@@ -1,0 +1,108 @@
+// Lens Flare, pass 3 of 4 - Field Kit
+// The halo: a ring around the FRAME CENTRE, not the emitter - a halo comes
+// from internal reflections off the lens elements themselves, which are
+// centred on the optical axis regardless of where the source sits, so this is
+// the one element in the filter that placement never moves.
+//
+// Built by sampling the highlight buffer at a radially distorted coordinate:
+// for a pixel at distance d from centre, read the highlight at the MIRROR
+// distance (2 * haloRadius - d) along the same angle. A bright spot at
+// distance R then echoes at (2 * haloRadius - R) - its reflection through the
+// ring - which is what actually puts a lit arc on the ring when something
+// bright happens to sit near it. A gaussian band centred on haloRadius keeps
+// that echo confined to a ring rather than smeared across the whole frame.
+// Halo Chromatic reads the mirror distance per channel, which fringes the
+// ring the way a real internal reflection would.
+
+uniform float  threshold;
+uniform float  gamma;
+
+uniform float  haloRadius;
+uniform float  haloWidth;
+uniform float  haloChromatic;
+uniform float  haloBlur;     // softens the echoed detail across the ring
+uniform float  colourSource;     // enum: 0 from the image, 1 the manual colour
+uniform float  brightnessSource; // enum: 0 from the image, 1 constant
+uniform half4  flareColour;  // used when colourSource is Manual
+uniform float  haloIntensity;
+
+uniform float2 resolution;
+uniform float2 rectCentre;
+
+uniform shader childShader;   // pass 2: ghosts + streak + starburst so far
+uniform shader original;      // untouched input - MUST be declared last
+
+// Non-trig hash - a fract(sin(dot())) one degrades badly at absolute
+// fragCoord magnitudes on an HD layer.
+float hash21(float2 p) {
+    p = fract(p * float2(0.1031, 0.11369));
+    p += dot(p, p.yx + 19.19);
+    return fract((p.x + p.y) * p.x);
+}
+
+float3 highlights(float2 coord) {
+    half4 c = original.eval(coord);
+    float3 lin = c.a > 0.0 ? float3(c.rgb / c.a) : float3(0.0);
+    float bp = clamp(threshold, 0.0, 0.999);
+    return pow(clamp((lin - bp) / max(1.0 - bp, 0.0001), 0.0, 1e4),
+               float3(max(gamma, 0.0001)));
+}
+
+half4 main(float2 fragCoord) {
+    float3 acc = float3(childShader.eval(fragCoord).rgb);
+
+    if (haloIntensity > 0.0) {
+        float2 toPixel = fragCoord - rectCentre;
+        float  d = length(toPixel);
+        float2 dir = d > 0.0001 ? toPixel / d : float2(1.0, 0.0);
+
+        float mirrorR = 2.0 * haloRadius - d;
+        float ring = exp(-pow((d - haloRadius) / max(haloWidth, 0.5), 2.0));
+
+        // A single tap per channel echoes the source's DETAIL onto the ring, so
+        // whatever is bright reappears sharp - which is not what an internal
+        // reflection looks like. Averaging a few taps across the ring blurs
+        // that echo into a band of light while leaving the ring's own position
+        // and chromatic separation intact.
+        // Three taps spread over the blur radius landed as three discrete
+        // copies rather than a blur. Seven gaussian-weighted taps, offset by a
+        // sub-tap jitter that differs per pixel, turn what stepping remains
+        // into fine noise instead - the same treatment the bloom ladder needed.
+        float bl = max(haloBlur, 0.0);
+        float jitter = hash21(fragCoord) - 0.5;
+        float3 sum = float3(0.0);
+        float  wsum = 0.0;
+        for (int i = -3; i <= 3; i++) {
+            float f = (float(i) + jitter) / 3.0;
+            float w = exp(-2.0 * f * f);
+            float rr = mirrorR + f * bl;
+            sum += float3(highlights(rectCentre + dir * (rr + haloChromatic)).r,
+                          highlights(rectCentre + dir * rr).g,
+                          highlights(rectCentre + dir * (rr - haloChromatic)).b) * w;
+            wsum += w;
+        }
+        sum /= max(wsum, 0.0001);
+        float r = sum.r;
+        float g = sum.g;
+        float b = sum.b;
+
+        // Manual colour: keep the ring's brightness, replace its hue. The
+        // per-channel radii above still separate, so the rim keeps its
+        // chromatic edge rather than going flat.
+        float lum = (r + g + b) * 0.3333;
+        if (brightnessSource > 0.5) { lum = 1.0; }
+        if (colourSource > 0.5) {
+            r = float(flareColour.r) * lum;
+            g = float(flareColour.g) * lum;
+            b = float(flareColour.b) * lum;
+        } else if (brightnessSource > 0.5) {
+            // Keep the sampled hue, drop its brightness.
+            float srcLum = max((r + g + b) * 0.3333, 0.0001);
+            r /= srcLum; g /= srcLum; b /= srcLum;
+        }
+
+        acc += float3(r, g, b) * ring * haloIntensity;
+    }
+
+    return half4(half3(clamp(acc, 0.0, 64.0)), half(1.0));
+}

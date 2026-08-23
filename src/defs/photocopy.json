@@ -1,0 +1,252 @@
+{
+  "author": "samMularczyk",
+  "type": "photocopy",
+  "superType": "thirdPartyFilter",
+  "version": "1.0",
+  "passes": [
+    {
+      "skslFile": "photocopyBlur.sksl",
+      "uniforms": [
+        "blurRadius"
+      ],
+      "constants": {
+        "dirX": 1.0,
+        "dirY": 0.0,
+        "firstPass": 1.0
+      }
+    },
+    {
+      "skslFile": "photocopyBlur.sksl",
+      "uniforms": [
+        "blurRadius"
+      ],
+      "constants": {
+        "dirX": 0.0,
+        "dirY": 1.0,
+        "firstPass": 0.0
+      }
+    },
+    {
+      "skslFile": "photocopy.sksl",
+      "uniforms": [
+        "exposure",
+        "contrastAmount",
+        "blurRadius",
+        "edgeBlowout",
+        "threshold",
+        "softness",
+        "dither",
+        "ditherAmount",
+        "speckle",
+        "speckleScale",
+        "banding",
+        "bandingScale",
+        "paperAmount",
+        "paperScale",
+        "inkColor",
+        "paperColor",
+        "amount"
+      ]
+    }
+  ],
+  "attributes": {
+    "exposure": {
+      "type": "double",
+      "default": 0.0,
+      "softMin": -0.5,
+      "softMax": 0.5,
+      "step": 0.01
+    },
+    "contrastAmount": {
+      "type": "double",
+      "default": 1.6,
+      "min": 0.0,
+      "softMax": 8.0,
+      "step": 0.05,
+      "dimming": "blurRadius <= 0.499"
+    },
+    "blurRadius": {
+      "type": "double",
+      "default": 8.0,
+      "min": 0.0,
+      "softMax": 80.0,
+      "step": 0.5
+    },
+    "edgeBlowout": {
+      "type": "double",
+      "default": 0.5,
+      "min": 0.0,
+      "softMax": 3.0,
+      "step": 0.01,
+      "dimming": "blurRadius <= 0.499"
+    },
+    "threshold": {
+      "type": "double",
+      "default": 0.5,
+      "min": 0.0,
+      "max": 1.0,
+      "step": 0.01
+    },
+    "softness": {
+      "type": "double",
+      "default": 0.12,
+      "min": 0.0,
+      "softMax": 0.5,
+      "step": 0.005
+    },
+    "dither": {
+      "type": "enum",
+      "default": 0,
+      "enumValues": [
+        0,
+        1,
+        2
+      ]
+    },
+    "ditherAmount": {
+      "type": "double",
+      "default": 0.15,
+      "min": 0.0,
+      "softMax": 1.0,
+      "step": 0.01,
+      "dimming": "dither == 2"
+    },
+    "speckle": {
+      "type": "double",
+      "default": 0.15,
+      "min": 0.0,
+      "max": 1.0,
+      "step": 0.01
+    },
+    "speckleScale": {
+      "type": "double",
+      "default": 0.06,
+      "min": 0.0001,
+      "softMax": 0.5,
+      "step": 0.005,
+      "dimming": "speckle <= 0"
+    },
+    "banding": {
+      "type": "double",
+      "default": 0.0,
+      "min": 0.0,
+      "softMax": 0.5,
+      "step": 0.005
+    },
+    "bandingScale": {
+      "type": "double",
+      "default": 0.02,
+      "min": 0.0001,
+      "softMax": 0.5,
+      "step": 0.005,
+      "dimming": "banding <= 0"
+    },
+    "paperAmount": {
+      "type": "double",
+      "default": 0.0,
+      "min": 0.0,
+      "max": 1.0,
+      "step": 0.01
+    },
+    "paperScale": {
+      "type": "double",
+      "default": 0.35,
+      "min": 0.0001,
+      "softMax": 2.0,
+      "step": 0.01,
+      "dimming": "paperAmount <= 0"
+    },
+    "inkColor": {
+      "type": "color",
+      "default": {
+        "type": "Color",
+        "r": 18,
+        "g": 18,
+        "b": 20,
+        "a": 255
+      }
+    },
+    "paperColor": {
+      "type": "color",
+      "default": {
+        "type": "Color",
+        "r": 246,
+        "g": 244,
+        "b": 236,
+        "a": 255
+      }
+    },
+    "amount": {
+      "type": "double",
+      "default": 1.0,
+      "min": 0.0,
+      "max": 1.0,
+      "step": 0.01
+    }
+  },
+  "triggers": {
+    "out": [
+      "exposure",
+      "contrastAmount",
+      "blurRadius",
+      "edgeBlowout",
+      "threshold",
+      "softness",
+      "dither",
+      "ditherAmount",
+      "speckle",
+      "speckleScale",
+      "banding",
+      "bandingScale",
+      "paperAmount",
+      "paperScale",
+      "inkColor",
+      "paperColor",
+      "amount"
+    ]
+  },
+  "UI": {
+    "icon": "photocopy.png",
+    "tabs": [
+      {
+        "id": "filter",
+        "attributeOrder": [
+          "exposure",
+          "contrastAmount",
+          "blurRadius",
+          "edgeBlowout"
+        ]
+      },
+      {
+        "id": "toner",
+        "attributeOrder": [
+          "threshold",
+          "softness",
+          "dither",
+          "ditherAmount",
+          "speckle",
+          "speckleScale",
+          "---Machine",
+          "banding",
+          "bandingScale"
+        ]
+      },
+      {
+        "id": "paper",
+        "attributeOrder": [
+          "paperAmount",
+          "paperScale",
+          "inkColor",
+          "paperColor"
+        ]
+      },
+      {
+        "id": "output",
+        "attributeOrder": [
+          "amount",
+          "---Inspired by copier artefacts"
+        ]
+      }
+    ]
+  }
+}

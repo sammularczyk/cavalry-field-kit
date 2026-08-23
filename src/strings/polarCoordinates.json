@@ -1,0 +1,47 @@
+{
+ "type": "layerStrings",
+ "value": {
+  "author": "samMularczyk",
+  "layerType": "polarCoordinates",
+  "niceName": "Polar Coordinates",
+  "layerInfo": "Remaps the frame between rectangular and polar space, like After Effects' Polar Coordinates.",
+  "language": "en",
+  "attributes": {
+   "mapping": [
+    "Type",
+    "Rect to Polar wraps rows into rings, with the top edge at the centre. Polar to Rect unwraps rings into rows."
+   ],
+   "interpolation": [
+    "Interpolation",
+    "Blends the remapped coordinate against the original one. 0 is a passthrough."
+   ],
+   "centre": [
+    "Centre",
+    "Offset of the polar origin from the layer centre, in pixels."
+   ],
+   "angleOffset": [
+    "Angle",
+    "Rotates the angular axis, moving where the seam falls."
+   ],
+   "tileMode": [
+    "Tile Mode",
+    "What happens outside the source: Clamp holds the edge, Repeat wraps, Mirror folds."
+   ],
+   "amount": [
+    "Amount",
+    "Mix back to the unfiltered input."
+   ]
+  },
+  "enums": {
+   "mapping": [
+    "Rect to Polar",
+    "Polar to Rect"
+   ],
+   "tileMode": [
+    "Clamp",
+    "Repeat",
+    "Mirror"
+   ]
+  }
+ }
+}

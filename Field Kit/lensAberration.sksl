@@ -1,0 +1,219 @@
+// Lens, pass 2 of 8 - Field Kit
+// Chromatic aberration: three ways to displace by wavelength and accumulate.
+//
+//   SPECTRAL - seven discrete bands, each stepped from identity to its own
+//              transform, which is what turns a displacement into a streak.
+//              Ported from "Spectral_Aberration_Pro_V2" by Marten Blumen (BSD-3).
+//   CHANNEL  - per-channel offset with a smear along the displacement.
+//              Inspired by "chroma_Smear" by Luc Julien.
+//   PRISM    - displacement driven by another shader's luminance, split per
+//              wavelength so it fringes like a prism.
+//
+// The old Barrel model is gone: it was distortion plus per-wavelength taps,
+// which is pass 1's job. Its look is now Distortion + Fringing.
+
+uniform float  abModel;        // enum: 0 Spectral, 1 Channel, 2 Prism, 3 None
+uniform float  geometry;       // enum: 0 Radial, 1 Spin, 2 Linear
+uniform float2 centre;         // layer-local pixels
+uniform float  angle;          // degrees
+
+uniform float  dispersion;     // Spectral and Prism
+uniform float  focusWave;
+uniform float  smoothing;
+
+uniform float  aberration;     // Channel
+uniform float  redScale;
+uniform float  greenScale;
+uniform float  blueScale;
+uniform float  smear;
+uniform float  falloff;
+
+uniform float  mapChannel;     // Prism: enum 0 Luma, 1 Sat, 2 Value, 3 R, 4 G, 5 B
+uniform float  mapAmplitude;
+uniform float  mapFromGradient; // bool: direction from the map, else from angle
+uniform float  abIntensity;
+
+uniform float  samples;
+
+uniform float2 resolution;
+uniform float2 rectCentre;
+
+uniform shader displaceMap;    // shaderData - binds BEFORE the image
+uniform shader defocusMap;     // shaderData - unused here, but every pass must
+                                // declare it or the binding order breaks
+uniform shader childShader;    // pass 1 result
+
+const int MAX_ITER = 16;
+
+// The seven bands and their tints, from the Spectral Aberration gizmo.
+float bandWave(int i) {
+    if (i == 0) { return  1.00; }
+    if (i == 1) { return  0.66; }
+    if (i == 2) { return  0.33; }
+    if (i == 3) { return  0.00; }
+    if (i == 4) { return -0.33; }
+    if (i == 5) { return -0.66; }
+    return -1.00;
+}
+float3 bandTint(int i) {
+    if (i == 0) { return float3(1.0, 0.0, 0.0); }
+    if (i == 1) { return float3(1.0, 0.5, 0.0); }
+    if (i == 2) { return float3(1.0, 1.0, 0.0); }
+    if (i == 3) { return float3(0.0, 1.0, 0.0); }
+    if (i == 4) { return float3(0.0, 0.5, 1.0); }
+    if (i == 5) { return float3(0.0, 0.0, 1.0); }
+    return float3(0.2, 0.0, 0.5);
+}
+// The gizmo's white-balance fix, restoring luminance after tinting.
+const float3 BAND_NORM = float3(0.3125, 0.3333, 0.4);
+
+float chanAt(float2 fragCoord, float2 disp, int which, float nq) {
+    float sum = 0.0;
+    float cnt = 0.0;
+    for (int j = 0; j < MAX_ITER; j++) {
+        if (float(j) >= nq) { continue; }
+        float t = nq > 1.0 ? float(j) / (nq - 1.0) : 1.0;
+        float k = mix(1.0, t, clamp(smear, 0.0, 1.0));
+        half4 s = childShader.eval(fragCoord + disp * k);
+        float3 lin = s.a > 0.0 ? float3(s.rgb / s.a) : float3(0.0);
+        sum += which == 0 ? lin.r : which == 1 ? lin.g : lin.b;
+        cnt += 1.0;
+    }
+    return sum / max(cnt, 1.0);
+}
+
+float mapAt(float2 coord) {
+    half4 m = displaceMap.eval(coord);
+    float3 lin = m.a > 0.0 ? float3(m.rgb / m.a) : float3(m.rgb);
+    int c = int(mapChannel);
+    if (c == 3) { return lin.r; }
+    if (c == 4) { return lin.g; }
+    if (c == 5) { return lin.b; }
+    if (c == 2) { return max(max(lin.r, lin.g), lin.b); }              // Value
+    if (c == 1) {                                                      // Saturation
+        float mx = max(max(lin.r, lin.g), lin.b);
+        float mn = min(min(lin.r, lin.g), lin.b);
+        return mx > 0.0 ? (mx - mn) / mx : 0.0;
+    }
+    return dot(lin, float3(0.299, 0.587, 0.114));                      // Luma
+}
+
+half4 main(float2 fragCoord) {
+    half4 src = childShader.eval(fragCoord);
+    // None: this half of the lens is switched off.
+    if (int(abModel) == 3) { return src; }
+    float2 res = max(resolution, float2(1.0));
+    int   md = int(abModel);
+    float nq = clamp(samples, 2.0, float(MAX_ITER));
+    float2 c = rectCentre + centre;
+    float ang = radians(angle);
+    float2 adir = float2(cos(ang), sin(ang));
+
+    if (md == 1) {
+        // ---- Channel -----------------------------------------------------
+        float2 dir;
+        if (int(geometry) == 2) {
+            dir = adir;
+        } else {
+            // Radial: displacement grows with distance from centre. r is
+            // CLAMPED to 0..1 before the falloff curve - without the clamp,
+            // pow(r, falloff) exceeds 1 outside the inscribed circle and
+            // Falloff multiplies the displacement instead of shaping it, so
+            // the whole frame scales instead of fringing.
+            float2 p = fragCoord - c;
+            float  len = length(p);
+            float  r = clamp(len / max(min(res.x, res.y) * 0.5, 1.0), 0.0, 1.0);
+            float  core = smoothstep(0.0, 2.0, len);   // avoid the centre pinch
+            dir = (len > 0.0001 ? normalize(p) : float2(0.0))
+                * pow(r, max(falloff, 0.0001)) * core;
+        }
+        float2 base = dir * aberration;
+
+        float r = chanAt(fragCoord, base * redScale,   0, nq);
+        float g = chanAt(fragCoord, base * greenScale, 1, nq);
+        float b = chanAt(fragCoord, base * blueScale,  2, nq);
+
+        half4 ga = childShader.eval(fragCoord + base * greenScale);
+        half a = ga.a;
+        return half4(half3(half(r), half(g), half(b)) * a, a);
+    }
+
+    // ---- Spectral and Prism: seven bands, accumulated ---------------------
+    float2 p = fragCoord - c;
+
+    // Prism: displacement direction and magnitude come from the map.
+    float2 prismBase = float2(0.0);
+    if (md == 2) {
+        float mv = mapAt(fragCoord);
+        float2 pdir;
+        if (mapFromGradient > 0.5) {
+            float e = 1.5;
+            float2 gr = float2(mapAt(fragCoord + float2(e, 0.0)) - mapAt(fragCoord - float2(e, 0.0)),
+                               mapAt(fragCoord + float2(0.0, e)) - mapAt(fragCoord - float2(0.0, e)));
+            pdir = dot(gr, gr) > 1e-12 ? normalize(gr) : float2(0.0);
+        } else {
+            pdir = adir;
+        }
+        prismBase = pdir * mapAmplitude * mv;
+    }
+
+    float3 acc  = float3(0.0);
+    float  accA = 0.0;
+    float  cnt  = 0.0;
+
+    for (int bi = 0; bi < 7; bi++) {
+        float w = bandWave(bi);
+        float d = (w - focusWave) * dispersion;
+
+        float3 band  = float3(0.0);
+        float  bandA = 0.0;
+        float  n = 0.0;
+
+        for (int j = 0; j < MAX_ITER; j++) {
+            if (float(j) >= nq) { continue; }
+            float t = nq > 1.0 ? float(j) / (nq - 1.0) : 0.0;
+
+            float2 at;
+            if (md == 2) {
+                // Prism: step out along the map displacement, scaled per band.
+                at = fragCoord + prismBase * (1.0 + d) * t;
+            } else {
+                // Spectral: step from identity to the band's full transform,
+                // which is what turns a displacement into a streak.
+                float sc  = max(0.001, 1.0 + d + smoothing * dispersion * 0.5);
+                float rot = d * 50.0 + smoothing * dispersion * 10.0;
+                float tr  = (1.0 + d * 100.0) + smoothing * dispersion * 20.0;
+                int gm = int(geometry);
+                float2 q;
+                if (gm == 1) {
+                    float a2 = radians(mix(0.0, rot, t));
+                    float ca = cos(a2), sa = sin(a2);
+                    q = float2(p.x * ca - p.y * sa, p.x * sa + p.y * ca);
+                } else if (gm == 2) {
+                    q = p - adir * mix(0.0, tr, t);
+                } else {
+                    q = p / mix(1.0, sc, t);
+                }
+                at = c + q;
+            }
+
+            half4 s = childShader.eval(at);
+            band  += s.a > 0.0 ? float3(s.rgb / s.a) : float3(0.0);
+            bandA += float(s.a);
+            n     += 1.0;
+        }
+
+        band  /= max(n, 1.0);
+        bandA /= max(n, 1.0);
+
+        acc  += band * bandTint(bi);
+        accA += bandA;
+        cnt  += 1.0;
+    }
+
+    acc *= BAND_NORM * 7.0 / max(cnt, 1.0);
+    acc  = clamp(acc * max(abIntensity, 0.0), 0.0, 1.0);
+
+    half a = half(clamp(accA / max(cnt, 1.0), 0.0, 1.0));
+    return half4(half3(acc) * a, a);
+}

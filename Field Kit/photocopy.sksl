@@ -1,0 +1,146 @@
+// Photocopy, pass 3 of 3 - Field Kit
+//
+// Built from principles rather than ported. A photocopier is a stack of
+// specific, cheap artefacts, applied in the order the machine applies them:
+//
+//   1. Local contrast - the original minus a blurred copy, which is what
+//      crushes midtones toward black and white the way the exposure lamp does.
+//   2. Edge blowout - toner accumulating at boundaries, so a dark halo just
+//      inside an edge and a bright one just outside. This is the artefact that
+//      most reads as "photocopied". Uses sqrt of the local difference so small
+//      differences blow out too, not just strong ones.
+//   3. Drum banding - faint horizontal streaks down the page.
+//   4. A SOFT dithered threshold rather than a hard cut, so gradients break
+//      into toner grain instead of banding.
+//   5. Toner speckle - blotchy low-frequency noise multiplied into the black,
+//      so coverage is uneven.
+//   6. Paper fibre - two octaves of value noise, stretched slightly so it
+//      reads as fibre direction rather than as plain grain.
+//
+// Ink and paper are colours rather than black and white, so it does blueprint
+// and riso variants as well as office grey.
+//
+// The paper fibre is generated inline rather than taken as a shader input: it is
+// texture, not a look in its own right, and a node input would only be clutter.
+//
+// Uniform order matches the attribute order in definitions.json.
+
+uniform float  exposure;
+uniform float  contrastAmount;
+uniform float  blurRadius;
+uniform float  edgeBlowout;
+uniform float  threshold;
+uniform float  softness;
+uniform float  dither;         // enum: 0 ordered, 1 random, 2 none
+uniform float  ditherAmount;
+uniform float  speckle;
+uniform float  speckleScale;
+uniform float  banding;
+uniform float  bandingScale;
+uniform float  paperAmount;
+uniform float  paperScale;
+uniform half4  inkColor;
+uniform half4  paperColor;
+uniform float  amount;
+
+uniform float2 resolution;
+uniform float2 rectCentre;
+
+uniform shader childShader;    // the blurred luminance from pass 2
+uniform shader original;       // untouched input - MUST be declared last
+
+float hash12(float2 p) {
+    p = fract(p * float2(5.3987, 5.4421));
+    p += dot(p.yx, p.xy + float2(21.5351, 14.3137));
+    return fract(p.x * p.y * 95.4307);
+}
+
+// Smooth value noise, for the toner blotches and the drum streaks.
+float vnoise(float2 p) {
+    float2 i = floor(p);
+    float2 f = fract(p);
+    f = f * f * (3.0 - 2.0 * f);
+    return mix(mix(hash12(i), hash12(i + float2(1.0, 0.0)), f.x),
+               mix(hash12(i + float2(0.0, 1.0)),
+                   hash12(i + float2(1.0, 1.0)), f.x), f.y);
+}
+
+// 4x4 ordered Bayer. SkSL has no arrays or bitwise ops, so it is a comparison
+// ladder over the cell index.
+float bayer4(float2 p) {
+    float x = mod(floor(p.x), 4.0);
+    float y = mod(floor(p.y), 4.0);
+    float c = y * 4.0 + x;
+    if (c <  0.5) { return  0.0 / 16.0; }
+    if (c <  1.5) { return  8.0 / 16.0; }
+    if (c <  2.5) { return  2.0 / 16.0; }
+    if (c <  3.5) { return 10.0 / 16.0; }
+    if (c <  4.5) { return 12.0 / 16.0; }
+    if (c <  5.5) { return  4.0 / 16.0; }
+    if (c <  6.5) { return 14.0 / 16.0; }
+    if (c <  7.5) { return  6.0 / 16.0; }
+    if (c <  8.5) { return  3.0 / 16.0; }
+    if (c <  9.5) { return 11.0 / 16.0; }
+    if (c < 10.5) { return  1.0 / 16.0; }
+    if (c < 11.5) { return  9.0 / 16.0; }
+    if (c < 12.5) { return 15.0 / 16.0; }
+    if (c < 13.5) { return  7.0 / 16.0; }
+    if (c < 14.5) { return 13.0 / 16.0; }
+    return 5.0 / 16.0;
+}
+
+half4 main(float2 fragCoord) {
+    half4 src = original.eval(fragCoord);
+    float3 lin = src.a > 0.0 ? float3(src.rgb / src.a) : float3(0.0);
+    float  lum = dot(lin, float3(0.2126, 0.7152, 0.0722));
+
+    float blurLum = float(childShader.eval(fragCoord).r);
+    float detail  = lum - blurLum;
+
+    // Local contrast, then the blowout on top of it.
+    float v = lum + detail * max(contrastAmount, 0.0);
+    v += edgeBlowout * sign(detail) * sqrt(abs(detail));
+    v += exposure;
+
+    // Drum banding: streaks that run across the page, varying down it.
+    if (banding > 0.0) {
+        float b = vnoise(float2(0.0, fragCoord.y * max(bandingScale, 0.0001)));
+        v += (b - 0.5) * banding;
+    }
+
+    // Soft dithered threshold. Ordered dither is the copier-like one; random
+    // reads as a coarser, older machine.
+    int dm = int(dither);
+    float d = dm == 0 ? bayer4(fragCoord) - 0.5
+            : dm == 1 ? hash12(fragCoord) - 0.5
+            : 0.0;
+    v += d * ditherAmount;
+
+    float soft = max(softness, 0.0001);
+    float thr  = clamp(threshold, 0.0, 1.0);
+    float ink  = 1.0 - smoothstep(thr - soft, thr + soft, v);
+
+    // Toner speckle: uneven coverage, so the black is blotchy not flat.
+    if (speckle > 0.0) {
+        float s = vnoise(fragCoord * max(speckleScale, 0.0001));
+        ink *= mix(1.0, s * 1.4, clamp(speckle, 0.0, 1.0));
+    }
+    ink = clamp(ink, 0.0, 1.0);
+
+    // Paper fibre, only where the paper shows. The two octaves are sampled at
+    // different aspect ratios so the grain has a weak direction to it, which is
+    // what separates paper from noise.
+    float fibre = 1.0;
+    if (paperAmount > 0.0) {
+        float sc = max(paperScale, 0.0001);
+        float g = vnoise(fragCoord * sc * float2(1.0, 3.0)) * 0.65
+                + vnoise(fragCoord * sc * float2(2.7, 0.9)) * 0.35;
+        fibre = mix(1.0, 0.78 + 0.44 * g, clamp(paperAmount, 0.0, 1.0));
+    }
+
+    float3 col = mix(float3(paperColor.rgb) * fibre, float3(inkColor.rgb), ink);
+
+    half a = src.a;
+    return mix(src, half4(half3(clamp(col, 0.0, 1.0)) * a, a),
+               half(clamp(amount, 0.0, 1.0)));
+}

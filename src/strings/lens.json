@@ -1,0 +1,288 @@
+{
+ "type": "layerStrings",
+ "value": {
+  "author": "samMularczyk",
+  "layerType": "lens",
+  "niceName": "Lens Distortion",
+  "layerInfo": "A whole lens in one filter, applied in the order light meets one: geometric distortion, chromatic aberration, blur, then scatter. Seven real HAWK anamorphic lens profiles, solved from an ARRI ALEXA distortion chart. Each half switches off at zero, so it is also just a distortion, or just a bokeh.",
+  "language": "en",
+  "attributes": {
+   "profile": [
+    "Lens",
+    "Which measured HAWK anamorphic focal length to apply, solved from a real distortion chart."
+   ],
+   "distortion": [
+    "Distortion",
+    "Scales the chosen profile's strength. 1.0 reproduces the solved lens; use this to match a plate rather than as a cosmetic dial."
+   ],
+   "squeeze": [
+    "Squeeze",
+    "Anamorphic squeeze ratio. Stretches the frame horizontally as a taking lens does."
+   ],
+   "centreOffset": [
+    "Centre Offset",
+    "Shifts the optical centre, as a fraction of half the layer height. The HAWK profiles carry no baked-in centre of their own."
+   ],
+   "expand": [
+    "Expand",
+    "Scales the sampled area. Raise it slightly to pull the distorted edges back inside the frame."
+   ],
+   "edges": [
+    "Edges",
+    "What to do where the distortion samples outside the layer. Transparent is honest - there is no picture there. Clamp smears the rim outward, Mirror reflects the picture back; both fill the wedges a barrel distortion opens at the corners."
+   ],
+   "edgeTrim": [
+    "Edge Trim",
+    "Pixels to inset the edge that Clamp and Mirror fold against. A layer's outermost pixels are antialiased, so reflecting them doubles the rim into a seam; a pixel or two of trim folds against real picture instead."
+   ],
+   "fringing": [
+    "Fringing",
+    "Chromatic spread across the distortion, so the fringe follows the glass. This replaces the old Barrel model, which was this pass with a spectrum."
+   ],
+   "abModel": [
+    "Model",
+    "Which aberration to apply. None switches this half of the lens off."
+   ],
+   "geometry": [
+    "Geometry",
+    "Direction the bands separate: radially from the centre, spun around it, or along a fixed angle."
+   ],
+   "centre": [
+    "Centre",
+    "Origin for radial and spin geometry, in pixels from the layer centre."
+   ],
+   "angle": [
+    "Angle",
+    "Direction for linear geometry, and for Prism when its direction is not taken from the map."
+   ],
+   "dispersion": [
+    "Dispersion",
+    "Spectral and Prism. Magnitude of the separation between wavelength bands."
+   ],
+   "focusWave": [
+    "Focus Wavelength",
+    "Spectral and Prism. Which wavelength stays sharp: -1 violet, 0 green, 1 red. Everything either side separates."
+   ],
+   "smoothing": [
+    "Gap Smoothing",
+    "Spectral only. Widens each band to bridge the gaps between the seven, melting them together."
+   ],
+   "aberration": [
+    "Aberration",
+    "Channel only. Displacement in pixels before the per-channel scales."
+   ],
+   "redScale": [
+    "Red",
+    "Channel only. Multiplier on red's displacement."
+   ],
+   "greenScale": [
+    "Green",
+    "Channel only. Multiplier on green's displacement."
+   ],
+   "blueScale": [
+    "Blue",
+    "Channel only. Multiplier on blue's displacement."
+   ],
+   "smear": [
+    "Smear",
+    "Smears each channel along its displacement instead of just offsetting it. Channel model only."
+   ],
+   "falloff": [
+    "Falloff",
+    "Channel only. How quickly radial displacement grows outward. Higher keeps the centre cleaner."
+   ],
+   "mapChannel": [
+    "Map Channel",
+    "Prism only. Which part of the displacement map drives the effect."
+   ],
+   "mapAmplitude": [
+    "Map Amplitude",
+    "Prism only. Displacement in pixels at the map's full value."
+   ],
+   "mapFromGradient": [
+    "Direction From Map",
+    "Take the displacement direction from the map's own slope rather than from the Angle control."
+   ],
+   "abIntensity": [
+    "Intensity",
+    "Spectral and Prism. Overall brightness of the result."
+   ],
+   "bokehThreshold": [
+    "Highlight Threshold",
+    "Only light above this forms distinct discs. It shapes the bokeh; the blur still replaces the picture either way."
+   ],
+   "bokehGamma": [
+    "Highlight Gamma",
+    "How hard highlights are pushed before blurring. High values make discs form rather than a smear."
+   ],
+   "defocus": [
+    "Blur",
+    "Blur radius in pixels. Zero switches the blur off."
+   ],
+   "blades": [
+    "Blades",
+    "Aperture shape: 4 gives a square, 6 a hexagon, 8 an octagon."
+   ],
+   "rotation": [
+    "Rotation",
+    "Turns the whole aperture, in degrees."
+   ],
+   "catsEye": [
+    "Cat's Eye",
+    "Optical vignetting. Clips the aperture toward the frame edge, so highlights out there turn into lemons pointing at the centre."
+   ],
+   "catsEyeFalloff": [
+    "Cat's Eye Falloff",
+    "How quickly the clipping grows away from the centre. Higher keeps the middle of frame round for longer."
+   ],
+   "ringBias": [
+    "Ring Bias",
+    "Weights samples toward the aperture's edge, so highlights render as bright-rimmed rings rather than flat discs."
+   ],
+   "cocSource": [
+    "Focus From",
+    "What drives how blurred each pixel is: uniform, the layer’s alpha, its luminance, a vertical ramp, or a texture."
+   ],
+   "focus": [
+    "Focus",
+    "The value that stays sharp; anything further from it blurs more. Ignored when Focus From is Uniform."
+   ],
+   "aperture": [
+    "Aperture",
+    "How fast the blur grows away from the focus value."
+   ],
+   "exposure": [
+    "Exposure",
+    "Filmic tone map strength on the way out. Zero switches it off, which keeps the blur brightness-preserving."
+   ],
+   "gain": [
+    "Gain",
+    "Brightness of the result before tone mapping."
+   ],
+   "dither": [
+    "Dither",
+    "Jitters tap positions to trade banding along the aperture edges for fine grain."
+   ],
+   "kernel": [
+    "Kernel",
+    "The shape light scatters into. Disc is spherical aberration, Line is astigmatism, Rings is diffraction, Halo is haze."
+   ],
+   "size": [
+    "Scatter Size",
+    "Radius of the artefact scatter, in pixels. Zero switches the artefacts off."
+   ],
+   "kernelRotation": [
+    "Rotation",
+    "Axis of the Line kernel."
+   ],
+   "ringFrequency": [
+    "Ring Frequency",
+    "How many diffraction rings fit inside the radius. Only used by the Rings kernel."
+   ],
+   "axialRed": [
+    "Axial Red",
+    "Kernel size multiplier for red. Setting the three channels apart gives axial chromatic aberration."
+   ],
+   "axialGreen": [
+    "Axial Green",
+    "Kernel size multiplier for green."
+   ],
+   "axialBlue": [
+    "Axial Blue",
+    "Kernel size multiplier for blue."
+   ],
+   "scatterThreshold": [
+    "Scatter Threshold",
+    "Only light above this level scatters. Lower it to let midtones haze as well."
+   ],
+   "scatterGain": [
+    "Scatter Gain",
+    "Brightness of the scattered light."
+   ],
+   "scatterBlend": [
+    "Scatter Blend",
+    "How the scatter combines with the layer. Replace shows the scatter alone."
+   ],
+   "samples": [
+    "Samples",
+    "Tap count, shared by fringing, aberration and the artefact scatter."
+   ],
+   "amount": [
+    "Amount",
+    "Mix between the original layer and the full lens."
+   ],
+   "displaceMap": [
+    "Displace Map",
+    "Prism only. The shader whose luminance drives the displacement. Prism does nothing until something is connected here."
+   ],
+   "defocusMap": [
+    "Blur Map",
+    "Focus From Texture only. The shader whose luminance drives how blurred each pixel is."
+   ]
+  },
+  "enums": {
+   "profile": [
+    "HAWK Anamorphic 28mm",
+    "HAWK Anamorphic 35mm",
+    "HAWK Anamorphic 45mm",
+    "HAWK Anamorphic 55mm",
+    "HAWK Anamorphic 65mm",
+    "HAWK Anamorphic 80mm",
+    "HAWK Anamorphic 110mm"
+   ],
+   "abModel": {
+    "0": "Spectral",
+    "1": "Channel",
+    "2": "Prism",
+    "3": "None"
+   },
+   "geometry": {
+    "0": "Radial",
+    "1": "Spin",
+    "2": "Linear"
+   },
+   "mapChannel": {
+    "0": "Luma",
+    "1": "Saturation",
+    "2": "Value",
+    "3": "Red",
+    "4": "Green",
+    "5": "Blue"
+   },
+   "blades": {
+    "4": "4 - Square",
+    "6": "6 - Hexagon",
+    "8": "8 - Octagon"
+   },
+   "cocSource": {
+    "0": "Uniform",
+    "1": "Alpha",
+    "2": "Luminance",
+    "3": "Vertical Ramp",
+    "4": "Texture"
+   },
+   "kernel": [
+    "Disc (Spherical)",
+    "Line (Astigmatism)",
+    "Rings (Diffraction)",
+    "Halo (Haze)"
+   ],
+   "scatterBlend": [
+    "Screen",
+    "Plus",
+    "Replace"
+   ],
+   "edges": {
+    "0": "Transparent",
+    "1": "Clamp",
+    "2": "Mirror"
+   }
+  },
+  "tabs": {
+   "filter": "Distortion",
+   "aberration": "Aberration",
+   "defocus": "Blur",
+   "artefacts": "Artefacts"
+  }
+ }
+}

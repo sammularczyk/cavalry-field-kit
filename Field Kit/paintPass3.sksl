@@ -1,0 +1,146 @@
+// Paint, pass 3 of 4 - Field Kit
+// Brush: the vertical half of the tangent-field blur.
+// Watercolour: directional pigment transport.
+// Oil: copies through.
+//
+// WATERCOLOUR TRANSPORT. Flat washes plus a wet-edge displacement wobble a
+// boundary but never MOVE any colour, which is why that read as a posterised
+// photo with wiggly edges. Real watercolour transports pigment two ways at once:
+// along wash boundaries, where water dragging pigment leaves the characteristic
+// dark rim, and up the brightness gradient, where it drains the dark side and
+// pools colour at the edge. Both walks are jittered, because mechanically even
+// transport reads as a filter and irregular transport reads as water.
+
+uniform float  style;
+uniform float  blurRadius;    // Brush
+uniform float  blurTaps;      // Brush
+uniform float  transport;     // Watercolour
+uniform float  edgeFlow;      // Watercolour
+uniform float  washFlow;      // Watercolour
+uniform float  flowJitter;    // Watercolour
+uniform float  flowScale;     // Watercolour
+
+uniform float2 resolution;
+uniform float2 rectCentre;
+
+uniform shader field;         // shaderData - binds BEFORE the image
+uniform shader childShader;   // previous pass
+
+const int MAX_TAPS = 31;
+const int FLOW_TAPS = 10;
+
+// Gaussian probability density function, sigma = 0.144; see paintPass2.sksl
+// for the same weighting, used here for the tangent field's vertical pass.
+float pdf(float x) {
+    return 2.77043 * exp(-24.1126 * x * x);
+}
+
+float hash21(float2 p) {
+    p = fract(p * float2(123.34, 456.21));
+    p += dot(p, p + 45.32);
+    return fract(p.x * p.y);
+}
+
+float vnoise(float2 p) {
+    float2 i = floor(p), f = fract(p);
+    f = f * f * (3.0 - 2.0 * f);
+    return mix(mix(hash21(i), hash21(i + float2(1.0, 0.0)), f.x),
+               mix(hash21(i + float2(0.0, 1.0)),
+                   hash21(i + float2(1.0, 1.0)), f.x), f.y);
+}
+
+float3 colAt(float2 coord) {
+    half4 c = childShader.eval(coord);
+    return c.a > 0.0 ? float3(c.rgb / c.a) : float3(c.rgb);
+}
+
+float lumAt(float2 coord) {
+    return dot(colAt(coord), float3(0.299, 0.587, 0.114));
+}
+
+half4 main(float2 fragCoord) {
+    int st = int(style);
+    if (st == 1) { return childShader.eval(fragCoord); }
+
+    if (st == 0) {
+        // ---- Brush: vertical half of the separable field blur -------------
+        float n = clamp(blurTaps, 1.0, float(MAX_TAPS));
+        float r = max(blurRadius, 0.001);
+        float2 dir = float2(0.0, 1.0);
+
+        float3 sum = float3(0.0);
+        float  sumA = 0.0;
+        float  den = 0.0;
+
+        for (int i = -MAX_TAPS; i <= MAX_TAPS; i++) {
+            if (abs(float(i)) > n) { continue; }
+            float f = float(i) / n;
+            float w = pdf(f / r);
+            half4 c = childShader.eval(fragCoord + dir * f * r * n);
+            float3 lin = c.a > 0.0 ? float3(c.rgb / c.a) : float3(0.0);
+            sum  += lin * w;
+            sumA += float(c.a) * w;
+            den  += w;
+        }
+
+        sum  /= max(den, 0.0001);
+        sumA /= max(den, 0.0001);
+        half a = half(clamp(sumA, 0.0, 1.0));
+        return half4(half3(clamp(sum, 0.0, 1.0)) * a, a);
+    }
+
+    // ---- Watercolour: directional pigment transport -----------------------
+    half4 src = childShader.eval(fragCoord);
+    float3 base = src.a > 0.0 ? float3(src.rgb / src.a) : float3(src.rgb);
+
+    float dist = max(transport, 0.0);
+    if (dist <= 0.0) { return src; }
+
+    // Gradient measured a little way out, so it follows wash boundaries rather
+    // than the residual noise inside a wash.
+    float e = max(dist * 0.25, 1.0);
+    float2 grad = float2(lumAt(fragCoord + float2(e, 0.0))
+                       - lumAt(fragCoord - float2(e, 0.0)),
+                         lumAt(fragCoord + float2(0.0, e))
+                       - lumAt(fragCoord - float2(0.0, e)));
+
+    float gmag = length(grad);
+    if (gmag < 0.0001) { return src; }
+
+    float2 gdir = grad / gmag;
+    float2 tdir = float2(-gdir.y, gdir.x);
+
+    float2 px = fragCoord - rectCentre;
+    float jn = vnoise(px / max(flowScale, 0.001)) - 0.5;
+    float jit = 1.0 + jn * 2.0 * clamp(flowJitter, 0.0, 1.0);
+
+    // Walk along the contour, weighted toward the centre so the smear tapers.
+    float3 along = float3(0.0);
+    float  wsum  = 0.0;
+    for (int i = 0; i < FLOW_TAPS; i++) {
+        float t = (float(i) + 0.5) / float(FLOW_TAPS) * 2.0 - 1.0;
+        float w = 1.0 - abs(t) * 0.7;
+        along += colAt(fragCoord + tdir * (t * dist * jit)) * w;
+        wsum  += w;
+    }
+    along /= max(wsum, 0.0001);
+
+    // Walk up the gradient carrying the DARKEST SAMPLE'S WHOLE COLOUR. A
+    // per-channel minimum would mix channels from different samples and cannot
+    // preserve hue - that turned cream and blue into pink and olive.
+    float3 wash = base;
+    float  wl   = dot(base, float3(0.299, 0.587, 0.114));
+    for (int i = 1; i <= 4; i++) {
+        float d = float(i) / 4.0 * dist * jit;
+        float3 c = colAt(fragCoord + gdir * d);
+        float  l = dot(c, float3(0.299, 0.587, 0.114));
+        if (l < wl) { wash = c; wl = l; }
+    }
+
+    float3 col = base;
+    col = mix(col, along, clamp(edgeFlow, 0.0, 1.0));
+    col = mix(col, wash, clamp(washFlow, 0.0, 1.0));
+
+    half a = src.a;
+    return half4(half3(clamp(col, 0.0, 1.0)) * a, a);
+}

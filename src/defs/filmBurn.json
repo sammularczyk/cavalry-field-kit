@@ -1,0 +1,182 @@
+{
+  "author": "samMularczyk",
+  "type": "filmBurn",
+  "superType": "thirdPartyFilter",
+  "version": "1.0",
+  "passes": [
+    {
+      "skslFile": "filmBurnMask.sksl",
+      "uniforms": [
+        "progress",
+        "origin",
+        "position",
+        "scale",
+        "roughness",
+        "seed"
+      ]
+    },
+    {
+      "skslFile": "filmBurnColour.sksl",
+      "uniforms": [
+        "progress",
+        "charWidth",
+        "charColor",
+        "burnWidth",
+        "burnColor",
+        "bloomWidth",
+        "bloomIntensity",
+        "amount"
+      ]
+    }
+  ],
+  "attributes": {
+    "progress": {
+      "type": "double",
+      "default": 0.0,
+      "min": 0.0,
+      "max": 1.0,
+      "step": 0.01
+    },
+    "origin": {
+      "type": "enum",
+      "default": 0,
+      "enumValues": [
+        0,
+        1,
+        2,
+        3
+      ]
+    },
+    "position": {
+      "type": "double2",
+      "default": {
+        "x": 0.0,
+        "y": 0.0
+      },
+      "children": {
+        "*": {
+          "step": 1.0
+        }
+      },
+      "dimming": "origin != 3"
+    },
+    "scale": {
+      "type": "double",
+      "default": 220.0,
+      "min": 1.0,
+      "softMax": 1000.0,
+      "step": 1.0
+    },
+    "roughness": {
+      "type": "double",
+      "default": 1.0,
+      "min": 0.0,
+      "softMax": 3.0,
+      "step": 0.01
+    },
+    "seed": {
+      "type": "double",
+      "default": 0.0,
+      "min": 0.0,
+      "softMax": 100.0,
+      "step": 1.0
+    },
+    "charWidth": {
+      "type": "double",
+      "default": 0.03,
+      "min": 0.0,
+      "softMax": 0.2,
+      "step": 0.001
+    },
+    "charColor": {
+      "type": "color",
+      "default": {
+        "type": "Color",
+        "r": 33,
+        "g": 20,
+        "b": 12,
+        "a": 255
+      }
+    },
+    "burnWidth": {
+      "type": "double",
+      "default": 0.04,
+      "min": 0.0,
+      "softMax": 0.2,
+      "step": 0.001
+    },
+    "burnColor": {
+      "type": "color",
+      "default": {
+        "type": "Color",
+        "r": 255,
+        "g": 120,
+        "b": 20,
+        "a": 255
+      }
+    },
+    "bloomWidth": {
+      "type": "double",
+      "default": 0.05,
+      "min": 0.0,
+      "softMax": 0.3,
+      "step": 0.001
+    },
+    "bloomIntensity": {
+      "type": "double",
+      "default": 0.6,
+      "min": 0.0,
+      "softMax": 3.0,
+      "step": 0.01
+    },
+    "amount": {
+      "type": "double",
+      "default": 1.0,
+      "min": 0.0,
+      "max": 1.0,
+      "step": 0.01
+    }
+  },
+  "triggers": {
+    "out": [
+      "progress",
+      "origin",
+      "position",
+      "scale",
+      "roughness",
+      "seed",
+      "charWidth",
+      "charColor",
+      "burnWidth",
+      "burnColor",
+      "bloomWidth",
+      "bloomIntensity",
+      "amount"
+    ]
+  },
+  "UI": {
+    "icon": "filmBurn.png",
+    "attributeOrder": [
+      "progress",
+      "---Origin",
+      "origin",
+      "position",
+      "---Edge",
+      "scale",
+      "roughness",
+      "seed",
+      "---Char",
+      "charWidth",
+      "charColor",
+      "---Burn",
+      "burnWidth",
+      "burnColor",
+      "---Bloom",
+      "bloomWidth",
+      "bloomIntensity",
+      "---Output",
+      "amount",
+      "---Written from the maths"
+    ]
+  }
+}

@@ -1,0 +1,164 @@
+{
+ "type": "layerStrings",
+ "value": {
+  "author": "samMularczyk",
+  "layerType": "compositeVideo",
+  "niceName": "Composite Video",
+  "layerInfo": "Encodes to a real composite signal and decodes it back, so NTSC and PAL artefacts arise rather than being drawn on.",
+  "language": "en",
+  "attributes": {
+   "system": [
+    "System",
+    "Broadcast standard. PAL gives a finer, slower dot pattern and steadier hues than NTSC; PAL-M is PAL colour on 525 lines."
+   ],
+   "time": [
+    "Time",
+    "Drives the animated interference and the subcarrier drift. Connected to comp time by default."
+   ],
+   "speed": [
+    "Speed",
+    "How fast the interference and subcarrier move. Zero freezes the signal."
+   ],
+   "virtualRes": [
+    "Virtual Resolution",
+    "Line and sample grid the signal is quantised to. Keep the line count well below the layer's pixel height or it aliases."
+   ],
+   "brightness": [
+    "Brightness",
+    "Gain on luma after decoding."
+   ],
+   "saturation": [
+    "Saturation",
+    "Gain on both chroma axes after decoding."
+   ],
+   "blur": [
+    "Luma Filter",
+    "How much of the filtered luma replaces the raw luma. This is a transmission filter, so it rings rather than softens."
+   ],
+   "bandwidth": [
+    "Bandwidth",
+    "Passband of the decoder's luma and chroma filters, the real parameter that sets how much detail survives the signal path and how far colour bleeds sideways. Below 1 narrows both and softens the picture; above 1 opens them up and lets more subcarrier through as dot crawl."
+   ],
+   "peaking": [
+    "Peaking",
+    "Aperture correction - the mid-frequency boost a receiver applied to claw back the sharpness the camera and the tube's spot size had cost. This is where the crunchy, edgy look comes from; at 0 the picture is correctly filtered and noticeably softer."
+   ],
+   "blurSize": [
+    "Luma Filter Width",
+    "Spacing of the luma filter's taps. Wider spacing means a lower bandwidth and heavier ringing."
+   ],
+   "chromaBlur": [
+    "Chroma Filter",
+    "How much of the filtered chroma replaces the raw chroma. Colour bleeding across edges comes from here."
+   ],
+   "chromaSize": [
+    "Chroma Filter Width",
+    "Spacing of the chroma filter's taps. Composite colour bandwidth is far below luma's, so this is normally much wider."
+   ],
+   "qNarrow": [
+    "Q Narrowing",
+    "NTSC only: how much harder the Q axis is filtered than I, which is what makes colour bleed directional."
+   ],
+   "subcarrier": [
+    "Subcarrier",
+    "Strength of the colour subcarrier left visible in the picture - the fine dot crawl over saturated areas."
+   ],
+   "phaseError": [
+    "Phase Error",
+    "Differential phase - how far the subcarrier's phase drifts at peak white on its way down the transmission path. This is the defect the three systems differ over: NTSC passes it through as a brightness-dependent hue shift, while PAL's line-alternating V cancels it into a small loss of saturation."
+   ],
+   "crosstalk": [
+    "Crosstalk",
+    "How much of the subcarrier leaks into luma, so colour makes the picture shimmer."
+   ],
+   "crossColour": [
+    "Cross Colour",
+    "Fine luma detail leaking into the colour decoder - the rainbow on herringbone and fine stripes."
+   ],
+   "hanover": [
+    "Hanover Bars",
+    "PAL only: weakens the delay line, giving fine banding in line pairs. Worst on saturated flats."
+   ],
+   "scanlines": [
+    "Scanlines",
+    "Depth of the line structure. Zero is off, which is also what you want when checking that the signal path returns the original colours."
+   ],
+   "scanFlicker": [
+    "Interlace Flicker",
+    "Vertical jitter alternating frame to frame, standing in for interlace."
+   ],
+   "interference1": [
+    "Line Noise",
+    "Random per-line horizontal displacement."
+   ],
+   "interference2": [
+    "Signal Dropout",
+    "Occasional strong disturbance that smears and brightens a band of lines."
+   ],
+   "fishEye": [
+    "Tube Curvature",
+    "Horizontal and vertical curvature of the screen."
+   ],
+   "tubeOverscan": [
+    "Overscan",
+    "How far the raster is drawn past the faceplate. A real set overscans so the picture runs off the glass rather than showing an unpainted border where the tube's bulge pulled the edges in."
+   ],
+   "vignetteRounding": [
+    "Corner Rounding",
+    "Shape of the tube mask. High values give squarer corners."
+   ],
+   "vignetteSmoothness": [
+    "Edge Softness",
+    "Softness of the tube mask's edge. Very small values make the mask disappear."
+   ],
+   "amount": [
+    "Amount",
+    "Mix between the original layer and the broadcast result."
+   ],
+   "vRoll": [
+    "Vertical Hold",
+    "Speed the picture rolls at when vertical sync is lost. Signed - positive and negative roll opposite ways. Zero holds the picture still."
+   ],
+   "vRollJump": [
+    "Roll Jitter",
+    "How much the roll stutters in discrete line jumps rather than sliding smoothly."
+   ],
+   "hTear": [
+    "Sync Tear",
+    "How far affected scanlines jump sideways when horizontal sync briefly fails."
+   ],
+   "hTearDensity": [
+    "Tear Density",
+    "Fraction of lines torn on any given frame. Higher values tear more lines at once, in short bursts."
+   ],
+   "ghostAmount": [
+    "Ghosting",
+    "Strength of a second, delayed copy of the picture, as from a reflected aerial signal."
+   ],
+   "ghostDelay": [
+    "Ghost Delay",
+    "How far to the right the ghost trails behind the main picture."
+   ],
+   "snow": [
+    "Snow",
+    "Amount of white noise speckle, strongest where the picture is darkest."
+   ],
+   "snowBurst": [
+    "Snow Bursts",
+    "How much the snow clumps into intermittent bursts rather than a constant speckle."
+   ]
+  },
+  "enums": {
+   "system": {
+    "0": "NTSC",
+    "1": "PAL",
+    "2": "PAL-M"
+   }
+  },
+  "tabs": {
+   "filter": "Signal",
+   "tube": "Tube",
+   "sync": "Sync"
+  }
+ }
+}

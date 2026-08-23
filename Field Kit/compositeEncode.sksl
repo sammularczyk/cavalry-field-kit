@@ -1,0 +1,62 @@
+// Composite Video, pass 1 of 2 - Field Kit
+// Encode: RGB -> (Y, C1, C2), the two chroma axes biased into 0..1.
+//
+// This pass has no equivalent in the original shader. "C64 screen with NTSC
+// filter" by BitOfGold (Shadertoy 3tVBWR) is procedural - its Buffer B draws a
+// C64 screen and hands the decoder a ready-made signal buffer - so to run the
+// decoder over real footage the encode step has to exist, and is written here.
+//
+// The first version of this filter stored (luma, chroma magnitude, phase).
+// That cannot express PAL, whose defining feature is that the sign of V flips
+// on alternate lines: a magnitude/phase pair has no way to carry a per-line
+// inversion through the transmission filtering, which is exactly where the
+// averaging has to happen for the PAL delay line to do its job. So the signal
+// is (Y, C1, C2) instead, which both systems can express.
+//
+// NTSC rotates the chroma axes by 33 degrees into I and Q, which is what lets
+// it filter them asymmetrically. PAL keeps U and V unrotated and instead
+// alternates the sign of V line by line.
+//
+// Uniform order matches the attribute order in definitions.json.
+
+uniform float  system;        // enum: 0 NTSC, 1 PAL, 2 PAL-M
+uniform float2 virtualRes;
+
+uniform float2 resolution;
+uniform float2 rectCentre;
+
+uniform shader childShader;   // pass 1 input = the layer being filtered
+
+// Chroma is scaled by this before the 0.5 bias, so the widest axis (V, +-0.615)
+// still fits inside 0..1 with room for the filter's overshoot.
+const float CHROMA_SCALE = 0.7;
+const float DEG33 = 0.57595865;
+
+half4 main(float2 fragCoord) {
+    half4 src = childShader.eval(fragCoord);
+    float3 rgb = src.a > 0.0 ? float3(src.rgb / src.a) : float3(0.0);
+
+    float y = dot(rgb, float3( 0.299,    0.587,    0.114));
+    float u = dot(rgb, float3(-0.14713, -0.28886,  0.436));
+    float v = dot(rgb, float3( 0.615,   -0.51499, -0.10001));
+
+    float c1, c2;
+    if (system < 0.5) {
+        // NTSC: rotate into I and Q.
+        float s = sin(DEG33), c = cos(DEG33);
+        c1 = v * c - u * s;      // I
+        c2 = v * s + u * c;      // Q
+    } else {
+        // PAL: U and V as they are, but V's sign alternates line by line.
+        float2 res = max(resolution, float2(1.0));
+        float uvy  = (fragCoord.y - rectCentre.y) / res.y + 0.5;
+        float line = floor(uvy * max(virtualRes.y, 1.0));
+        c1 = u;
+        c2 = v * (mod(line, 2.0) < 0.5 ? 1.0 : -1.0);
+    }
+
+    half a = src.a;
+    return half4(half3(half(y),
+                       half(c1 * CHROMA_SCALE + 0.5),
+                       half(c2 * CHROMA_SCALE + 0.5)) * a, a);
+}

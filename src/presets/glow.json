@@ -1,0 +1,140 @@
+[
+  {
+    "presetType": "layer",
+    "id": "d4dca558-eb9e-d7de-eba1-b918d2d6ca40",
+    "author": "samMularczyk",
+    "name": "Ultra Glow",
+    "layerType": [
+      "glow"
+    ],
+    "attrs": [
+      {
+        "attrId": "bloomAmount",
+        "value": 1.0
+      },
+      {
+        "attrId": "streakAmount",
+        "value": 0.0
+      },
+      {
+        "attrId": "size",
+        "value": 300
+      },
+      {
+        "attrId": "falloff",
+        "value": 1.0
+      },
+      {
+        "attrId": "steps",
+        "value": 4
+      },
+      {
+        "attrId": "persistence",
+        "value": 1.0
+      },
+      {
+        "attrId": "intensity",
+        "value": 2.0
+      },
+      {
+        "attrId": "tint",
+        "value": "#FFFFFF"
+      },
+      {
+        "attrId": "blend",
+        "value": 0
+      },
+      {
+        "attrId": "srcBlack",
+        "value": 0.0
+      },
+      {
+        "attrId": "srcWhite",
+        "value": 1.0
+      },
+      {
+        "attrId": "response",
+        "value": 1.0
+      }
+    ],
+    "resetsTransforms": false,
+    "resetsLayer": true
+  },
+  {
+    "presetType": "layer",
+    "id": "0bdcc4bf-35c3-b29c-53e8-79dcb6d19658",
+    "author": "samMularczyk",
+    "name": "Streaks",
+    "layerType": [
+      "glow"
+    ],
+    "attrs": [
+      {
+        "attrId": "bloomAmount",
+        "value": 0.0
+      },
+      {
+        "attrId": "streakAmount",
+        "value": 1.0
+      },
+      {
+        "attrId": "srcBlack",
+        "value": 0.85
+      },
+      {
+        "attrId": "srcWhite",
+        "value": 1.0
+      },
+      {
+        "attrId": "response",
+        "value": 2.2
+      },
+      {
+        "attrId": "reach",
+        "value": 300
+      },
+      {
+        "attrId": "angle",
+        "value": 0
+      },
+      {
+        "attrId": "samples",
+        "value": 16
+      },
+      {
+        "attrId": "streakFalloff",
+        "value": 1.5
+      },
+      {
+        "attrId": "bidirectional",
+        "value": true
+      },
+      {
+        "attrId": "blur",
+        "value": 0.0
+      },
+      {
+        "attrId": "chromatic",
+        "value": 0.0
+      },
+      {
+        "attrId": "dispersion",
+        "value": 12
+      },
+      {
+        "attrId": "intensity",
+        "value": 0.6
+      },
+      {
+        "attrId": "tint",
+        "value": "#96BEFF"
+      },
+      {
+        "attrId": "blend",
+        "value": 0
+      }
+    ],
+    "resetsTransforms": false,
+    "resetsLayer": true
+  }
+]

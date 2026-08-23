@@ -1,0 +1,163 @@
+// Paint, pass 1 of 4 - Field Kit
+// Style-dependent: the tangent-field estimate for Brush, the wash flattening for
+// Watercolour, a passthrough for Oil.
+//
+// The three styles are alternative renderings rather than layers, so `style`
+// picks one and the passes that belong to the others copy through. A filter's
+// pass list is fixed, so the union is four passes: Brush needs all four,
+// Watercolour three, Oil only the last.
+//
+// Pass 0 must NOT declare `uniform shader original` - there is no such input on
+// the first pass and the shader fails to BUILD, silently contributing nothing.
+// On pass 0 `childShader` IS the layer.
+
+uniform float  style;            // enum: 0 Brush, 1 Oil, 2 Watercolour
+uniform float  estimatorRadius;  // Brush
+uniform float  estimatorTaps;    // Brush
+uniform float  threshold;        // Brush
+uniform float  washes;           // Watercolour
+uniform float  washRadius;       // Watercolour
+uniform float  washThreshold;    // Watercolour
+
+uniform float2 resolution;
+uniform float2 rectCentre;
+
+uniform shader field;            // shaderData - binds BEFORE the image
+uniform shader childShader;      // pass 1 input = the layer being filtered
+
+const int MAX_TAPS = 64;
+
+float srgbToY(float3 c) {
+    return dot(float3(0.2126, 0.7152, 0.0722), c);
+}
+
+half4 main(float2 fragCoord) {
+    int st = int(style);
+
+    if (st == 1) { return childShader.eval(fragCoord); }   // Oil: nothing yet
+
+    half4 ref = childShader.eval(fragCoord);
+    float3 refLin = ref.a > 0.0 ? float3(ref.rgb / ref.a) : float3(0.0);
+
+    if (st == 2) {
+        // ---- Watercolour: bilateral flatten, then quantise into washes -----
+        float refY = dot(refLin, float3(0.299, 0.587, 0.114));
+        float r   = max(washRadius, 0.0);
+        float thr = max(washThreshold, 0.001);
+
+        float3 sum = float3(0.0);
+        float  sumA = 0.0;
+        float  den = 0.0;
+
+        for (int y = -2; y <= 2; y++) {
+            for (int x = -2; x <= 2; x++) {
+                float2 o = float2(float(x), float(y)) * (r * 0.5);
+                half4 c = childShader.eval(fragCoord + o);
+                // Outside the layer contributes nothing. Read as black it
+                // looked like a legitimate dark neighbour to the bilateral
+                // weight, so a wash next to a dark edge pulled false black in.
+                if (c.a <= 0.001) { continue; }
+                float3 lin = float3(c.rgb / c.a);
+
+                float d = abs(dot(lin, float3(0.299, 0.587, 0.114)) - refY);
+                float w = max(1.0 - d / thr, 0.0);
+                w = w * w;
+
+                sum  += lin * w;
+                sumA += float(c.a) * w;
+                den  += w;
+            }
+        }
+
+        sum  /= max(den, 0.0001);
+        sumA /= max(den, 0.0001);
+
+        // Quantise TONE, not each channel. Posterising R, G and B
+        // independently moves the hue - a warm grey lands on pink or olive
+        // depending on which channel rounds up - which is not what a wash
+        // does. Scaling the colour by the quantised luminance keeps the hue
+        // and steps only the density.
+        float n = max(washes, 2.0) - 1.0;
+        sum = clamp(sum, 0.0, 1.0);
+        float y  = dot(sum, float3(0.299, 0.587, 0.114));
+        float qy = floor(y * n + 0.5) / n;
+        sum *= y > 0.0001 ? qy / y : 0.0;
+
+        half a = half(clamp(sumA, 0.0, 1.0));
+        return half4(half3(clamp(sum, 0.0, 1.0)) * a, a);
+    }
+
+    // ---- Brush: local structure tensor, per Kyprianidis & Döllner, "Image
+    // Abstraction by Structure Adaptive Filtering" (2008), and the flow-based
+    // DoG / anisotropic Kuwahara literature that follows it. The structure
+    // tensor's minor eigenvector gives the edge-tangent direction; passes 2-3
+    // then smooth that field (their own "integration scale" blur) before
+    // paintFinal's line-integral-convolution-style smear runs along it.
+    //
+    // The tensor's off-diagonal form (Jxx-Jyy, 2*Jxy) IS the double angle of
+    // the gradient direction, so summing that pair over several probe
+    // directions and halving the angle afterwards is the standard way to
+    // average orientations that are only defined modulo 180 degrees -
+    // opposite-pointing gradients must reinforce, not cancel.
+    float refY = srgbToY(refLin);
+
+    float  radius = max(estimatorRadius, 1.0);
+    float  n      = clamp(estimatorTaps, 4.0, float(MAX_TAPS));
+    float  thr    = max(threshold, 0.001);
+
+    float2 sum = float2(0.0);
+
+    for (int i = 0; i < MAX_TAPS; i++) {
+        if (float(i) >= n) { continue; }
+
+        // Directions spread evenly over a half-turn: a diameter and its
+        // reverse give the same axis, so a full sweep of pi radians covers
+        // every distinct orientation.
+        float  angle = 3.14159265 * float(i) / n;
+        float2 axis  = float2(cos(angle), sin(angle));
+        float2 ofs   = axis * radius;
+
+        half4 spF = childShader.eval(fragCoord + ofs);
+        half4 spB = childShader.eval(fragCoord - ofs);
+        float3 linF = spF.a > 0.0 ? float3(spF.rgb / spF.a) : float3(0.0);
+        float3 linB = spB.a > 0.0 ? float3(spB.rgb / spB.a) : float3(0.0);
+        float  yF = srgbToY(linF);
+        float  yB = srgbToY(linB);
+
+        // Tone difference across the diameter - a directional derivative up
+        // to a constant factor of the radius, which cancels out below once
+        // this is used only for direction and relative confidence, not an
+        // absolute gradient magnitude. Leaving the radius out keeps a wide
+        // search as sensitive as a tight one instead of fading the estimate
+        // out as the radius grows.
+        float d = yF - yB;
+
+        // Down-weight a probe when either end strays far in tone from the
+        // centre, so a stroke does not steer itself across an unrelated
+        // region - the same tone-tolerance role `threshold` always had.
+        float wF = max(1.0 - abs(yF - refY) / thr, 0.0);
+        float wB = max(1.0 - abs(yB - refY) / thr, 0.0);
+        float weight = wF * wF * wB * wB;
+        weight *= 1.0 - clamp(abs(float(spF.a) - float(ref.a)), 0.0, 1.0);
+        weight *= 1.0 - clamp(abs(float(spB.a) - float(ref.a)), 0.0, 1.0);
+
+        // Fit the structure tensor's off-diagonal pair from this axis's
+        // directional derivative: for direction angle theta, d(theta)^2
+        // projects onto (cos 2*theta, sin 2*theta) with the same Jxx-Jyy,
+        // 2*Jxy terms a Sobel-built tensor would carry, so summing that
+        // projection over several axes recovers the dominant one.
+        sum += (d * d * weight) * float2(cos(2.0 * angle), sin(2.0 * angle));
+    }
+
+    // The tensor's dominant eigenvector points along the gradient; its minor
+    // eigenvector - the stroke tangent - sits a quarter turn round, which in
+    // this doubled-angle representation is a half-turn, i.e. a sign flip.
+    float2 v = -sum / n;
+    float  mag = clamp(length(v), 0.0, 1.0);
+
+    half a = ref.a;
+    half3 rgb = half3(half(clamp(v.x * 0.5 + 0.5, 0.0, 1.0)),
+                      half(clamp(v.y * 0.5 + 0.5, 0.0, 1.0)),
+                      half(mag));
+    return half4(rgb * a, a);
+}

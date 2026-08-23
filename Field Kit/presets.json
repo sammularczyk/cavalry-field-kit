@@ -1,0 +1,1857 @@
+[
+  {
+    "presetType": "layer",
+    "id": "1a50639b-3ea4-ee98-d6af-e865ac7870a8",
+    "author": "samMularczyk",
+    "name": "NTSC",
+    "layerType": [
+      "compositeVideo"
+    ],
+    "attrs": [
+      {
+        "attrId": "system",
+        "value": 0
+      },
+      {
+        "attrId": "phaseError",
+        "value": 18
+      },
+      {
+        "attrId": "qNarrow",
+        "value": 2
+      },
+      {
+        "attrId": "hanover",
+        "value": 0
+      },
+      {
+        "attrId": "crosstalk",
+        "value": 0.5
+      },
+      {
+        "attrId": "crossColour",
+        "value": 0.4
+      },
+      {
+        "attrId": "blur",
+        "value": 1
+      },
+      {
+        "attrId": "bandwidth",
+        "value": 1
+      },
+      {
+        "attrId": "peaking",
+        "value": 2.9
+      },
+      {
+        "attrId": "chromaBlur",
+        "value": 1
+      },
+      {
+        "attrId": "chromaSize",
+        "value": 6
+      }
+    ]
+  },
+  {
+    "presetType": "layer",
+    "id": "a5e06067-4773-b9cc-e696-b3a8cfb04e4d",
+    "author": "samMularczyk",
+    "name": "PAL",
+    "layerType": [
+      "compositeVideo"
+    ],
+    "attrs": [
+      {
+        "attrId": "system",
+        "value": 1
+      },
+      {
+        "attrId": "phaseError",
+        "value": 18
+      },
+      {
+        "attrId": "qNarrow",
+        "value": 1
+      },
+      {
+        "attrId": "hanover",
+        "value": 0
+      },
+      {
+        "attrId": "crosstalk",
+        "value": 0.35
+      },
+      {
+        "attrId": "crossColour",
+        "value": 0.3
+      },
+      {
+        "attrId": "blur",
+        "value": 1
+      },
+      {
+        "attrId": "bandwidth",
+        "value": 1
+      },
+      {
+        "attrId": "peaking",
+        "value": 2.6
+      },
+      {
+        "attrId": "chromaBlur",
+        "value": 1
+      },
+      {
+        "attrId": "chromaSize",
+        "value": 7
+      }
+    ]
+  },
+  {
+    "presetType": "layer",
+    "id": "dad57943-b653-8ad8-28d7-fa46c89ed646",
+    "author": "samMularczyk",
+    "name": "PAL Hanover Bars",
+    "layerType": [
+      "compositeVideo"
+    ],
+    "attrs": [
+      {
+        "attrId": "system",
+        "value": 1
+      },
+      {
+        "attrId": "phaseError",
+        "value": 35
+      },
+      {
+        "attrId": "qNarrow",
+        "value": 1
+      },
+      {
+        "attrId": "hanover",
+        "value": 0.7
+      },
+      {
+        "attrId": "crosstalk",
+        "value": 0.35
+      },
+      {
+        "attrId": "crossColour",
+        "value": 0.3
+      },
+      {
+        "attrId": "blur",
+        "value": 1
+      },
+      {
+        "attrId": "bandwidth",
+        "value": 1
+      },
+      {
+        "attrId": "peaking",
+        "value": 2.6
+      },
+      {
+        "attrId": "chromaBlur",
+        "value": 1
+      },
+      {
+        "attrId": "chromaSize",
+        "value": 7
+      }
+    ]
+  },
+  {
+    "presetType": "layer",
+    "id": "7c6c400e-b463-c2a4-8f4d-424bbb2151bb",
+    "author": "samMularczyk",
+    "name": "PAL-M",
+    "layerType": [
+      "compositeVideo"
+    ],
+    "attrs": [
+      {
+        "attrId": "system",
+        "value": 2
+      },
+      {
+        "attrId": "phaseError",
+        "value": 18
+      },
+      {
+        "attrId": "qNarrow",
+        "value": 1
+      },
+      {
+        "attrId": "hanover",
+        "value": 0
+      },
+      {
+        "attrId": "crosstalk",
+        "value": 0.5
+      },
+      {
+        "attrId": "crossColour",
+        "value": 0.4
+      },
+      {
+        "attrId": "blur",
+        "value": 1
+      },
+      {
+        "attrId": "bandwidth",
+        "value": 1
+      },
+      {
+        "attrId": "peaking",
+        "value": 2.9
+      },
+      {
+        "attrId": "chromaBlur",
+        "value": 1
+      },
+      {
+        "attrId": "chromaSize",
+        "value": 6
+      }
+    ]
+  },
+  {
+    "presetType": "layer",
+    "id": "7480b32d-7ec1-a91a-6d12-267670d467ee",
+    "author": "samMularczyk",
+    "name": "CRT",
+    "layerType": [
+      "display"
+    ],
+    "attrs": [
+      {
+        "attrId": "mask",
+        "value": 3
+      },
+      {
+        "attrId": "pixelSize",
+        "value": 3
+      },
+      {
+        "attrId": "stagger",
+        "value": 1
+      },
+      {
+        "attrId": "gridGap",
+        "value": 0
+      },
+      {
+        "attrId": "pixelate",
+        "value": 0.7
+      },
+      {
+        "attrId": "maskAmount",
+        "value": 0.7
+      },
+      {
+        "attrId": "distortion",
+        "value": 0.7
+      },
+      {
+        "attrId": "cornerRadius",
+        "value": 63
+      },
+      {
+        "attrId": "vignette",
+        "value": 0.7
+      },
+      {
+        "attrId": "aberration",
+        "value": 0.7
+      },
+      {
+        "attrId": "grain",
+        "value": 0.7
+      },
+      {
+        "attrId": "bloom",
+        "value": 0.7
+      },
+      {
+        "attrId": "bloomRadius",
+        "value": 12
+      }
+    ],
+    "resetsTransforms": false,
+    "resetsLayer": true
+  },
+  {
+    "presetType": "layer",
+    "id": "69daff75-a8b7-af8a-e8f1-06a8c8bb1279",
+    "author": "samMularczyk",
+    "name": "Shadow Mask",
+    "layerType": [
+      "display"
+    ],
+    "attrs": [
+      {
+        "attrId": "mask",
+        "value": 0
+      },
+      {
+        "attrId": "pixelSize",
+        "value": 4
+      },
+      {
+        "attrId": "dotSize",
+        "value": 0.65
+      },
+      {
+        "attrId": "pixelate",
+        "value": 1
+      },
+      {
+        "attrId": "maskAmount",
+        "value": 0.63
+      },
+      {
+        "attrId": "distortion",
+        "value": 0
+      },
+      {
+        "attrId": "cornerRadius",
+        "value": 0
+      },
+      {
+        "attrId": "vignette",
+        "value": 0
+      },
+      {
+        "attrId": "aberration",
+        "value": 0
+      },
+      {
+        "attrId": "grain",
+        "value": 0
+      },
+      {
+        "attrId": "bloom",
+        "value": 0
+      }
+    ],
+    "resetsTransforms": false,
+    "resetsLayer": true
+  },
+  {
+    "presetType": "layer",
+    "id": "3af78f8a-c526-1c93-c953-a157bb6a8f68",
+    "author": "samMularczyk",
+    "name": "Aperture Grille",
+    "layerType": [
+      "display"
+    ],
+    "attrs": [
+      {
+        "attrId": "mask",
+        "value": 1
+      },
+      {
+        "attrId": "pixelSize",
+        "value": 8
+      },
+      {
+        "attrId": "dotSize",
+        "value": 0.42
+      },
+      {
+        "attrId": "maskAmount",
+        "value": 0.45
+      },
+      {
+        "attrId": "maskSaturation",
+        "value": 0.35
+      },
+      {
+        "attrId": "scanlines",
+        "value": 0.22
+      },
+      {
+        "attrId": "scanlineThickness",
+        "value": 0.62
+      },
+      {
+        "attrId": "distortion",
+        "value": 0.08
+      },
+      {
+        "attrId": "cornerRadius",
+        "value": 12
+      },
+      {
+        "attrId": "vignette",
+        "value": 0.7
+      },
+      {
+        "attrId": "diffusion",
+        "value": 0.28
+      },
+      {
+        "attrId": "bloom",
+        "value": 0
+      },
+      {
+        "attrId": "gain",
+        "value": 1
+      },
+      {
+        "attrId": "grain",
+        "value": 0.12
+      }
+    ],
+    "resetsTransforms": false,
+    "resetsLayer": true
+  },
+  {
+    "presetType": "layer",
+    "id": "03d8d2fb-e632-3172-8d38-b12ebe7e0473",
+    "author": "samMularczyk",
+    "name": "Slot Mask",
+    "layerType": [
+      "display"
+    ],
+    "attrs": [
+      {
+        "attrId": "mask",
+        "value": 2
+      },
+      {
+        "attrId": "pixelSize",
+        "value": 9
+      },
+      {
+        "attrId": "dotSize",
+        "value": 0.38
+      },
+      {
+        "attrId": "maskAmount",
+        "value": 0.4
+      },
+      {
+        "attrId": "maskSaturation",
+        "value": 0.3
+      },
+      {
+        "attrId": "scanlines",
+        "value": 0.18
+      },
+      {
+        "attrId": "scanlineThickness",
+        "value": 0.6
+      },
+      {
+        "attrId": "distortion",
+        "value": 0.2
+      },
+      {
+        "attrId": "cornerRadius",
+        "value": 22
+      },
+      {
+        "attrId": "vignette",
+        "value": 1
+      },
+      {
+        "attrId": "diffusion",
+        "value": 0.35
+      },
+      {
+        "attrId": "bloom",
+        "value": 0
+      },
+      {
+        "attrId": "gain",
+        "value": 1
+      },
+      {
+        "attrId": "grain",
+        "value": 0.18
+      }
+    ],
+    "resetsTransforms": false,
+    "resetsLayer": true
+  },
+  {
+    "presetType": "layer",
+    "id": "f1e71d86-3cfa-d1cb-eb73-4150832a7470",
+    "author": "samMularczyk",
+    "name": "Film Emulation",
+    "layerType": [
+      "film"
+    ],
+    "attrs": [
+      {
+        "attrId": "halation",
+        "value": 0.1
+      },
+      {
+        "attrId": "halationRadius",
+        "value": 12
+      },
+      {
+        "attrId": "halationTint",
+        "value": "#ED1200"
+      },
+      {
+        "attrId": "linearise",
+        "value": 0
+      },
+      {
+        "attrId": "exposure",
+        "value": 0
+      },
+      {
+        "attrId": "rolloff",
+        "value": 1
+      },
+      {
+        "attrId": "gamutExtension",
+        "value": 1
+      },
+      {
+        "attrId": "grain",
+        "value": 0.04
+      },
+      {
+        "attrId": "grainSize",
+        "value": 1
+      },
+      {
+        "attrId": "recipe",
+        "value": 0
+      },
+      {
+        "attrId": "damage",
+        "value": 0
+      }
+    ],
+    "resetsTransforms": false,
+    "resetsLayer": true
+  },
+  {
+    "presetType": "layer",
+    "id": "63d0d5ad-4a46-7cc9-ebf8-9e9f20215055",
+    "author": "samMularczyk",
+    "name": "Colour Recipe",
+    "layerType": [
+      "film"
+    ],
+    "attrs": [
+      {
+        "attrId": "recipe",
+        "value": 1
+      },
+      {
+        "attrId": "base",
+        "value": 0
+      },
+      {
+        "attrId": "clarityRadius",
+        "value": 24
+      },
+      {
+        "attrId": "halation",
+        "value": 0
+      },
+      {
+        "attrId": "grain",
+        "value": 0
+      },
+      {
+        "attrId": "rolloff",
+        "value": 0
+      },
+      {
+        "attrId": "damage",
+        "value": 0
+      }
+    ],
+    "resetsTransforms": false,
+    "resetsLayer": true
+  },
+  {
+    "presetType": "layer",
+    "id": "258a3672-8023-98de-9a99-4c3c1b6a9b95",
+    "author": "samMularczyk",
+    "name": "Projector",
+    "layerType": [
+      "film"
+    ],
+    "attrs": [
+      {
+        "attrId": "damage",
+        "value": 1
+      },
+      {
+        "attrId": "recipe",
+        "value": 0
+      },
+      {
+        "attrId": "halation",
+        "value": 0
+      },
+      {
+        "attrId": "grain",
+        "value": 0
+      },
+      {
+        "attrId": "rolloff",
+        "value": 0
+      },
+      {
+        "attrId": "frameRate",
+        "value": 12
+      },
+      {
+        "attrId": "speed",
+        "value": 0.0333
+      },
+      {
+        "attrId": "weave",
+        "value": 0.002
+      },
+      {
+        "attrId": "flicker",
+        "value": 0.06
+      },
+      {
+        "attrId": "dirt",
+        "value": 1
+      },
+      {
+        "attrId": "dirtThreshold",
+        "value": 0.22
+      },
+      {
+        "attrId": "dirtScale",
+        "value": 0.5
+      },
+      {
+        "attrId": "vignetteAmount",
+        "value": 1
+      },
+      {
+        "attrId": "vignetteFlicker",
+        "value": 1
+      },
+      {
+        "attrId": "desaturate",
+        "value": 1
+      }
+    ],
+    "resetsTransforms": false,
+    "resetsLayer": true
+  },
+  {
+    "presetType": "layer",
+    "id": "d4dca558-eb9e-d7de-eba1-b918d2d6ca40",
+    "author": "samMularczyk",
+    "name": "Ultra Glow",
+    "layerType": [
+      "glow"
+    ],
+    "attrs": [
+      {
+        "attrId": "bloomAmount",
+        "value": 1
+      },
+      {
+        "attrId": "streakAmount",
+        "value": 0
+      },
+      {
+        "attrId": "size",
+        "value": 300
+      },
+      {
+        "attrId": "falloff",
+        "value": 1
+      },
+      {
+        "attrId": "steps",
+        "value": 4
+      },
+      {
+        "attrId": "persistence",
+        "value": 1
+      },
+      {
+        "attrId": "intensity",
+        "value": 2
+      },
+      {
+        "attrId": "tint",
+        "value": "#FFFFFF"
+      },
+      {
+        "attrId": "blend",
+        "value": 0
+      },
+      {
+        "attrId": "srcBlack",
+        "value": 0
+      },
+      {
+        "attrId": "srcWhite",
+        "value": 1
+      },
+      {
+        "attrId": "response",
+        "value": 1
+      }
+    ],
+    "resetsTransforms": false,
+    "resetsLayer": true
+  },
+  {
+    "presetType": "layer",
+    "id": "0bdcc4bf-35c3-b29c-53e8-79dcb6d19658",
+    "author": "samMularczyk",
+    "name": "Streaks",
+    "layerType": [
+      "glow"
+    ],
+    "attrs": [
+      {
+        "attrId": "bloomAmount",
+        "value": 0
+      },
+      {
+        "attrId": "streakAmount",
+        "value": 1
+      },
+      {
+        "attrId": "srcBlack",
+        "value": 0.85
+      },
+      {
+        "attrId": "srcWhite",
+        "value": 1
+      },
+      {
+        "attrId": "response",
+        "value": 2.2
+      },
+      {
+        "attrId": "reach",
+        "value": 300
+      },
+      {
+        "attrId": "angle",
+        "value": 0
+      },
+      {
+        "attrId": "samples",
+        "value": 16
+      },
+      {
+        "attrId": "streakFalloff",
+        "value": 1.5
+      },
+      {
+        "attrId": "bidirectional",
+        "value": true
+      },
+      {
+        "attrId": "blur",
+        "value": 0
+      },
+      {
+        "attrId": "chromatic",
+        "value": 0
+      },
+      {
+        "attrId": "dispersion",
+        "value": 12
+      },
+      {
+        "attrId": "intensity",
+        "value": 0.6
+      },
+      {
+        "attrId": "tint",
+        "value": "#96BEFF"
+      },
+      {
+        "attrId": "blend",
+        "value": 0
+      }
+    ],
+    "resetsTransforms": false,
+    "resetsLayer": true
+  },
+  {
+    "presetType": "layer",
+    "id": "030ebb33-7115-3378-d233-45617a03c9f5",
+    "author": "samMularczyk",
+    "name": "Anamorphic",
+    "layerType": [
+      "lens"
+    ],
+    "attrs": [
+      {
+        "attrId": "profile",
+        "value": 0
+      },
+      {
+        "attrId": "distortion",
+        "value": 1
+      },
+      {
+        "attrId": "squeeze",
+        "value": 1
+      },
+      {
+        "attrId": "expand",
+        "value": 1
+      },
+      {
+        "attrId": "fringing",
+        "value": 0
+      },
+      {
+        "attrId": "abModel",
+        "value": 3
+      },
+      {
+        "attrId": "defocus",
+        "value": 0
+      },
+      {
+        "attrId": "size",
+        "value": 0
+      }
+    ],
+    "resetsTransforms": false,
+    "resetsLayer": true
+  },
+  {
+    "presetType": "layer",
+    "id": "1ae229ad-95bc-093f-2cb5-673d8f369560",
+    "author": "samMularczyk",
+    "name": "Barrel Chroma",
+    "layerType": [
+      "lens"
+    ],
+    "attrs": [
+      {
+        "attrId": "profile",
+        "value": 0
+      },
+      {
+        "attrId": "distortion",
+        "value": 1
+      },
+      {
+        "attrId": "fringing",
+        "value": 0.5
+      },
+      {
+        "attrId": "abModel",
+        "value": 3
+      },
+      {
+        "attrId": "defocus",
+        "value": 0
+      },
+      {
+        "attrId": "size",
+        "value": 0
+      }
+    ],
+    "resetsTransforms": false,
+    "resetsLayer": true
+  },
+  {
+    "presetType": "layer",
+    "id": "14208e9e-2f11-db81-69b6-148824aef847",
+    "author": "samMularczyk",
+    "name": "Spectral Displacement",
+    "layerType": [
+      "lens"
+    ],
+    "attrs": [
+      {
+        "attrId": "distortion",
+        "value": 0
+      },
+      {
+        "attrId": "abModel",
+        "value": 0
+      },
+      {
+        "attrId": "geometry",
+        "value": 0
+      },
+      {
+        "attrId": "dispersion",
+        "value": 0.02
+      },
+      {
+        "attrId": "focusWave",
+        "value": 0
+      },
+      {
+        "attrId": "smoothing",
+        "value": 0.5
+      },
+      {
+        "attrId": "aberration",
+        "value": 8
+      },
+      {
+        "attrId": "redScale",
+        "value": 0.4
+      },
+      {
+        "attrId": "greenScale",
+        "value": 0.6
+      },
+      {
+        "attrId": "blueScale",
+        "value": 1
+      },
+      {
+        "attrId": "smear",
+        "value": 1
+      },
+      {
+        "attrId": "falloff",
+        "value": 1.5
+      },
+      {
+        "attrId": "mapAmplitude",
+        "value": 30
+      },
+      {
+        "attrId": "abIntensity",
+        "value": 1
+      },
+      {
+        "attrId": "samples",
+        "value": 7
+      },
+      {
+        "attrId": "defocus",
+        "value": 0
+      },
+      {
+        "attrId": "size",
+        "value": 0
+      }
+    ],
+    "resetsTransforms": false,
+    "resetsLayer": true
+  },
+  {
+    "presetType": "layer",
+    "id": "07306b30-b003-7710-8902-3d153a5d323b",
+    "author": "samMularczyk",
+    "name": "Bokeh",
+    "layerType": [
+      "lens"
+    ],
+    "attrs": [
+      {
+        "attrId": "distortion",
+        "value": 0
+      },
+      {
+        "attrId": "abModel",
+        "value": 3
+      },
+      {
+        "attrId": "defocus",
+        "value": 40
+      },
+      {
+        "attrId": "blades",
+        "value": 6
+      },
+      {
+        "attrId": "rotation",
+        "value": 0
+      },
+      {
+        "attrId": "cocSource",
+        "value": 0
+      },
+      {
+        "attrId": "focus",
+        "value": 0.5
+      },
+      {
+        "attrId": "aperture",
+        "value": 2.5
+      },
+      {
+        "attrId": "bokehThreshold",
+        "value": 0
+      },
+      {
+        "attrId": "bokehGamma",
+        "value": 2.2
+      },
+      {
+        "attrId": "exposure",
+        "value": 0
+      },
+      {
+        "attrId": "gain",
+        "value": 1
+      },
+      {
+        "attrId": "dither",
+        "value": true
+      },
+      {
+        "attrId": "size",
+        "value": 0
+      }
+    ],
+    "resetsTransforms": false,
+    "resetsLayer": true
+  },
+  {
+    "presetType": "layer",
+    "id": "85fa91fe-78a4-4b11-6912-a754212c5a2c",
+    "author": "samMularczyk",
+    "name": "Lens Artefacts",
+    "layerType": [
+      "lens"
+    ],
+    "attrs": [
+      {
+        "attrId": "distortion",
+        "value": 0
+      },
+      {
+        "attrId": "abModel",
+        "value": 3
+      },
+      {
+        "attrId": "defocus",
+        "value": 0
+      },
+      {
+        "attrId": "kernel",
+        "value": 0
+      },
+      {
+        "attrId": "size",
+        "value": 20
+      },
+      {
+        "attrId": "kernelRotation",
+        "value": 0
+      },
+      {
+        "attrId": "ringFrequency",
+        "value": 6
+      },
+      {
+        "attrId": "axialRed",
+        "value": 1
+      },
+      {
+        "attrId": "axialGreen",
+        "value": 1
+      },
+      {
+        "attrId": "axialBlue",
+        "value": 1
+      },
+      {
+        "attrId": "samples",
+        "value": 20
+      },
+      {
+        "attrId": "scatterThreshold",
+        "value": 0.5
+      },
+      {
+        "attrId": "scatterGain",
+        "value": 1
+      },
+      {
+        "attrId": "scatterBlend",
+        "value": 0
+      }
+    ],
+    "resetsTransforms": false,
+    "resetsLayer": true
+  },
+  {
+    "presetType": "layer",
+    "id": "822951b6-3d87-45e0-a946-4b79867c87a9",
+    "author": "samMularczyk",
+    "name": "Fast Prime",
+    "layerType": [
+      "lensFlare"
+    ],
+    "attrs": [
+      {
+        "attrId": "lens",
+        "value": 0
+      },
+      {
+        "attrId": "ghostIntensity",
+        "value": 0.7
+      },
+      {
+        "attrId": "ghostCount",
+        "value": 8
+      },
+      {
+        "attrId": "ghostSpacing",
+        "value": 0.6
+      },
+      {
+        "attrId": "ghostScale",
+        "value": 0.6
+      },
+      {
+        "attrId": "ghostChromatic",
+        "value": 3
+      },
+      {
+        "attrId": "ghostCatsEye",
+        "value": 0.5
+      },
+      {
+        "attrId": "ghostCatsEyeFalloff",
+        "value": 1.2
+      },
+      {
+        "attrId": "blades",
+        "value": 9
+      },
+      {
+        "attrId": "haloIntensity",
+        "value": 0.5
+      },
+      {
+        "attrId": "haloRadius",
+        "value": 220
+      },
+      {
+        "attrId": "starIntensity",
+        "value": 0.6
+      },
+      {
+        "attrId": "starLength",
+        "value": 450
+      },
+      {
+        "attrId": "streakIntensity",
+        "value": 0
+      }
+    ],
+    "resetsTransforms": false,
+    "resetsLayer": true
+  },
+  {
+    "presetType": "layer",
+    "id": "afacbf6b-da95-48a6-9328-2c7605e663ee",
+    "author": "samMularczyk",
+    "name": "Standard Zoom",
+    "layerType": [
+      "lensFlare"
+    ],
+    "attrs": [
+      {
+        "attrId": "lens",
+        "value": 1
+      },
+      {
+        "attrId": "ghostIntensity",
+        "value": 0.6
+      },
+      {
+        "attrId": "ghostCount",
+        "value": 8
+      },
+      {
+        "attrId": "ghostSpacing",
+        "value": 0.35
+      },
+      {
+        "attrId": "ghostScale",
+        "value": 0.45
+      },
+      {
+        "attrId": "ghostChromatic",
+        "value": 5
+      },
+      {
+        "attrId": "ghostCatsEye",
+        "value": 0.6
+      },
+      {
+        "attrId": "ghostCatsEyeFalloff",
+        "value": 1
+      },
+      {
+        "attrId": "blades",
+        "value": 9
+      },
+      {
+        "attrId": "haloIntensity",
+        "value": 0.35
+      },
+      {
+        "attrId": "haloRadius",
+        "value": 300
+      },
+      {
+        "attrId": "starIntensity",
+        "value": 0.4
+      },
+      {
+        "attrId": "starLength",
+        "value": 350
+      },
+      {
+        "attrId": "streakIntensity",
+        "value": 0
+      }
+    ],
+    "resetsTransforms": false,
+    "resetsLayer": true
+  },
+  {
+    "presetType": "layer",
+    "id": "f80e1310-82be-e5fb-f090-5f7b8ef7dc17",
+    "author": "samMularczyk",
+    "name": "Anamorphic",
+    "layerType": [
+      "lensFlare"
+    ],
+    "attrs": [
+      {
+        "attrId": "blades",
+        "value": 2
+      },
+      {
+        "attrId": "colourSource",
+        "value": 1
+      },
+      {
+        "attrId": "brightnessSource",
+        "value": 1
+      },
+      {
+        "attrId": "intensity",
+        "value": 0.1
+      },
+      {
+        "attrId": "streakIntensity",
+        "value": 2
+      }
+    ],
+    "resetsTransforms": false,
+    "resetsLayer": true
+  },
+  {
+    "presetType": "layer",
+    "id": "804d1f0d-0b2b-beec-d4d6-c158d3e12454",
+    "author": "samMularczyk",
+    "name": "Brushstroke",
+    "layerType": [
+      "paint"
+    ],
+    "attrs": [
+      {
+        "attrId": "style",
+        "value": 0
+      },
+      {
+        "attrId": "estimatorRadius",
+        "value": 24
+      },
+      {
+        "attrId": "estimatorTaps",
+        "value": 32
+      },
+      {
+        "attrId": "threshold",
+        "value": 0.4
+      },
+      {
+        "attrId": "blurRadius",
+        "value": 3
+      },
+      {
+        "attrId": "blurTaps",
+        "value": 15
+      },
+      {
+        "attrId": "strokeLength",
+        "value": 8
+      },
+      {
+        "attrId": "strokeWidth",
+        "value": 2
+      }
+    ],
+    "resetsTransforms": false,
+    "resetsLayer": true
+  },
+  {
+    "presetType": "layer",
+    "id": "adff5942-8f33-a36c-bc70-9cb8987a79ac",
+    "author": "samMularczyk",
+    "name": "Oil Paint",
+    "layerType": [
+      "paint"
+    ],
+    "attrs": [
+      {
+        "attrId": "style",
+        "value": 1
+      },
+      {
+        "attrId": "fieldMode",
+        "value": 0
+      },
+      {
+        "attrId": "flowMix",
+        "value": 0.5
+      },
+      {
+        "attrId": "mapChannel",
+        "value": 0
+      },
+      {
+        "attrId": "fieldStep",
+        "value": 2
+      },
+      {
+        "attrId": "intensity",
+        "value": 6
+      },
+      {
+        "attrId": "smear",
+        "value": 8
+      },
+      {
+        "attrId": "bristle",
+        "value": 0.35
+      },
+      {
+        "attrId": "perpendicular",
+        "value": false
+      }
+    ],
+    "resetsTransforms": false,
+    "resetsLayer": true
+  },
+  {
+    "presetType": "layer",
+    "id": "04a4746b-f32a-316d-e6f1-1e8edafd99be",
+    "author": "samMularczyk",
+    "name": "Watercolour",
+    "layerType": [
+      "paint"
+    ],
+    "attrs": [
+      {
+        "attrId": "style",
+        "value": 2
+      },
+      {
+        "attrId": "washes",
+        "value": 6
+      },
+      {
+        "attrId": "washRadius",
+        "value": 4
+      },
+      {
+        "attrId": "washThreshold",
+        "value": 0.15
+      },
+      {
+        "attrId": "transport",
+        "value": 10
+      },
+      {
+        "attrId": "edgeFlow",
+        "value": 0.7
+      },
+      {
+        "attrId": "washFlow",
+        "value": 0.4
+      },
+      {
+        "attrId": "flowJitter",
+        "value": 0.5
+      },
+      {
+        "attrId": "flowScale",
+        "value": 40
+      },
+      {
+        "attrId": "wetEdge",
+        "value": 6
+      },
+      {
+        "attrId": "wetEdgeScale",
+        "value": 40
+      },
+      {
+        "attrId": "edgeDarkening",
+        "value": 0.5
+      },
+      {
+        "attrId": "granulation",
+        "value": 0.35
+      },
+      {
+        "attrId": "granulationScale",
+        "value": 14
+      },
+      {
+        "attrId": "paperTexture",
+        "value": 0.5
+      },
+      {
+        "attrId": "paperColor",
+        "value": "#F7F2EB"
+      }
+    ],
+    "resetsTransforms": false,
+    "resetsLayer": true
+  },
+  {
+    "presetType": "layer",
+    "id": "5ddd387f-d738-4c21-8e91-975f17583d47",
+    "author": "samMularczyk",
+    "name": "Riso",
+    "layerType": [
+      "print"
+    ],
+    "attrs": [
+      {
+        "attrId": "process",
+        "value": 0
+      },
+      {
+        "attrId": "separation",
+        "value": 0
+      },
+      {
+        "attrId": "inkCount",
+        "value": 2
+      },
+      {
+        "attrId": "ink1Color",
+        "value": "#0078BF"
+      },
+      {
+        "attrId": "ink2Color",
+        "value": "#FFE800"
+      },
+      {
+        "attrId": "screenType",
+        "value": 0
+      },
+      {
+        "attrId": "levels",
+        "value": 3
+      },
+      {
+        "attrId": "levelBias",
+        "value": 1.2
+      },
+      {
+        "attrId": "flatten",
+        "value": 2
+      },
+      {
+        "attrId": "mottle",
+        "value": 0.4
+      },
+      {
+        "attrId": "registrationError",
+        "value": 2
+      },
+      {
+        "attrId": "inkLoss",
+        "value": 0.2
+      },
+      {
+        "attrId": "inkOpacity",
+        "value": 0.8
+      }
+    ],
+    "resetsTransforms": false,
+    "resetsLayer": true
+  },
+  {
+    "presetType": "layer",
+    "id": "3503ef46-bb73-490d-8344-38a31aaa3e01",
+    "author": "samMularczyk",
+    "name": "Screen Print",
+    "layerType": [
+      "print"
+    ],
+    "attrs": [
+      {
+        "attrId": "process",
+        "value": 1
+      },
+      {
+        "attrId": "separation",
+        "value": 0
+      },
+      {
+        "attrId": "inkCount",
+        "value": 3
+      },
+      {
+        "attrId": "screenType",
+        "value": 2
+      },
+      {
+        "attrId": "frequency",
+        "value": 8
+      },
+      {
+        "attrId": "levels",
+        "value": 0
+      },
+      {
+        "attrId": "flatten",
+        "value": 0
+      },
+      {
+        "attrId": "registrationError",
+        "value": 1.5
+      },
+      {
+        "attrId": "inkLoss",
+        "value": 0.15
+      },
+      {
+        "attrId": "mottle",
+        "value": 0.1
+      },
+      {
+        "attrId": "inkOpacity",
+        "value": 0.9
+      }
+    ],
+    "resetsTransforms": false,
+    "resetsLayer": true
+  },
+  {
+    "presetType": "layer",
+    "id": "e132319e-8e2a-4215-8397-6fc5e8356228",
+    "author": "samMularczyk",
+    "name": "Newsprint",
+    "layerType": [
+      "print"
+    ],
+    "attrs": [
+      {
+        "attrId": "process",
+        "value": 2
+      },
+      {
+        "attrId": "separation",
+        "value": 1
+      },
+      {
+        "attrId": "inkCount",
+        "value": 1
+      },
+      {
+        "attrId": "ink1Color",
+        "value": "#1A1A1A"
+      },
+      {
+        "attrId": "ink1Coverage",
+        "value": 1.3
+      },
+      {
+        "attrId": "screenType",
+        "value": 2
+      },
+      {
+        "attrId": "frequency",
+        "value": 5
+      },
+      {
+        "attrId": "dotGain",
+        "value": 0.35
+      },
+      {
+        "attrId": "levels",
+        "value": 0
+      },
+      {
+        "attrId": "flatten",
+        "value": 1
+      },
+      {
+        "attrId": "paperColor",
+        "value": "#E8E4D8"
+      },
+      {
+        "attrId": "paperGrain",
+        "value": 0.4
+      },
+      {
+        "attrId": "registrationError",
+        "value": 0.5
+      },
+      {
+        "attrId": "mottle",
+        "value": 0.15
+      },
+      {
+        "attrId": "inkOpacity",
+        "value": 1
+      }
+    ],
+    "resetsTransforms": false,
+    "resetsLayer": true
+  },
+  {
+    "presetType": "layer",
+    "id": "e78bc95d-248a-4b7a-89bd-134336447440",
+    "author": "samMularczyk",
+    "name": "VHS",
+    "layerType": [
+      "vhs"
+    ],
+    "attrs": [
+      {
+        "attrId": "format",
+        "value": 0
+      },
+      {
+        "attrId": "waveAmount",
+        "value": 0.006
+      },
+      {
+        "attrId": "fineWave",
+        "value": 0.012
+      },
+      {
+        "attrId": "switchingShift",
+        "value": 0.3
+      },
+      {
+        "attrId": "jitter",
+        "value": 0.25
+      },
+      {
+        "attrId": "bloomStrength",
+        "value": 0.15
+      },
+      {
+        "attrId": "greenLag",
+        "value": 2
+      },
+      {
+        "attrId": "blueLag",
+        "value": 4
+      },
+      {
+        "attrId": "dropout",
+        "value": 0.06
+      },
+      {
+        "attrId": "tracking",
+        "value": 0.1
+      },
+      {
+        "attrId": "hiss",
+        "value": 0.18
+      }
+    ],
+    "resetsTransforms": false,
+    "resetsLayer": true
+  },
+  {
+    "presetType": "layer",
+    "id": "3eb9a7dc-0ab4-4068-a53c-9a70a738f463",
+    "author": "samMularczyk",
+    "name": "S-VHS",
+    "layerType": [
+      "vhs"
+    ],
+    "attrs": [
+      {
+        "attrId": "format",
+        "value": 1
+      },
+      {
+        "attrId": "waveAmount",
+        "value": 0.003
+      },
+      {
+        "attrId": "fineWave",
+        "value": 0.006
+      },
+      {
+        "attrId": "switchingShift",
+        "value": 0.2
+      },
+      {
+        "attrId": "jitter",
+        "value": 0.12
+      },
+      {
+        "attrId": "bloomStrength",
+        "value": 0.08
+      },
+      {
+        "attrId": "greenLag",
+        "value": 1.2
+      },
+      {
+        "attrId": "blueLag",
+        "value": 2.2
+      },
+      {
+        "attrId": "dropout",
+        "value": 0.02
+      },
+      {
+        "attrId": "tracking",
+        "value": 0.04
+      },
+      {
+        "attrId": "hiss",
+        "value": 0.08
+      }
+    ],
+    "resetsTransforms": false,
+    "resetsLayer": true
+  },
+  {
+    "presetType": "layer",
+    "id": "1dcc48d6-1261-43ed-b6e2-d1fd7557a12f",
+    "author": "samMularczyk",
+    "name": "Hi8",
+    "layerType": [
+      "vhs"
+    ],
+    "attrs": [
+      {
+        "attrId": "format",
+        "value": 2
+      },
+      {
+        "attrId": "waveAmount",
+        "value": 0.0025
+      },
+      {
+        "attrId": "fineWave",
+        "value": 0.005
+      },
+      {
+        "attrId": "switchingShift",
+        "value": 0.15
+      },
+      {
+        "attrId": "jitter",
+        "value": 0.1
+      },
+      {
+        "attrId": "bloomStrength",
+        "value": 0.09
+      },
+      {
+        "attrId": "greenLag",
+        "value": 1.4
+      },
+      {
+        "attrId": "blueLag",
+        "value": 2.6
+      },
+      {
+        "attrId": "dropout",
+        "value": 0.015
+      },
+      {
+        "attrId": "tracking",
+        "value": 0.03
+      },
+      {
+        "attrId": "hiss",
+        "value": 0.06
+      }
+    ],
+    "resetsTransforms": false,
+    "resetsLayer": true
+  },
+  {
+    "presetType": "layer",
+    "id": "ee4b75e9-0594-45cd-b449-ac657e7a91a1",
+    "author": "samMularczyk",
+    "name": "Video8",
+    "layerType": [
+      "vhs"
+    ],
+    "attrs": [
+      {
+        "attrId": "format",
+        "value": 3
+      },
+      {
+        "attrId": "waveAmount",
+        "value": 0.005
+      },
+      {
+        "attrId": "fineWave",
+        "value": 0.01
+      },
+      {
+        "attrId": "switchingShift",
+        "value": 0.25
+      },
+      {
+        "attrId": "jitter",
+        "value": 0.2
+      },
+      {
+        "attrId": "bloomStrength",
+        "value": 0.12
+      },
+      {
+        "attrId": "greenLag",
+        "value": 1.8
+      },
+      {
+        "attrId": "blueLag",
+        "value": 3.2
+      },
+      {
+        "attrId": "dropout",
+        "value": 0.04
+      },
+      {
+        "attrId": "tracking",
+        "value": 0.08
+      },
+      {
+        "attrId": "hiss",
+        "value": 0.12
+      }
+    ],
+    "resetsTransforms": false,
+    "resetsLayer": true
+  }
+]

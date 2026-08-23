@@ -1,0 +1,100 @@
+// Film Burn, pass 2 of 2 - Field Kit
+// Colours the burn edge built in pass 1 (filmBurnMask.sksl) and composites it
+// against the untouched layer. This is deliberately NOT a transition: a
+// Cavalry filter only has one image to work with, so there is no second layer
+// to cut to. Instead `progress` eats a hole through the layer's own alpha,
+// and whatever sits underneath in the comp shows through - which is how this
+// would be built in Cavalry regardless, and it keeps the whole burn on one
+// keyframeable control.
+//
+// pass 1 packed:
+//   .r = antialiased "how far inside the hole" mask, 1 in the hole, 0 outside
+//   .g = signed distance to the burn edge in field units, 0 at the edge,
+//        negative inside the hole, positive out over intact picture
+//   .b = the raw fbm noise sample at this pixel, used here for a little
+//        ember flicker rather than recomputing the fbm a second time
+//
+// From the hole outward the distance in .g places three rings: char (dark,
+// just-consumed film), burn (the bright, actively alight front) and bloom
+// (the emulsion whitening just ahead of it) before the untouched picture.
+//
+// Uniform order matches this pass's `uniforms` entry in the definition.
+// IMPORTANT: shaderData inputs bind BEFORE the input image, which is last -
+// not relevant here (no shaderData input) but `original` still must be last.
+
+uniform float  progress;
+uniform float  charWidth;
+uniform half4  charColor;      // straight RGBA
+uniform float  burnWidth;
+uniform half4  burnColor;      // straight RGBA
+uniform float  bloomWidth;
+uniform float  bloomIntensity;
+uniform float  amount;
+
+uniform float2 resolution;
+uniform float2 rectCentre;
+
+uniform shader childShader;   // pass 1's packed mask/distance/noise
+uniform shader original;      // untouched input - MUST be declared last
+
+half4 main(float2 fragCoord) {
+    half4 orig = original.eval(fragCoord);
+
+    // progress = 0 MUST be an exact passthrough. The fbm-warped field in
+    // pass 1 can dip slightly negative right near the origin even before
+    // progress rises off zero, so this is gated explicitly rather than
+    // trusted to fall out of the maths. amount <= 0 is the same passthrough
+    // by definition.
+    if (progress <= 0.0 || amount <= 0.0) {
+        return orig;
+    }
+
+    half4  fields = childShader.eval(fragCoord);
+    float  mask   = float(fields.r);
+    float  d      = float(fields.g);
+    float  ember  = float(fields.b);
+
+    float cw  = max(charWidth, 0.0001);
+    float bw  = max(burnWidth, 0.0001);
+    float glw = max(bloomWidth, 0.0001);
+
+    float d0 = 0.0;     // the hole edge itself
+    float d1 = d0 + cw;  // char -> burn
+    float d2 = d1 + bw;  // burn -> bloom
+    float d3 = d2 + glw; // bloom -> untouched picture
+
+    float3 charC  = float3(charColor.rgb);
+    float3 burnC  = float3(burnColor.rgb);
+    // Bloom is the emulsion blowing out just before it catches: push the burn
+    // colour toward white and let it exceed 1 - a real pre-ignition flare
+    // clips, it doesn't plateau.
+    float3 bloomC = mix(burnC, float3(1.0), 0.7) * (1.0 + max(bloomIntensity, 0.0));
+
+    float3 origStraight = orig.a > 0.0 ? float3(orig.rgb / orig.a) : float3(orig.rgb);
+
+    float3 col;
+    if (d < d1) {
+        col = mix(charC, burnC, smoothstep(d0, d1, d));
+    } else if (d < d2) {
+        col = mix(burnC, bloomC, smoothstep(d1, d2, d));
+    } else if (d < d3) {
+        col = mix(bloomC, origStraight, smoothstep(d2, d3, d));
+    } else {
+        col = origStraight;
+    }
+
+    // A little of the noise pass 1 already computed, folded back in as an
+    // ember flicker across the char and burn rings rather than a flat tint.
+    if (d < d2) {
+        col += burnC * max(ember, 0.0) * 0.4;
+    }
+
+    // Alpha is zero through the hole, ramping up to the layer's OWN alpha
+    // across the char band - char and burn are opaque burning film, not a
+    // transparency gradient, so nothing past d1 should still be fading.
+    float a = mix(0.0, float(orig.a), smoothstep(d0, d1, d));
+    a *= (1.0 - mask); // antialiases the true zero-alpha edge from pass 1
+
+    half4 result = half4(half3(col * a), half(a));
+    return mix(orig, result, half(clamp(amount, 0.0, 1.0)));
+}

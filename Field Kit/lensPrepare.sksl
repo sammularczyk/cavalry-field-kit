@@ -1,0 +1,37 @@
+// Lens, pass 3 of 8 - Field Kit
+// Highlight extraction and into the gamma domain. No blur.
+//
+// This pass exists because pass 1 doing double duty did not work: when the
+// segment blur ALSO extracted highlights on pass 1, the threshold applied but
+// the blur silently did not, so blades 6 summed only two segments (a rhombus,
+// not a hexagon) and blades 4 gave a single capsule. Splitting the preparation
+// out fixed it and is the better shape anyway - every segment pass is now
+// identical, and `original` is available to all of them, so the awkward
+// "read the layer on pass 1, read original later" branch is gone.
+//
+// High gamma is what makes highlights form distinct discs rather than a smear:
+// it pushes everything below the threshold toward zero so only real highlights
+// carry energy into the blur chain.
+
+uniform float  bokehThreshold;
+uniform float  bokehGamma;
+
+uniform float2 resolution;
+uniform float2 rectCentre;
+
+uniform shader displaceMap;   // shaderData - binds BEFORE the image
+uniform shader defocusMap;    // shaderData - unused here, but every pass must
+                               // declare it or the binding order breaks
+uniform shader childShader;   // pass 2 result
+
+half4 main(float2 fragCoord) {
+    half4 c = childShader.eval(fragCoord);
+    float3 lin = c.a > 0.0 ? float3(c.rgb / c.a) : float3(c.rgb);
+
+    float thr = clamp(bokehThreshold, 0.0, 0.999);
+    float g   = max(bokehGamma, 0.0001);
+    lin = pow(max(lin - thr, 0.0) / (1.0 - thr), float3(g));
+
+    half a = c.a;
+    return half4(half3(clamp(lin, 0.0, 16.0)) * a, a);
+}

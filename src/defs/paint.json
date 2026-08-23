@@ -1,0 +1,446 @@
+{
+  "author": "samMularczyk",
+  "type": "paint",
+  "superType": "thirdPartyFilter",
+  "version": "1.0",
+  "passes": [
+    {
+      "skslFile": "paintPass1.sksl",
+      "uniforms": [
+        "style",
+        "estimatorRadius",
+        "estimatorTaps",
+        "threshold",
+        "washes",
+        "washRadius",
+        "washThreshold"
+      ]
+    },
+    {
+      "skslFile": "paintPass2.sksl",
+      "uniforms": [
+        "style",
+        "blurRadius",
+        "blurTaps"
+      ]
+    },
+    {
+      "skslFile": "paintPass3.sksl",
+      "uniforms": [
+        "style",
+        "blurRadius",
+        "blurTaps",
+        "transport",
+        "edgeFlow",
+        "washFlow",
+        "flowJitter",
+        "flowScale"
+      ]
+    },
+    {
+      "skslFile": "paintFinal.sksl",
+      "uniforms": [
+        "style",
+        "strokeLength",
+        "strokeWidth",
+        "fieldMode",
+        "flowMix",
+        "mapChannel",
+        "fieldStep",
+        "intensity",
+        "smear",
+        "bristle",
+        "perpendicular",
+        "wetEdge",
+        "wetEdgeScale",
+        "edgeDarkening",
+        "granulation",
+        "granulationScale",
+        "paperTexture",
+        "paperColor",
+        "amount"
+      ]
+    }
+  ],
+  "attributes": {
+    "style": {
+      "type": "enum",
+      "default": 0,
+      "enumValues": [
+        0,
+        1,
+        2
+      ]
+    },
+    "estimatorRadius": {
+      "type": "double",
+      "default": 24.0,
+      "min": 1.0,
+      "softMax": 200.0,
+      "step": 1.0,
+      "dimming": "style != 0"
+    },
+    "estimatorTaps": {
+      "type": "double",
+      "default": 24.0,
+      "min": 4.0,
+      "max": 64.0,
+      "step": 1.0,
+      "dimming": "style != 0"
+    },
+    "threshold": {
+      "type": "double",
+      "default": 0.12,
+      "min": 0.001,
+      "softMax": 1.0,
+      "step": 0.01,
+      "dimming": "style != 0"
+    },
+    "blurRadius": {
+      "type": "double",
+      "default": 0.35,
+      "min": 0.001,
+      "softMax": 2.0,
+      "step": 0.01,
+      "dimming": "style != 0"
+    },
+    "blurTaps": {
+      "type": "double",
+      "default": 15.0,
+      "min": 1.0,
+      "max": 31.0,
+      "step": 1.0,
+      "dimming": "style != 0"
+    },
+    "strokeLength": {
+      "type": "double",
+      "default": 8.0,
+      "min": 1.0,
+      "max": 16.0,
+      "step": 1.0,
+      "dimming": "style != 0"
+    },
+    "strokeWidth": {
+      "type": "double",
+      "default": 2.0,
+      "min": 0.0,
+      "softMax": 20.0,
+      "step": 0.1,
+      "dimming": "style != 0"
+    },
+    "fieldMode": {
+      "type": "enum",
+      "default": 0,
+      "enumValues": [
+        0,
+        1,
+        2
+      ],
+      "dimming": "style != 1"
+    },
+    "flowMix": {
+      "type": "double",
+      "default": 0.5,
+      "min": 0.0,
+      "max": 1.0,
+      "step": 0.01,
+      "dimming": "style != 1 || fieldMode != 2"
+    },
+    "mapChannel": {
+      "type": "enum",
+      "default": 0,
+      "enumValues": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5
+      ],
+      "dimming": "style != 1 || fieldMode == 1"
+    },
+    "fieldStep": {
+      "type": "double",
+      "default": 2.0,
+      "min": 0.01,
+      "softMax": 32.0,
+      "step": 0.1,
+      "dimming": "style != 1"
+    },
+    "intensity": {
+      "type": "double",
+      "default": 6.0,
+      "min": 0.0,
+      "softMax": 80.0,
+      "step": 0.5,
+      "dimming": "style != 1"
+    },
+    "smear": {
+      "type": "double",
+      "default": 8.0,
+      "min": 0.0,
+      "softMax": 120.0,
+      "step": 0.5,
+      "dimming": "style != 1"
+    },
+    "bristle": {
+      "type": "double",
+      "default": 0.35,
+      "min": 0.0,
+      "max": 1.0,
+      "step": 0.01,
+      "dimming": "style != 1"
+    },
+    "perpendicular": {
+      "type": "bool",
+      "default": false,
+      "dimming": "style != 1"
+    },
+    "washes": {
+      "type": "double",
+      "default": 6.0,
+      "min": 2.0,
+      "softMax": 32.0,
+      "step": 1.0,
+      "dimming": "style != 2"
+    },
+    "washRadius": {
+      "type": "double",
+      "default": 6.0,
+      "min": 0.0,
+      "softMax": 40.0,
+      "step": 0.5,
+      "dimming": "style != 2"
+    },
+    "washThreshold": {
+      "type": "double",
+      "default": 0.12,
+      "min": 0.001,
+      "softMax": 1.0,
+      "step": 0.01,
+      "dimming": "style != 2"
+    },
+    "transport": {
+      "type": "double",
+      "default": 10.0,
+      "min": 0.0,
+      "softMax": 80.0,
+      "step": 0.5,
+      "dimming": "style != 2"
+    },
+    "edgeFlow": {
+      "type": "double",
+      "default": 0.7,
+      "min": 0.0,
+      "max": 1.0,
+      "step": 0.01,
+      "dimming": "style != 2 || transport <= 0"
+    },
+    "washFlow": {
+      "type": "double",
+      "default": 0.4,
+      "min": 0.0,
+      "max": 1.0,
+      "step": 0.01,
+      "dimming": "style != 2 || transport <= 0"
+    },
+    "flowJitter": {
+      "type": "double",
+      "default": 0.5,
+      "min": 0.0,
+      "max": 1.0,
+      "step": 0.01,
+      "dimming": "style != 2 || transport <= 0"
+    },
+    "flowScale": {
+      "type": "double",
+      "default": 40.0,
+      "min": 0.001,
+      "softMax": 300.0,
+      "step": 1.0,
+      "dimming": "style != 2 || transport <= 0 || flowJitter <= 0"
+    },
+    "wetEdge": {
+      "type": "double",
+      "default": 4.0,
+      "min": 0.0,
+      "softMax": 40.0,
+      "step": 0.5,
+      "dimming": "style != 2"
+    },
+    "wetEdgeScale": {
+      "type": "double",
+      "default": 30.0,
+      "min": 0.001,
+      "softMax": 200.0,
+      "step": 1.0,
+      "dimming": "style != 2 || wetEdge <= 0"
+    },
+    "edgeDarkening": {
+      "type": "double",
+      "default": 0.5,
+      "min": 0.0,
+      "max": 1.0,
+      "step": 0.01,
+      "dimming": "style != 2"
+    },
+    "granulation": {
+      "type": "double",
+      "default": 0.3,
+      "min": 0.0,
+      "max": 1.0,
+      "step": 0.01,
+      "dimming": "style != 2"
+    },
+    "granulationScale": {
+      "type": "double",
+      "default": 8.0,
+      "min": 0.001,
+      "softMax": 80.0,
+      "step": 0.5,
+      "dimming": "style != 2 || granulation <= 0"
+    },
+    "paperTexture": {
+      "type": "double",
+      "default": 0.4,
+      "min": 0.0,
+      "max": 1.0,
+      "step": 0.01,
+      "dimming": "style != 2"
+    },
+    "paperColor": {
+      "type": "color",
+      "default": {
+        "type": "Color",
+        "r": 247,
+        "g": 244,
+        "b": 235,
+        "a": 255
+      },
+      "dimming": "style != 2 || paperTexture <= 0"
+    },
+    "amount": {
+      "type": "double",
+      "default": 1.0,
+      "min": 0.0,
+      "max": 1.0,
+      "step": 0.01
+    },
+    "field": {
+      "type": "shaderData",
+      "supportedInputNodeTypes": [
+        "shader",
+        "shaderArray"
+      ],
+      "subUI": true,
+      "defaultSubnodeType": "noiseShader",
+      "dimming": "style != 1"
+    }
+  },
+  "triggers": {
+    "out": [
+      "style",
+      "estimatorRadius",
+      "estimatorTaps",
+      "threshold",
+      "blurRadius",
+      "blurTaps",
+      "strokeLength",
+      "strokeWidth",
+      "fieldMode",
+      "flowMix",
+      "mapChannel",
+      "fieldStep",
+      "intensity",
+      "smear",
+      "bristle",
+      "perpendicular",
+      "washes",
+      "washRadius",
+      "washThreshold",
+      "transport",
+      "edgeFlow",
+      "washFlow",
+      "flowJitter",
+      "flowScale",
+      "wetEdge",
+      "wetEdgeScale",
+      "edgeDarkening",
+      "granulation",
+      "granulationScale",
+      "paperTexture",
+      "paperColor",
+      "amount",
+      "field"
+    ]
+  },
+  "UI": {
+    "tabs": [
+      {
+        "id": "filter",
+        "attributeOrder": [
+          "style",
+          "---A",
+          "amount"
+        ]
+      },
+      {
+        "id": "brush",
+        "attributeOrder": [
+          "estimatorRadius",
+          "estimatorTaps",
+          "threshold",
+          "---Smoothing",
+          "blurRadius",
+          "blurTaps",
+          "---Stroke",
+          "strokeLength",
+          "strokeWidth"
+        ]
+      },
+      {
+        "id": "oil",
+        "attributeOrder": [
+          "fieldMode",
+          "field",
+          "mapChannel",
+          "flowMix",
+          "fieldStep",
+          "---Stroke",
+          "intensity",
+          "smear",
+          "bristle",
+          "perpendicular"
+        ]
+      },
+      {
+        "id": "water",
+        "attributeOrder": [
+          "washes",
+          "washRadius",
+          "washThreshold",
+          "---Transport",
+          "transport",
+          "edgeFlow",
+          "washFlow",
+          "flowJitter",
+          "flowScale",
+          "---Wet Edges",
+          "wetEdge",
+          "wetEdgeScale",
+          "edgeDarkening",
+          "---Pigment",
+          "granulation",
+          "granulationScale",
+          "paperTexture",
+          "paperColor",
+          "---Brush from the flow-based abstraction literature; Oil inspired by Spi3lot, Watercolour by noztol"
+        ]
+      }
+    ],
+    "controls": {
+      "field": "nodeInput"
+    },
+    "icon": "paint.png"
+  }
+}

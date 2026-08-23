@@ -1,0 +1,52 @@
+{
+ "type": "layerStrings",
+ "value": {
+  "author": "samMularczyk",
+  "layerType": "godray",
+  "niceName": "Godray",
+  "layerInfo": "Volumetric light shafts - the crepuscular rays you get through cloud or a window - radiating from a point or travelling in parallel from a direction.",
+  "language": "en",
+  "attributes": {
+   "parallel": [
+    "Parallel Rays",
+    "On for rays travelling in one direction (Angle). Off for rays radiating from a point (Light)."
+   ],
+   "angle": [
+    "Angle",
+    "Direction the rays travel in, in degrees. Zero is vertical."
+   ],
+   "light": [
+    "Light",
+    "Offset of the ray source from the layer centre, in pixels. Radiating rays only."
+   ],
+   "gain": [
+    "Gain",
+    "Strength of the turbulence that shapes the shafts. Zero is a passthrough."
+   ],
+   "lacunarity": [
+    "Lacunarity",
+    "Frequency step between turbulence octaves. Higher breaks the shafts into finer, busier detail."
+   ],
+   "density": [
+    "Density",
+    "How tightly packed the shafts are."
+   ],
+   "speed": [
+    "Speed",
+    "How fast the shafts drift. 0 holds them still."
+   ],
+   "blur": [
+    "Blur",
+    "Softens the shafts across their width. It works on the ray pattern, not the picture."
+   ],
+   "time": [
+    "Time",
+    "Driven by the composition time. Disconnect it to freeze the shafts."
+   ],
+   "amount": [
+    "Amount",
+    "Overall opacity of the ray effect over the original layer."
+   ]
+  }
+ }
+}

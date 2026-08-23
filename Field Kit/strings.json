@@ -1,0 +1,2270 @@
+[
+  {
+    "type": "layerStrings",
+    "value": {
+      "author": "samMularczyk",
+      "layerType": "ascii",
+      "niceName": "ASCII",
+      "layerInfo": "Draws the layer as a grid of 5x5 bitmap characters. Edge Glyphs traces outlines with line characters instead of tone.",
+      "language": "en",
+      "attributes": {
+        "textSize": [
+          "Text Size",
+          "Size of one character cell in pixels."
+        ],
+        "cellAspect": [
+          "Cell Aspect",
+          "Cell height as a multiple of its width. Above one gives tall cells, like real monospaced type."
+        ],
+        "margin": [
+          "Margin",
+          "Padding inside each cell, as a fraction of it. Higher values space the characters further apart."
+        ],
+        "charset": [
+          "Characters",
+          "Which glyph ramp to use. Classic is pixi.js's eight-level dot-to-hash ramp; Block Density, Dots, and Numeric are five, eight, and eleven steps native to this plugin; Letters and Full ASCII are twenty-six and ninety-five steps from the Tom Thumb font."
+        ],
+        "rampGamma": [
+          "Ramp Gamma",
+          "Bias of brightness onto the glyph ramp. Below one favours dense glyphs, above one sparse."
+        ],
+        "edgeThreshold": [
+          "Edge Glyphs",
+          "Above zero, cells on a boundary use a line glyph chosen by edge direction. This is the threshold the edge must clear."
+        ],
+        "colorMode": [
+          "Colour",
+          "Colour from the layer, one flat colour with transparency between glyphs, or ink on a filled paper."
+        ],
+        "inkColor": [
+          "Ink",
+          "Character colour, used by Single Colour and Ink On Paper."
+        ],
+        "paperColor": [
+          "Paper",
+          "Background colour, used by Ink On Paper."
+        ],
+        "paletteLevels": [
+          "Palette Levels",
+          "Quantises each cell's colour to this many steps per channel. Zero is off."
+        ],
+        "invert": [
+          "Invert",
+          "Flip the brightness ramp, so dark areas get the dense characters."
+        ],
+        "randomChars": [
+          "Scatter",
+          "Chance of a cell using a random glyph instead of its brightness one, for a scattered letterform look."
+        ],
+        "seed": [
+          "Seed",
+          "Changes which cells are scattered and which characters they get."
+        ],
+        "amount": [
+          "Amount",
+          "Mix between the original layer and the character result."
+        ]
+      },
+      "enums": {
+        "charset": {
+          "0": "Classic",
+          "1": "Block Density",
+          "2": "Dots",
+          "3": "Numeric",
+          "4": "Letters",
+          "5": "Full ASCII"
+        },
+        "colorMode": [
+          "From Layer",
+          "Single Colour",
+          "Ink On Paper"
+        ]
+      },
+      "tabs": {}
+    }
+  },
+  {
+    "type": "layerStrings",
+    "value": {
+      "author": "samMularczyk",
+      "layerType": "compositeVideo",
+      "niceName": "Composite Video",
+      "layerInfo": "Encodes to a real composite signal and decodes it back, so NTSC and PAL artefacts arise rather than being drawn on.",
+      "language": "en",
+      "attributes": {
+        "system": [
+          "System",
+          "Broadcast standard. PAL gives a finer, slower dot pattern and steadier hues than NTSC; PAL-M is PAL colour on 525 lines."
+        ],
+        "time": [
+          "Time",
+          "Drives the animated interference and the subcarrier drift. Connected to comp time by default."
+        ],
+        "speed": [
+          "Speed",
+          "How fast the interference and subcarrier move. Zero freezes the signal."
+        ],
+        "virtualRes": [
+          "Virtual Resolution",
+          "Line and sample grid the signal is quantised to. Keep the line count well below the layer's pixel height or it aliases."
+        ],
+        "brightness": [
+          "Brightness",
+          "Gain on luma after decoding."
+        ],
+        "saturation": [
+          "Saturation",
+          "Gain on both chroma axes after decoding."
+        ],
+        "blur": [
+          "Luma Filter",
+          "How much of the filtered luma replaces the raw luma. This is a transmission filter, so it rings rather than softens."
+        ],
+        "bandwidth": [
+          "Bandwidth",
+          "Passband of the decoder's luma and chroma filters, the real parameter that sets how much detail survives the signal path and how far colour bleeds sideways. Below 1 narrows both and softens the picture; above 1 opens them up and lets more subcarrier through as dot crawl."
+        ],
+        "peaking": [
+          "Peaking",
+          "Aperture correction - the mid-frequency boost a receiver applied to claw back the sharpness the camera and the tube's spot size had cost. This is where the crunchy, edgy look comes from; at 0 the picture is correctly filtered and noticeably softer."
+        ],
+        "blurSize": [
+          "Luma Filter Width",
+          "Spacing of the luma filter's taps. Wider spacing means a lower bandwidth and heavier ringing."
+        ],
+        "chromaBlur": [
+          "Chroma Filter",
+          "How much of the filtered chroma replaces the raw chroma. Colour bleeding across edges comes from here."
+        ],
+        "chromaSize": [
+          "Chroma Filter Width",
+          "Spacing of the chroma filter's taps. Composite colour bandwidth is far below luma's, so this is normally much wider."
+        ],
+        "qNarrow": [
+          "Q Narrowing",
+          "NTSC only: how much harder the Q axis is filtered than I, which is what makes colour bleed directional."
+        ],
+        "subcarrier": [
+          "Subcarrier",
+          "Strength of the colour subcarrier left visible in the picture - the fine dot crawl over saturated areas."
+        ],
+        "phaseError": [
+          "Phase Error",
+          "Differential phase - how far the subcarrier's phase drifts at peak white on its way down the transmission path. This is the defect the three systems differ over: NTSC passes it through as a brightness-dependent hue shift, while PAL's line-alternating V cancels it into a small loss of saturation."
+        ],
+        "crosstalk": [
+          "Crosstalk",
+          "How much of the subcarrier leaks into luma, so colour makes the picture shimmer."
+        ],
+        "crossColour": [
+          "Cross Colour",
+          "Fine luma detail leaking into the colour decoder - the rainbow on herringbone and fine stripes."
+        ],
+        "hanover": [
+          "Hanover Bars",
+          "PAL only: weakens the delay line, giving fine banding in line pairs. Worst on saturated flats."
+        ],
+        "scanlines": [
+          "Scanlines",
+          "Depth of the line structure. Zero is off, which is also what you want when checking that the signal path returns the original colours."
+        ],
+        "scanFlicker": [
+          "Interlace Flicker",
+          "Vertical jitter alternating frame to frame, standing in for interlace."
+        ],
+        "interference1": [
+          "Line Noise",
+          "Random per-line horizontal displacement."
+        ],
+        "interference2": [
+          "Signal Dropout",
+          "Occasional strong disturbance that smears and brightens a band of lines."
+        ],
+        "fishEye": [
+          "Tube Curvature",
+          "Horizontal and vertical curvature of the screen."
+        ],
+        "tubeOverscan": [
+          "Overscan",
+          "How far the raster is drawn past the faceplate. A real set overscans so the picture runs off the glass rather than showing an unpainted border where the tube's bulge pulled the edges in."
+        ],
+        "vignetteRounding": [
+          "Corner Rounding",
+          "Shape of the tube mask. High values give squarer corners."
+        ],
+        "vignetteSmoothness": [
+          "Edge Softness",
+          "Softness of the tube mask's edge. Very small values make the mask disappear."
+        ],
+        "amount": [
+          "Amount",
+          "Mix between the original layer and the broadcast result."
+        ],
+        "vRoll": [
+          "Vertical Hold",
+          "Speed the picture rolls at when vertical sync is lost. Signed - positive and negative roll opposite ways. Zero holds the picture still."
+        ],
+        "vRollJump": [
+          "Roll Jitter",
+          "How much the roll stutters in discrete line jumps rather than sliding smoothly."
+        ],
+        "hTear": [
+          "Sync Tear",
+          "How far affected scanlines jump sideways when horizontal sync briefly fails."
+        ],
+        "hTearDensity": [
+          "Tear Density",
+          "Fraction of lines torn on any given frame. Higher values tear more lines at once, in short bursts."
+        ],
+        "ghostAmount": [
+          "Ghosting",
+          "Strength of a second, delayed copy of the picture, as from a reflected aerial signal."
+        ],
+        "ghostDelay": [
+          "Ghost Delay",
+          "How far to the right the ghost trails behind the main picture."
+        ],
+        "snow": [
+          "Snow",
+          "Amount of white noise speckle, strongest where the picture is darkest."
+        ],
+        "snowBurst": [
+          "Snow Bursts",
+          "How much the snow clumps into intermittent bursts rather than a constant speckle."
+        ]
+      },
+      "enums": {
+        "system": {
+          "0": "NTSC",
+          "1": "PAL",
+          "2": "PAL-M"
+        }
+      },
+      "tabs": {
+        "filter": "Signal",
+        "tube": "Tube",
+        "sync": "Sync"
+      }
+    }
+  },
+  {
+    "type": "layerStrings",
+    "value": {
+      "author": "samMularczyk",
+      "layerType": "display",
+      "niceName": "Display Simulation",
+      "layerInfo": "Screen emulation: sub-pixel structure, curvature, rounded tube corners, bloom and grain. Shadow Mask, Aperture Grille and Slot Mask are three real CRT dot geometries; LCD Stripe is an aligned RGB stripe with a grid line. The Beam tab adds a scanning electron beam with a trailing phosphor-decay glow.",
+      "language": "en",
+      "attributes": {
+        "distortion": [
+          "Curvature",
+          "Barrel curvature of the glass. The tube outline and corners bow with it."
+        ],
+        "overscan": [
+          "Overscan",
+          "How far the raster is drawn past the faceplate, as a real set does so the picture runs off the glass rather than showing an unpainted border. 1 fills the tube exactly at any distortion; below 1 the bowed raster edge becomes visible."
+        ],
+        "edges": [
+          "Edges",
+          "What to do where the curvature samples outside the layer. Transparent is honest - there is no picture there. Clamp smears the rim outward, Mirror reflects the picture back."
+        ],
+        "edgeTrim": [
+          "Edge Trim",
+          "Pixels to inset the edge that Clamp and Mirror fold against, so they reflect real picture rather than the layer's antialiased rim."
+        ],
+        "cornerRadius": [
+          "Corner Radius",
+          "Radius of the rounded tube corners, in pixels. Clamped to half the short side."
+        ],
+        "vignette": [
+          "Vignette",
+          "Brightness falloff toward the edges. The tube SHAPE comes from Corner Radius."
+        ],
+        "mask": [
+          "Mask",
+          "Sub-pixel structure. Shadow Mask, Aperture Grille and Slot Mask are hex-packed, wire and slot phosphor geometries; LCD Stripe is an aligned RGB stripe."
+        ],
+        "pixelSize": [
+          "Pixel Size",
+          "Size of one addressable pixel, in screen pixels. The same square cell for every mask, so switching Mask does not change the scale."
+        ],
+        "pixelate": [
+          "Pixelate",
+          "How much the picture is quantised to the pixel grid."
+        ],
+        "maskAmount": [
+          "Mask Amount",
+          "Strength of the sub-pixel mask against the unmasked picture."
+        ],
+        "gridGap": [
+          "Grid Gap",
+          "Darkness of the black grid line between LCD cells."
+        ],
+        "stagger": [
+          "Stagger",
+          "Offsets alternate columns. Zero reads as a flat panel; one gives the staggered CRT look."
+        ],
+        "dotSize": [
+          "Dot Size",
+          "Size of the dot, wire or slot within its cell, for Shadow Mask, Aperture Grille and Slot Mask."
+        ],
+        "maskSaturation": [
+          "Mask Saturation",
+          "How coloured the phosphors are. At 1 they are full red, green and blue; at 0 they are neutral grey dots with black between them. Turn this down rather than Mask Amount when the texture is right but the colour is loud."
+        ],
+        "maskSoftness": [
+          "Mask Softness",
+          "How soft the phosphor edges are. 1 is about one screen pixel, which is what stops the mask aliasing; raise it to diffuse the dots, drop it toward 0 for a hard-edged digital look."
+        ],
+        "scanlines": [
+          "Scanlines",
+          "Depth of the dark gap between the lines the tube draws. One line per virtual pixel row."
+        ],
+        "scanlineThickness": [
+          "Scanline Thickness",
+          "Fraction of each line's pitch that is lit. Lower is a thinner, harder line."
+        ],
+        "gain": [
+          "Gain",
+          "Exposure after the mask. A mask that passes one channel per pixel has to be boosted to hold its brightness, and that boost clips the dots to white, so a strong mask always costs some light. Raise this to win it back."
+        ],
+        "beamAmount": [
+          "Beam Amount",
+          "Strength of the scanning-beam effect. Zero leaves the picture unchanged."
+        ],
+        "beamHeight": [
+          "Beam Height",
+          "How tall the brightly-illuminated band is, as a fraction of one full sweep."
+        ],
+        "beamSpeed": [
+          "Beam Speed",
+          "Rolling rate of the beam: sweeps of the frame per unit of Time."
+        ],
+        "beamDecay": [
+          "Beam Decay",
+          "Phosphor persistence trailing the beam. Higher lingers longer after the beam passes."
+        ],
+        "beamPhase": [
+          "Beam Phase",
+          "Manual offset of the beam's position within its sweep."
+        ],
+        "aberration": [
+          "Aberration",
+          "Chromatic aberration, increasing toward the edges."
+        ],
+        "grain": [
+          "Grain",
+          "Animated per-channel grain."
+        ],
+        "bloom": [
+          "Bloom",
+          "Weighted glow spreading light off bright areas."
+        ],
+        "bloomRadius": [
+          "Spread",
+          "How far Bloom and Diffusion reach, in pixels. Both share this gather, so it needs to cross a mask cell before either can soften the dots."
+        ],
+        "diffusion": [
+          "Diffusion",
+          "Light scattering in the glass face. Unlike Bloom it lifts everything, not just highlights, so blacks wash toward grey the way a real tube's do."
+        ],
+        "time": [
+          "Time",
+          "Drives the grain and the beam sweep. Connected to comp time by default."
+        ],
+        "amount": [
+          "Amount",
+          "Mix between the original layer and the screen result."
+        ]
+      },
+      "enums": {
+        "mask": {
+          "0": "Shadow Mask",
+          "1": "Aperture Grille",
+          "2": "Slot Mask",
+          "3": "LCD Stripe",
+          "4": "None"
+        },
+        "edges": {
+          "0": "Transparent",
+          "1": "Clamp",
+          "2": "Mirror"
+        }
+      },
+      "tabs": {
+        "filter": "Output",
+        "texture": "Texture"
+      }
+    }
+  },
+  {
+    "type": "layerStrings",
+    "value": {
+      "author": "samMularczyk",
+      "layerType": "film",
+      "niceName": "Film Emulation",
+      "layerInfo": "Film in one node: halation, tone roll-off, grain, a Fujifilm-style colour recipe and projector wear.",
+      "language": "en",
+      "tabs": {
+        "filter": "Recipe",
+        "grade": "Halation",
+        "damage": "Damage"
+      },
+      "attributes": {
+        "halation": [
+          "Halation",
+          "Warm bloom from light scattering back through the film base, spreading around highlights."
+        ],
+        "halationRadius": [
+          "Halation Radius",
+          "How far the halation spreads, in pixels. The layer bounds expand to match."
+        ],
+        "halationThreshold": [
+          "Halation Threshold",
+          "Luminance above which highlights start to glow. Softly thresholded, so the matte has no hard edge."
+        ],
+        "halationDensity": [
+          "Halation Density",
+          "How much denser the core of the glow is than its falloff. Higher makes only the brightest highlights bloom."
+        ],
+        "halationTint": [
+          "Halation Tint",
+          "Which channels the scatter shows up in. The original used a deep orange, so it lands mostly in red."
+        ],
+        "linearise": [
+          "Linearise",
+          "Applies a 2.2 transfer before the tone curve and undoes it after. Off by default - Cavalry has its own colour management."
+        ],
+        "exposure": [
+          "Exposure",
+          "Stops of gain before the tone curve. This is what drives highlights into the roll-off."
+        ],
+        "rolloff": [
+          "Roll-Off",
+          "Compresses highlights through a filmic shoulder. It needs something above white to compress, so raise Exposure or Halation first - on a plain 0-1 image it has nothing to work on and only lifts the midtones."
+        ],
+        "gamutExtension": [
+          "Gamut Extension",
+          "Width of the gamut the roll-off happens inside. Wider desaturates highlights further before they clip."
+        ],
+        "recipe": [
+          "Recipe Strength",
+          "Strength of the Recipe tab's Fujifilm-style grade. 0 leaves colour untouched."
+        ],
+        "base": [
+          "Base",
+          "Starting colour character, built from published descriptions of a film simulation. Mono and Mono Flat are black and white."
+        ],
+        "colour": [
+          "Colour",
+          "Overall saturation trim, on Fujifilm's -4 to +4 scale."
+        ],
+        "highlightTone": [
+          "Highlight Tone",
+          "Density of the highlights, -2 to +4. Positive is harder, negative softer."
+        ],
+        "shadowTone": [
+          "Shadow Tone",
+          "Density of the shadows, -2 to +4. Positive crushes them, negative opens them up."
+        ],
+        "highlightProtect": [
+          "Dynamic Range",
+          "Highlight protection, as the camera's DR100 / DR200 / DR400. Higher holds the top end back."
+        ],
+        "colourChrome": [
+          "Colour Chrome",
+          "Deepens colours that are already saturated, leaving pale ones alone. Off, Weak (0.5) or Strong (1.0)."
+        ],
+        "colourChromeBlue": [
+          "Colour Chrome Blue",
+          "The same, restricted to blues and cyans - for skies and deep blues specifically."
+        ],
+        "wbShiftR": [
+          "WB Shift R",
+          "Red trim on Fujifilm's white balance shift grid, -9 to +9."
+        ],
+        "wbShiftB": [
+          "WB Shift B",
+          "Blue trim on the same grid. Positive is cooler, negative warmer."
+        ],
+        "monoToning": [
+          "Mono Toning",
+          "Warm or cool cast for the black and white bases, matching MonochromaticColor. No effect on the colour bases."
+        ],
+        "clarity": [
+          "Clarity",
+          "Local contrast, -5 to +5: micro-contrast without touching overall tone. Negative softens the way a diffusion filter does."
+        ],
+        "clarityRadius": [
+          "Clarity Radius",
+          "Size of the detail Clarity acts on, in pixels. Small values sharpen fine texture, large values shape broad areas."
+        ],
+        "grain": [
+          "Grain",
+          "Film grain strength (k in the signal-dependent model x + k*x^gamma*u)."
+        ],
+        "grainSize": [
+          "Grain Size",
+          "Size of one grain in pixels."
+        ],
+        "grainBlur": [
+          "Grain Blur",
+          "Texture of the grain field: 0 is soft organic clumps, 1 is fine correlated noise."
+        ],
+        "grainResponse": [
+          "Grain Response",
+          "Signal-dependent amplification exponent - lower makes grain rise faster with brightness."
+        ],
+        "grainDomain": [
+          "Grain Domain",
+          "Whether grain is added before or after the tone curve. Positive Print grains the developed image; Negative grains before it, so the curve reshapes the grain too."
+        ],
+        "scannerNoise": [
+          "Scanner Noise",
+          "Separate white noise modelling a telecine/scanner's own sensor noise, independent of film grain."
+        ],
+        "time": [
+          "Time",
+          "Driven by the composition time. Disconnect it to freeze the film artefacts."
+        ],
+        "damage": [
+          "Damage",
+          "Strength of the Damage tab's projector wear. 0 is a pristine print."
+        ],
+        "damageDomain": [
+          "Damage Domain",
+          "Whether dirt, scratches, vignette and flicker are applied to the print or to the (inverted) negative, which changes how they land in highlights versus shadows."
+        ],
+        "frameRate": [
+          "Frame Rate",
+          "Steps time to this rate for a projected-film judder. Zero leaves motion smooth."
+        ],
+        "speed": [
+          "Speed",
+          "How fast the damage clock runs relative to real time. 1 is real time; lower slows the judder and weave, higher speeds them up."
+        ],
+        "weave": [
+          "Gate Weave",
+          "How much the picture wanders in the gate, as a fraction of the layer. A mean-reverting wander rather than a steady drift."
+        ],
+        "flicker": [
+          "Flicker",
+          "Frame-to-frame exposure wobble, log-normal like a real lamp/shutter flicker rather than symmetric."
+        ],
+        "dirt": [
+          "Dirt",
+          "Density of dirt and scratches."
+        ],
+        "dirtThreshold": [
+          "Dirt Threshold",
+          "How much dirt shows. Lower values let more specks and scratches through."
+        ],
+        "dirtScale": [
+          "Dirt Scale",
+          "Size of the dirt features. Lower values give finer specks."
+        ],
+        "scratches": [
+          "Scratches",
+          "Density of vertical gate scratches - thin, flickering, drifting sideways over time."
+        ],
+        "scratchWidth": [
+          "Scratch Width",
+          "Base width of a scratch in pixels. Real scratches are thin - keep this small."
+        ],
+        "vignetteAmount": [
+          "Vignette",
+          "Corner darkening."
+        ],
+        "vignetteFlicker": [
+          "Vignette Flicker",
+          "How much the vignette breathes over time."
+        ],
+        "desaturate": [
+          "Desaturate",
+          "One is full black and white, as in the original. Lower it to keep some colour."
+        ],
+        "amount": [
+          "Amount",
+          "Mix between the original layer and the film result."
+        ]
+      },
+      "enums": {
+        "linearise": {
+          "0": "Off",
+          "1": "sRGB 2.2"
+        },
+        "base": {
+          "0": "Standard",
+          "1": "Soft",
+          "2": "Vivid",
+          "3": "Muted Chrome",
+          "4": "Faded Neg",
+          "5": "Cine",
+          "6": "Neg Std",
+          "7": "Mono",
+          "8": "Mono Flat"
+        },
+        "grainDomain": {
+          "0": "Positive Print",
+          "1": "Negative"
+        },
+        "damageDomain": {
+          "0": "Positive Print",
+          "1": "Negative"
+        },
+        "highlightProtect": {
+          "0": "DR100",
+          "1": "DR200",
+          "2": "DR400"
+        }
+      }
+    }
+  },
+  {
+    "type": "layerStrings",
+    "value": {
+      "author": "samMularczyk",
+      "layerType": "filmBurn",
+      "niceName": "Film Burn",
+      "layerInfo": "Film stopping in the gate and burning through. Progress eats a hole in the layer's own alpha rather than cutting to a second layer, so whatever sits underneath in the comp shows through - drop this on a clip with something already behind it.",
+      "language": "en",
+      "attributes": {
+        "progress": [
+          "Progress",
+          "How far the burn has eaten through. 0 is untouched, 1 is fully gone."
+        ],
+        "origin": [
+          "Starts From",
+          "Where the hole first appears: the frame centre, an edge, a corner, or a point you place yourself."
+        ],
+        "position": [
+          "Position",
+          "Where the hole starts, offset from the layer centre in pixels. Only used when Starts From is set to Manual."
+        ],
+        "scale": [
+          "Scale",
+          "Feature size of the noise that ravels the edge, in pixels. Larger values give broad, lazy tears; smaller values give fine, busy ones."
+        ],
+        "roughness": [
+          "Roughness",
+          "How much the noise warps the edge away from a plain circle or front. Zero burns in a clean shape; higher values make it ragged and organic."
+        ],
+        "seed": [
+          "Seed",
+          "Shifts the noise pattern without changing its character, so different instances of the filter burn through differently."
+        ],
+        "charWidth": [
+          "Char Width",
+          "Width of the blackened ring right at the edge of the hole, in field units."
+        ],
+        "charColor": [
+          "Char Colour",
+          "Colour of the charred film immediately around the hole."
+        ],
+        "burnWidth": [
+          "Burn Width",
+          "Width of the bright ring where the film is actively alight."
+        ],
+        "burnColor": [
+          "Burn Colour",
+          "Colour of the active burn front."
+        ],
+        "bloomWidth": [
+          "Bloom Width",
+          "Width of the pre-ignition glow ahead of the burn front, where the emulsion is heating but hasn't caught yet."
+        ],
+        "bloomIntensity": [
+          "Bloom Intensity",
+          "How far the bloom blows out toward white before it settles into the untouched picture."
+        ],
+        "amount": [
+          "Amount",
+          "Mix between the original layer and the burnt result."
+        ]
+      },
+      "enums": {
+        "origin": [
+          "Centre",
+          "Edge",
+          "Corner",
+          "Manual"
+        ]
+      },
+      "tabs": {}
+    }
+  },
+  {
+    "type": "layerStrings",
+    "value": {
+      "author": "samMularczyk",
+      "layerType": "glow",
+      "niceName": "Ultra Glow",
+      "layerInfo": "Bloom and anamorphic streak from the same highlights, and both can run at once - which is what a lens flare is. Built as chained separable blurs, so it never rings or ghosts at any size. The streak is built first and the bloom ladder runs over it, so the streak blooms too.",
+      "language": "en",
+      "attributes": {
+        "srcBlack": [
+          "Threshold",
+          "Only light above this emits. This is the black point of the grade that isolates the highlights."
+        ],
+        "srcWhite": [
+          "White Point",
+          "Level that counts as fully lit. Below 1 pushes more of the picture into the glow."
+        ],
+        "response": [
+          "Response",
+          "Curve of the highlight grade. Higher keeps the glow tight around genuinely bright areas."
+        ],
+        "streakAmount": [
+          "Streak",
+          "Strength of the directional smear. Zero leaves a pure bloom."
+        ],
+        "reach": [
+          "Length",
+          "Total streak length in pixels. The layer bounds expand to match."
+        ],
+        "angle": [
+          "Angle",
+          "Streak axis in degrees. Zero is the classic horizontal anamorphic bar."
+        ],
+        "samples": [
+          "Samples",
+          "Taps per pass along the streak. Low values band a long streak into steps."
+        ],
+        "streakFalloff": [
+          "Streak Falloff",
+          "How quickly the streak fades along its length."
+        ],
+        "blur": [
+          "Streak Blur",
+          "Softens the streak across its axis, turning a hard line into a ribbon. Costs no extra samples."
+        ],
+        "bidirectional": [
+          "Both Directions",
+          "Smear both ways for a symmetric bar. Off gives a comet trail."
+        ],
+        "chromatic": [
+          "Chromatic",
+          "Splits the streak into seven spectral bands, so it fringes warm one way and cool the other."
+        ],
+        "dispersion": [
+          "Dispersion",
+          "How far the colour bands separate, in pixels. Negative swaps which end is warm."
+        ],
+        "bloomAmount": [
+          "Bloom",
+          "Strength of the isotropic glow. Zero leaves a pure streak."
+        ],
+        "size": [
+          "Size",
+          "Widest radius in the bloom ladder, in pixels."
+        ],
+        "falloff": [
+          "Bloom Falloff",
+          "Scales the whole ladder. Above one pulls the bloom in tighter."
+        ],
+        "steps": [
+          "Steps",
+          "How many widths the ladder sums. Also normalises it, so raising this dims each step."
+        ],
+        "persistence": [
+          "Persistence",
+          "Gains the wide end of the ladder, for a longer, softer tail."
+        ],
+        "intensity": [
+          "Intensity",
+          "Glow brightness. A wide glow spreads a highlight's energy far, so expect to push this up."
+        ],
+        "tint": [
+          "Tint",
+          "Colour multiplier on the glow."
+        ],
+        "blend": [
+          "Blend",
+          "How the glow combines with the layer. Effect Only shows the glow alone."
+        ],
+        "amount": [
+          "Amount",
+          "Mix between the original layer and the result."
+        ]
+      },
+      "enums": {
+        "blend": {
+          "0": "Add",
+          "1": "Screen",
+          "2": "Max",
+          "3": "Effect Only"
+        }
+      },
+      "tabs": {
+        "filter": "Highlights",
+        "bloom": "Bloom",
+        "streak": "Streak"
+      }
+    }
+  },
+  {
+    "type": "layerStrings",
+    "value": {
+      "author": "samMularczyk",
+      "layerType": "godray",
+      "niceName": "Godray",
+      "layerInfo": "Volumetric light shafts - the crepuscular rays you get through cloud or a window - radiating from a point or travelling in parallel from a direction.",
+      "language": "en",
+      "attributes": {
+        "parallel": [
+          "Parallel Rays",
+          "On for rays travelling in one direction (Angle). Off for rays radiating from a point (Light)."
+        ],
+        "angle": [
+          "Angle",
+          "Direction the rays travel in, in degrees. Zero is vertical."
+        ],
+        "light": [
+          "Light",
+          "Offset of the ray source from the layer centre, in pixels. Radiating rays only."
+        ],
+        "gain": [
+          "Gain",
+          "Strength of the turbulence that shapes the shafts. Zero is a passthrough."
+        ],
+        "lacunarity": [
+          "Lacunarity",
+          "Frequency step between turbulence octaves. Higher breaks the shafts into finer, busier detail."
+        ],
+        "density": [
+          "Density",
+          "How tightly packed the shafts are."
+        ],
+        "speed": [
+          "Speed",
+          "How fast the shafts drift. 0 holds them still."
+        ],
+        "blur": [
+          "Blur",
+          "Softens the shafts across their width. It works on the ray pattern, not the picture."
+        ],
+        "time": [
+          "Time",
+          "Driven by the composition time. Disconnect it to freeze the shafts."
+        ],
+        "amount": [
+          "Amount",
+          "Overall opacity of the ray effect over the original layer."
+        ]
+      }
+    }
+  },
+  {
+    "type": "layerStrings",
+    "value": {
+      "author": "samMularczyk",
+      "layerType": "hatching",
+      "niceName": "Hatching",
+      "layerInfo": "Repeating marks keyed off luminance: hatching, engraving, cross stitch, lines, rings, spiral or squares.",
+      "language": "en",
+      "attributes": {
+        "pattern": [
+          "Pattern",
+          "Which mark to draw. The first three are threshold-layered; the rest are continuous-width lines."
+        ],
+        "size": [
+          "Size",
+          "Line period, or cell size for Cross Stitch, in pixels."
+        ],
+        "lineWidth": [
+          "Line Width",
+          "Thickness of the marks. Interacts with Size: the ratio of the two sets how solid dark areas go."
+        ],
+        "angle": [
+          "Angle",
+          "Direction of the Lines pattern, in degrees. Unused by the other patterns."
+        ],
+        "softness": [
+          "Softness",
+          "Edge softness of the continuous line patterns, in period units. Small values give crisp lines."
+        ],
+        "threshold1": [
+          "Threshold 1",
+          "Crosshatch only. Luminance below which the first family appears. Luminance here is length(RGB), so the range is 0 to 1.74."
+        ],
+        "threshold2": [
+          "Threshold 2",
+          "Crosshatch only. Luminance below which the second, crossing family appears."
+        ],
+        "threshold3": [
+          "Threshold 3",
+          "Crosshatch only. Luminance below which the third family appears."
+        ],
+        "threshold4": [
+          "Threshold 4",
+          "Crosshatch only. The darkest areas get all four families."
+        ],
+        "offset": [
+          "Offset",
+          "Crosshatch only. Shifts the third and fourth families so they do not sit on top of the first two."
+        ],
+        "warpAmount": [
+          "Warp Amount",
+          "Currency only. How far the lines wander, as a fraction of the layer height."
+        ],
+        "warpFrequency": [
+          "Warp Frequency",
+          "Currency only. Wave cycles across the layer height."
+        ],
+        "layers": [
+          "Families",
+          "Currency only. How many of the six line families to draw. Fewer gives a sparser pattern."
+        ],
+        "brightness": [
+          "Thread Brightness",
+          "Cross Stitch only. Gain on the thread colour; the original used 1.4 to stop stitches reading too dark."
+        ],
+        "invert": [
+          "Invert Stitch",
+          "Cross Stitch only. Swap thread and background, so stitches become solid ink and the gaps carry the image."
+        ],
+        "inkColor": [
+          "Ink",
+          "Colour of the mark. Cross Stitch takes its thread colour from the image instead, unless Invert Stitch is on."
+        ],
+        "paperColor": [
+          "Paper",
+          "Colour behind the mark."
+        ],
+        "transparentPaper": [
+          "Transparent Paper",
+          "Output the mark and its alpha only, with no background, so it composites straight over whatever sits behind the layer."
+        ],
+        "amount": [
+          "Amount",
+          "Mix between the original layer and the hatched result."
+        ]
+      },
+      "enums": {
+        "pattern": {
+          "0": "Crosshatch",
+          "1": "Currency",
+          "2": "Cross Stitch",
+          "3": "Lines",
+          "4": "Concentric",
+          "5": "Spiral",
+          "6": "Squares"
+        }
+      },
+      "tabs": {
+        "filter": "Pattern",
+        "levels": "Per Pattern",
+        "output": "Ink"
+      }
+    }
+  },
+  {
+    "type": "layerStrings",
+    "value": {
+      "author": "samMularczyk",
+      "layerType": "led",
+      "niceName": "LED",
+      "layerInfo": "LED matrix. Each cell becomes one lamp, with control over spacing, roundness, size and gap.",
+      "language": "en",
+      "attributes": {
+        "cellSize": [
+          "Cell Size",
+          "Grid pitch in pixels - the spacing between lamps."
+        ],
+        "stagger": [
+          "Stagger",
+          "Offsets alternate rows. Zero is a square grid, one is a fully offset hex grid."
+        ],
+        "dotSize": [
+          "Dot Size",
+          "Lamp diameter as a fraction of the cell. Above one the lamps touch and merge."
+        ],
+        "roundness": [
+          "Roundness",
+          "Zero is a square lamp, one is a circle."
+        ],
+        "softness": [
+          "Softness",
+          "Edge falloff in pixels. Raise it for a glowing lamp, drop it for a hard pixel."
+        ],
+        "sizeFromBrightness": [
+          "Size From Brightness",
+          "Drives lamp radius from image brightness, so dark areas get small lamps. This is the behaviour of the original lightbulb shader."
+        ],
+        "perChannel": [
+          "Per Channel",
+          "Drive each colour's lamp separately rather than one lamp tinted by the pixel."
+        ],
+        "bgColor": [
+          "Background",
+          "Colour filling the gaps between lamps."
+        ],
+        "amount": [
+          "Amount",
+          "Mix between the original layer and the LED result."
+        ]
+      },
+      "tabs": {}
+    }
+  },
+  {
+    "type": "layerStrings",
+    "value": {
+      "author": "samMularczyk",
+      "layerType": "lens",
+      "niceName": "Lens Distortion",
+      "layerInfo": "A whole lens in one filter, applied in the order light meets one: geometric distortion, chromatic aberration, blur, then scatter. Seven real HAWK anamorphic lens profiles, solved from an ARRI ALEXA distortion chart. Each half switches off at zero, so it is also just a distortion, or just a bokeh.",
+      "language": "en",
+      "attributes": {
+        "profile": [
+          "Lens",
+          "Which measured HAWK anamorphic focal length to apply, solved from a real distortion chart."
+        ],
+        "distortion": [
+          "Distortion",
+          "Scales the chosen profile's strength. 1.0 reproduces the solved lens; use this to match a plate rather than as a cosmetic dial."
+        ],
+        "squeeze": [
+          "Squeeze",
+          "Anamorphic squeeze ratio. Stretches the frame horizontally as a taking lens does."
+        ],
+        "centreOffset": [
+          "Centre Offset",
+          "Shifts the optical centre, as a fraction of half the layer height. The HAWK profiles carry no baked-in centre of their own."
+        ],
+        "expand": [
+          "Expand",
+          "Scales the sampled area. Raise it slightly to pull the distorted edges back inside the frame."
+        ],
+        "edges": [
+          "Edges",
+          "What to do where the distortion samples outside the layer. Transparent is honest - there is no picture there. Clamp smears the rim outward, Mirror reflects the picture back; both fill the wedges a barrel distortion opens at the corners."
+        ],
+        "edgeTrim": [
+          "Edge Trim",
+          "Pixels to inset the edge that Clamp and Mirror fold against. A layer's outermost pixels are antialiased, so reflecting them doubles the rim into a seam; a pixel or two of trim folds against real picture instead."
+        ],
+        "fringing": [
+          "Fringing",
+          "Chromatic spread across the distortion, so the fringe follows the glass. This replaces the old Barrel model, which was this pass with a spectrum."
+        ],
+        "abModel": [
+          "Model",
+          "Which aberration to apply. None switches this half of the lens off."
+        ],
+        "geometry": [
+          "Geometry",
+          "Direction the bands separate: radially from the centre, spun around it, or along a fixed angle."
+        ],
+        "centre": [
+          "Centre",
+          "Origin for radial and spin geometry, in pixels from the layer centre."
+        ],
+        "angle": [
+          "Angle",
+          "Direction for linear geometry, and for Prism when its direction is not taken from the map."
+        ],
+        "dispersion": [
+          "Dispersion",
+          "Spectral and Prism. Magnitude of the separation between wavelength bands."
+        ],
+        "focusWave": [
+          "Focus Wavelength",
+          "Spectral and Prism. Which wavelength stays sharp: -1 violet, 0 green, 1 red. Everything either side separates."
+        ],
+        "smoothing": [
+          "Gap Smoothing",
+          "Spectral only. Widens each band to bridge the gaps between the seven, melting them together."
+        ],
+        "aberration": [
+          "Aberration",
+          "Channel only. Displacement in pixels before the per-channel scales."
+        ],
+        "redScale": [
+          "Red",
+          "Channel only. Multiplier on red's displacement."
+        ],
+        "greenScale": [
+          "Green",
+          "Channel only. Multiplier on green's displacement."
+        ],
+        "blueScale": [
+          "Blue",
+          "Channel only. Multiplier on blue's displacement."
+        ],
+        "smear": [
+          "Smear",
+          "Smears each channel along its displacement instead of just offsetting it. Channel model only."
+        ],
+        "falloff": [
+          "Falloff",
+          "Channel only. How quickly radial displacement grows outward. Higher keeps the centre cleaner."
+        ],
+        "mapChannel": [
+          "Map Channel",
+          "Prism only. Which part of the displacement map drives the effect."
+        ],
+        "mapAmplitude": [
+          "Map Amplitude",
+          "Prism only. Displacement in pixels at the map's full value."
+        ],
+        "mapFromGradient": [
+          "Direction From Map",
+          "Take the displacement direction from the map's own slope rather than from the Angle control."
+        ],
+        "abIntensity": [
+          "Intensity",
+          "Spectral and Prism. Overall brightness of the result."
+        ],
+        "bokehThreshold": [
+          "Highlight Threshold",
+          "Only light above this forms distinct discs. It shapes the bokeh; the blur still replaces the picture either way."
+        ],
+        "bokehGamma": [
+          "Highlight Gamma",
+          "How hard highlights are pushed before blurring. High values make discs form rather than a smear."
+        ],
+        "defocus": [
+          "Blur",
+          "Blur radius in pixels. Zero switches the blur off."
+        ],
+        "blades": [
+          "Blades",
+          "Aperture shape: 4 gives a square, 6 a hexagon, 8 an octagon."
+        ],
+        "rotation": [
+          "Rotation",
+          "Turns the whole aperture, in degrees."
+        ],
+        "catsEye": [
+          "Cat's Eye",
+          "Optical vignetting. Clips the aperture toward the frame edge, so highlights out there turn into lemons pointing at the centre."
+        ],
+        "catsEyeFalloff": [
+          "Cat's Eye Falloff",
+          "How quickly the clipping grows away from the centre. Higher keeps the middle of frame round for longer."
+        ],
+        "ringBias": [
+          "Ring Bias",
+          "Weights samples toward the aperture's edge, so highlights render as bright-rimmed rings rather than flat discs."
+        ],
+        "cocSource": [
+          "Focus From",
+          "What drives how blurred each pixel is: uniform, the layer’s alpha, its luminance, a vertical ramp, or a texture."
+        ],
+        "focus": [
+          "Focus",
+          "The value that stays sharp; anything further from it blurs more. Ignored when Focus From is Uniform."
+        ],
+        "aperture": [
+          "Aperture",
+          "How fast the blur grows away from the focus value."
+        ],
+        "exposure": [
+          "Exposure",
+          "Filmic tone map strength on the way out. Zero switches it off, which keeps the blur brightness-preserving."
+        ],
+        "gain": [
+          "Gain",
+          "Brightness of the result before tone mapping."
+        ],
+        "dither": [
+          "Dither",
+          "Jitters tap positions to trade banding along the aperture edges for fine grain."
+        ],
+        "kernel": [
+          "Kernel",
+          "The shape light scatters into. Disc is spherical aberration, Line is astigmatism, Rings is diffraction, Halo is haze."
+        ],
+        "size": [
+          "Scatter Size",
+          "Radius of the artefact scatter, in pixels. Zero switches the artefacts off."
+        ],
+        "kernelRotation": [
+          "Rotation",
+          "Axis of the Line kernel."
+        ],
+        "ringFrequency": [
+          "Ring Frequency",
+          "How many diffraction rings fit inside the radius. Only used by the Rings kernel."
+        ],
+        "axialRed": [
+          "Axial Red",
+          "Kernel size multiplier for red. Setting the three channels apart gives axial chromatic aberration."
+        ],
+        "axialGreen": [
+          "Axial Green",
+          "Kernel size multiplier for green."
+        ],
+        "axialBlue": [
+          "Axial Blue",
+          "Kernel size multiplier for blue."
+        ],
+        "scatterThreshold": [
+          "Scatter Threshold",
+          "Only light above this level scatters. Lower it to let midtones haze as well."
+        ],
+        "scatterGain": [
+          "Scatter Gain",
+          "Brightness of the scattered light."
+        ],
+        "scatterBlend": [
+          "Scatter Blend",
+          "How the scatter combines with the layer. Replace shows the scatter alone."
+        ],
+        "samples": [
+          "Samples",
+          "Tap count, shared by fringing, aberration and the artefact scatter."
+        ],
+        "amount": [
+          "Amount",
+          "Mix between the original layer and the full lens."
+        ],
+        "displaceMap": [
+          "Displace Map",
+          "Prism only. The shader whose luminance drives the displacement. Prism does nothing until something is connected here."
+        ],
+        "defocusMap": [
+          "Blur Map",
+          "Focus From Texture only. The shader whose luminance drives how blurred each pixel is."
+        ]
+      },
+      "enums": {
+        "profile": [
+          "HAWK Anamorphic 28mm",
+          "HAWK Anamorphic 35mm",
+          "HAWK Anamorphic 45mm",
+          "HAWK Anamorphic 55mm",
+          "HAWK Anamorphic 65mm",
+          "HAWK Anamorphic 80mm",
+          "HAWK Anamorphic 110mm"
+        ],
+        "abModel": {
+          "0": "Spectral",
+          "1": "Channel",
+          "2": "Prism",
+          "3": "None"
+        },
+        "geometry": {
+          "0": "Radial",
+          "1": "Spin",
+          "2": "Linear"
+        },
+        "mapChannel": {
+          "0": "Luma",
+          "1": "Saturation",
+          "2": "Value",
+          "3": "Red",
+          "4": "Green",
+          "5": "Blue"
+        },
+        "blades": {
+          "4": "4 - Square",
+          "6": "6 - Hexagon",
+          "8": "8 - Octagon"
+        },
+        "cocSource": {
+          "0": "Uniform",
+          "1": "Alpha",
+          "2": "Luminance",
+          "3": "Vertical Ramp",
+          "4": "Texture"
+        },
+        "kernel": [
+          "Disc (Spherical)",
+          "Line (Astigmatism)",
+          "Rings (Diffraction)",
+          "Halo (Haze)"
+        ],
+        "scatterBlend": [
+          "Screen",
+          "Plus",
+          "Replace"
+        ],
+        "edges": {
+          "0": "Transparent",
+          "1": "Clamp",
+          "2": "Mirror"
+        }
+      },
+      "tabs": {
+        "filter": "Distortion",
+        "aberration": "Aberration",
+        "defocus": "Blur",
+        "artefacts": "Artefacts"
+      }
+    }
+  },
+  {
+    "type": "layerStrings",
+    "value": {
+      "author": "samMularczyk",
+      "layerType": "lensFlare",
+      "niceName": "Lens Flare",
+      "layerInfo": "The ghosts, halo and starburst a bright source makes inside a lens. Ghosts and the starburst are built from a real lens's own surfaces and aperture rather than drawn, and every element is built from the layer's own thresholded highlights, so it always tracks real image content - including a Manual emitter placed off screen, which is where a flare's source usually is.",
+      "language": "en",
+      "attributes": {
+        "placement": [
+          "Placement",
+          "How the emitter position is found. Auto tracks the brightest region in the frame; Manual lets you place it anywhere, including off screen."
+        ],
+        "position": [
+          "Position",
+          "Emitter offset from the layer centre, in pixels. Works fine outside the frame bounds - that is the usual case for a real flare."
+        ],
+        "colourSource": [
+          "Colour Source",
+          "Where the flare's colour comes from. From Image takes it from the highlight the flare sits on; Manual lets you set it outright."
+        ],
+        "brightnessSource": [
+          "Brightness Source",
+          "Where the flare's strength comes from. From Image fades it with the highlight underneath; Manual renders it at full strength wherever you place it."
+        ],
+        "flareColour": [
+          "Flare Colour",
+          "The flare's colour in Manual mode. Brightness still comes from the image, so the flare keeps responding to how blown out the highlight is."
+        ],
+        "threshold": [
+          "Threshold",
+          "Only light above this feeds the flare. This is the black point of the grade that isolates the highlights."
+        ],
+        "gamma": [
+          "Gamma",
+          "Curve of the highlight grade. Higher keeps every element tight around genuinely bright areas."
+        ],
+        "lens": [
+          "Lens",
+          "Which lens's surfaces the ghost pattern is traced from. Fast Prime and Standard Zoom are paraxially traced from real optical-bench prescriptions; Anamorphic is a derived approximation and squeezes every ghost horizontally."
+        ],
+        "ghostIntensity": [
+          "Ghosts",
+          "Strength of the reflection ghosts. Zero removes them entirely."
+        ],
+        "ghostSoft": [
+          "Ghost Softness",
+          "How defocused the ghosts are. A ghost forms at the wrong focal distance, so it is genuinely out of focus - at 0 you get hard-edged polygons, which is the main thing that makes a flare look drawn."
+        ],
+        "ghostCount": [
+          "Count",
+          "How many ghosts to draw, out of a fixed maximum of 8, revealed in order of how bright that reflection path actually is on the chosen lens."
+        ],
+        "ghostSpacing": [
+          "Spacing",
+          "Scales how far each ghost sits from frame centre. Each ghost has its own baked distance and direction from the lens trace, so raising this spreads an already-irregular pattern rather than fixing its rhythm."
+        ],
+        "ghostScale": [
+          "Scale",
+          "Overall ghost size. Each ghost keeps its own baked size relative to the others."
+        ],
+        "ghostChromatic": [
+          "Chromatic",
+          "Strength of each ghost's own dispersion. The direction and amount differ per ghost, baked from how that reflection path shifts with wavelength - not one fringe applied to all of them."
+        ],
+        "ghostCatsEye": [
+          "Cat's Eye",
+          "Optical vignetting on the ghosts. Clips each one toward frame centre from its own position, so ghosts that land off-axis turn into lemons instead of staying round."
+        ],
+        "ghostCatsEyeFalloff": [
+          "Cat's Eye Falloff",
+          "How quickly that clipping grows with a ghost's distance from centre. Higher keeps ghosts near the middle round for longer."
+        ],
+        "blades": [
+          "Blades",
+          "Aperture shape carved into each ghost and the starburst spikes. Zero is round. Matches the Lens filter's own Blades control, so a scene's flare and its bokeh agree on the diaphragm."
+        ],
+        "haloIntensity": [
+          "Halo",
+          "Strength of the ring around the frame centre. Zero removes it entirely."
+        ],
+        "haloRadius": [
+          "Radius",
+          "Distance from the frame centre to the ring, in pixels."
+        ],
+        "haloWidth": [
+          "Width",
+          "How wide the ring is, in pixels."
+        ],
+        "haloChromatic": [
+          "Chromatic",
+          "Per-channel radius offset, in pixels, so the ring fringes."
+        ],
+        "haloBlur": [
+          "Halo Blur",
+          "Softens the halo across the ring. Without it the ring echoes the source's detail sharply, which an internal reflection never does."
+        ],
+        "starIntensity": [
+          "Starburst",
+          "Strength of the diffraction spikes at the emitter. Zero removes it entirely."
+        ],
+        "starLength": [
+          "Length",
+          "How far the spikes reach, in pixels."
+        ],
+        "starRotation": [
+          "Rotation",
+          "Spins the whole starburst, in degrees."
+        ],
+        "starSoftness": [
+          "Starburst Softness",
+          "How crisp the diffraction spikes are. Above 1 the sinc's side ripples fade toward a plain glow; at 0 they are as sharp as the maths allows."
+        ],
+        "starGlow": [
+          "Starburst Glow",
+          "Veiling glow around the core. The sharp centre is real - it is the diffraction pattern's central lobe - but a lens always scatters light around it too, and without that the spikes read as a drawn asterisk."
+        ],
+        "streakIntensity": [
+          "Streak",
+          "Strength of the anamorphic bar through the emitter. Zero removes it entirely."
+        ],
+        "streakLength": [
+          "Length",
+          "How far the streak reaches from the emitter, in pixels."
+        ],
+        "streakAngle": [
+          "Angle",
+          "Streak axis in degrees. Zero is horizontal."
+        ],
+        "streakTint": [
+          "Tint",
+          "Colour of the streak."
+        ],
+        "intensity": [
+          "Intensity",
+          "Flare brightness. A wide flare spreads a highlight's energy far, so expect to push this up."
+        ],
+        "tint": [
+          "Tint",
+          "Colour multiplier on the whole flare."
+        ],
+        "blend": [
+          "Blend",
+          "How the flare combines with the layer. Effect Only shows the flare alone."
+        ],
+        "amount": [
+          "Amount",
+          "Mix between the original layer and the result."
+        ]
+      },
+      "enums": {
+        "placement": {
+          "0": "Auto",
+          "1": "Manual"
+        },
+        "lens": {
+          "0": "Fast Prime",
+          "1": "Standard Zoom",
+          "2": "Anamorphic"
+        },
+        "blend": {
+          "0": "Add",
+          "1": "Screen",
+          "2": "Max",
+          "3": "Effect Only"
+        },
+        "colourSource": {
+          "0": "From Image",
+          "1": "Manual"
+        },
+        "brightnessSource": {
+          "0": "From Image",
+          "1": "Manual"
+        }
+      },
+      "tabs": {
+        "filter": "Flare",
+        "artifacts": "Artifacts"
+      }
+    }
+  },
+  {
+    "type": "layerStrings",
+    "value": {
+      "author": "samMularczyk",
+      "layerType": "lightLeak",
+      "niceName": "Light Leak",
+      "layerInfo": "Stray light fogging the film, the way it gets in around a loose camera back. Enters from an edge or corner and blooms with the picture's own brightness.",
+      "language": "en",
+      "attributes": {
+        "intensity": [
+          "Intensity",
+          "Overall strength of the leak. Zero is an exact passthrough."
+        ],
+        "source": [
+          "Source",
+          "Where the light gets in: an edge, a corner, or a manual point."
+        ],
+        "position": [
+          "Position",
+          "Offset from the layer centre in pixels, used only when Source is Manual."
+        ],
+        "spread": [
+          "Spread",
+          "How far the leak reaches in from its source before it fades away."
+        ],
+        "wander": [
+          "Wander",
+          "How much the leak drifts in and out of frame over time. Above zero it recedes past the edge for stretches and comes back, so a shot is not lit by the same leak end to end. Speed sets how quickly it moves."
+        ],
+        "red": [
+          "Red",
+          "Strength of the red colour band."
+        ],
+        "yellow": [
+          "Yellow",
+          "Strength of the yellow colour band."
+        ],
+        "blue": [
+          "Blue",
+          "Strength of the blue colour band."
+        ],
+        "interact": [
+          "Interact With Image",
+          "How much the leak is driven by the picture's own brightness, so it blooms in highlights and stays weak in shadow rather than sitting on top like a sticker."
+        ],
+        "speed": [
+          "Speed",
+          "How fast the bands wobble and drift."
+        ],
+        "time": [
+          "Time",
+          "Driven by the composition time. Disconnect it to freeze the leak."
+        ],
+        "blend": [
+          "Blend",
+          "How the leak combines with the picture: Screen and Lighten are the original's two modes, Add is a stronger third option."
+        ],
+        "amount": [
+          "Amount",
+          "Mix between the original layer and the result."
+        ]
+      },
+      "enums": {
+        "source": [
+          "Top",
+          "Bottom",
+          "Left",
+          "Right",
+          "Top Left",
+          "Top Right",
+          "Bottom Left",
+          "Bottom Right",
+          "Manual"
+        ],
+        "blend": [
+          "Screen",
+          "Lighten",
+          "Add"
+        ]
+      },
+      "tabs": {}
+    }
+  },
+  {
+    "type": "layerStrings",
+    "value": {
+      "author": "samMularczyk",
+      "layerType": "lightwrap",
+      "niceName": "Lightwrap",
+      "layerInfo": "Bleeds light from a background layer inward from this layer's edges. Needs Background Input connected AND Background Size set.",
+      "language": "en",
+      "attributes": {
+        "size": [
+          "Size",
+          "How far light wraps in from the edge, in pixels."
+        ],
+        "falloff": [
+          "Falloff",
+          "Scales the whole blur ladder. Above one pulls the wrap tighter to the edge, below one spreads it further in."
+        ],
+        "aspect": [
+          "Aspect",
+          "Stretches the wrap horizontally against vertically."
+        ],
+        "useLuminance": [
+          "Bright Areas Only",
+          "Only let the brighter parts of the background wrap, rather than all of it."
+        ],
+        "threshold": [
+          "Threshold",
+          "How bright the background must be to wrap, when Bright Areas Only is on."
+        ],
+        "bgSize": [
+          "Background Size",
+          "Pixel resolution of the background image. Sets where it sits; without it the background reads as almost black."
+        ],
+        "bgScale": [
+          "Background Scale",
+          "Corrects for the background being shown at a different size to its native resolution. 1.0 if shown at 100%."
+        ],
+        "brightness": [
+          "Brightness",
+          "Gain on the wrapped light."
+        ],
+        "gamma": [
+          "Gamma",
+          "Falloff curve of the wrap from the edge inward."
+        ],
+        "saturation": [
+          "Saturation",
+          "Colour strength of the wrapped light."
+        ],
+        "blend": [
+          "Blend",
+          "How the wrap combines with the layer. Effect Only shows the wrap alone."
+        ],
+        "amount": [
+          "Amount",
+          "Mix between the original layer and the wrapped result."
+        ],
+        "background": [
+          "Background Input",
+          "The background layer's shader. Nothing happens until this is connected."
+        ]
+      },
+      "enums": {
+        "blend": [
+          "Plus",
+          "Screen",
+          "Max",
+          "Effect Only"
+        ]
+      },
+      "tabs": {}
+    }
+  },
+  {
+    "type": "layerStrings",
+    "value": {
+      "author": "samMularczyk",
+      "layerType": "paint",
+      "niceName": "Paint",
+      "layerInfo": "Re-renders the layer as paint, three ways. Brush smears along the image's own structure; Oil displaces every pixel the same distance along a field's steepest slope, which is what reads as brushwork; Watercolour flattens into washes then transports pigment along them.",
+      "language": "en",
+      "attributes": {
+        "style": [
+          "Style",
+          "Which painting model to use. These are alternative renderings, not layers - stack two Paint filters if you want both."
+        ],
+        "estimatorRadius": [
+          "Search Radius",
+          "How far to look when working out which way the image runs. The most expensive control here."
+        ],
+        "estimatorTaps": [
+          "Search Samples",
+          "Samples used for that estimate. Drop it if playback suffers."
+        ],
+        "threshold": [
+          "Tone Tolerance",
+          "How similar in tone a neighbour must be to steer the stroke. Low values keep strokes inside one area."
+        ],
+        "blurRadius": [
+          "Field Smoothing",
+          "Smooths the direction field, so strokes follow broad structure rather than pixel noise."
+        ],
+        "blurTaps": [
+          "Smoothing Samples",
+          "Samples used for that smoothing."
+        ],
+        "strokeLength": [
+          "Stroke Length",
+          "Taps along each stroke."
+        ],
+        "strokeWidth": [
+          "Stroke Spacing",
+          "Pixels between those taps. Zero collapses the stroke to nothing."
+        ],
+        "fieldMode": [
+          "Direction From",
+          "What steers the strokes: the attached shader, the layer's own contours, or a blend."
+        ],
+        "flowMix": [
+          "Flow Mix",
+          "Balance between shader-driven and image-driven direction. Zero is all shader, one all image."
+        ],
+        "mapChannel": [
+          "Field Channel",
+          "Which channel of the field shader to differentiate."
+        ],
+        "fieldStep": [
+          "Gradient Step",
+          "Spacing of the samples measuring the field's slope. Larger ignores fine detail."
+        ],
+        "intensity": [
+          "Stroke Push",
+          "How far pixels are displaced. Every pixel moves this same distance, which is the point."
+        ],
+        "smear": [
+          "Stroke Length",
+          "Extra blur along the stroke direction. This is what turns displacement into a visible mark."
+        ],
+        "bristle": [
+          "Bristle",
+          "Randomises stroke length per pixel, so the smear breaks into hairs."
+        ],
+        "perpendicular": [
+          "Perpendicular",
+          "Rotates the stroke direction ninety degrees."
+        ],
+        "washes": [
+          "Washes",
+          "How many flat tones the image is reduced to."
+        ],
+        "washRadius": [
+          "Wash Radius",
+          "Size of the edge-preserving flatten that forms the washes."
+        ],
+        "washThreshold": [
+          "Wash Tolerance",
+          "How different a neighbour may be and still join the same wash."
+        ],
+        "transport": [
+          "Transport",
+          "How far pigment is carried, in pixels. Zero leaves flat washes with wobbly edges."
+        ],
+        "edgeFlow": [
+          "Edge Flow",
+          "Smears colour along wash boundaries, which is what leaves watercolour's dark rim."
+        ],
+        "washFlow": [
+          "Wash Flow",
+          "Carries pigment up the brightness gradient, draining dark areas and pooling colour at the edge."
+        ],
+        "flowJitter": [
+          "Flow Jitter",
+          "Randomises how far pigment travels. Even transport reads as a filter; irregular reads as water."
+        ],
+        "flowScale": [
+          "Jitter Scale",
+          "Size of the jitter field, in pixels."
+        ],
+        "wetEdge": [
+          "Wet Edge",
+          "How far wash boundaries wander, as pigment creeping through damp paper."
+        ],
+        "wetEdgeScale": [
+          "Wet Edge Scale",
+          "Size of that wander."
+        ],
+        "edgeDarkening": [
+          "Edge Pooling",
+          "Darkens where a wash ends, as watercolour dries."
+        ],
+        "granulation": [
+          "Granulation",
+          "Mottled density where pigment settles into the paper."
+        ],
+        "granulationScale": [
+          "Granulation Scale",
+          "Size of the mottling."
+        ],
+        "paperTexture": [
+          "Paper",
+          "Paper tooth, and the stock showing through pale washes."
+        ],
+        "paperColor": [
+          "Paper Colour",
+          "Colour of the stock."
+        ],
+        "amount": [
+          "Amount",
+          "Mix between the original layer and the painted result."
+        ],
+        "field": [
+          "Field",
+          "Shader whose slope sets the Oil stroke direction. Its Scale controls stroke size, its Evolution animates them."
+        ]
+      },
+      "enums": {
+        "style": {
+          "0": "Brush",
+          "1": "Oil",
+          "2": "Watercolour"
+        },
+        "fieldMode": {
+          "0": "Noise Flow",
+          "1": "Image Flow",
+          "2": "Mix"
+        },
+        "mapChannel": {
+          "0": "Luma",
+          "1": "Saturation",
+          "2": "Value",
+          "3": "Red",
+          "4": "Green",
+          "5": "Blue"
+        }
+      },
+      "tabs": {
+        "filter": "Style",
+        "brush": "Brush",
+        "oil": "Oil",
+        "water": "Watercolour"
+      }
+    }
+  },
+  {
+    "type": "layerStrings",
+    "value": {
+      "author": "samMularczyk",
+      "layerType": "photocopy",
+      "niceName": "Photocopy",
+      "layerInfo": "Copier artefacts: crushed midtones, toner blowout at edges, dithered threshold, blotchy toner and paper fibre.",
+      "language": "en",
+      "attributes": {
+        "exposure": [
+          "Exposure",
+          "Lightens or darkens the whole page before the toner threshold, the way the copier's exposure dial does."
+        ],
+        "contrastAmount": [
+          "Local Contrast",
+          "How hard midtones are crushed toward black and white. Responds to detail rather than overall brightness."
+        ],
+        "blurRadius": [
+          "Detail Size",
+          "Radius of the blurred reference, in pixels. Small values pick out fine detail; large values act on broad areas."
+        ],
+        "edgeBlowout": [
+          "Edge Blowout",
+          "Toner piling up at boundaries: a dark halo inside an edge, a bright one outside."
+        ],
+        "threshold": [
+          "Threshold",
+          "Brightness at which toner stops being laid down. Lower for a lighter copy, higher for a heavier one."
+        ],
+        "softness": [
+          "Softness",
+          "Width of the threshold. Zero is a hard lo-fi cut; raise it to keep some tone in the result."
+        ],
+        "dither": [
+          "Dither",
+          "Pattern that breaks gradients into grain instead of banding. Ordered is the copier-like one; Random reads as a coarser, older machine."
+        ],
+        "ditherAmount": [
+          "Dither Amount",
+          "Strength of the dither. Too much reads as noise rather than toner."
+        ],
+        "speckle": [
+          "Toner Speckle",
+          "Blotchy unevenness in the black, so coverage varies the way a tired cartridge does."
+        ],
+        "speckleScale": [
+          "Speckle Scale",
+          "Size of the toner blotches. Small values give large soft patches."
+        ],
+        "banding": [
+          "Drum Banding",
+          "Faint horizontal streaks running across the page, as a worn drum produces. Zero by default."
+        ],
+        "bandingScale": [
+          "Banding Scale",
+          "How closely the streaks are spaced down the page."
+        ],
+        "paperAmount": [
+          "Paper Texture",
+          "Fibre grain in the paper, visible only where the paper shows. Zero leaves the stock clean."
+        ],
+        "paperScale": [
+          "Texture Scale",
+          "Size of the paper fibre. The grain is stretched, so it reads as fibre direction rather than plain noise."
+        ],
+        "inkColor": [
+          "Ink",
+          "Toner colour. Cyan for blueprint, a flat spot colour for riso."
+        ],
+        "paperColor": [
+          "Paper",
+          "Stock colour. Slightly warm off-white by default."
+        ],
+        "amount": [
+          "Amount",
+          "Mix between the original layer and the copied result."
+        ]
+      },
+      "enums": {
+        "dither": {
+          "0": "Ordered",
+          "1": "Random",
+          "2": "None"
+        }
+      },
+      "tabs": {
+        "filter": "Exposure",
+        "toner": "Toner",
+        "paper": "Paper",
+        "output": "Output"
+      }
+    }
+  },
+  {
+    "type": "layerStrings",
+    "value": {
+      "author": "samMularczyk",
+      "layerType": "polarCoordinates",
+      "niceName": "Polar Coordinates",
+      "layerInfo": "Remaps the frame between rectangular and polar space, like After Effects' Polar Coordinates.",
+      "language": "en",
+      "attributes": {
+        "mapping": [
+          "Type",
+          "Rect to Polar wraps rows into rings, with the top edge at the centre. Polar to Rect unwraps rings into rows."
+        ],
+        "interpolation": [
+          "Interpolation",
+          "Blends the remapped coordinate against the original one. 0 is a passthrough."
+        ],
+        "centre": [
+          "Centre",
+          "Offset of the polar origin from the layer centre, in pixels."
+        ],
+        "angleOffset": [
+          "Angle",
+          "Rotates the angular axis, moving where the seam falls."
+        ],
+        "tileMode": [
+          "Tile Mode",
+          "What happens outside the source: Clamp holds the edge, Repeat wraps, Mirror folds."
+        ],
+        "amount": [
+          "Amount",
+          "Mix back to the unfiltered input."
+        ]
+      },
+      "enums": {
+        "mapping": [
+          "Rect to Polar",
+          "Polar to Rect"
+        ],
+        "tileMode": [
+          "Clamp",
+          "Repeat",
+          "Mirror"
+        ]
+      }
+    }
+  },
+  {
+    "type": "layerStrings",
+    "value": {
+      "author": "samMularczyk",
+      "layerType": "print",
+      "niceName": "Print",
+      "layerInfo": "Riso, screen print and newsprint are the same mechanism: separate the image into spot-ink plates, screen each plate, offset it slightly out of register, then overprint translucent ink onto paper. Ink Density separation solves for the actual inks by density rather than tonal band, so a blue-plus-yellow riso genuinely reproduces greens.",
+      "language": "en",
+      "attributes": {
+        "process": [
+          "Process",
+          "Biases mottle character and ink translucency to suit the printing process. Use the presets for the full look of each - this only nudges the residual difference at matched settings."
+        ],
+        "separation": [
+          "Separation",
+          "How the image is split across plates. Ink Density solves each plate's density from the chosen inks' own colours, so overprints mix like real ink. Tonal Bands splits by shadow/mid/highlight, ignoring hue. Channel gives plate n the image's colour channel n."
+        ],
+        "inkCount": [
+          "Ink Count",
+          "How many plates print, from one to four."
+        ],
+        "flatten": [
+          "Flatten",
+          "Edge-preserving smooth of the source before separation. The single biggest quality win: without it, source noise scatters band edges pixel to pixel and contours crawl. 0 is off."
+        ],
+        "levels": [
+          "Levels",
+          "Quantises each plate's ink density to this many discrete steps. 0 is continuous tone."
+        ],
+        "levelBias": [
+          "Level Bias",
+          "Gamma on density before quantising, so levels are not evenly spaced. 1.0 is even."
+        ],
+        "bandDither": [
+          "Band Dither",
+          "Perturbs the quantisation threshold near a band edge, so banding breaks up only where it would otherwise show."
+        ],
+        "screenType": [
+          "Screen",
+          "The halftone pattern used to build tone from ink. Flat prints solid density with no pattern at all - the default for Riso. Grain adds a random speckle instead of a regular screen."
+        ],
+        "frequency": [
+          "Frequency",
+          "Screen cell size in pixels. Smaller cells read as a finer, higher-line-count screen."
+        ],
+        "dotGain": [
+          "Dot Gain",
+          "Grows or chokes the printed dots, as ink spread on press does."
+        ],
+        "ink1Color": [
+          "Ink 1 Colour",
+          "First plate's ink."
+        ],
+        "ink1Angle": [
+          "Ink 1 Angle",
+          "Screen angle for plate 1. Classic separations use differing angles to avoid moiré."
+        ],
+        "ink1Coverage": [
+          "Ink 1 Coverage",
+          "How strongly plate 1 inks. 0 switches the plate off."
+        ],
+        "ink2Color": [
+          "Ink 2 Colour",
+          "Second plate's ink."
+        ],
+        "ink2Angle": [
+          "Ink 2 Angle",
+          "Screen angle for plate 2."
+        ],
+        "ink2Coverage": [
+          "Ink 2 Coverage",
+          "How strongly plate 2 inks. 0 switches the plate off."
+        ],
+        "ink3Color": [
+          "Ink 3 Colour",
+          "Third plate's ink."
+        ],
+        "ink3Angle": [
+          "Ink 3 Angle",
+          "Screen angle for plate 3."
+        ],
+        "ink3Coverage": [
+          "Ink 3 Coverage",
+          "How strongly plate 3 inks. 0 switches the plate off."
+        ],
+        "ink4Color": [
+          "Ink 4 Colour",
+          "Fourth plate's ink."
+        ],
+        "ink4Angle": [
+          "Ink 4 Angle",
+          "Screen angle for plate 4."
+        ],
+        "ink4Coverage": [
+          "Ink 4 Coverage",
+          "How strongly plate 4 inks. 0 switches the plate off."
+        ],
+        "inkOpacity": [
+          "Ink Opacity",
+          "Translucency of all inks. Lower values build density more gradually where plates overlap - soy-based riso ink is quite translucent."
+        ],
+        "registrationError": [
+          "Registration Error",
+          "How far the plates drift out of alignment, in pixels. Real presses commonly drift a few millimetres between passes."
+        ],
+        "inkLoss": [
+          "Ink Loss",
+          "Patchy ink transfer - areas where the ink fails to take."
+        ],
+        "mottle": [
+          "Mottle",
+          "Uneven ink laydown breaking up flat areas of density."
+        ],
+        "ghosting": [
+          "Ghosting",
+          "A faint second impression offset from the first."
+        ],
+        "seed": [
+          "Seed",
+          "Re-rolls the registration drift, speckle, and mottle."
+        ],
+        "paperColor": [
+          "Paper Colour",
+          "The stock the plates print onto."
+        ],
+        "paperGrain": [
+          "Paper Grain",
+          "Paper fibre structure. Textures the blank stock."
+        ],
+        "trueColour": [
+          "True Colour",
+          "Brings the original colours back through the print. The screen, grain and paper texture all stay - only the hue returns. Unlike Amount, which fades the whole effect out."
+        ],
+        "paperTooth": [
+          "Paper Tooth",
+          "Fibre texture that shows through where ink has already printed, darkest in the densest areas."
+        ],
+        "outputMode": [
+          "Output",
+          "What the filter produces: the full print on paper, ink printed over the source, ink alone on transparency, or a single plate proof."
+        ],
+        "amount": [
+          "Amount",
+          "Mix between the original layer and the printed result."
+        ]
+      },
+      "enums": {
+        "process": {
+          "0": "Riso",
+          "1": "Screen Print",
+          "2": "Newsprint"
+        },
+        "separation": {
+          "0": "Ink Density",
+          "1": "Tonal Bands",
+          "2": "Channel"
+        },
+        "screenType": {
+          "0": "Flat",
+          "1": "Grain",
+          "2": "Dots",
+          "3": "Lines",
+          "4": "Stipple",
+          "5": "Bayer",
+          "6": "Voronoi"
+        },
+        "outputMode": {
+          "0": "Paper",
+          "1": "Print on Source",
+          "2": "Ink Only",
+          "3": "Plate 1 Proof",
+          "4": "Plate 2 Proof",
+          "5": "Plate 3 Proof",
+          "6": "Plate 4 Proof"
+        }
+      },
+      "tabs": {
+        "filter": "Separation",
+        "screen": "Screen",
+        "inks": "Inks",
+        "press": "Press",
+        "paper": "Paper"
+      }
+    }
+  },
+  {
+    "type": "layerStrings",
+    "value": {
+      "author": "samMularczyk",
+      "layerType": "vhs",
+      "niceName": "VHS",
+      "layerInfo": "Tape simulation: horizontal wander, tape crease, head-switching noise, RGB bloom smear and an AC hum beat.",
+      "language": "en",
+      "attributes": {
+        "time": [
+          "Time",
+          "Driven by the composition time. Disconnect it to freeze the tape artefacts."
+        ],
+        "speed": [
+          "Speed",
+          "How fast the tape artefacts move. Zero freezes them."
+        ],
+        "noiseDetail": [
+          "Noise Detail",
+          "Octaves of value noise. This is called six times per pixel and dominates the cost, so drop it if playback is slow."
+        ],
+        "format": [
+          "Format",
+          "Biases the noise floor and chroma bandwidth to match a tape format. S-VHS and Hi8 keep a sharper picture with less noise; Video8 sits close to VHS. Every other control keeps its own meaning - this only scales how much noise and chroma bleed they produce."
+        ],
+        "waveAmount": [
+          "Wave",
+          "Slow horizontal tape wander."
+        ],
+        "fineWave": [
+          "Fine Wave",
+          "Fast per-line horizontal jitter."
+        ],
+        "creaseAmount": [
+          "Crease Amount",
+          "Strength of the horizontal crease band that sweeps up the frame."
+        ],
+        "creaseFrequency": [
+          "Crease Frequency",
+          "How many crease bands fit in the frame height."
+        ],
+        "creaseSpeed": [
+          "Crease Speed",
+          "How fast the crease travels. Negative reverses it."
+        ],
+        "creaseThreshold": [
+          "Crease Threshold",
+          "How high the wave must peak before a crease appears. Lower makes creases more frequent and wider."
+        ],
+        "switchingHeight": [
+          "Switching Height",
+          "Height of the head-switching band at the bottom of frame, as a fraction of the layer."
+        ],
+        "switchingShift": [
+          "Switching Shift",
+          "How far the picture is dragged inside that band."
+        ],
+        "jitter": [
+          "Switching Jitter",
+          "Horizontal noise inside the head-switching band."
+        ],
+        "bloomAmount": [
+          "Bloom Spread",
+          "Horizontal step between the seven smear taps."
+        ],
+        "bloomStrength": [
+          "Bloom Strength",
+          "How much each smear tap adds."
+        ],
+        "greenLag": [
+          "Green Lag",
+          "How far the green channel trails the red in the smear."
+        ],
+        "blueLag": [
+          "Blue Lag",
+          "How far the blue channel trails the red in the smear."
+        ],
+        "gain": [
+          "Gain",
+          "Overall exposure after the bloom is added."
+        ],
+        "humAmount": [
+          "Hum Amount",
+          "Strength of the rolling AC brightness beat."
+        ],
+        "humSpeed": [
+          "Hum Speed",
+          "How fast the hum band rolls up the frame."
+        ],
+        "edgeColor": [
+          "Edge Fill",
+          "Colour shown where the tape wave pulls the picture off its own edge. The original used a flat dark grey."
+        ],
+        "dropout": [
+          "Dropout",
+          "Density of short dashes where the tape has shed oxide, scattered at random scanlines and x positions. Zero removes them."
+        ],
+        "dropoutLength": [
+          "Dropout Length",
+          "Length of each dropout dash, in pixels."
+        ],
+        "dropoutPolarity": [
+          "Dropout Polarity",
+          "Colour of the dashes: +1 white, -1 black, 0 a mix of both."
+        ],
+        "tracking": [
+          "Tracking Loss",
+          "Strength of a band of badly degraded picture drifting up the frame, as when tracking is off. Zero removes it."
+        ],
+        "trackingHeight": [
+          "Tracking Band Height",
+          "Height of the tracking-loss band, as a fraction of the frame."
+        ],
+        "trackingSpeed": [
+          "Tracking Drift",
+          "How fast the tracking-loss band drifts up the frame."
+        ],
+        "hiss": [
+          "Hiss",
+          "Fine luma noise over the whole frame, like tape hiss. Independent of Noise Detail."
+        ],
+        "amount": [
+          "Amount",
+          "Mix between the original layer and the tape result."
+        ]
+      },
+      "enums": {
+        "format": {
+          "0": "VHS",
+          "1": "S-VHS",
+          "2": "Hi8",
+          "3": "Video8"
+        }
+      },
+      "tabs": {
+        "filter": "Tape",
+        "picture": "Picture"
+      }
+    }
+  }
+]

@@ -1,0 +1,67 @@
+// Print, pass 5 of 6 - Field Kit
+// Paper tooth: a fibre texture that catches slightly more ink in its
+// crevices, so it reads mostly where the print has already laid colour down
+// rather than as a wash over the whole frame. Then the final Amount mix
+// against the untouched layer.
+
+uniform float trueColour;
+uniform float paperTooth;
+uniform float seed;
+uniform float amount;
+
+uniform float2 resolution;
+uniform float2 rectCentre;
+
+uniform shader childShader;  // all plates printed
+uniform shader original;     // untouched input - MUST be declared last
+
+float hash2(float2 p) {
+    p = fract(p * float2(123.34, 456.21) + seed * 0.123);
+    p += dot(p, p + 45.32);
+    return fract(p.x * p.y);
+}
+
+float fibre(float2 p) {
+    float2 i = floor(p);
+    float2 f = fract(p);
+    float2 u = f * f * (3.0 - 2.0 * f);
+    float a = hash2(i);
+    float b = hash2(i + float2(1.0, 0.0));
+    float c = hash2(i + float2(0.0, 1.0));
+    float d = hash2(i + float2(1.0, 1.0));
+    return mix(mix(a, b, u.x), mix(c, d, u.x), u.y);
+}
+
+half4 main(float2 fragCoord) {
+    half4 src = childShader.eval(fragCoord);
+
+    if (paperTooth > 0.0) {
+        float3 lin = src.a > 0.0 ? float3(src.rgb / src.a) : float3(1.0);
+        float g = fibre(fragCoord * 1.1) * 0.5 + fibre(fragCoord * 2.3) * 0.5;
+        float lum = dot(lin, float3(0.299, 0.587, 0.114));
+        float inked = 1.0 - lum;
+        float shade = 1.0 - paperTooth * 0.25 * g * inked;
+        lin *= shade;
+        src = half4(half3(clamp(lin, 0.0, 1.0)) * src.a, src.a);
+    }
+
+    half4 orig = original.eval(fragCoord);
+
+    // True Colour: hand the source's own hue back, while keeping everything the
+    // press did to the tone - the screen, the grain, the mottle, the paper.
+    // Re-exposing the source to the print's luminance is what makes this a
+    // gradual return of COLOUR rather than a crossfade to the untouched image,
+    // which is what Amount already does.
+    float tc = clamp(trueColour, 0.0, 1.0);
+    if (tc > 0.0 && orig.a > 0.0) {
+        float3 printed = src.a > 0.0 ? float3(src.rgb / src.a) : float3(1.0);
+        float3 source  = float3(orig.rgb / orig.a);
+        float  printY  = dot(printed, float3(0.299, 0.587, 0.114));
+        float  srcY    = dot(source,  float3(0.299, 0.587, 0.114));
+        float3 regrade = source * (printY / max(srcY, 0.001));
+        float3 mixed   = clamp(mix(printed, regrade, tc), 0.0, 1.0);
+        src = half4(half3(mixed) * src.a, src.a);
+    }
+
+    return mix(orig, src, half(clamp(amount, 0.0, 1.0)));
+}

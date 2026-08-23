@@ -1,0 +1,243 @@
+// Colour Recipe, pass 3 of 3 - Field Kit
+// Inspired by Fujifilm's film simulations and recipe format, via Fujifilm's own
+// X Stories pages and "The ultimate guide to Fuji's Film Simulations" (Imaging
+// Resource, Aug 2020).
+//
+// The controls a Fujifilm recipe is actually made of, for the ones Cavalry
+// cannot already do. A recipe (.FP1) is a set of camera settings, not a LUT:
+// FilmSimulation, DynamicRange, HighlightTone, ShadowTone, Color, Clarity,
+// ChromeEffect, ColorChromeBlue, WBShiftR/WBShiftB, MonochromaticColor. Settings
+// and parameter values are not copyrightable, so dialling a published recipe in
+// here is fine; what is NOT public is the film simulations themselves.
+//
+// SO BE CLEAR ABOUT THE BASES: Fujifilm has never published what Classic Chrome
+// or Eterna actually are - no curves, no matrices. The bases below are built
+// from DOCUMENTED, DIRECTIONAL descriptions and are approximations in the spirit
+// of the originals, not matches to them. Each one cites the claim it implements.
+// They are deliberately not named after Fujifilm's simulations.
+//
+// Sources for the base behaviours:
+//   - Fujifilm's own X Stories pages. On Classic Chrome: images "generally have
+//     low color saturation and full-bodied tones"; "when the sky includes a hint
+//     of magenta ... we moved in a different direction ... by removing the
+//     magenta component"; it "controls the saturation and hue of reds and greens
+//     to produce a unique chromatic balance".
+//   - "The ultimate guide to Fuji's Film Simulations", Imaging Resource, Aug
+//     2020, which gives per-simulation contrast/saturation/hue directions.
+//
+// A measured route does exist and is public domain - bastibe's
+// Darktable-Film-Simulation-Panel derives styles from a colour-checker shot
+// through each simulation - but it ships binary style files rather than numbers,
+// so it could inform the method here and not the values.
+//
+// Uniform order matches the attribute order in definitions.json.
+
+uniform float  base;              // enum: see baseSat/baseHue/baseTone
+uniform float  colour;            // Fuji "Color", -4..+4
+uniform float  highlightTone;     // -2..+4, positive = harder highlights
+uniform float  shadowTone;        // -2..+4, positive = harder shadows
+uniform float  colourChrome;      // 0..1
+uniform float  colourChromeBlue;  // 0..1
+uniform float  wbShiftR;          // -9..+9
+uniform float  wbShiftB;          // -9..+9
+uniform float  clarity;           // -5..+5
+uniform float  clarityRadius;
+uniform float  highlightProtect;  // enum: 0 = DR100, 1 = DR200, 2 = DR400
+uniform float  monoToning;        // -1 cool .. +1 warm, mono bases only
+uniform float  recipe;
+
+uniform float2 resolution;
+uniform float2 rectCentre;
+
+uniform shader childShader;   // blurred luminance from pass 2
+uniform shader original;      // untouched input - MUST be declared last
+
+const float LUMA_R = 0.2126;
+const float LUMA_G = 0.7152;
+const float LUMA_B = 0.0722;
+
+// ---------------------------------------------------------------- hue helpers
+
+float3 rgb2hsv(float3 c) {
+    float mx = max(max(c.r, c.g), c.b);
+    float mn = min(min(c.r, c.g), c.b);
+    float d = mx - mn;
+    float h = 0.0;
+    if (d > 0.00001) {
+        if (mx == c.r)      { h = (c.g - c.b) / d; }
+        else if (mx == c.g) { h = 2.0 + (c.b - c.r) / d; }
+        else                { h = 4.0 + (c.r - c.g) / d; }
+        h = fract(h / 6.0);
+    }
+    return float3(h, mx > 0.0 ? d / mx : 0.0, mx);
+}
+
+float3 hsv2rgb(float3 hsv) {
+    float h = fract(hsv.x) * 6.0;
+    float s = hsv.y, v = hsv.z;
+    int i = int(floor(h));
+    float f = h - float(i);
+    float p = v * (1.0 - s);
+    float q = v * (1.0 - s * f);
+    float t = v * (1.0 - s * (1.0 - f));
+    if (i == 0) { return float3(v, t, p); }
+    if (i == 1) { return float3(q, v, p); }
+    if (i == 2) { return float3(p, v, t); }
+    if (i == 3) { return float3(p, q, v); }
+    if (i == 4) { return float3(t, p, v); }
+    return float3(v, p, q);
+}
+
+// Triangular weight for one of six hue bands, so the six weights sum to 1 and a
+// per-band adjustment blends smoothly into its neighbours instead of banding.
+float bandWeight(float h, float centre) {
+    float d = abs(fract(h - centre + 0.5) - 0.5);   // circular distance
+    return max(0.0, 1.0 - d * 6.0);
+}
+
+// ------------------------------------------------------- per-base parameters
+// Bands are ordered red, yellow, green, cyan, blue, magenta.
+
+float3 baseSatRYG(int b) {          // red, yellow, green multipliers
+    if (b == 1) { return float3(0.90, 0.95, 1.05); }  // Soft: skin desaturated
+    if (b == 2) { return float3(1.55, 1.35, 1.50); }  // Vivid: ultra-high
+    if (b == 3) { return float3(0.85, 0.60, 0.65); }  // Muted Chrome: yellows/greens pulled back
+    if (b == 4) { return float3(1.25, 0.55, 0.50); }  // Faded Neg: loves reds, hates yellows/greens
+    if (b == 5) { return float3(0.75, 0.72, 0.55); }  // Cine: flat, greens down most
+    if (b == 6) { return float3(0.85, 0.85, 0.85); }  // Neg Std: even desaturation
+    return float3(1.10, 1.00, 1.00);                  // Standard: reds slightly up
+}
+
+float3 baseSatCBM(int b) {          // cyan, blue, magenta multipliers
+    if (b == 1) { return float3(0.95, 1.10, 1.00); }  // Soft
+    if (b == 2) { return float3(0.90, 1.50, 1.20); }  // Vivid: dark blues strong
+    if (b == 3) { return float3(0.70, 0.70, 0.55); }  // Muted Chrome: magenta removed
+    if (b == 4) { return float3(0.70, 0.80, 1.10); }  // Faded Neg
+    if (b == 5) { return float3(0.70, 0.65, 0.50); }  // Cine: magentas/purples down most
+    if (b == 6) { return float3(0.85, 0.85, 0.85); }  // Neg Std
+    return float3(0.95, 1.00, 1.00);                  // Standard
+}
+
+// Hue rotations per band, in hue units (1.0 = full circle).
+float3 baseHueRYG(int b) {
+    if (b == 2) { return float3(0.000, -0.015, 0.000); }  // Vivid: yellow toward orange
+    if (b == 6) { return float3(0.000, -0.008, 0.000); }  // Neg Std: yellows rotated
+    return float3(0.000, 0.008, 0.000);                   // oranges slightly toward yellow
+}
+
+float3 baseHueCBM(int b) {
+    if (b == 2) { return float3(0.000, 0.020, 0.000); }   // Vivid: blues toward magenta
+    if (b == 3) { return float3(0.030, -0.012, 0.000); }  // Muted Chrome: cyan->blue, blue away from magenta
+    return float3(0.020, 0.000, 0.000);                   // dark cyans toward blue
+}
+
+// contrast about mid grey, shadow exponent, highlight exponent
+float3 baseTone(int b) {
+    if (b == 1) { return float3(0.95, 1.15, 1.30); }  // Soft: flatter mids, darker shadows, flat highlights
+    if (b == 2) { return float3(1.25, 1.05, 1.00); }  // Vivid: contrasty
+    if (b == 3) { return float3(1.05, 1.20, 1.25); }  // Muted Chrome: harder shadows, softer highlights
+    if (b == 4) { return float3(1.35, 1.10, 1.05); }  // Faded Neg: much higher contrast
+    if (b == 5) { return float3(0.75, 0.85, 0.85); }  // Cine: very flat
+    if (b == 6) { return float3(0.80, 0.95, 0.95); }  // Neg Std: very low contrast
+    if (b == 7) { return float3(1.15, 0.85, 1.10); }  // Mono: softer shadows, harder upper mids
+    if (b == 8) { return float3(0.90, 0.95, 0.95); }  // Mono Flat
+    return float3(1.00, 1.00, 1.00);                  // Standard
+}
+
+bool baseIsMono(int b) { return b == 7 || b == 8; }
+
+// ------------------------------------------------------------------- the look
+
+// Split tone shaping: the shadow exponent acts in the darks, the highlight
+// exponent in the lights, blended by the value itself. Above 1 hardens.
+float3 shapeTone(float3 c, float contrast, float shG, float hiG) {
+    c = clamp((c - 0.5) * contrast + 0.5, 0.0, 1.0);
+    float3 lo = pow(c, float3(max(shG, 0.05)));
+    float3 hi = 1.0 - pow(1.0 - c, float3(max(hiG, 0.05)));
+    float3 k = smoothstep(float3(0.0), float3(1.0), c);
+    return mix(lo, hi, k);
+}
+
+half4 main(float2 fragCoord) {
+    half4 src = original.eval(fragCoord);
+    float3 lin = src.a > 0.0 ? float3(src.rgb / src.a) : float3(0.0);
+
+    int b = int(base);
+
+    // White balance shift, on the R/B trim axes Fuji exposes. One step is a
+    // small fraction, matching how coarse the in-camera grid is.
+    lin.r *= 1.0 + wbShiftR * 0.015;
+    lin.b *= 1.0 + wbShiftB * 0.015;
+    lin = max(lin, 0.0);
+
+    // Dynamic Range: protect the top end before anything shapes it, which is
+    // what DR200/DR400 do by underexposing and pulling the highlights back.
+    int dr = int(highlightProtect);
+    float prot = dr == 2 ? 0.30 : (dr == 1 ? 0.15 : 0.0);
+    if (prot > 0.0) {
+        lin = 1.0 - pow(max(1.0 - lin, 0.0), float3(1.0 / (1.0 + prot)));
+    }
+
+    // Tone: the base's own curve, trimmed by the recipe's Highlight/Shadow Tone.
+    float3 t = baseTone(b);
+    float shG = t.y * (1.0 + shadowTone * 0.10);
+    float hiG = t.z * (1.0 + highlightTone * 0.10);
+    float3 col = shapeTone(lin, t.x, shG, hiG);
+
+    // Clarity: local contrast against the blurred luminance from pass 2.
+    if (abs(clarity) > 0.001) {
+        float blurLum = float(childShader.eval(fragCoord).r);
+        float lum = dot(col, float3(LUMA_R, LUMA_G, LUMA_B));
+        col += (lum - blurLum) * clarity * 0.25;
+        col = clamp(col, 0.0, 1.0);
+    }
+
+    if (baseIsMono(b)) {
+        float g = dot(col, float3(LUMA_R, LUMA_G, LUMA_B));
+        // MonochromaticColor: warm one way, cool the other.
+        float w = clamp(monoToning, -1.0, 1.0);
+        col = float3(g) * float3(1.0 + w * 0.06, 1.0, 1.0 - w * 0.06);
+    } else {
+        float3 hsv = rgb2hsv(clamp(col, 0.0, 1.0));
+        float h = hsv.x, s = hsv.y;
+
+        float wR = bandWeight(h, 0.0);
+        float wY = bandWeight(h, 1.0 / 6.0);
+        float wG = bandWeight(h, 2.0 / 6.0);
+        float wC = bandWeight(h, 3.0 / 6.0);
+        float wB = bandWeight(h, 4.0 / 6.0);
+        float wM = bandWeight(h, 5.0 / 6.0);
+
+        float3 sRYG = baseSatRYG(b);
+        float3 sCBM = baseSatCBM(b);
+        float satMul = wR * sRYG.x + wY * sRYG.y + wG * sRYG.z
+                     + wC * sCBM.x + wB * sCBM.y + wM * sCBM.z;
+
+        float3 hRYG = baseHueRYG(b);
+        float3 hCBM = baseHueCBM(b);
+        float hueAdd = wR * hRYG.x + wY * hRYG.y + wG * hRYG.z
+                     + wC * hCBM.x + wB * hCBM.y + wM * hCBM.z;
+
+        // Colour: Fuji's saturation trim, -4..+4.
+        satMul *= 1.0 + colour * 0.12;
+
+        // Colour Chrome Effect. The distinctive part, and the reason this filter
+        // exists: it deepens colours that are ALREADY dense and leaves pale ones
+        // alone. HSV saturation and ASC-CDL both scale saturation uniformly, so
+        // neither can do saturation-dependent saturation.
+        float dense = smoothstep(0.35, 0.85, s);
+        satMul *= 1.0 + clamp(colourChrome, 0.0, 1.0) * dense * 0.45;
+        // Colour Chrome Blue: the same, restricted to the blues.
+        satMul *= 1.0 + clamp(colourChromeBlue, 0.0, 1.0) * dense
+                      * (wB + wC * 0.5) * 0.55;
+
+        hsv.x = fract(h + hueAdd);
+        hsv.y = clamp(s * satMul, 0.0, 1.0);
+        col = hsv2rgb(hsv);
+    }
+
+    col = clamp(col, 0.0, 1.0);
+
+    half a = src.a;
+    return mix(src, half4(half3(col) * a, a), half(clamp(recipe, 0.0, 1.0)));
+}

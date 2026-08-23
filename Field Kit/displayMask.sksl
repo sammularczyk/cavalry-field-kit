@@ -1,0 +1,430 @@
+// Display, pass 2 of 3 - Field Kit
+// Pixelation, the sub-pixel mask, and the scanning beam.
+//
+// FOUR mask models plus None. Three are ported from Cathode-Retro
+// (https://github.com/DeadlyRedCube/Cathode-Retro, Boost Software License 1.0)
+// - specifically its cathode-retro-crt-generate-{shadow-mask,aperture-grille,
+// slot-mask}.hlsl, which each bake a small repeating tile of coloured dots to
+// a texture at startup. Baking to a texture isn't an option in a single-pass
+// runtime shader, so these are re-expressed as closed-form functions of a
+// continuous cell-relative coordinate instead of a lookup - same geometry,
+// evaluated analytically per pixel:
+//
+//   SHADOW MASK - the classic dot triad, packed into a hexagonal grid rather
+//     than lined up in columns. That hex packing is what makes a shadow mask
+//     read as dots up close instead of stripes.
+//
+//   APERTURE GRILLE - vertical RGB wires with no horizontal break, because a
+//     real aperture grille has nothing to interrupt it vertically.
+//
+//   SLOT MASK - like the grille, but alternating columns are offset half a
+//     slot vertically, which is what breaks the wires up into dashes.
+//
+//   LCD STRIPE - unchanged, still ENDESGA's sub-pixel mask (Shadortoy ms2fDV,
+//     CC0): a 7x4 cell with two columns each of red, green and blue, plus a
+//     dark grid line. `stagger` offsets alternate columns.
+//
+// A PREVIOUS VERSION of the CRT mask ("CRT Triad") was built on "Cathode" by
+// nimitz (Shadertoy 4lXcDH), marked "All rights reserved" - not reusable at
+// any licence tier. It has been removed in full; nothing derived from it
+// remains in this file.
+//
+// ENERGY NORMALISATION. Every mask below only ever lights ONE channel per
+// pixel (or none, in the gaps) - the mean brightness across a full tile is
+// therefore well below 1, and different dot sizes give different means. Each
+// mask has a matching *MeanCoverage() function, closed-form from the same
+// edge the mask itself uses, and the result divides back out below - so a
+// flat mid-grey input still reads mid-grey through any mask at any dot size,
+// and swapping masks is a change of TEXTURE rather than of exposure.
+//
+// THE BEAM tab models a CRT's scanning electron beam rather than its phosphor
+// geometry: a bright band sweeps down the frame with a trailing decay behind
+// it, standing in for the persistence of the phosphor after the beam has
+// passed. It is inspired by Blur Busters' CRT Beam Simulator
+// (https://github.com/blurbusters/crt-beam-simulator, MIT) but is NOT a port
+// of it - that shader accumulates photon budgets across several actual
+// trailing video frames (a real rolling-scan / black-frame-insertion
+// technique), which needs a multi-frame buffer this single-pass, single-frame
+// effect does not have. What is kept is the idea: a raster position derived
+// from `time`, and a trailing exponential fade standing in for phosphor decay.
+//
+// Uniform order matches the attribute order in definitions.json.
+
+uniform float  mask;         // enum: 0 Shadow Mask, 1 Aperture Grille, 2 Slot Mask, 3 LCD Stripe, 4 None
+uniform float  pixelSize;
+uniform float  pixelate;
+uniform float  maskAmount;
+uniform float  gridGap;      // LCD: darkness of the grid line
+uniform float  stagger;      // LCD: 0 aligned (flat panel), 1 staggered
+uniform float  dotSize;
+uniform float  maskSaturation;
+uniform float  maskSoftness;   // multiplies the edge band; 1 = about one screen pixel  // 1 = full RGB phosphors, 0 = neutral grey dots      // Shadow/Aperture/Slot: size of the dot, wire or slot
+uniform float  scanlines;    // depth of the gap between drawn lines
+uniform float  scanlineThickness;
+uniform float  gain;
+uniform float  beamAmount;
+uniform float  beamHeight;
+uniform float  beamSpeed;
+uniform float  beamDecay;
+uniform float  beamPhase;
+uniform float  time;         // frames - shared with pass 1, drives the beam sweep
+
+uniform float2 resolution;
+uniform float2 rectCentre;
+
+uniform shader childShader;  // pass 1 result
+
+// Antialiasing half-width shared by every mask's soft edge, in cell units.
+// Antialiasing band for the mask edges, in CELL units. It has to scale with
+// how many screen pixels a cell actually covers: a fixed 0.05 cells was 0.4
+// screen pixels at Pixel Size 8, which is sub-pixel and so reads as a hard
+// edge - and aliases outright once cells get small. Deriving it from
+// pixelSize keeps the band roughly one screen pixel wide at any size, and
+// keeps it a runtime value rather than a compile-time constant.
+float maskAA() {
+    // Two jobs, and they need different units - which is why scaling the whole
+    // band by pixelSize made Softness feel dead at large cells. Antialiasing is
+    // a SCREEN-pixel quantity: one pixel, however big the cell is, so it has to
+    // divide by pixelSize. Diffusion is a CELL quantity: softening a dot means
+    // blurring it relative to its own size, and dividing that by pixelSize made
+    // it 36x weaker at Pixel Size 36 than at 1 - you needed Softness ~36 to see
+    // anything.
+    //
+    // So Softness up to 1 scales the antialiasing band, unchanged from before;
+    // past 1 it adds cell-relative diffusion on top, which is the same edge
+    // taken deliberately wide rather than a fix for aliasing.
+    float soft = max(maskSoftness, 0.0);
+    float aaFloor = 1.2 / max(pixelSize, 1.0);
+    return clamp(aaFloor * min(soft, 1.0) + 0.35 * max(soft - 1.0, 0.0), 0.0, 0.6);
+}
+
+// --- Shadow mask -------------------------------------------------------------
+
+float shadowEdge(float dotSize) {
+    return mix(0.35, 0.95, clamp(dotSize, 0.0, 1.0));
+}
+
+// x mod 3, folded into [0, 3) - int division truncates toward zero in SkSL,
+// so a plain `x - 3 * (x / 3)` still comes out negative for negative x.
+int mod3(int x) {
+    int r = x - 3 * (x / 3);
+    return r < 0 ? r + 3 : r;
+}
+
+// Hex-packed RGB triad, evaluated per pixel rather than baked to a texture.
+// `p` is a continuous coordinate in mask-cell units (one hex dot pitch = 1.0).
+float3 shadowMaskColor(float2 p, float dotSize) {
+    float oddRow = step(0.5, fract(p.y * 0.5));
+    float2 g = p;
+    g.x += oddRow * 0.5;
+
+    float2 cellCoord = fract(g);
+    int hexIdX = int(floor(g.x));
+    int hexIdY = int(floor(g.y));
+
+    float t = 0.5773502691; // tan(30 degrees)
+    float c = 0.5 * t;
+
+    if (cellCoord.y < -t * cellCoord.x + c) {
+        hexIdY -= 1;
+        g.x += oddRow > 0.5 ? -0.5 : 0.5;
+        if (oddRow > 0.5) { hexIdX -= 1; }
+    } else if (cellCoord.y < t * cellCoord.x - c) {
+        hexIdY -= 1;
+        g.x += oddRow > 0.5 ? -0.5 : 0.5;
+        if (oddRow <= 0.5) { hexIdX += 1; }
+    }
+
+    if (fract(float(hexIdY) * 0.5) >= 0.5) {
+        g.x += 1.0;
+        hexIdX += 1;
+    }
+
+    int zone = mod3(hexIdX + 1);
+    float3 tint = zone == 0 ? float3(1.0, 0.0, 0.0)
+                : zone == 1 ? float3(0.0, 1.0, 0.0)
+                            : float3(0.0, 0.0, 1.0);
+
+    float2 cc = (g - float2(float(hexIdX), float(hexIdY))) * float2(1.0, 1.0 / (1.0 + c));
+    cc = cc * 2.0 - 1.0;
+    float dist = length(cc);
+    float edge = shadowEdge(dotSize);
+    float cov = 1.0 - smoothstep(edge - maskAA(), edge, dist);
+    return tint * cov;
+}
+
+// Circle of radius `edge` in a cc-space that spans [-1, 1] per hex cell by
+// construction, so its area over the cell is pi*edge^2 / 4.
+const float ONE_THIRD = 0.33333333;
+const float HEX_C     = 0.28867513;   // 0.5 * tan(30 degrees)
+
+float shadowMeanCoverage(float dotSize) {
+    float edge = shadowEdge(dotSize) - maskAA() * 0.5;
+    // ONE_THIRD because each channel is one of the three phosphors, and
+    // (1 + c) because a hex cell is 1 x (1 + c) rather than a unit square -
+    // the dot's area is measured in that taller cell, so the mean is scaled by
+    // it. Verified numerically against the mask itself: without this the
+    // divisor is 1.289x too small at every dot size.
+    return clamp(3.14159265 * edge * edge / 4.0 * ONE_THIRD * (1.0 + HEX_C), 0.0, 1.0);
+}
+
+// --- Aperture grille -----------------------------------------------------
+
+float apertureEdge(float dotSize) {
+    return mix(0.18, 0.5, clamp(dotSize, 0.0, 1.0));
+}
+
+// Vertical RGB wires: three equal bands per cell, no vertical break at all -
+// a real aperture grille is just wires, nothing interrupts them top to bottom.
+float3 apertureMaskColor(float2 p, float dotSize) {
+    float x3 = fract(p.x) * 3.0;
+    float3 tint = x3 < 1.0 ? float3(1.0, 0.0, 0.0)
+                : x3 < 2.0 ? float3(0.0, 1.0, 0.0)
+                           : float3(0.0, 0.0, 1.0);
+    float d = abs(fract(x3) - 0.5);
+    float edge = apertureEdge(dotSize);
+    float cov = 1.0 - smoothstep(edge - maskAA(), edge, d);
+    return tint * cov;
+}
+
+// A band of width 2*edge inside a unit-wide third: mean coverage is exactly
+// that width, less the antialiasing band's own half-width.
+float apertureMeanCoverage(float dotSize) {
+    float edge = apertureEdge(dotSize) - maskAA() * 0.5;
+    // ONE_THIRD: each wire is one of the three in the cell.
+    return clamp(2.0 * edge * ONE_THIRD, 0.0, 1.0);
+}
+
+// --- Slot mask -------------------------------------------------------------
+
+float2 slotEdges(float dotSize) {
+    float ex = mix(0.14, 0.48, clamp(dotSize, 0.0, 1.0));
+    return float2(ex, clamp(ex * 1.8, 0.0, 0.5)); // slots are taller than wide
+}
+
+// Like the grille, but alternating columns are offset half a cell vertically -
+// that stagger is what turns continuous wires into discrete, brick-laid slots.
+float3 slotMaskColor(float2 p, float dotSize) {
+    float pairX = floor(p.x);
+    float rowShift = mod(pairX, 2.0) * 0.5;
+    float2 g = float2(p.x, p.y + rowShift);
+
+    float x3 = fract(g.x) * 3.0;
+    float3 tint = x3 < 1.0 ? float3(1.0, 0.0, 0.0)
+                : x3 < 2.0 ? float3(0.0, 1.0, 0.0)
+                           : float3(0.0, 0.0, 1.0);
+
+    float2 edges = slotEdges(dotSize);
+    float dx = abs(fract(x3) - 0.5);
+    float dy = abs(fract(g.y) - 0.5);
+    float dist = max(dx / edges.x, dy / edges.y);
+    float cov = 1.0 - smoothstep(1.0 - maskAA(), 1.0, dist);
+    return tint * cov;
+}
+
+// Rectangle 2*edgeX by 2*edgeY inside a unit cell: mean coverage is that
+// rectangle's area, with each edge shrunk by the antialiasing band.
+float slotMeanCoverage(float dotSize) {
+    float2 edges = slotEdges(dotSize);
+    float ex = edges.x * (1.0 - maskAA() * 0.5);
+    float ey = edges.y * (1.0 - maskAA() * 0.5);
+    // ONE_THIRD: as above, one channel per phosphor column.
+    return clamp(4.0 * ex * ey * ONE_THIRD, 0.0, 1.0);
+}
+
+// --- LCD stripe --------------------------------------------------------------
+
+// Row 0 and column 0 are the dark grid line; then two columns each of R, G, B.
+// A soft band over [lo, hi], with `aa` of transition on each side.
+float band(float x, float lo, float hi, float aa) {
+    float a = max(aa, 1e-4);
+    return smoothstep(lo - a, lo + a, x) * (1.0 - smoothstep(hi - a, hi + a, x));
+}
+
+// LCD stripe as a CONTINUOUS field rather than an integer cell lookup.
+//
+// It used to be four `if`s on int row/col, which meant it had no antialiasing
+// of any kind: Mask Softness did nothing to it, and at a large Pixel Size the
+// grid was raw hard-edged bars - the aliasing every other mask here was fixed
+// for. Now the sub-cell position is kept continuous and each stripe is a soft
+// band, so the same Softness control acts on it.
+//
+// `u` runs 0..7 across the cell, `v` runs 0..4 down it. Sub-column 0 and row 0
+// are the grid line; the remaining six columns are two each of R, G, B.
+//
+// The two terms compose rather than branch: `rgb` is non-zero only inside a
+// stripe and sums to `lit` there, so the grid value fills exactly the space the
+// stripes leave. Symmetric smoothstep edges preserve the mean, which is why the
+// existing meanT normalisation still holds at any softness.
+float3 stripeField(float u, float v, float gap, float aax, float aay) {
+    float g = 1.0 - clamp(gap, 0.0, 1.0);
+    float rows = band(v, 1.0, 4.0, aay);
+    float lit  = band(u, 1.0, 7.0, aax) * rows;
+    float3 rgb = float3(band(u, 1.0, 3.0, aax),
+                        band(u, 3.0, 5.0, aax),
+                        band(u, 5.0, 7.0, aax)) * rows;
+    return float3(g) * (1.0 - lit) + rgb;
+}
+
+half4 main(float2 fragCoord) {
+    float2 res = max(resolution, float2(1.0));
+    float2 F   = fragCoord - rectCentre + res * 0.5;
+    int m = int(mask);
+
+    // ---- Pixelation, shared by every mask (and None) -----------------------
+    // Cell keeps the 7:4 sampling density of the original LCD implementation;
+    // that is just a fixed gather-quality knob, not tied to any one mask's
+    // geometry, so it now serves all of them the same way.
+    float2 cellSize = float2(max(pixelSize, 1.0));
+    float2 cell = floor(F / cellSize);
+
+    float stag = 0.0;
+    if (m == 3) { // LCD Stripe
+        float hexOffset = mod(cell.x, 2.0) * 2.0 * clamp(stagger, 0.0, 1.0);
+        cell.y += floor(mod(F.y, cellSize.y) / (cellSize.y * 0.5)) * hexOffset * 0.5;
+        stag = hexOffset;
+    }
+
+    float3 sum  = float3(0.0);
+    float  sumA = 0.0;
+    float  cnt  = 0.0;
+    for (int y = 0; y < 4; y++) {
+        for (int x = 0; x < 7; x++) {
+            float2 at = cell * cellSize
+                      + float2(float(x) / 7.0, float(y) / 4.0) * cellSize;
+            half4 s = childShader.eval(at - res * 0.5 + rectCentre);
+            // Weight COLOUR by alpha, so taps outside the layer contribute
+            // nothing to it. Counting them as black dragged every edge cell
+            // toward black and left a dark band one cell tall along the top and
+            // bottom - the same mistake the print filter's paper made.
+            float sa = float(s.a);
+            sum  += float3(s.rgb) * (sa > 0.0 ? 1.0 : 0.0);
+            sumA += sa;
+            cnt  += 1.0;
+        }
+    }
+    // sum holds premultiplied colour, so dividing by the summed alpha
+    // un-premultiplies and averages in one step. Alpha itself still averages
+    // over every tap, so the matte still feathers at the layer's edge.
+    sum  /= max(sumA, 0.0001);
+    sumA /= cnt;
+
+    half4 here = childShader.eval(fragCoord);
+    float3 hereLin = here.a > 0.0 ? float3(here.rgb / here.a) : float3(0.0);
+
+    float pix = clamp(pixelate, 0.0, 1.0);
+    float3 col = mix(hereLin, sum, pix);
+    float  a   = mix(float(here.a), sumA, pix);
+
+    // ---- Sub-pixel mask ------------------------------------------------------
+    if (m != 4) { // 4 = None
+        float2 p  = F / cellSize; // continuous, cell-relative coordinate
+        float  ma = clamp(maskAmount, 0.0, 1.0);
+
+        if (m == 3) {
+            // LCD stripe indexes the 7x4 cell by POSITION WITHIN THE CELL, not
+            // a hardcoded 7 and 4, so it stays aligned at any Pixel Size.
+            float u = mod(F.x, cellSize.x) / max(cellSize.x, 1.0) * 7.0;
+            float v = mod(F.y + stag, cellSize.y) / max(cellSize.y, 1.0) * 4.0;
+            // maskAA() is in whole cells; the bands are in sub-cells, so scale
+            // by the subdivision on each axis. The floor keeps a half screen
+            // pixel of transition at any Softness, since a stripe boundary
+            // landing between samples aliases exactly like a dot edge does.
+            float aax = max(maskAA() * 7.0, 3.5 / max(cellSize.x, 1.0));
+            float aay = max(maskAA() * 4.0, 2.0 / max(cellSize.y, 1.0));
+            // The stripe passes only one channel per sub-column: of the 28
+            // sub-cells, 10 are grid line and the other 18 split evenly, so
+            // each channel sees (6 + 10*(1-gridGap)) / 28 on average.
+            float meanT = (6.0 + 10.0 * (1.0 - clamp(gridGap, 0.0, 1.0))) / 28.0;
+            float3 stripe  = stripeField(u, v, gridGap, aax, aay);
+            float  sat     = clamp(maskSaturation, 0.0, 1.0);
+            float3 neutral = float3((stripe.r + stripe.g + stripe.b) / 3.0);
+            stripe = mix(neutral, stripe, sat);
+
+            col *= mix(float3(1.0), stripe, ma);
+            col /= mix(1.0, meanT, ma);
+        } else {
+            float3 tint;
+            float  meanCov;
+            if (m == 0) {
+                tint    = shadowMaskColor(p, dotSize);
+                meanCov = shadowMeanCoverage(dotSize);
+            } else if (m == 1) {
+                tint    = apertureMaskColor(p, dotSize);
+                meanCov = apertureMeanCoverage(dotSize);
+            } else {
+                tint    = slotMaskColor(p, dotSize);
+                meanCov = slotMeanCoverage(dotSize);
+            }
+            // Saturation: each phosphor carries one channel, which is why the
+            // mask reads as strongly coloured even at a low Mask Amount -
+            // turning that down fades the whole mask, structure included.
+            // Desaturating instead keeps the dots and the black between them
+            // and drains only the colour. Spreading a dot's coverage evenly
+            // across all three channels leaves the per-channel mean identical,
+            // so the normalisation below still holds at any setting.
+            float sat = clamp(maskSaturation, 0.0, 1.0);
+            float3 neutral = float3((tint.r + tint.g + tint.b) / 3.0);
+            tint = mix(neutral, tint, sat);
+
+            col *= mix(float3(1.0), tint, ma);
+            col /= mix(1.0, max(meanCov, 1e-4), ma);
+        }
+    }
+
+    // ---- Scanlines ---------------------------------------------------------
+    // A CRT draws discrete lines with a gap between them. The old phosphor-
+    // triad model produced these implicitly, as a side effect of red sitting
+    // lower than green and blue; the geometric masks do not, so they are drawn
+    // here. One line per virtual pixel row, which keeps them locked to the same
+    // grid as the mask.
+    //
+    // Normalised like every other multiplier in this pass: a raised cosine has
+    // a mean of 0.5, so scanlines of depth d have mean 1 - d*0.5, and dividing
+    // that out means turning them up changes the texture and not the exposure.
+    float scanAmt = clamp(scanlines, 0.0, 1.0);
+    if (scanAmt > 0.0) {
+        // Thickness is the fraction of the line pitch that is LIT, which makes
+        // the mean of the mask exactly that fraction - so the normalisation
+        // below is exact at every thickness. A raised cosine raised to a power
+        // would have looked similar and been wrong everywhere except the
+        // midpoint, since only an exponent of 1 leaves its mean at 0.5.
+        float duty = clamp(scanlineThickness, 0.05, 0.95);
+        // Same phase as the mask, stagger included. Without the stagger term
+        // the lines sat at their own offset against a staggered mask, so two
+        // horizontal structures at the same pitch beat against each other.
+        float yph  = fract((F.y + stag) / max(cellSize.y, 1.0));
+        // Softness reaches the lines too. A scanline is a beam profile, not a
+        // rectangle - it is genuinely soft, and at Scanline Thickness near its
+        // floor a hard band is a hairline that aliases. maskAA() is already in
+        // cell units and yph is a fraction of one cell, so it transfers with no
+        // conversion. Floor at half a screen pixel as before. Symmetric edges
+        // keep the mean at `duty`, so the normalisation below stays exact.
+        float aa   = max(maskAA(), 0.5 / max(cellSize.y, 1.0));
+        float lit  = 1.0 - smoothstep(duty * 0.5 - aa, duty * 0.5 + aa,
+                                      abs(yph - 0.5));
+        col *= mix(1.0, lit, scanAmt);
+        col /= 1.0 - scanAmt * (1.0 - duty);
+    }
+
+    // ---- Beam: a scanning band with a trailing phosphor-decay glow ----------
+    // rasterY is 0 at the top of the frame and 1 at the bottom (fragCoord's Y
+    // is UP, so this is 1 minus the normalised height).
+    float rasterY  = 1.0 - clamp(F.y / res.y, 0.0, 1.0);
+    float beamPos  = fract(time * beamSpeed + beamPhase);
+    // How far the beam has travelled past this row since it last swept it,
+    // wrapping every full cycle - 0 right at the beam, growing as it moves on.
+    float sinceBeam = fract(beamPos - rasterY + 1.0);
+
+    float bandHalf = max(beamHeight, 0.001) * 0.5;
+    float core  = 1.0 - smoothstep(bandHalf, bandHalf + 0.05, sinceBeam);
+    float glow  = exp2(-max(sinceBeam - bandHalf, 0.0) / max(beamDecay, 0.001));
+    float beamEnvelope = max(core, glow);
+
+    col *= mix(1.0, beamEnvelope, clamp(beamAmount, 0.0, 1.0));
+
+    col *= max(gain, 0.0);
+
+    half ha = half(clamp(a, 0.0, 1.0));
+    return half4(half3(clamp(col, 0.0, 1.0)) * ha, ha);
+}

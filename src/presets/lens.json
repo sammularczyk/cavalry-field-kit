@@ -1,0 +1,303 @@
+[
+  {
+    "presetType": "layer",
+    "id": "030ebb33-7115-3378-d233-45617a03c9f5",
+    "author": "samMularczyk",
+    "name": "Anamorphic",
+    "layerType": [
+      "lens"
+    ],
+    "attrs": [
+      {
+        "attrId": "profile",
+        "value": 0
+      },
+      {
+        "attrId": "distortion",
+        "value": 1.0
+      },
+      {
+        "attrId": "squeeze",
+        "value": 1.0
+      },
+      {
+        "attrId": "expand",
+        "value": 1.0
+      },
+      {
+        "attrId": "fringing",
+        "value": 0.0
+      },
+      {
+        "attrId": "abModel",
+        "value": 3
+      },
+      {
+        "attrId": "defocus",
+        "value": 0.0
+      },
+      {
+        "attrId": "size",
+        "value": 0.0
+      }
+    ],
+    "resetsTransforms": false,
+    "resetsLayer": true
+  },
+  {
+    "presetType": "layer",
+    "id": "1ae229ad-95bc-093f-2cb5-673d8f369560",
+    "author": "samMularczyk",
+    "name": "Barrel Chroma",
+    "layerType": [
+      "lens"
+    ],
+    "attrs": [
+      {
+        "attrId": "profile",
+        "value": 0
+      },
+      {
+        "attrId": "distortion",
+        "value": 1.0
+      },
+      {
+        "attrId": "fringing",
+        "value": 0.5
+      },
+      {
+        "attrId": "abModel",
+        "value": 3
+      },
+      {
+        "attrId": "defocus",
+        "value": 0.0
+      },
+      {
+        "attrId": "size",
+        "value": 0.0
+      }
+    ],
+    "resetsTransforms": false,
+    "resetsLayer": true
+  },
+  {
+    "presetType": "layer",
+    "id": "14208e9e-2f11-db81-69b6-148824aef847",
+    "author": "samMularczyk",
+    "name": "Spectral Displacement",
+    "layerType": [
+      "lens"
+    ],
+    "attrs": [
+      {
+        "attrId": "distortion",
+        "value": 0.0
+      },
+      {
+        "attrId": "abModel",
+        "value": 0
+      },
+      {
+        "attrId": "geometry",
+        "value": 0
+      },
+      {
+        "attrId": "dispersion",
+        "value": 0.02
+      },
+      {
+        "attrId": "focusWave",
+        "value": 0.0
+      },
+      {
+        "attrId": "smoothing",
+        "value": 0.5
+      },
+      {
+        "attrId": "aberration",
+        "value": 8.0
+      },
+      {
+        "attrId": "redScale",
+        "value": 0.4
+      },
+      {
+        "attrId": "greenScale",
+        "value": 0.6
+      },
+      {
+        "attrId": "blueScale",
+        "value": 1.0
+      },
+      {
+        "attrId": "smear",
+        "value": 1.0
+      },
+      {
+        "attrId": "falloff",
+        "value": 1.5
+      },
+      {
+        "attrId": "mapAmplitude",
+        "value": 30.0
+      },
+      {
+        "attrId": "abIntensity",
+        "value": 1.0
+      },
+      {
+        "attrId": "samples",
+        "value": 7
+      },
+      {
+        "attrId": "defocus",
+        "value": 0.0
+      },
+      {
+        "attrId": "size",
+        "value": 0.0
+      }
+    ],
+    "resetsTransforms": false,
+    "resetsLayer": true
+  },
+  {
+    "presetType": "layer",
+    "id": "07306b30-b003-7710-8902-3d153a5d323b",
+    "author": "samMularczyk",
+    "name": "Bokeh",
+    "layerType": [
+      "lens"
+    ],
+    "attrs": [
+      {
+        "attrId": "distortion",
+        "value": 0.0
+      },
+      {
+        "attrId": "abModel",
+        "value": 3
+      },
+      {
+        "attrId": "defocus",
+        "value": 40.0
+      },
+      {
+        "attrId": "blades",
+        "value": 6
+      },
+      {
+        "attrId": "rotation",
+        "value": 0.0
+      },
+      {
+        "attrId": "cocSource",
+        "value": 0
+      },
+      {
+        "attrId": "focus",
+        "value": 0.5
+      },
+      {
+        "attrId": "aperture",
+        "value": 2.5
+      },
+      {
+        "attrId": "bokehThreshold",
+        "value": 0.0
+      },
+      {
+        "attrId": "bokehGamma",
+        "value": 2.2
+      },
+      {
+        "attrId": "exposure",
+        "value": 0.0
+      },
+      {
+        "attrId": "gain",
+        "value": 1.0
+      },
+      {
+        "attrId": "dither",
+        "value": true
+      },
+      {
+        "attrId": "size",
+        "value": 0.0
+      }
+    ],
+    "resetsTransforms": false,
+    "resetsLayer": true
+  },
+  {
+    "presetType": "layer",
+    "id": "85fa91fe-78a4-4b11-6912-a754212c5a2c",
+    "author": "samMularczyk",
+    "name": "Lens Artefacts",
+    "layerType": [
+      "lens"
+    ],
+    "attrs": [
+      {
+        "attrId": "distortion",
+        "value": 0.0
+      },
+      {
+        "attrId": "abModel",
+        "value": 3
+      },
+      {
+        "attrId": "defocus",
+        "value": 0.0
+      },
+      {
+        "attrId": "kernel",
+        "value": 0
+      },
+      {
+        "attrId": "size",
+        "value": 20.0
+      },
+      {
+        "attrId": "kernelRotation",
+        "value": 0.0
+      },
+      {
+        "attrId": "ringFrequency",
+        "value": 6.0
+      },
+      {
+        "attrId": "axialRed",
+        "value": 1.0
+      },
+      {
+        "attrId": "axialGreen",
+        "value": 1.0
+      },
+      {
+        "attrId": "axialBlue",
+        "value": 1.0
+      },
+      {
+        "attrId": "samples",
+        "value": 20
+      },
+      {
+        "attrId": "scatterThreshold",
+        "value": 0.5
+      },
+      {
+        "attrId": "scatterGain",
+        "value": 1.0
+      },
+      {
+        "attrId": "scatterBlend",
+        "value": 0
+      }
+    ],
+    "resetsTransforms": false,
+    "resetsLayer": true
+  }
+]

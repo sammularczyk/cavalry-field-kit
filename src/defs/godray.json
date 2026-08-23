@@ -1,0 +1,116 @@
+{
+  "author": "samMularczyk",
+  "type": "godray",
+  "superType": "thirdPartyFilter",
+  "version": "1.0",
+  "skslFile": "godray.sksl",
+  "attributes": {
+    "angle": {
+      "type": "double",
+      "default": 30.0,
+      "softMin": -180.0,
+      "softMax": 180.0,
+      "step": 0.5,
+      "dimming": "parallel == false"
+    },
+    "parallel": {
+      "type": "bool",
+      "default": true
+    },
+    "light": {
+      "type": "double2",
+      "default": {
+        "x": 0.0,
+        "y": 0.0
+      },
+      "children": {
+        "*": {
+          "step": 1.0
+        }
+      },
+      "dimming": "parallel == true"
+    },
+    "gain": {
+      "type": "double",
+      "default": 0.5,
+      "min": 0.0,
+      "max": 1.0,
+      "step": 0.01
+    },
+    "lacunarity": {
+      "type": "double",
+      "default": 2.5,
+      "min": 0.1,
+      "softMax": 6.0,
+      "step": 0.05,
+      "dimming": "gain <= 0"
+    },
+    "density": {
+      "type": "double",
+      "default": 8.0,
+      "min": 0.1,
+      "softMax": 64.0,
+      "step": 0.5,
+      "dimming": "gain <= 0"
+    },
+    "speed": {
+      "type": "double",
+      "default": 0.05,
+      "min": 0.0,
+      "softMax": 1.0,
+      "step": 0.005
+    },
+    "blur": {
+      "type": "double",
+      "default": 0.0,
+      "min": 0.0,
+      "max": 1.0,
+      "step": 0.01
+    },
+    "time": {
+      "type": "double",
+      "default": 0.0,
+      "compConnect": "time",
+      "dimming": "gain <= 0 || amount <= 0"
+    },
+    "amount": {
+      "type": "double",
+      "default": 1.0,
+      "min": 0.0,
+      "max": 1.0,
+      "step": 0.01
+    }
+  },
+  "triggers": {
+    "out": [
+      "angle",
+      "parallel",
+      "light",
+      "gain",
+      "lacunarity",
+      "density",
+      "speed",
+      "blur",
+      "time",
+      "amount"
+    ]
+  },
+  "UI": {
+    "icon": "godray.png",
+    "attributeOrder": [
+      "parallel",
+      "angle",
+      "light",
+      "---Turbulence",
+      "gain",
+      "lacunarity",
+      "density",
+      "speed",
+      "blur",
+      "time",
+      "---Output",
+      "amount",
+      "---Ported from pixi.js filters (MIT)"
+    ]
+  }
+}

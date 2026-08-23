@@ -1,0 +1,230 @@
+[
+  {
+    "presetType": "layer",
+    "id": "e78bc95d-248a-4b7a-89bd-134336447440",
+    "author": "samMularczyk",
+    "name": "VHS",
+    "layerType": [
+      "vhs"
+    ],
+    "attrs": [
+      {
+        "attrId": "format",
+        "value": 0
+      },
+      {
+        "attrId": "waveAmount",
+        "value": 0.006
+      },
+      {
+        "attrId": "fineWave",
+        "value": 0.012
+      },
+      {
+        "attrId": "switchingShift",
+        "value": 0.3
+      },
+      {
+        "attrId": "jitter",
+        "value": 0.25
+      },
+      {
+        "attrId": "bloomStrength",
+        "value": 0.15
+      },
+      {
+        "attrId": "greenLag",
+        "value": 2.0
+      },
+      {
+        "attrId": "blueLag",
+        "value": 4.0
+      },
+      {
+        "attrId": "dropout",
+        "value": 0.06
+      },
+      {
+        "attrId": "tracking",
+        "value": 0.1
+      },
+      {
+        "attrId": "hiss",
+        "value": 0.18
+      }
+    ],
+    "resetsTransforms": false,
+    "resetsLayer": true
+  },
+  {
+    "presetType": "layer",
+    "id": "3eb9a7dc-0ab4-4068-a53c-9a70a738f463",
+    "author": "samMularczyk",
+    "name": "S-VHS",
+    "layerType": [
+      "vhs"
+    ],
+    "attrs": [
+      {
+        "attrId": "format",
+        "value": 1
+      },
+      {
+        "attrId": "waveAmount",
+        "value": 0.003
+      },
+      {
+        "attrId": "fineWave",
+        "value": 0.006
+      },
+      {
+        "attrId": "switchingShift",
+        "value": 0.2
+      },
+      {
+        "attrId": "jitter",
+        "value": 0.12
+      },
+      {
+        "attrId": "bloomStrength",
+        "value": 0.08
+      },
+      {
+        "attrId": "greenLag",
+        "value": 1.2
+      },
+      {
+        "attrId": "blueLag",
+        "value": 2.2
+      },
+      {
+        "attrId": "dropout",
+        "value": 0.02
+      },
+      {
+        "attrId": "tracking",
+        "value": 0.04
+      },
+      {
+        "attrId": "hiss",
+        "value": 0.08
+      }
+    ],
+    "resetsTransforms": false,
+    "resetsLayer": true
+  },
+  {
+    "presetType": "layer",
+    "id": "1dcc48d6-1261-43ed-b6e2-d1fd7557a12f",
+    "author": "samMularczyk",
+    "name": "Hi8",
+    "layerType": [
+      "vhs"
+    ],
+    "attrs": [
+      {
+        "attrId": "format",
+        "value": 2
+      },
+      {
+        "attrId": "waveAmount",
+        "value": 0.0025
+      },
+      {
+        "attrId": "fineWave",
+        "value": 0.005
+      },
+      {
+        "attrId": "switchingShift",
+        "value": 0.15
+      },
+      {
+        "attrId": "jitter",
+        "value": 0.1
+      },
+      {
+        "attrId": "bloomStrength",
+        "value": 0.09
+      },
+      {
+        "attrId": "greenLag",
+        "value": 1.4
+      },
+      {
+        "attrId": "blueLag",
+        "value": 2.6
+      },
+      {
+        "attrId": "dropout",
+        "value": 0.015
+      },
+      {
+        "attrId": "tracking",
+        "value": 0.03
+      },
+      {
+        "attrId": "hiss",
+        "value": 0.06
+      }
+    ],
+    "resetsTransforms": false,
+    "resetsLayer": true
+  },
+  {
+    "presetType": "layer",
+    "id": "ee4b75e9-0594-45cd-b449-ac657e7a91a1",
+    "author": "samMularczyk",
+    "name": "Video8",
+    "layerType": [
+      "vhs"
+    ],
+    "attrs": [
+      {
+        "attrId": "format",
+        "value": 3
+      },
+      {
+        "attrId": "waveAmount",
+        "value": 0.005
+      },
+      {
+        "attrId": "fineWave",
+        "value": 0.01
+      },
+      {
+        "attrId": "switchingShift",
+        "value": 0.25
+      },
+      {
+        "attrId": "jitter",
+        "value": 0.2
+      },
+      {
+        "attrId": "bloomStrength",
+        "value": 0.12
+      },
+      {
+        "attrId": "greenLag",
+        "value": 1.8
+      },
+      {
+        "attrId": "blueLag",
+        "value": 3.2
+      },
+      {
+        "attrId": "dropout",
+        "value": 0.04
+      },
+      {
+        "attrId": "tracking",
+        "value": 0.08
+      },
+      {
+        "attrId": "hiss",
+        "value": 0.12
+      }
+    ],
+    "resetsTransforms": false,
+    "resetsLayer": true
+  }
+]

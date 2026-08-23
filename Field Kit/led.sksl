@@ -1,0 +1,75 @@
+// LED - Field Kit
+// Inspired by "lightbulb screen" by FabriceNeyret2 (Shadertoy MdsXRB) and
+// "Golfing Mosaic Filter" by GregRostami (Shadertoy ftGyDm).
+//
+// The two originals are the two ends of one control: ftGyDm draws a fixed round
+// dot per cell tinted by the image, while MdsXRB drives each channel's dot
+// RADIUS from that channel's brightness, so colour comes out of dot size
+// rather than dot tint. `sizeFromBrightness` and `perChannel` cover both.
+//
+// Uniform order matches the attribute order in definitions.json.
+
+uniform float  cellSize;           // grid pitch in pixels
+uniform float  stagger;            // 0 = square grid, 1 = fully offset rows
+uniform float  dotSize;            // dot diameter as a fraction of the cell
+uniform float  roundness;          // 0 = square dot, 1 = round dot
+uniform float  softness;           // edge falloff in pixels
+uniform float  sizeFromBrightness; // 0 = fixed dots, 1 = radius tracks brightness
+uniform float  perChannel;         // bool: separate R/G/B dot radii
+uniform half4  bgColor;            // straight RGBA, fills between the dots
+uniform float  amount;
+
+uniform float2 resolution;
+uniform float2 rectCentre;
+
+uniform shader image;              // input image - binds by position, must be last
+
+half4 main(float2 fragCoord) {
+    half4 src = image.eval(fragCoord);
+
+    float cs = max(cellSize, 2.0);
+
+    // Layer-local pixels, so the grid does not swim when the layer moves and
+    // every copy in a Duplicator lines up.
+    float2 p = fragCoord - rectCentre;
+
+    // Offset alternate rows. The original shifted by half a cell; `stagger`
+    // scales that so a square grid and a hex grid are the same control.
+    float row = floor(p.y / cs);
+    float off = mod(row, 2.0) * 0.5 * stagger * cs;
+
+    float2 q      = float2(p.x - off, p.y);
+    float2 centre = (floor(q / cs) + 0.5) * cs;
+    float2 local  = (q - centre) / cs;        // -0.5 .. 0.5 within the cell
+
+    // Sample the cell centre, back in unstaggered space.
+    half4 cell = image.eval(centre + float2(off, 0.0) + rectCentre);
+    float3 lin = cell.a > 0.0 ? float3(cell.rgb / cell.a) : float3(0.0);
+
+    // Superellipse-ish distance: Chebyshev is a square, Euclidean is a circle.
+    float d = mix(max(abs(local.x), abs(local.y)), length(local), clamp(roundness, 0.0, 1.0));
+
+    float lum = dot(lin, float3(0.299, 0.587, 0.114));
+    float3 drive = perChannel > 0.5 ? lin : float3(lum);
+    float3 rad = 0.5 * clamp(dotSize, 0.0, 2.0) * mix(float3(1.0), drive, sizeFromBrightness);
+
+    // Softness is given in pixels; the distance above is in cell units.
+    float s = max(softness, 0.01) / cs;
+
+    float3 mask = float3(
+        1.0 - smoothstep(rad.r - s, rad.r + s, d),
+        1.0 - smoothstep(rad.g - s, rad.g + s, d),
+        1.0 - smoothstep(rad.b - s, rad.b + s, d));
+
+    // With per-channel radii the dot size already carries the colour, so the
+    // lamp itself is lit flat. Otherwise the dot is tinted by the image.
+    float3 lamp = perChannel > 0.5 ? float3(1.0) : lin;
+
+    float3 rgb = mix(float3(bgColor.rgb), lamp, mask);
+    float  m   = max(max(mask.r, mask.g), mask.b);
+    float  a   = float(cell.a) * mix(float(bgColor.a), 1.0, m);
+
+    half ha = half(clamp(a, 0.0, 1.0));
+    half4 outCol = half4(half3(clamp(rgb, 0.0, 1.0)) * ha, ha);
+    return mix(src, outCol, half(clamp(amount, 0.0, 1.0)));
+}

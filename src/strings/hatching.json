@@ -1,0 +1,104 @@
+{
+  "type": "layerStrings",
+  "value": {
+    "author": "samMularczyk",
+    "layerType": "hatching",
+    "niceName": "Hatching",
+    "layerInfo": "Repeating marks keyed off luminance: hatching, engraving, cross stitch, lines, rings, spiral or squares.",
+    "language": "en",
+    "attributes": {
+      "pattern": [
+        "Pattern",
+        "Which mark to draw. The first three are threshold-layered; the rest are continuous-width lines."
+      ],
+      "size": [
+        "Size",
+        "Line period, or cell size for Cross Stitch, in pixels."
+      ],
+      "lineWidth": [
+        "Line Width",
+        "Thickness of the marks. Interacts with Size: the ratio of the two sets how solid dark areas go."
+      ],
+      "angle": [
+        "Angle",
+        "Direction of the Lines pattern, in degrees. Unused by the other patterns."
+      ],
+      "softness": [
+        "Softness",
+        "Edge softness of the continuous line patterns, in period units. Small values give crisp lines."
+      ],
+      "threshold1": [
+        "Threshold 1",
+        "Crosshatch only. Luminance below which the first family appears. Luminance here is length(RGB), so the range is 0 to 1.74."
+      ],
+      "threshold2": [
+        "Threshold 2",
+        "Crosshatch only. Luminance below which the second, crossing family appears."
+      ],
+      "threshold3": [
+        "Threshold 3",
+        "Crosshatch only. Luminance below which the third family appears."
+      ],
+      "threshold4": [
+        "Threshold 4",
+        "Crosshatch only. The darkest areas get all four families."
+      ],
+      "offset": [
+        "Offset",
+        "Crosshatch only. Shifts the third and fourth families so they do not sit on top of the first two."
+      ],
+      "warpAmount": [
+        "Warp Amount",
+        "Currency only. How far the lines wander, as a fraction of the layer height."
+      ],
+      "warpFrequency": [
+        "Warp Frequency",
+        "Currency only. Wave cycles across the layer height."
+      ],
+      "layers": [
+        "Families",
+        "Currency only. How many of the six line families to draw. Fewer gives a sparser pattern."
+      ],
+      "brightness": [
+        "Thread Brightness",
+        "Cross Stitch only. Gain on the thread colour; the original used 1.4 to stop stitches reading too dark."
+      ],
+      "invert": [
+        "Invert Stitch",
+        "Cross Stitch only. Swap thread and background, so stitches become solid ink and the gaps carry the image."
+      ],
+      "inkColor": [
+        "Ink",
+        "Colour of the mark. Cross Stitch takes its thread colour from the image instead, unless Invert Stitch is on."
+      ],
+      "paperColor": [
+        "Paper",
+        "Colour behind the mark."
+      ],
+      "transparentPaper": [
+        "Transparent Paper",
+        "Output the mark and its alpha only, with no background, so it composites straight over whatever sits behind the layer."
+      ],
+      "amount": [
+        "Amount",
+        "Mix between the original layer and the hatched result."
+      ]
+    },
+    "enums": {
+      "pattern": {
+        "0": "Crosshatch",
+        "1": "Currency",
+        "2": "Cross Stitch",
+        "3": "Lines",
+        "4": "Concentric",
+        "5": "Spiral",
+        "6": "Squares"
+      }
+    },
+    "tabs": {
+      "filter": "Pattern",
+      "levels": "Per Pattern",
+      "output": "Ink"
+    }
+  }
+}

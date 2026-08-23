@@ -1,0 +1,485 @@
+// Composite Video, pass 2 of 2 - Field Kit
+// Inspired by "C64 screen with NTSC filter" by BitOfGold (Shadertoy 3tVBWR),
+// whose subcarrier crosstalk model this follows. The signal is now (Y, C1, C2)
+// rather than (luma, chroma magnitude, phase), and PAL and PAL-M are added.
+//
+// Nothing here is that shader's code or its numbers any more. The two FIR
+// kernels are derived from the sampling parameters at runtime (lowpassTap()),
+// and the tube geometry - bulge, vignette, interference envelope - is built
+// from the shapes the physical objects actually have rather than from tuned
+// constants: see fisheye(), vignette() and peak().
+//
+// What differs per system, and why each one is visible:
+//
+//   NTSC     227.5 cycles/line, +0.5 per line, YIQ. The I and Q axes are
+//            filtered ASYMMETRICALLY - I wide, Q narrow - so colour bleeds
+//            further along orange-cyan than along green-magenta. That
+//            directional bleed is a real NTSC signature, not a subtlety.
+//   PAL      283.7516 cycles/line, +0.7516 per line, YUV, V's sign alternating
+//            line to line, plus a two-line chroma average at the decoder - the
+//            delay line - which is what cancels phase error into a small
+//            brightness error instead of a hue shift. Finer, slower dot
+//            pattern than NTSC as a direct consequence of the higher
+//            subcarrier.
+//   PAL-M    PAL colour on 525 lines: 227.25 cycles/line, +0.25 per line.
+//
+// Hanover bars weaken the delay line while injecting an alternating phase error,
+// which is exactly how they arise in a set with a failing delay line: fine
+// banding in line pairs, one line pushed one way in hue and the next the other,
+// worst on saturated flats and invisible on greys.
+//
+// The Sync tab is a separate failure mode from all of the above: not the
+// SIGNAL degrading, but the receiver losing lock on it - vertical hold
+// rolling the picture, sync tearing lines sideways, a multipath ghost, and
+// weak-signal snow. All four are scanline-local, so they live in this pass
+// rather than needing one of their own.
+//
+// Uniform order matches the attribute order in definitions.json.
+
+uniform float  system;        // enum: 0 NTSC, 1 PAL, 2 PAL-M
+uniform float  time;
+uniform float  speed;
+uniform float2 virtualRes;
+uniform float  brightness;
+uniform float  saturation;
+uniform float  blur;
+uniform float  bandwidth;
+uniform float  peaking;
+uniform float  blurSize;
+uniform float  chromaBlur;
+uniform float  chromaSize;
+uniform float  qNarrow;       // NTSC only: how much narrower the Q axis is
+uniform float  phaseError;   // differential phase, degrees at peak white
+uniform float  subcarrier;
+uniform float  crosstalk;
+uniform float  crossColour;
+uniform float  hanover;
+uniform float  scanlines;
+uniform float  scanFlicker;
+uniform float  interference1;
+uniform float  interference2;
+uniform float2 fishEye;
+uniform float  tubeOverscan;
+uniform float  vignetteRounding;
+uniform float  vignetteSmoothness;
+uniform float  amount;
+uniform float  vRoll;
+uniform float  vRollJump;
+uniform float  hTear;
+uniform float  hTearDensity;
+uniform float  ghostAmount;
+uniform float  ghostDelay;
+uniform float  snow;
+uniform float  snowBurst;
+
+uniform float2 resolution;
+uniform float2 rectCentre;
+
+uniform shader childShader;   // pass 1 result - the composite signal
+uniform shader original;      // untouched input - MUST be declared last
+
+const float PI  = 3.14159265;
+const float TAU = 6.28318530718;
+const float CHROMA_SCALE = 0.7;
+// Tap counts. Odd, so each kernel has a centre tap and stays linear-phase -
+// an asymmetric kernel shifts the picture sideways by a fraction of a pixel
+// per channel, which is a chroma fringe you cannot dial out.
+const int LUMA_HALF   = 12;   // 25 taps
+const int CHROMA_HALF = 8;    // 17 taps
+
+// Design cutoffs, as a fraction of the tap rate (0.5 is Nyquist). Because tap
+// SPACING is set by Blur Size, a fixed normalised cutoff means the physical
+// cutoff moves as 1/blurSize - so Blur Size keeps meaning what it always did,
+// and the filter shape stays correct at every setting instead of only at one.
+const float LUMA_FC   = 0.108;
+const float CHROMA_FC = 0.094;
+
+// Peaking is an unsharp between two cutoffs: the boosted band is whatever sits
+// between fc*PEAK_RATIO and fc. 0.4 puts the peak near the middle of the luma
+// passband, where a receiver's aperture correction actually worked.
+const float PEAK_RATIO = 0.4;
+
+float random(float2 p, float t) {
+    // Non-trig hash. A fract(sin(dot(...))) hash degrades badly here: fed
+    // absolute fragCoord on an HD layer the dot product reaches tens of
+    // thousands, where float32 sin() is effectively quantised, so the "noise"
+    // gains correlated structure and visible discontinuities. This form has no
+    // such cliff at large coordinates.
+    float2 q = fract((p + t * 37.13) * float2(0.1031, 0.11369));
+    q += dot(q, q.yx + 19.19);
+    return fract((q.x + q.y) * q.x);
+}
+
+// Tube bulge. Cross-coupled on purpose rather than radial: a tube is not a
+// section of a sphere, it has DIFFERENT horizontal and vertical curvature
+// radii, so how far a point is pushed sideways depends on how far up the tube
+// it sits, and vice versa. That is why a CRT bows its horizontal lines more
+// toward the top and bottom of the picture than through the middle, which a
+// radial r-squared barrel cannot do.
+float2 fisheye(float2 uv, float2 k, float over) {
+    uv *= float2(1.0 + (uv.y * uv.y) * k.x, 1.0 + (uv.x * uv.x) * k.y);
+    // Overscan, the same thing a real set does and the same control Display
+    // has: the raster is drawn slightly larger than the faceplate so the
+    // picture runs off the glass instead of the glass showing an unpainted
+    // border where the bulge pulled the edges in.
+    return uv / max(over, 1e-4);
+}
+
+// Tube edge falloff, as a superellipse - the same faceplate shape Display
+// uses, for the same reason: a rounded rectangle has a curvature break where
+// its arcs meet its straight edges and a real faceplate has none. The 2.0 is
+// exact rather than tuned: uv arrives spanning -0.5..0.5, so doubling puts the
+// frame edge at 1.0, which is where the superellipse is defined to sit.
+float vignette(float2 uv, float rounding, float smoothness) {
+    uv *= 2.0;
+    float a = 1.0 - sqrt(pow(abs(uv.x), rounding) + pow(abs(uv.y), rounding));
+    return smoothstep(0.0, smoothness, a);
+}
+
+float3 yiq2rgb(float3 yiq) {
+    return float3(
+        yiq.x + 0.956  * yiq.y + 0.6210 * yiq.z,
+        yiq.x - 0.2720 * yiq.y - 0.6474 * yiq.z,
+        yiq.x - 1.1060 * yiq.y + 1.7046 * yiq.z);
+}
+
+float3 yuv2rgb(float3 yuv) {
+    return float3(
+        yuv.x                  + 1.13983 * yuv.z,
+        yuv.x - 0.39465 * yuv.y - 0.58060 * yuv.z,
+        yuv.x + 2.03211 * yuv.y);
+}
+
+// Read the signal in normalised coordinates, un-premultiplied and with the
+// chroma bias removed - the signal channels are not colour and must not carry
+// alpha.
+float3 sigAt(float2 uv) {
+    float2 res = max(resolution, float2(1.0));
+    half4 c = childShader.eval((uv - 0.5) * res + rectCentre);
+    // Outside the layer there is no signal at all, so return a neutral one.
+    // Returning zeroes and THEN removing the 0.5 chroma bias gives -0.71 on
+    // both axes, which decodes to a bright green - visible as a one-pixel
+    // fringe all the way round the layer.
+    if (c.a <= 0.0) { return float3(0.0); }
+    float3 v = float3(c.rgb / c.a);
+    return float3(v.x, (v.y - 0.5) / CHROMA_SCALE, (v.z - 0.5) / CHROMA_SCALE);
+}
+
+// Envelope for the heavy interference band. A Lorentzian, which is the line
+// shape a single resonance actually produces - interference on a set is a
+// narrow-band pickup ringing at one frequency, not a gaussian blob - times a
+// falloff down the picture, because the flyback and supply noise that causes
+// it is worst near the top of the frame where the beam has just retraced.
+float peak(float y, float centre, float width) {
+    float t = (y - centre) / max(width, 1e-4);
+    return clamp((1.0 - y) / (1.0 + t * t), 0.0, 1.0);
+}
+
+float lumaTap(float2 uv, float off, float d) {
+    float o = off * d;
+    return sigAt(uv + float2(o, 0.67 * o)).x;
+}
+
+// One chroma tap, returning the two axes already recovered - for PAL that means
+// V's line alternation undone and the delay-line average applied. `s` is the
+// centre line's alternation sign; the lines either side carry the opposite one,
+// which is why theirs are subtracted rather than added.
+// Differential phase distortion: the subcarrier's phase drifts as a function of
+// LUMINANCE LEVEL on its way through the transmission path, so a bright part of
+// the picture decodes at a different hue from a dark one. This is the defect
+// the three systems actually differ over, and without it they barely differ at
+// all - the enum was changing the subcarrier frequency and little else, because
+// PAL's delay line had no error to cancel.
+//
+// Applied to the TRANSMITTED chroma vector, before V's sign is undone and
+// before the delay line averages. That order is what makes the systems diverge
+// on their own, with no per-system code:
+//
+//   NTSC   takes the rotation straight through as a hue shift that varies with
+//          brightness - "Never Twice the Same Colour", and why sets had a tint
+//          control at all.
+//   PAL    alternates V line to line, so the same path error lands as +theta on
+//          one line and -theta on the next; averaging them cancels the hue
+//          rotation and leaves only a small loss of saturation, cos(theta).
+//          Immunity by construction, which is the whole reason PAL exists.
+//   PAL-M  PAL's immunity on a 525-line subcarrier.
+float2 diffPhase(float3 c) {
+    if (phaseError == 0.0) { return float2(c.y, c.z); }
+    float th = radians(phaseError) * clamp(c.x, 0.0, 1.0);
+    float ct = cos(th), st = sin(th);
+    return float2(c.y * ct - c.z * st, c.y * st + c.z * ct);
+}
+
+float2 chromaTap(float2 uv, float off, float d1, float d2, float s,
+                 float yCentre, float lineStep, float delay) {
+    // Chroma taps run purely HORIZONTALLY, unlike the luma taps, which keep the
+    // original's 0.67 diagonal. Chroma band-limiting happens along the line, so
+    // horizontal is the physically right axis - and for PAL it is essential: a
+    // diagonal tap at this spacing lands up to eight lines away, where V's sign
+    // has flipped, and applying the centre line's sign to it scrambles the hue.
+    if (system < 0.5) {
+        // NTSC: two axes, two bandwidths, no vertical averaging. I and Q come
+        // from different positions, so each is rotated with its own sample's
+        // partner component rather than the two being mixed across positions.
+        float2 ra = diffPhase(sigAt(uv + float2(off * d1, 0.0)));
+        float2 rb = diffPhase(sigAt(uv + float2(off * d2, 0.0)));
+        return float2(ra.x, rb.y);
+    }
+    // Sample at the CENTRE of the virtual line, not at the output pixel's own
+    // y. The encoder decides V's sign from floor(y * lines) and the decoder has
+    // to reach the same answer; evaluating that floor on two slightly different
+    // values disagrees near line boundaries, inverting V on scattered rows and
+    // showing up as thin green dashes. Snapping to mid-line puts both well
+    // inside the same line, so they cannot disagree.
+    float2 at = float2(uv.x + off * d1, yCentre);
+    float2 rc = diffPhase(sigAt(at));
+    float2 raw = float2(rc.x, rc.y * s);
+    if (delay <= 0.0) { return raw; }
+    float2 ru = diffPhase(sigAt(at + float2(0.0, lineStep)));
+    float2 rd = diffPhase(sigAt(at - float2(0.0, lineStep)));
+    float2 avg = float2((rc.x + ru.x + rd.x) / 3.0,
+                        s * (rc.y - ru.y - rd.y) / 3.0);
+    return mix(raw, avg, delay);
+}
+
+float cyclesPerLine() {
+    if (system < 0.5) { return 227.5; }
+    if (system < 1.5) { return 283.7516; }
+    return 227.25;
+}
+
+float lineAdvance() {
+    if (system < 0.5) { return 0.5; }
+    if (system < 1.5) { return 0.7516; }
+    return 0.25;
+}
+
+// One windowed-sinc lowpass coefficient.
+//
+// The ideal lowpass impulse response is 2*fc*sinc(2*fc*n), infinitely long;
+// truncating it outright rings badly (Gibbs), so it is tapered by a Hamming
+// window, which is the standard choice at this tap count - about -53 dB of
+// stopband, comfortably enough to bury the subcarrier residue that would
+// otherwise show as dot crawl in the luma.
+//
+// `n` is the tap index from centre, `fc` the cutoff in cycles per tap,
+// `halfWidth` the kernel's half-width. Not named `half` - that is an SkSL
+// type, and using a type name as an identifier is one of this compiler's
+// silent build failures. Every input is a runtime value: an all-literal
+// version of this would be a compile-time constant, and this compiler folds
+// those to zero (see the Display kernel-normaliser note in LEARNINGS).
+float lowpassTap(float n, float fc, float halfWidth) {
+    float x = 2.0 * fc * n;
+    float sincX = abs(x) < 1e-5 ? 1.0 : sin(PI * x) / (PI * x);
+    float win   = 0.54 + 0.46 * cos(PI * n / max(halfWidth, 1.0));
+    return 2.0 * fc * sincX * win;
+}
+
+half4 main(float2 fragCoord) {
+    float2 res = max(resolution, float2(1.0));
+    float2 uv  = (fragCoord - rectCentre) / res + 0.5;
+
+    float XRES = max(virtualRes.x, 1.0);
+    float YRES = max(virtualRes.y, 1.0);
+    float t    = time * speed;
+
+    uv -= 0.5;
+    uv = fisheye(uv, fishEye, tubeOverscan);
+    float vign = vignette(uv, vignetteRounding, vignetteSmoothness);
+    uv += 0.5;
+
+    // Vertical hold: wrap the vertical sampling position so a lost vertical
+    // sync rolls the raster's CONTENT through a fixed tube - the fisheye and
+    // vignette above are the physical screen and must not move with it.
+    // Guarded on vRoll itself so the default leaves uv.y bit-exact, including
+    // outside the layer, where fract() would otherwise wrap an out-of-bounds
+    // coordinate into visible picture even with zero roll.
+    if (vRoll != 0.0) {
+        float rollSmooth  = vRoll * t;
+        float rollStepped = floor(rollSmooth * YRES) / YRES;
+        uv.y = fract(uv.y + mix(rollSmooth, rollStepped, clamp(vRollJump, 0.0, 1.0)));
+    }
+
+    float scany = floor(uv.y * YRES + 0.5);
+
+    // The original used iFrame % 2 for the interlace flicker.
+    float mframe = mod(floor(time), 2.0);
+    uv.y += mframe * scanFlicker / YRES;
+
+    // Interference: a per-line horizontal shift, occasionally much larger.
+    float r = random(float2(0.0, scany), t);
+    if (r > 0.995) { r *= 3.0; }
+    float ifx1 = interference1 * 2.0 / res.x * r;
+    float ifx2 = interference2 * (r * peak(uv.y, 0.2, 0.2));
+    uv.x += ifx1 - ifx2;
+
+    // Horizontal sync tear: a hashed subset of lines jump sideways. Keyed to
+    // floor(time) rather than the continuous t so a torn line is stable for
+    // the whole frame and the set of torn lines reshuffles on the next one -
+    // that reads as bursts of torn lines rather than a single wobbling one.
+    float tearOn  = step(random(float2(scany, 91.7), floor(time)), clamp(hTearDensity, 0.0, 1.0));
+    float tearMag = random(float2(scany, 47.3), floor(time)) * 2.0 - 1.0;
+    uv.x += tearOn * tearMag * hTear / res.x;
+
+    // A scanline is a fixed-length signal, so shifting it sideways WRAPS - the
+    // picture pushed off one end arrives at the other. Leaving it unwrapped
+    // opened a transparent gap at the end of every torn or interfered line,
+    // which no television does. Guarded like vRoll above so the default stays
+    // bit-exact and an out-of-layer coordinate is never folded into picture.
+    if (ifx1 != 0.0 || ifx2 != 0.0 || tearOn > 0.0) {
+        uv.x = fract(uv.x);
+    }
+
+    // Both kernels are DERIVED at runtime rather than being tables of literal
+    // coefficients - see lowpassTap(). Two reasons, and the second is the one
+    // that shows on screen.
+    //
+    // Provenance: a hand-specified coefficient table is data, not something
+    // recomputable from a description, so it carries whatever licence its
+    // author's did. A windowed-sinc lowpass is the textbook design for exactly
+    // this job and follows from the sampling parameters alone.
+    //
+    // Behaviour: a fixed table is only correct at the tap spacing it was solved
+    // for. Deriving from Bandwidth and the tap rate keeps the response right at
+    // every Blur Size and Chroma Size, and makes the passband a control rather
+    // than a constant - which is the real parameter in a decoder, and what sets
+    // how far colour bleeds sideways.
+    //
+    // Measuring the original's response first was what made the replacement
+    // work. Its luma kernel is NOT a lowpass: it is flat at DC, peaks at 2.9x
+    // around a tenth of the tap rate, and nulls just above - a large aperture
+    // correction, which is what real receivers applied to claw back the
+    // sharpness the camera and the tube's spot size had cost. That peak is
+    // where the crunchy, edgy look comes from, and a plain lowpass loses it
+    // entirely. So Peaking is a control here, defaulting to the 2.9 that was
+    // measured, and the stopband comes out cleaner than the original's on top.
+    float d   = 1.0 / XRES * (blurSize + ifx2 * 100.0);
+    float dc1 = d * chromaSize;
+    // Q is filtered harder than I, which is where NTSC's directional colour
+    // bleed comes from. PAL filters both axes alike.
+    float dc2 = system < 0.5 ? dc1 * max(qNarrow, 1.0) : dc1;
+
+    float line = floor(uv.y * YRES);
+    float s = mod(line, 2.0) < 0.5 ? 1.0 : -1.0;
+    float lineStep = 1.0 / YRES;
+    // Mid-line y, so the encoder's and decoder's floor() always agree.
+    float yCentre = (line + 0.5) * lineStep;
+    float delay = system < 0.5 ? 0.0 : clamp(1.0 - hanover, 0.0, 1.0);
+
+    // Normalised cutoffs. Bandwidth scales both; the clamp keeps the design
+    // between "so narrow nothing survives" and Nyquist.
+    float bw    = max(bandwidth, 0.01);
+    float fcL   = clamp(LUMA_FC   * bw, 0.005, 0.49);
+    float fcC   = clamp(CHROMA_FC * bw, 0.005, 0.49);
+    float pk    = max(peaking, 0.0);
+
+    // Luma runs the SAME taps through two cutoffs at once and takes the
+    // difference - an unsharp, which costs a second weight per tap and no
+    // extra reads. Each lowpass is normalised on its own before they are
+    // combined, so the (1 + pk) and -pk weights leave DC gain at exactly 1
+    // however hard the peaking is driven.
+    float  lWide = 0.0, lNarrow = 0.0, sumWide = 0.0, sumNarrow = 0.0;
+    for (int i = -LUMA_HALF; i <= LUMA_HALF; i++) {
+        float n  = float(i);
+        float wa = lowpassTap(n, fcL, float(LUMA_HALF));
+        float wb = lowpassTap(n, fcL * PEAK_RATIO, float(LUMA_HALF));
+        float tap = lumaTap(uv, n, d);
+        lWide   += tap * wa;  sumWide   += wa;
+        lNarrow += tap * wb;  sumNarrow += wb;
+    }
+    float lsignal = (1.0 + pk) * (lWide / max(sumWide, 1e-4))
+                          - pk * (lNarrow / max(sumNarrow, 1e-4));
+
+    // Chroma is a plain lowpass - measuring the original's response found no
+    // peaking in it at all, only a leaky stopband that let high-frequency luma
+    // through into the colour difference signals. That leak is not worth
+    // reproducing: Crosstalk and Cross Colour make that artefact deliberately,
+    // and controllably.
+    float2 csignal = float2(0.0);
+    float  csum = 0.0;
+    for (int i = -CHROMA_HALF; i <= CHROMA_HALF; i++) {
+        float n = float(i);
+        float w = lowpassTap(n, fcC, float(CHROMA_HALF));
+        csignal += chromaTap(uv, n, dc1, dc2, s, yCentre, lineStep, delay) * w;
+        csum += w;
+    }
+    csignal /= max(csum, 1e-4);
+
+
+    // Unfiltered signal, for the blur mixes and for cross colour.
+    float3 raw = sigAt(uv);
+    // Unfiltered chroma is read mid-line too, for the same reason.
+    float3 rawMid = system < 0.5 ? raw : sigAt(float2(uv.x, yCentre));
+    float2 rawC = float2(rawMid.y, system < 0.5 ? rawMid.z : rawMid.z * s);
+
+    float3 signal = float3(
+        raw.x * (1.0 - blur) + blur * lsignal,
+        mix(rawC.x, csignal.x, clamp(chromaBlur, 0.0, 1.0)),
+        mix(rawC.y, csignal.y, clamp(chromaBlur, 0.0, 1.0)));
+
+    // Multipath ghosting: a delayed, attenuated echo of the same composite
+    // signal arriving from a second, longer aerial path. Added rather than
+    // blended, because that is what a real reflection does to the RF signal
+    // before it is ever demodulated - and offset in +x so it trails to the
+    // right, as a real reflection does.
+    if (ghostAmount > 0.0) {
+        float3 ghost = sigAt(uv + float2(ghostDelay / res.x, 0.0));
+        signal += ghost * ghostAmount * 0.5;
+    }
+
+    // Zeroable, so the signal path can be checked for a neutral round trip.
+    float scanl = mix(1.0, 0.5 + 0.5 * abs(sin(PI * uv.y * YRES)),
+                      clamp(scanlines, 0.0, 1.0));
+
+    // Subcarrier phase, in real cycles per line, advancing line to line. This
+    // is what makes PAL's dot pattern visibly finer and slower than NTSC's.
+    float phase = TAU * (cyclesPerLine() * uv.x
+                       + lineAdvance() * line
+                       + t * 60.0 * 0.6667);
+
+    // Cross colour: fine luma detail leaking into the chroma demodulator, which
+    // is the rainbow that appears on herringbone jackets and fine stripes.
+    float detail = raw.x - lsignal;
+    signal.yz += crossColour * detail * float2(cos(phase), sin(phase));
+
+    // Hanover bars: an alternating hue error, strongest where the delay line
+    // has been weakened. Rotating the chroma vector is the honest way to do it,
+    // because a phase error is a rotation.
+    if (system > 0.5 && hanover > 0.0) {
+        float e = hanover * 0.6 * s;
+        float cs = cos(e), sn = sin(e);
+        signal.yz = float2(signal.y * cs - signal.z * sn,
+                           signal.y * sn + signal.z * cs);
+    }
+
+    signal.x *= brightness;
+    signal.yz *= saturation;
+
+    // Subcarrier residue: chroma amplitude leaking back into the picture.
+    float scarrier = subcarrier * length(signal.yz);
+    float iMod = cos(phase);
+    float qMod = sin(phase);
+
+    signal.x  *= crosstalk * scarrier * qMod + 1.0 - ifx2 * 30.0;
+    signal.y  *= scarrier * iMod + 1.0;
+    signal.z  *= scarrier * qMod + 1.0;
+
+    float3 conv = system < 0.5 ? yiq2rgb(signal) : yuv2rgb(signal);
+    float3 rgb = clamp(vign * scanl * conv, 0.0, 1.0);
+
+    // Snow: aerial noise, heaviest where the picture is weakest (darkest),
+    // and clumping into intermittent bursts rather than a constant hiss.
+    if (snow > 0.0) {
+        float weakness  = 1.0 - clamp(dot(rgb, float3(0.299, 0.587, 0.114)), 0.0, 1.0);
+        float speckle   = random(fragCoord, floor(time)) * 2.0 - 1.0;
+        float burstHash = random(float2(3.0, 7.0), floor(time * 6.0));
+        float envelope  = mix(1.0, burstHash, clamp(snowBurst, 0.0, 1.0));
+        rgb = clamp(rgb + speckle * snow * weakness * envelope, 0.0, 1.0);
+    }
+
+    // Carry the layer's matte through, shaped by the tube vignette.
+    half4 srcOrig = original.eval(fragCoord);
+    half a = half(clamp(float(srcOrig.a) * vign, 0.0, 1.0));
+
+    return mix(srcOrig, half4(half3(rgb) * a, a), half(clamp(amount, 0.0, 1.0)));
+}

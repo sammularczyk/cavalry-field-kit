@@ -1,0 +1,227 @@
+{
+  "author": "samMularczyk",
+  "type": "hatching",
+  "superType": "thirdPartyFilter",
+  "version": "1.0",
+  "skslFile": "hatching.sksl",
+  "attributes": {
+    "pattern": {
+      "type": "enum",
+      "default": 0,
+      "enumValues": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5,
+        6
+      ]
+    },
+    "size": {
+      "type": "double",
+      "default": 10.0,
+      "min": 1.0,
+      "softMax": 128.0,
+      "step": 0.1
+    },
+    "lineWidth": {
+      "type": "double",
+      "default": 1.5,
+      "min": 0.5,
+      "softMax": 64.0,
+      "step": 0.1
+    },
+    "angle": {
+      "type": "double",
+      "default": 0.0,
+      "softMin": -180.0,
+      "softMax": 180.0,
+      "step": 0.5,
+      "dimming": "pattern != 3"
+    },
+    "softness": {
+      "type": "double",
+      "default": 0.06,
+      "min": 0.001,
+      "max": 0.5,
+      "step": 0.005,
+      "dimming": "pattern <= 2"
+    },
+    "threshold1": {
+      "type": "double",
+      "default": 1.0,
+      "min": 0.0,
+      "max": 1.74,
+      "step": 0.01,
+      "dimming": "pattern != 0"
+    },
+    "threshold2": {
+      "type": "double",
+      "default": 0.7,
+      "min": 0.0,
+      "max": 1.74,
+      "step": 0.01,
+      "dimming": "pattern != 0"
+    },
+    "threshold3": {
+      "type": "double",
+      "default": 0.5,
+      "min": 0.0,
+      "max": 1.74,
+      "step": 0.01,
+      "dimming": "pattern != 0"
+    },
+    "threshold4": {
+      "type": "double",
+      "default": 0.3,
+      "min": 0.0,
+      "max": 1.74,
+      "step": 0.01,
+      "dimming": "pattern != 0"
+    },
+    "offset": {
+      "type": "double",
+      "default": 5.0,
+      "step": 0.1,
+      "dimming": "pattern != 0"
+    },
+    "warpAmount": {
+      "type": "double",
+      "default": 0.03,
+      "min": 0.0,
+      "softMax": 0.5,
+      "step": 0.001,
+      "dimming": "pattern != 1"
+    },
+    "warpFrequency": {
+      "type": "double",
+      "default": 10.0,
+      "min": 0.0,
+      "softMax": 60.0,
+      "step": 0.1,
+      "dimming": "pattern != 1"
+    },
+    "layers": {
+      "type": "double",
+      "default": 6.0,
+      "min": 1.0,
+      "max": 6.0,
+      "step": 1.0,
+      "dimming": "pattern != 1"
+    },
+    "brightness": {
+      "type": "double",
+      "default": 1.4,
+      "min": 0.0,
+      "softMax": 4.0,
+      "step": 0.01,
+      "dimming": "pattern != 2"
+    },
+    "invert": {
+      "type": "bool",
+      "default": false,
+      "dimming": "pattern != 2"
+    },
+    "inkColor": {
+      "type": "color",
+      "default": {
+        "type": "Color",
+        "r": 0,
+        "g": 0,
+        "b": 0,
+        "a": 255
+      }
+    },
+    "paperColor": {
+      "type": "color",
+      "default": {
+        "type": "Color",
+        "r": 255,
+        "g": 255,
+        "b": 255,
+        "a": 255
+      },
+      "dimming": "transparentPaper == true"
+    },
+    "transparentPaper": {
+      "type": "bool",
+      "default": false
+    },
+    "amount": {
+      "type": "double",
+      "default": 1.0,
+      "min": 0.0,
+      "max": 1.0,
+      "step": 0.01
+    }
+  },
+  "triggers": {
+    "out": [
+      "pattern",
+      "size",
+      "lineWidth",
+      "angle",
+      "softness",
+      "threshold1",
+      "threshold2",
+      "threshold3",
+      "threshold4",
+      "offset",
+      "warpAmount",
+      "warpFrequency",
+      "layers",
+      "brightness",
+      "invert",
+      "inkColor",
+      "paperColor",
+      "transparentPaper",
+      "amount"
+    ]
+  },
+  "UI": {
+    "icon": "hatching.png",
+    "tabs": [
+      {
+        "id": "filter",
+        "attributeOrder": [
+          "pattern",
+          "size",
+          "lineWidth",
+          "---A",
+          "angle",
+          "softness"
+        ]
+      },
+      {
+        "id": "levels",
+        "attributeOrder": [
+          "---Crosshatch",
+          "threshold1",
+          "threshold2",
+          "threshold3",
+          "threshold4",
+          "offset",
+          "---Currency",
+          "warpAmount",
+          "warpFrequency",
+          "layers",
+          "---Cross Stitch",
+          "brightness",
+          "invert"
+        ]
+      },
+      {
+        "id": "output",
+        "attributeOrder": [
+          "inkColor",
+          "paperColor",
+          "transparentPaper",
+          "---A",
+          "amount",
+          "---Inspired by JeGX & Preciado"
+        ]
+      }
+    ]
+  }
+}

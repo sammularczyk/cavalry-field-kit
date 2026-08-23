@@ -1,0 +1,34 @@
+// Glow, pass 1 of 13 - Field Kit
+// Grades the source down to just the light that should emit.
+//
+// Inspired by "apGlow" v1.2 by Adrian Pueyo, whose Grade-then-glow structure
+// this is, and by "20151110_VHS"-era anamorphic streak looks for the directional
+// half.
+//
+// This pass exists on its own so nothing does double duty: pass 0 must NOT
+// declare `uniform shader original` - there is no such input on the first pass
+// and the shader fails to BUILD, silently contributing nothing. On pass 0
+// `childShader` IS the layer.
+
+uniform float  srcBlack;
+uniform float  srcWhite;
+uniform float  response;
+
+uniform float2 resolution;
+uniform float2 rectCentre;
+
+uniform shader childShader;   // pass 1 input = the layer being filtered
+
+half4 main(float2 fragCoord) {
+    half4 c = childShader.eval(fragCoord);
+    float3 lin = c.a > 0.0 ? float3(c.rgb / c.a) : float3(0.0);
+
+    float bp = srcBlack;
+    float wp = max(srcWhite, bp + 0.0001);
+    float3 h = pow(clamp((lin - bp) / (wp - bp), 0.0, 1e4),
+                   float3(max(response, 0.0001)));
+
+    // Unpremultiplied, alpha 1: this is an emission buffer, not a picture, and
+    // the passes downstream read it straight.
+    return half4(half3(clamp(h, 0.0, 64.0)), half(1.0));
+}

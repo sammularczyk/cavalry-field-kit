@@ -1,0 +1,458 @@
+{
+  "author": "samMularczyk",
+  "type": "lensFlare",
+  "superType": "thirdPartyFilter",
+  "version": "1.0",
+  "paddingExpression": "ceil(max(max(haloRadius + haloWidth, streakLength), max(starLength, ghostSpacing * 9.0 * 300.0)))",
+  "passes": [
+    {
+      "skslFile": "lensFlareEmitter.sksl",
+      "uniforms": [
+        "placement",
+        "position",
+        "threshold",
+        "gamma"
+      ]
+    },
+    {
+      "skslFile": "lensFlareGhosts.sksl",
+      "uniforms": [
+        "colourSource",
+        "brightnessSource",
+        "flareColour",
+        "threshold",
+        "gamma",
+        "lens",
+        "ghostCount",
+        "ghostSpacing",
+        "ghostScale",
+        "ghostChromatic",
+        "ghostCatsEye",
+        "ghostCatsEyeFalloff",
+        "ghostIntensity",
+        "ghostSoft",
+        "blades",
+        "streakLength",
+        "streakAngle",
+        "streakTint",
+        "streakIntensity",
+        "starLength",
+        "starRotation",
+        "starSoftness",
+        "starGlow",
+        "starIntensity"
+      ]
+    },
+    {
+      "skslFile": "lensFlareHalo.sksl",
+      "uniforms": [
+        "threshold",
+        "gamma",
+        "haloRadius",
+        "haloWidth",
+        "haloChromatic",
+        "haloBlur",
+        "colourSource",
+        "brightnessSource",
+        "flareColour",
+        "haloIntensity"
+      ]
+    },
+    {
+      "skslFile": "lensFlareCombine.sksl",
+      "uniforms": [
+        "intensity",
+        "tint",
+        "blend",
+        "amount"
+      ]
+    }
+  ],
+  "attributes": {
+    "placement": {
+      "type": "enum",
+      "default": 1,
+      "enumValues": [
+        0,
+        1
+      ]
+    },
+    "position": {
+      "type": "double2",
+      "default": {
+        "x": 0.0,
+        "y": 0.0
+      },
+      "children": {
+        "*": {
+          "step": 1.0
+        }
+      },
+      "dimming": "placement == 0"
+    },
+    "colourSource": {
+      "type": "enum",
+      "default": 1,
+      "enumValues": [
+        0,
+        1
+      ]
+    },
+    "brightnessSource": {
+      "type": "enum",
+      "default": 1,
+      "enumValues": [
+        0,
+        1
+      ]
+    },
+    "flareColour": {
+      "type": "color",
+      "default": {
+        "type": "Color",
+        "r": 255,
+        "g": 214,
+        "b": 170,
+        "a": 255
+      },
+      "dimming": "colourSource == 0"
+    },
+    "threshold": {
+      "type": "double",
+      "default": 0.8,
+      "min": 0.0,
+      "max": 0.999,
+      "step": 0.01,
+      "dimming": "placement == 1"
+    },
+    "gamma": {
+      "type": "double",
+      "default": 1.0,
+      "min": 0.1,
+      "softMax": 8.0,
+      "step": 0.05,
+      "dimming": "placement == 1"
+    },
+    "lens": {
+      "type": "enum",
+      "default": 0,
+      "enumValues": [
+        0,
+        1,
+        2
+      ],
+      "dimming": "ghostIntensity <= 0"
+    },
+    "ghostIntensity": {
+      "type": "double",
+      "default": 0.6,
+      "min": 0.0,
+      "softMax": 4.0,
+      "step": 0.05
+    },
+    "ghostSoft": {
+      "type": "double",
+      "default": 0.7,
+      "min": 0.0,
+      "max": 1.0,
+      "step": 0.01
+    },
+    "ghostCount": {
+      "type": "double",
+      "default": 5.0,
+      "min": 0.0,
+      "max": 8.0,
+      "step": 1.0,
+      "dimming": "ghostIntensity <= 0"
+    },
+    "ghostSpacing": {
+      "type": "double",
+      "default": 0.5,
+      "min": 0.0,
+      "softMax": 3.0,
+      "step": 0.05,
+      "dimming": "ghostIntensity <= 0"
+    },
+    "ghostScale": {
+      "type": "double",
+      "default": 0.5,
+      "min": 0.01,
+      "softMax": 3.0,
+      "step": 0.01,
+      "dimming": "ghostIntensity <= 0"
+    },
+    "ghostChromatic": {
+      "type": "double",
+      "default": 0.5,
+      "min": 0.0,
+      "softMax": 40.0,
+      "step": 0.5,
+      "dimming": "ghostIntensity <= 0"
+    },
+    "ghostCatsEye": {
+      "type": "double",
+      "default": 0.4,
+      "min": 0.0,
+      "max": 1.0,
+      "step": 0.01,
+      "dimming": "ghostIntensity <= 0"
+    },
+    "ghostCatsEyeFalloff": {
+      "type": "double",
+      "default": 1.0,
+      "min": 0.1,
+      "softMax": 4.0,
+      "step": 0.05,
+      "dimming": "ghostIntensity <= 0"
+    },
+    "blades": {
+      "type": "double",
+      "default": 6.0,
+      "min": 0.0,
+      "softMax": 12.0,
+      "step": 1.0,
+      "dimming": "ghostIntensity <= 0"
+    },
+    "haloIntensity": {
+      "type": "double",
+      "default": 0.4,
+      "min": 0.0,
+      "softMax": 4.0,
+      "step": 0.05
+    },
+    "haloRadius": {
+      "type": "double",
+      "default": 250.0,
+      "min": 0.0,
+      "softMax": 2000.0,
+      "step": 1.0,
+      "dimming": "haloIntensity <= 0"
+    },
+    "haloWidth": {
+      "type": "double",
+      "default": 40.0,
+      "min": 0.5,
+      "softMax": 400.0,
+      "step": 1.0,
+      "dimming": "haloIntensity <= 0"
+    },
+    "haloChromatic": {
+      "type": "double",
+      "default": 0.5,
+      "min": 0.0,
+      "softMax": 40.0,
+      "step": 0.5,
+      "dimming": "haloIntensity <= 0"
+    },
+    "haloBlur": {
+      "type": "double",
+      "default": 10.0,
+      "min": 0.0,
+      "softMax": 120.0,
+      "step": 0.5,
+      "dimming": "haloIntensity <= 0"
+    },
+    "starIntensity": {
+      "type": "double",
+      "default": 0.5,
+      "min": 0.0,
+      "softMax": 4.0,
+      "step": 0.05
+    },
+    "starLength": {
+      "type": "double",
+      "default": 400.0,
+      "min": 0.0,
+      "softMax": 3000.0,
+      "step": 1.0,
+      "dimming": "starIntensity <= 0"
+    },
+    "starRotation": {
+      "type": "double",
+      "default": 0.0,
+      "softMin": -180.0,
+      "softMax": 180.0,
+      "step": 0.5,
+      "dimming": "starIntensity <= 0"
+    },
+    "starSoftness": {
+      "type": "double",
+      "default": 1.0,
+      "min": 0.0,
+      "softMax": 4.0,
+      "step": 0.05,
+      "dimming": "starIntensity <= 0"
+    },
+    "starGlow": {
+      "type": "double",
+      "default": 0.45,
+      "min": 0.0,
+      "max": 1.0,
+      "step": 0.01,
+      "dimming": "starIntensity <= 0"
+    },
+    "streakIntensity": {
+      "type": "double",
+      "default": 0.0,
+      "min": 0.0,
+      "softMax": 4.0,
+      "step": 0.05
+    },
+    "streakLength": {
+      "type": "double",
+      "default": 600.0,
+      "min": 0.0,
+      "softMax": 4000.0,
+      "step": 1.0,
+      "dimming": "streakIntensity <= 0"
+    },
+    "streakAngle": {
+      "type": "double",
+      "default": 0.0,
+      "softMin": -180.0,
+      "softMax": 180.0,
+      "step": 0.5,
+      "dimming": "streakIntensity <= 0"
+    },
+    "streakTint": {
+      "type": "color",
+      "default": {
+        "type": "Color",
+        "r": 255,
+        "g": 255,
+        "b": 255,
+        "a": 255
+      },
+      "dimming": "streakIntensity <= 0"
+    },
+    "intensity": {
+      "type": "double",
+      "default": 0.5,
+      "min": 0.0,
+      "softMax": 8.0,
+      "step": 0.05
+    },
+    "tint": {
+      "type": "color",
+      "default": {
+        "type": "Color",
+        "r": 255,
+        "g": 255,
+        "b": 255,
+        "a": 255
+      },
+      "dimming": "intensity <= 0"
+    },
+    "blend": {
+      "type": "enum",
+      "default": 0,
+      "enumValues": [
+        0,
+        1,
+        2,
+        3
+      ]
+    },
+    "amount": {
+      "type": "double",
+      "default": 1.0,
+      "min": 0.0,
+      "max": 1.0,
+      "step": 0.01
+    }
+  },
+  "triggers": {
+    "out": [
+      "placement",
+      "position",
+      "colourSource",
+      "brightnessSource",
+      "flareColour",
+      "threshold",
+      "gamma",
+      "lens",
+      "ghostIntensity",
+      "ghostSoft",
+      "ghostCount",
+      "ghostSpacing",
+      "ghostScale",
+      "ghostChromatic",
+      "ghostCatsEye",
+      "ghostCatsEyeFalloff",
+      "blades",
+      "haloIntensity",
+      "haloRadius",
+      "haloWidth",
+      "haloChromatic",
+      "haloBlur",
+      "starIntensity",
+      "starLength",
+      "starRotation",
+      "starSoftness",
+      "starGlow",
+      "streakIntensity",
+      "streakLength",
+      "streakAngle",
+      "streakTint",
+      "intensity",
+      "tint",
+      "blend",
+      "amount"
+    ]
+  },
+  "UI": {
+    "tabs": [
+      {
+        "id": "filter",
+        "attributeOrder": [
+          "placement",
+          "position",
+          "intensity",
+          "colourSource",
+          "brightnessSource",
+          "flareColour",
+          "tint",
+          "amount",
+          "blend",
+          "---Auto placement",
+          "threshold",
+          "gamma",
+          "---Starburst",
+          "starIntensity",
+          "starLength",
+          "starRotation",
+          "starSoftness",
+          "starGlow",
+          "blades",
+          "---Streak",
+          "streakIntensity",
+          "streakLength",
+          "streakAngle",
+          "streakTint"
+        ]
+      },
+      {
+        "id": "artifacts",
+        "attributeOrder": [
+          "lens",
+          "ghostIntensity",
+          "ghostSoft",
+          "ghostCount",
+          "ghostSpacing",
+          "ghostScale",
+          "ghostChromatic",
+          "ghostCatsEye",
+          "ghostCatsEyeFalloff",
+          "---Halo",
+          "haloIntensity",
+          "haloRadius",
+          "haloWidth",
+          "haloChromatic",
+          "haloBlur",
+          "---Ghosts ported from flaresim_nuke, LocalStarlight (MIT). Streak/halo inspired by Ultimate Lens Flare, ektogamat (CC0)"
+        ]
+      }
+    ],
+    "icon": "lensFlare.png"
+  }
+}

@@ -1,0 +1,49 @@
+{
+  "type": "layerStrings",
+  "value": {
+    "author": "samMularczyk",
+    "layerType": "led",
+    "niceName": "LED",
+    "layerInfo": "LED matrix. Each cell becomes one lamp, with control over spacing, roundness, size and gap.",
+    "language": "en",
+    "attributes": {
+      "cellSize": [
+        "Cell Size",
+        "Grid pitch in pixels - the spacing between lamps."
+      ],
+      "stagger": [
+        "Stagger",
+        "Offsets alternate rows. Zero is a square grid, one is a fully offset hex grid."
+      ],
+      "dotSize": [
+        "Dot Size",
+        "Lamp diameter as a fraction of the cell. Above one the lamps touch and merge."
+      ],
+      "roundness": [
+        "Roundness",
+        "Zero is a square lamp, one is a circle."
+      ],
+      "softness": [
+        "Softness",
+        "Edge falloff in pixels. Raise it for a glowing lamp, drop it for a hard pixel."
+      ],
+      "sizeFromBrightness": [
+        "Size From Brightness",
+        "Drives lamp radius from image brightness, so dark areas get small lamps. This is the behaviour of the original lightbulb shader."
+      ],
+      "perChannel": [
+        "Per Channel",
+        "Drive each colour's lamp separately rather than one lamp tinted by the pixel."
+      ],
+      "bgColor": [
+        "Background",
+        "Colour filling the gaps between lamps."
+      ],
+      "amount": [
+        "Amount",
+        "Mix between the original layer and the LED result."
+      ]
+    },
+    "tabs": {}
+  }
+}

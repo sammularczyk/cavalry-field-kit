@@ -1,0 +1,210 @@
+// Godray - Field Kit
+// Volumetric light shafts (crepuscular rays) radiating from a point, or
+// travelling in parallel from a direction - the shafts you get through cloud
+// or a window. Nothing else in this kit does this: Glow is highlight bloom,
+// Lens Flare is ghost geometry.
+//
+// Ported from pixi.js filters' GodrayFilter (MIT licence),
+// github.com/pixijs/filters, src/godray - itself after a codepen original by
+// Alain Galvan. The turbulence underneath is Ashima/Stefan Gustavson's
+// classic periodic Perlin noise (webgl-noise, MIT), which pixi's own filter
+// also uses verbatim; it is reproduced here the same way.
+//
+// pixi's filter runs in Y-DOWN texture space (0,0 top-left) on premultiplied-
+// alpha-agnostic render targets, and its `center` is an absolute pixel
+// position. This port works in Cavalry's Y-UP, pixel-centre-addressed,
+// premultiplied convention instead: the frame coordinate is flipped to Y-down
+// before reusing pixi's own ray-projection formulas, `light` is an offset
+// from the layer centre (matching every other position control in this kit)
+// rather than an absolute position, and the ray brightness is folded into
+// BOTH colour and alpha on the way out, since the shafts spread across the
+// whole frame rather than staying inside whatever alpha the layer arrived
+// with - alpha has to follow them out or they get clipped to the layer's
+// shape. `density` is this port's own addition, standing in for the fixed
+// real-pixel frequency pixi's version got for free from working in absolute
+// texture units instead of a normalised 0..1 frame.
+//
+// gain <= 0 or amount <= 0 is an exact passthrough.
+//
+// Uniform order matches the attribute order in definitions.json. Single pass
+// (pass 0), so the layer is read only through childShader - there is no
+// "original" input on the first pass.
+
+uniform float  angle;        // degrees; ray direction when parallel
+uniform float  parallel;     // bool: true = parallel rays, false = radiating
+uniform float2 light;        // px offset from layer centre; radiating only
+uniform float  gain;         // 0 = passthrough; turbulence octave gain
+uniform float  lacunarity;   // frequency multiplier per octave
+uniform float  density;      // shaft frequency/spacing
+uniform float  speed;        // drift rate of the turbulence
+uniform float  blur;         // softens the shafts across their width
+uniform float  time;         // auto-connected to comp time
+uniform float  amount;       // 0..1 overall opacity
+
+uniform float2 resolution;
+uniform float2 rectCentre;
+
+uniform shader childShader;   // pass 0 input = the layer being filtered
+
+// --- Ashima/Stefan Gustavson periodic Perlin noise (webgl-noise, MIT) ---
+// Straight translation of perlin.frag from pixi.js filters' godray source -
+// vecN becomes floatN, everything else is unchanged.
+
+float3 mod289f3(float3 x) { return x - floor(x * (1.0 / 289.0)) * 289.0; }
+float4 mod289f4(float4 x) { return x - floor(x * (1.0 / 289.0)) * 289.0; }
+float4 permute(float4 x) { return mod289f4(((x * 34.0) + 1.0) * x); }
+float4 taylorInvSqrt(float4 r) { return 1.79284291400159 - 0.85373472095314 * r; }
+float3 noiseFade(float3 t) { return t * t * t * (t * (t * 6.0 - 15.0) + 10.0); }
+
+// Classic Perlin noise, periodic variant.
+float pnoise(float3 P, float3 rep) {
+    float3 Pi0 = mod(floor(P), rep);
+    float3 Pi1 = mod(Pi0 + float3(1.0), rep);
+    Pi0 = mod289f3(Pi0);
+    Pi1 = mod289f3(Pi1);
+    float3 Pf0 = fract(P);
+    float3 Pf1 = Pf0 - float3(1.0);
+    float4 ix = float4(Pi0.x, Pi1.x, Pi0.x, Pi1.x);
+    float4 iy = float4(Pi0.yy, Pi1.yy);
+    float4 iz0 = float4(Pi0.zzzz);
+    float4 iz1 = float4(Pi1.zzzz);
+
+    float4 ixy = permute(permute(ix) + iy);
+    float4 ixy0 = permute(ixy + iz0);
+    float4 ixy1 = permute(ixy + iz1);
+
+    float4 gx0 = ixy0 * (1.0 / 7.0);
+    float4 gy0 = fract(floor(gx0) * (1.0 / 7.0)) - 0.5;
+    gx0 = fract(gx0);
+    float4 gz0 = float4(0.5) - abs(gx0) - abs(gy0);
+    float4 sz0 = step(gz0, float4(0.0));
+    gx0 -= sz0 * (step(0.0, gx0) - 0.5);
+    gy0 -= sz0 * (step(0.0, gy0) - 0.5);
+
+    float4 gx1 = ixy1 * (1.0 / 7.0);
+    float4 gy1 = fract(floor(gx1) * (1.0 / 7.0)) - 0.5;
+    gx1 = fract(gx1);
+    float4 gz1 = float4(0.5) - abs(gx1) - abs(gy1);
+    float4 sz1 = step(gz1, float4(0.0));
+    gx1 -= sz1 * (step(0.0, gx1) - 0.5);
+    gy1 -= sz1 * (step(0.0, gy1) - 0.5);
+
+    float3 g000 = float3(gx0.x, gy0.x, gz0.x);
+    float3 g100 = float3(gx0.y, gy0.y, gz0.y);
+    float3 g010 = float3(gx0.z, gy0.z, gz0.z);
+    float3 g110 = float3(gx0.w, gy0.w, gz0.w);
+    float3 g001 = float3(gx1.x, gy1.x, gz1.x);
+    float3 g101 = float3(gx1.y, gy1.y, gz1.y);
+    float3 g011 = float3(gx1.z, gy1.z, gz1.z);
+    float3 g111 = float3(gx1.w, gy1.w, gz1.w);
+
+    float4 norm0 = taylorInvSqrt(float4(dot(g000, g000), dot(g010, g010), dot(g100, g100), dot(g110, g110)));
+    g000 *= norm0.x; g010 *= norm0.y; g100 *= norm0.z; g110 *= norm0.w;
+    float4 norm1 = taylorInvSqrt(float4(dot(g001, g001), dot(g011, g011), dot(g101, g101), dot(g111, g111)));
+    g001 *= norm1.x; g011 *= norm1.y; g101 *= norm1.z; g111 *= norm1.w;
+
+    float n000 = dot(g000, Pf0);
+    float n100 = dot(g100, float3(Pf1.x, Pf0.yz));
+    float n010 = dot(g010, float3(Pf0.x, Pf1.y, Pf0.z));
+    float n110 = dot(g110, float3(Pf1.xy, Pf0.z));
+    float n001 = dot(g001, float3(Pf0.xy, Pf1.z));
+    float n101 = dot(g101, float3(Pf1.x, Pf0.y, Pf1.z));
+    float n011 = dot(g011, float3(Pf0.x, Pf1.yz));
+    float n111 = dot(g111, Pf1);
+
+    float3 fadeXYZ = noiseFade(Pf0);
+    float4 nZ  = mix(float4(n000, n100, n010, n110), float4(n001, n101, n011, n111), fadeXYZ.z);
+    float2 nYZ = mix(nZ.xy, nZ.zw, fadeXYZ.y);
+    float  nXYZ = mix(nYZ.x, nYZ.y, fadeXYZ.x);
+    return 2.2 * nXYZ;
+}
+
+// Six fixed octaves, matching pixi's own loop count. The bound is a compile-
+// time constant, since SkSL loop bounds cannot be driven by a uniform; `sum`
+// accumulates real noise samples on every iteration, never bare literals, so
+// it cannot fold away to a constant.
+float turbulence(float3 P, float3 rep, float lac, float g) {
+    float sum = 0.0;
+    float sc = 1.0;
+    float amp = 1.0;
+    for (int i = 0; i < 6; i++) {
+        sum += amp * pnoise(P * sc, rep);
+        sc *= lac;
+        amp *= g;
+    }
+    return abs(sum);
+}
+
+half4 main(float2 fragCoord) {
+    half4 src = childShader.eval(fragCoord);
+
+    // Exact passthrough - nothing upstream should be visible.
+    if (gain <= 0.0 || amount <= 0.0) { return src; }
+
+    float2 res = max(resolution, float2(1.0));
+    float aspect = res.y / res.x;
+
+    // fragCoord is pixel-centre addressed and Y-UP; pixi's ray-projection
+    // maths is written for a top-left-origin, Y-DOWN texture space, so build
+    // a normalised coordinate in THAT convention before reusing it.
+    float2 uv = (fragCoord - rectCentre) / res + 0.5;
+    uv.y = 1.0 - uv.y;
+
+    bool isParallel = parallel > 0.5;
+    float d;
+
+    if (isParallel) {
+        float rad  = radians(angle);
+        float cosA = cos(rad);
+        float sinA = sin(rad);
+        d = cosA * uv.x + sinA * uv.y * aspect;
+    } else {
+        // `light` is a pixel offset from the layer centre, same convention as
+        // every other position control in this kit - converted into the same
+        // flipped, normalised space as uv above.
+        float2 lightUV = float2(0.5 + light.x / res.x, 0.5 - light.y / res.y);
+        float dx = uv.x - lightUV.x;
+        float dy = (uv.y - lightUV.y) * aspect;
+        float dist = sqrt(dx * dx + dy * dy) + 0.00001;
+        d = dy / dist;
+    }
+
+    float dens = max(density, 0.001);
+    float3 dir = float3(d, d, 0.0) * dens;
+    // The 0.05 was baked in; Speed exposes it so the drift can be slowed to a
+    // crawl or stopped outright without disconnecting time.
+    float tt = time * max(speed, 0.0);
+    // Blur works ACROSS the shafts rather than over the picture: the pattern
+    // comes from the turbulence sampled along the angular coordinate, so
+    // averaging a few neighbouring angles softens shaft edges without
+    // touching the image itself, and costs nothing at zero.
+    float2 lac = float2(max(lacunarity, 0.0001), clamp(gain, 0.0, 1.0));
+    float noise = turbulence(dir + float3(tt, 0.0, 62.1 + tt), float3(480.0, 320.0, 480.0),
+                              lac.x, lac.y);
+    float bl = max(blur, 0.0);
+    if (bl > 0.0) {
+        float e = bl * 0.035 * dens;
+        float3 dA = float3(d - e, d - e, 0.0) * dens;
+        float3 dB = float3(d + e, d + e, 0.0) * dens;
+        float nA = turbulence(dA + float3(tt, 0.0, 62.1 + tt), float3(480.0, 320.0, 480.0), lac.x, lac.y);
+        float nB = turbulence(dB + float3(tt, 0.0, 62.1 + tt), float3(480.0, 320.0, 480.0), lac.x, lac.y);
+        noise = mix(noise, (nA + noise * 2.0 + nB) * 0.25, clamp(bl, 0.0, 1.0));
+    }
+    noise = mix(noise, 0.0, 0.3);
+
+    // Fades out toward the far edge from the light, same vertical falloff
+    // pixi's own filter uses.
+    float mist = noise * (1.0 - uv.y);
+
+    float3 lin = src.a > 0.0 ? float3(src.rgb / src.a) : float3(0.0);
+    float3 rayColour  = float3(mist) * clamp(amount, 0.0, 1.0);
+    float3 outColour  = clamp(lin + rayColour, 0.0, 1.0);
+
+    // The shafts spread past wherever the source layer had alpha, so alpha
+    // has to follow the ray brightness out or it gets clipped to the layer's
+    // own shape.
+    float rayAlpha = clamp(dot(rayColour, float3(0.3333)), 0.0, 1.0);
+    half a = half(clamp(max(float(src.a), rayAlpha), 0.0, 1.0));
+
+    return half4(half3(outColour) * a, a);
+}

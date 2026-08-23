@@ -1,0 +1,80 @@
+// Polar Coordinates - Field Kit
+// After Effects' Polar Coordinates: remaps the frame between rectangular and
+// polar space.
+//
+// Rect to Polar puts the source's TOP edge at the centre and wraps its bottom
+// edge around the outer circle, so source rows become rings and source columns
+// become spokes. Polar to Rect is the opposite mapping - it is a separate
+// mapping, not a numerical inverse, which is why AE exposes both.
+//
+// Interpolation lerps the remapped coordinate against the identity coordinate,
+// so 0% is a passthrough and 100% is the full remap.
+//
+// Uniform order matches the attribute order in definitions.json.
+
+uniform float  mapping;        // enum: 0 rect to polar, 1 polar to rect
+uniform float  interpolation;  // 0..1
+uniform float2 centre;         // offset from the layer centre, pixels
+uniform float  angleOffset;    // degrees, rotates theta
+uniform float  tileMode;       // enum: 0 clamp, 1 repeat, 2 mirror
+uniform float  amount;
+
+uniform float2 resolution;
+uniform float2 rectCentre;
+
+uniform shader childShader;
+
+const float TAU = 6.28318530718;
+
+// Wrap or fold a normalised coordinate according to the tile mode. Clamp is
+// left to the sampler's own edge behaviour via the guard in main().
+float2 tile(float2 uv) {
+    int m = int(tileMode);
+    if (m == 1) { return fract(uv); }
+    if (m == 2) {
+        float2 t = fract(uv * 0.5) * 2.0;
+        return 1.0 - abs(t - 1.0);
+    }
+    return clamp(uv, 0.0, 1.0);
+}
+
+half4 main(float2 fragCoord) {
+    float2 res = max(resolution, float2(1.0));
+    float2 c   = rectCentre + centre;
+
+    // Normalised destination coordinate, 0..1 with v = 0 at the TOP so the
+    // mapping matches AE's description. fragCoord is Y-up.
+    float2 uv = (fragCoord - rectCentre) / res + 0.5;
+    uv.y = 1.0 - uv.y;
+
+    float maxR = length(res * 0.5);
+    float ang  = radians(angleOffset);
+
+    float2 srcUv;
+    if (int(mapping) == 0) {
+        // Rect to Polar: where in the SOURCE does this polar pixel come from?
+        float2 p = fragCoord - c;
+        // theta measured clockwise from straight up, 0..1.
+        float theta = atan(p.x, p.y) + ang;
+        srcUv = float2(fract(theta / TAU + 1.0), clamp(length(p) / maxR, 0.0, 1.0));
+    } else {
+        // Polar to Rect: this pixel's u is an angle, its v a radius.
+        float theta = uv.x * TAU - ang;
+        float r     = uv.y * maxR;
+        float2 p    = float2(sin(theta), cos(theta)) * r;
+        srcUv = (p + c - rectCentre) / res + 0.5;
+        srcUv.y = 1.0 - srcUv.y;
+    }
+
+    float k = clamp(interpolation, 0.0, 1.0);
+    float2 mixUv = mix(uv, srcUv, k);
+    mixUv = tile(mixUv);
+
+    // Back to absolute, Y-up pixels.
+    float2 at = float2(mixUv.x, 1.0 - mixUv.y);
+    at = (at - 0.5) * res + rectCentre;
+
+    half4 src = childShader.eval(fragCoord);
+    half4 rem = childShader.eval(at);
+    return mix(src, rem, half(clamp(amount, 0.0, 1.0)));
+}

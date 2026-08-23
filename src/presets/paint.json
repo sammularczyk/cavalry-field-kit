@@ -1,0 +1,173 @@
+[
+  {
+    "presetType": "layer",
+    "id": "804d1f0d-0b2b-beec-d4d6-c158d3e12454",
+    "author": "samMularczyk",
+    "name": "Brushstroke",
+    "layerType": [
+      "paint"
+    ],
+    "attrs": [
+      {
+        "attrId": "style",
+        "value": 0
+      },
+      {
+        "attrId": "estimatorRadius",
+        "value": 24
+      },
+      {
+        "attrId": "estimatorTaps",
+        "value": 32
+      },
+      {
+        "attrId": "threshold",
+        "value": 0.4
+      },
+      {
+        "attrId": "blurRadius",
+        "value": 3.0
+      },
+      {
+        "attrId": "blurTaps",
+        "value": 15
+      },
+      {
+        "attrId": "strokeLength",
+        "value": 8.0
+      },
+      {
+        "attrId": "strokeWidth",
+        "value": 2.0
+      }
+    ],
+    "resetsTransforms": false,
+    "resetsLayer": true
+  },
+  {
+    "presetType": "layer",
+    "id": "adff5942-8f33-a36c-bc70-9cb8987a79ac",
+    "author": "samMularczyk",
+    "name": "Oil Paint",
+    "layerType": [
+      "paint"
+    ],
+    "attrs": [
+      {
+        "attrId": "style",
+        "value": 1
+      },
+      {
+        "attrId": "fieldMode",
+        "value": 0
+      },
+      {
+        "attrId": "flowMix",
+        "value": 0.5
+      },
+      {
+        "attrId": "mapChannel",
+        "value": 0
+      },
+      {
+        "attrId": "fieldStep",
+        "value": 2.0
+      },
+      {
+        "attrId": "intensity",
+        "value": 6.0
+      },
+      {
+        "attrId": "smear",
+        "value": 8.0
+      },
+      {
+        "attrId": "bristle",
+        "value": 0.35
+      },
+      {
+        "attrId": "perpendicular",
+        "value": false
+      }
+    ],
+    "resetsTransforms": false,
+    "resetsLayer": true
+  },
+  {
+    "presetType": "layer",
+    "id": "04a4746b-f32a-316d-e6f1-1e8edafd99be",
+    "author": "samMularczyk",
+    "name": "Watercolour",
+    "layerType": [
+      "paint"
+    ],
+    "attrs": [
+      {
+        "attrId": "style",
+        "value": 2
+      },
+      {
+        "attrId": "washes",
+        "value": 6
+      },
+      {
+        "attrId": "washRadius",
+        "value": 4.0
+      },
+      {
+        "attrId": "washThreshold",
+        "value": 0.15
+      },
+      {
+        "attrId": "transport",
+        "value": 10.0
+      },
+      {
+        "attrId": "edgeFlow",
+        "value": 0.7
+      },
+      {
+        "attrId": "washFlow",
+        "value": 0.4
+      },
+      {
+        "attrId": "flowJitter",
+        "value": 0.5
+      },
+      {
+        "attrId": "flowScale",
+        "value": 40.0
+      },
+      {
+        "attrId": "wetEdge",
+        "value": 6.0
+      },
+      {
+        "attrId": "wetEdgeScale",
+        "value": 40.0
+      },
+      {
+        "attrId": "edgeDarkening",
+        "value": 0.5
+      },
+      {
+        "attrId": "granulation",
+        "value": 0.35
+      },
+      {
+        "attrId": "granulationScale",
+        "value": 14.0
+      },
+      {
+        "attrId": "paperTexture",
+        "value": 0.5
+      },
+      {
+        "attrId": "paperColor",
+        "value": "#F7F2EB"
+      }
+    ],
+    "resetsTransforms": false,
+    "resetsLayer": true
+  }
+]

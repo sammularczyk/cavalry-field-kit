@@ -1,0 +1,150 @@
+{
+ "type": "layerStrings",
+ "value": {
+  "author": "samMularczyk",
+  "layerType": "display",
+  "niceName": "Display Simulation",
+  "layerInfo": "Screen emulation: sub-pixel structure, curvature, rounded tube corners, bloom and grain. Shadow Mask, Aperture Grille and Slot Mask are three real CRT dot geometries; LCD Stripe is an aligned RGB stripe with a grid line. The Beam tab adds a scanning electron beam with a trailing phosphor-decay glow.",
+  "language": "en",
+  "attributes": {
+   "distortion": [
+    "Curvature",
+    "Barrel curvature of the glass. The tube outline and corners bow with it."
+   ],
+   "overscan": [
+    "Overscan",
+    "How far the raster is drawn past the faceplate, as a real set does so the picture runs off the glass rather than showing an unpainted border. 1 fills the tube exactly at any distortion; below 1 the bowed raster edge becomes visible."
+   ],
+   "edges": [
+    "Edges",
+    "What to do where the curvature samples outside the layer. Transparent is honest - there is no picture there. Clamp smears the rim outward, Mirror reflects the picture back."
+   ],
+   "edgeTrim": [
+    "Edge Trim",
+    "Pixels to inset the edge that Clamp and Mirror fold against, so they reflect real picture rather than the layer's antialiased rim."
+   ],
+   "cornerRadius": [
+    "Corner Radius",
+    "Radius of the rounded tube corners, in pixels. Clamped to half the short side."
+   ],
+   "vignette": [
+    "Vignette",
+    "Brightness falloff toward the edges. The tube SHAPE comes from Corner Radius."
+   ],
+   "mask": [
+    "Mask",
+    "Sub-pixel structure. Shadow Mask, Aperture Grille and Slot Mask are hex-packed, wire and slot phosphor geometries; LCD Stripe is an aligned RGB stripe."
+   ],
+   "pixelSize": [
+    "Pixel Size",
+    "Size of one addressable pixel, in screen pixels. The same square cell for every mask, so switching Mask does not change the scale."
+   ],
+   "pixelate": [
+    "Pixelate",
+    "How much the picture is quantised to the pixel grid."
+   ],
+   "maskAmount": [
+    "Mask Amount",
+    "Strength of the sub-pixel mask against the unmasked picture."
+   ],
+   "gridGap": [
+    "Grid Gap",
+    "Darkness of the black grid line between LCD cells."
+   ],
+   "stagger": [
+    "Stagger",
+    "Offsets alternate columns. Zero reads as a flat panel; one gives the staggered CRT look."
+   ],
+   "dotSize": [
+    "Dot Size",
+    "Size of the dot, wire or slot within its cell, for Shadow Mask, Aperture Grille and Slot Mask."
+   ],
+   "maskSaturation": [
+    "Mask Saturation",
+    "How coloured the phosphors are. At 1 they are full red, green and blue; at 0 they are neutral grey dots with black between them. Turn this down rather than Mask Amount when the texture is right but the colour is loud."
+   ],
+   "maskSoftness": [
+    "Mask Softness",
+    "How soft the phosphor edges are. 1 is about one screen pixel, which is what stops the mask aliasing; raise it to diffuse the dots, drop it toward 0 for a hard-edged digital look."
+   ],
+   "scanlines": [
+    "Scanlines",
+    "Depth of the dark gap between the lines the tube draws. One line per virtual pixel row."
+   ],
+   "scanlineThickness": [
+    "Scanline Thickness",
+    "Fraction of each line's pitch that is lit. Lower is a thinner, harder line."
+   ],
+   "gain": [
+    "Gain",
+    "Exposure after the mask. A mask that passes one channel per pixel has to be boosted to hold its brightness, and that boost clips the dots to white, so a strong mask always costs some light. Raise this to win it back."
+   ],
+   "beamAmount": [
+    "Beam Amount",
+    "Strength of the scanning-beam effect. Zero leaves the picture unchanged."
+   ],
+   "beamHeight": [
+    "Beam Height",
+    "How tall the brightly-illuminated band is, as a fraction of one full sweep."
+   ],
+   "beamSpeed": [
+    "Beam Speed",
+    "Rolling rate of the beam: sweeps of the frame per unit of Time."
+   ],
+   "beamDecay": [
+    "Beam Decay",
+    "Phosphor persistence trailing the beam. Higher lingers longer after the beam passes."
+   ],
+   "beamPhase": [
+    "Beam Phase",
+    "Manual offset of the beam's position within its sweep."
+   ],
+   "aberration": [
+    "Aberration",
+    "Chromatic aberration, increasing toward the edges."
+   ],
+   "grain": [
+    "Grain",
+    "Animated per-channel grain."
+   ],
+   "bloom": [
+    "Bloom",
+    "Weighted glow spreading light off bright areas."
+   ],
+   "bloomRadius": [
+    "Spread",
+    "How far Bloom and Diffusion reach, in pixels. Both share this gather, so it needs to cross a mask cell before either can soften the dots."
+   ],
+   "diffusion": [
+    "Diffusion",
+    "Light scattering in the glass face. Unlike Bloom it lifts everything, not just highlights, so blacks wash toward grey the way a real tube's do."
+   ],
+   "time": [
+    "Time",
+    "Drives the grain and the beam sweep. Connected to comp time by default."
+   ],
+   "amount": [
+    "Amount",
+    "Mix between the original layer and the screen result."
+   ]
+  },
+  "enums": {
+   "mask": {
+    "0": "Shadow Mask",
+    "1": "Aperture Grille",
+    "2": "Slot Mask",
+    "3": "LCD Stripe",
+    "4": "None"
+   },
+   "edges": {
+    "0": "Transparent",
+    "1": "Clamp",
+    "2": "Mirror"
+   }
+  },
+  "tabs": {
+   "filter": "Output",
+   "texture": "Texture"
+  }
+ }
+}

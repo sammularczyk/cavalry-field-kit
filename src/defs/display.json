@@ -1,0 +1,376 @@
+{
+  "author": "samMularczyk",
+  "type": "display",
+  "superType": "thirdPartyFilter",
+  "version": "1.0",
+  "passes": [
+    {
+      "skslFile": "displayOptics.sksl",
+      "uniforms": [
+        "vignette",
+        "aberration",
+        "grain",
+        "time"
+      ]
+    },
+    {
+      "skslFile": "displayMask.sksl",
+      "uniforms": [
+        "mask",
+        "pixelSize",
+        "pixelate",
+        "maskAmount",
+        "gridGap",
+        "stagger",
+        "dotSize",
+        "maskSaturation",
+        "maskSoftness",
+        "scanlines",
+        "scanlineThickness",
+        "gain",
+        "beamAmount",
+        "beamHeight",
+        "beamSpeed",
+        "beamDecay",
+        "beamPhase",
+        "time"
+      ]
+    },
+    {
+      "skslFile": "displayFinal.sksl",
+      "uniforms": [
+        "distortion",
+        "overscan",
+        "edges",
+        "edgeTrim",
+        "cornerRadius",
+        "bloom",
+        "bloomRadius",
+        "diffusion",
+        "amount"
+      ]
+    }
+  ],
+  "attributes": {
+    "distortion": {
+      "type": "double",
+      "default": 0.16,
+      "min": 0.0,
+      "softMax": 3.0,
+      "step": 0.01
+    },
+    "overscan": {
+      "type": "double",
+      "default": 1.0,
+      "min": 0.0,
+      "softMax": 1.5,
+      "step": 0.01,
+      "dimming": "distortion == 0"
+    },
+    "edges": {
+      "type": "enum",
+      "default": 0,
+      "enumValues": [
+        0,
+        1,
+        2
+      ],
+      "dimming": "distortion == 0"
+    },
+    "edgeTrim": {
+      "type": "double2",
+      "default": {
+        "x": 1.0,
+        "y": 1.0
+      },
+      "children": {
+        "*": {
+          "step": 0.5
+        }
+      },
+      "dimming": "edges == 0"
+    },
+    "cornerRadius": {
+      "type": "double",
+      "default": 18.0,
+      "min": 0.0,
+      "softMax": 400.0,
+      "step": 1.0
+    },
+    "vignette": {
+      "type": "double",
+      "default": 1.0,
+      "min": 0.0,
+      "max": 1.0,
+      "step": 0.01
+    },
+    "mask": {
+      "type": "enum",
+      "default": 2,
+      "enumValues": [
+        0,
+        1,
+        2,
+        3,
+        4
+      ]
+    },
+    "pixelSize": {
+      "type": "double",
+      "default": 8.0,
+      "min": 1.0,
+      "softMax": 40.0,
+      "step": 1.0
+    },
+    "pixelate": {
+      "type": "double",
+      "default": 0.3,
+      "min": 0.0,
+      "max": 1.0,
+      "step": 0.01
+    },
+    "maskAmount": {
+      "type": "double",
+      "default": 0.31,
+      "min": 0.0,
+      "max": 1.0,
+      "step": 0.01,
+      "dimming": "mask == 4"
+    },
+    "gridGap": {
+      "type": "double",
+      "default": 1.0,
+      "min": 0.0,
+      "max": 1.0,
+      "step": 0.01,
+      "dimming": "mask != 3"
+    },
+    "stagger": {
+      "type": "double",
+      "default": 0.0,
+      "min": 0.0,
+      "max": 1.0,
+      "step": 0.01,
+      "dimming": "mask != 3"
+    },
+    "dotSize": {
+      "type": "double",
+      "default": 0.33,
+      "min": 0.0,
+      "max": 1.0,
+      "step": 0.01,
+      "dimming": "mask == 3 || mask == 4"
+    },
+    "maskSaturation": {
+      "type": "double",
+      "default": 0.11,
+      "min": 0.0,
+      "max": 1.0,
+      "step": 0.01,
+      "dimming": "maskAmount <= 0"
+    },
+    "maskSoftness": {
+      "type": "double",
+      "default": 1.0,
+      "min": 0.0,
+      "softMax": 6.0,
+      "step": 0.05,
+      "dimming": "maskAmount <= 0"
+    },
+    "scanlines": {
+      "type": "double",
+      "default": 0.13,
+      "min": 0.0,
+      "max": 1.0,
+      "step": 0.01
+    },
+    "scanlineThickness": {
+      "type": "double",
+      "default": 0.05,
+      "min": 0.05,
+      "max": 0.95,
+      "step": 0.01,
+      "dimming": "scanlines <= 0"
+    },
+    "gain": {
+      "type": "double",
+      "default": 0.95,
+      "min": 0.0,
+      "softMax": 6.0,
+      "step": 0.05
+    },
+    "beamAmount": {
+      "type": "double",
+      "default": 0.13,
+      "min": 0.0,
+      "max": 1.0,
+      "step": 0.01
+    },
+    "beamHeight": {
+      "type": "double",
+      "default": 0.15,
+      "min": 0.01,
+      "softMax": 1.0,
+      "step": 0.01,
+      "dimming": "beamAmount <= 0"
+    },
+    "beamSpeed": {
+      "type": "double",
+      "default": 0.37,
+      "min": 0.0,
+      "softMax": 5.0,
+      "step": 0.01,
+      "dimming": "beamAmount <= 0"
+    },
+    "beamDecay": {
+      "type": "double",
+      "default": 2.0,
+      "min": 0.0,
+      "softMax": 2.0,
+      "step": 0.01,
+      "dimming": "beamAmount <= 0"
+    },
+    "beamPhase": {
+      "type": "double",
+      "default": 0.0,
+      "min": 0.0,
+      "softMax": 1.0,
+      "step": 0.01,
+      "dimming": "beamAmount <= 0"
+    },
+    "aberration": {
+      "type": "double",
+      "default": 0.25,
+      "min": 0.0,
+      "softMax": 10.0,
+      "step": 0.05
+    },
+    "grain": {
+      "type": "double",
+      "default": 0.21,
+      "min": 0.0,
+      "max": 1.0,
+      "step": 0.01
+    },
+    "bloom": {
+      "type": "double",
+      "default": 0.0,
+      "min": 0.0,
+      "softMax": 2.0,
+      "step": 0.01
+    },
+    "bloomRadius": {
+      "type": "double",
+      "default": 40.0,
+      "min": 0.0,
+      "softMax": 40.0,
+      "step": 0.5,
+      "dimming": "bloom <= 0 && diffusion <= 0"
+    },
+    "diffusion": {
+      "type": "double",
+      "default": 0.31,
+      "min": 0.0,
+      "max": 1.0,
+      "step": 0.01
+    },
+    "time": {
+      "type": "double",
+      "default": 0.0,
+      "compConnect": "time",
+      "dimming": "grain <= 0 && beamAmount <= 0"
+    },
+    "amount": {
+      "type": "double",
+      "default": 1.0,
+      "min": 0.0,
+      "max": 1.0,
+      "step": 0.01
+    }
+  },
+  "triggers": {
+    "out": [
+      "distortion",
+      "overscan",
+      "edges",
+      "edgeTrim",
+      "cornerRadius",
+      "vignette",
+      "mask",
+      "pixelSize",
+      "pixelate",
+      "maskAmount",
+      "gridGap",
+      "stagger",
+      "dotSize",
+      "maskSaturation",
+      "maskSoftness",
+      "scanlines",
+      "scanlineThickness",
+      "gain",
+      "beamAmount",
+      "beamHeight",
+      "beamSpeed",
+      "beamDecay",
+      "beamPhase",
+      "aberration",
+      "grain",
+      "bloom",
+      "bloomRadius",
+      "diffusion",
+      "time",
+      "amount"
+    ]
+  },
+  "UI": {
+    "tabs": [
+      {
+        "id": "filter",
+        "attributeOrder": [
+          "amount",
+          "aberration",
+          "grain",
+          "bloom",
+          "bloomRadius",
+          "diffusion",
+          "time",
+          "---Distortion",
+          "distortion",
+          "overscan",
+          "edges",
+          "edgeTrim",
+          "cornerRadius",
+          "vignette",
+          "---Inspired by ENDESGA & Cathode-Retro"
+        ]
+      },
+      {
+        "id": "texture",
+        "attributeOrder": [
+          "mask",
+          "---Pixels",
+          "pixelSize",
+          "pixelate",
+          "---Mask",
+          "maskAmount",
+          "gridGap",
+          "stagger",
+          "dotSize",
+          "maskSaturation",
+          "maskSoftness",
+          "scanlines",
+          "scanlineThickness",
+          "gain",
+          "---Beam",
+          "beamAmount",
+          "beamHeight",
+          "beamSpeed",
+          "beamDecay",
+          "beamPhase",
+          "---Inspired by Blur Busters' CRT Beam Simulator"
+        ]
+      }
+    ],
+    "icon": "display.png"
+  }
+}

@@ -1,0 +1,73 @@
+{
+  "type": "layerStrings",
+  "value": {
+    "author": "samMularczyk",
+    "layerType": "filmBurn",
+    "niceName": "Film Burn",
+    "layerInfo": "Film stopping in the gate and burning through. Progress eats a hole in the layer's own alpha rather than cutting to a second layer, so whatever sits underneath in the comp shows through - drop this on a clip with something already behind it.",
+    "language": "en",
+    "attributes": {
+      "progress": [
+        "Progress",
+        "How far the burn has eaten through. 0 is untouched, 1 is fully gone."
+      ],
+      "origin": [
+        "Starts From",
+        "Where the hole first appears: the frame centre, an edge, a corner, or a point you place yourself."
+      ],
+      "position": [
+        "Position",
+        "Where the hole starts, offset from the layer centre in pixels. Only used when Starts From is set to Manual."
+      ],
+      "scale": [
+        "Scale",
+        "Feature size of the noise that ravels the edge, in pixels. Larger values give broad, lazy tears; smaller values give fine, busy ones."
+      ],
+      "roughness": [
+        "Roughness",
+        "How much the noise warps the edge away from a plain circle or front. Zero burns in a clean shape; higher values make it ragged and organic."
+      ],
+      "seed": [
+        "Seed",
+        "Shifts the noise pattern without changing its character, so different instances of the filter burn through differently."
+      ],
+      "charWidth": [
+        "Char Width",
+        "Width of the blackened ring right at the edge of the hole, in field units."
+      ],
+      "charColor": [
+        "Char Colour",
+        "Colour of the charred film immediately around the hole."
+      ],
+      "burnWidth": [
+        "Burn Width",
+        "Width of the bright ring where the film is actively alight."
+      ],
+      "burnColor": [
+        "Burn Colour",
+        "Colour of the active burn front."
+      ],
+      "bloomWidth": [
+        "Bloom Width",
+        "Width of the pre-ignition glow ahead of the burn front, where the emulsion is heating but hasn't caught yet."
+      ],
+      "bloomIntensity": [
+        "Bloom Intensity",
+        "How far the bloom blows out toward white before it settles into the untouched picture."
+      ],
+      "amount": [
+        "Amount",
+        "Mix between the original layer and the burnt result."
+      ]
+    },
+    "enums": {
+      "origin": [
+        "Centre",
+        "Edge",
+        "Corner",
+        "Manual"
+      ]
+    },
+    "tabs": {}
+  }
+}

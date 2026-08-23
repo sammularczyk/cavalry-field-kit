@@ -1,0 +1,50 @@
+// Lightwrap, final pass - Field Kit
+// Grades the accumulated wrap, masks it back by the foreground alpha and
+// composites. See lightwrapBlur.sksl for the mechanism.
+//
+// IMPORTANT: shaderData inputs bind BEFORE the input image, which is last.
+
+uniform float  brightness;
+uniform float  gamma;
+uniform float  saturation;
+uniform float  blend;         // enum: 0 Plus, 1 Screen, 2 Max, 3 Effect Only
+uniform float  amount;
+
+uniform float2 resolution;
+uniform float2 rectCentre;
+
+uniform shader background;    // declared to keep the binding order identical
+uniform shader childShader;   // the accumulated wrap
+uniform shader original;      // the foreground - MUST be declared last
+
+// Four blur pairs each add H back in, so the chain's gain is roughly four.
+// Dividing here keeps Brightness reading as 1.0 = neutral.
+const float LADDER_GAIN = 4.0;
+
+half4 main(float2 fragCoord) {
+    half4 src = original.eval(fragCoord);
+
+    float3 wrap = float3(childShader.eval(fragCoord).rgb) / LADDER_GAIN;
+
+    // Grade the wrap: gamma, brightness, saturation.
+    wrap = pow(max(wrap, 0.0), float3(1.0 / max(gamma, 0.0001)))
+         * max(brightness, 0.0);
+    float wl = dot(wrap, float3(0.299, 0.587, 0.114));
+    wrap = max(wl + (wrap - wl) * max(saturation, 0.0), 0.0);
+
+    // Mask back by the foreground alpha - the wrap only lives on the foreground.
+    wrap = clamp(wrap * clamp(float(src.a), 0.0, 1.0), 0.0, 1.0);
+
+    float3 fg = src.a > 0.0 ? float3(src.rgb / src.a) : float3(0.0);
+
+    int bm = int(blend);
+    float3 outRgb =
+        bm == 1 ? 1.0 - (1.0 - fg) * (1.0 - wrap) :
+        bm == 2 ? max(fg, wrap) :
+        bm == 3 ? wrap :
+        fg + wrap;
+
+    half a = src.a;
+    return mix(src, half4(half3(clamp(outRgb, 0.0, 1.0)) * a, a),
+               half(clamp(amount, 0.0, 1.0)));
+}

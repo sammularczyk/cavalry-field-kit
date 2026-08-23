@@ -1,0 +1,93 @@
+{
+  "type": "layerStrings",
+  "value": {
+    "author": "samMularczyk",
+    "layerType": "photocopy",
+    "niceName": "Photocopy",
+    "layerInfo": "Copier artefacts: crushed midtones, toner blowout at edges, dithered threshold, blotchy toner and paper fibre.",
+    "language": "en",
+    "attributes": {
+      "exposure": [
+        "Exposure",
+        "Lightens or darkens the whole page before the toner threshold, the way the copier's exposure dial does."
+      ],
+      "contrastAmount": [
+        "Local Contrast",
+        "How hard midtones are crushed toward black and white. Responds to detail rather than overall brightness."
+      ],
+      "blurRadius": [
+        "Detail Size",
+        "Radius of the blurred reference, in pixels. Small values pick out fine detail; large values act on broad areas."
+      ],
+      "edgeBlowout": [
+        "Edge Blowout",
+        "Toner piling up at boundaries: a dark halo inside an edge, a bright one outside."
+      ],
+      "threshold": [
+        "Threshold",
+        "Brightness at which toner stops being laid down. Lower for a lighter copy, higher for a heavier one."
+      ],
+      "softness": [
+        "Softness",
+        "Width of the threshold. Zero is a hard lo-fi cut; raise it to keep some tone in the result."
+      ],
+      "dither": [
+        "Dither",
+        "Pattern that breaks gradients into grain instead of banding. Ordered is the copier-like one; Random reads as a coarser, older machine."
+      ],
+      "ditherAmount": [
+        "Dither Amount",
+        "Strength of the dither. Too much reads as noise rather than toner."
+      ],
+      "speckle": [
+        "Toner Speckle",
+        "Blotchy unevenness in the black, so coverage varies the way a tired cartridge does."
+      ],
+      "speckleScale": [
+        "Speckle Scale",
+        "Size of the toner blotches. Small values give large soft patches."
+      ],
+      "banding": [
+        "Drum Banding",
+        "Faint horizontal streaks running across the page, as a worn drum produces. Zero by default."
+      ],
+      "bandingScale": [
+        "Banding Scale",
+        "How closely the streaks are spaced down the page."
+      ],
+      "paperAmount": [
+        "Paper Texture",
+        "Fibre grain in the paper, visible only where the paper shows. Zero leaves the stock clean."
+      ],
+      "paperScale": [
+        "Texture Scale",
+        "Size of the paper fibre. The grain is stretched, so it reads as fibre direction rather than plain noise."
+      ],
+      "inkColor": [
+        "Ink",
+        "Toner colour. Cyan for blueprint, a flat spot colour for riso."
+      ],
+      "paperColor": [
+        "Paper",
+        "Stock colour. Slightly warm off-white by default."
+      ],
+      "amount": [
+        "Amount",
+        "Mix between the original layer and the copied result."
+      ]
+    },
+    "enums": {
+      "dither": {
+        "0": "Ordered",
+        "1": "Random",
+        "2": "None"
+      }
+    },
+    "tabs": {
+      "filter": "Exposure",
+      "toner": "Toner",
+      "paper": "Paper",
+      "output": "Output"
+    }
+  }
+}

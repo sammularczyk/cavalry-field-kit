@@ -1,0 +1,163 @@
+{
+  "author": "samMularczyk",
+  "type": "ascii",
+  "superType": "thirdPartyFilter",
+  "version": "1.0",
+  "skslFile": "ascii.sksl",
+  "attributes": {
+    "textSize": {
+      "type": "double",
+      "default": 12.0,
+      "min": 4.0,
+      "softMax": 128.0,
+      "step": 1.0
+    },
+    "cellAspect": {
+      "type": "double",
+      "default": 1.0,
+      "min": 0.05,
+      "softMax": 3.0,
+      "step": 0.05
+    },
+    "margin": {
+      "type": "double",
+      "default": 0.1,
+      "min": 0.0,
+      "max": 0.45,
+      "step": 0.01
+    },
+    "charset": {
+      "type": "enum",
+      "default": 0,
+      "enumValues": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5
+      ]
+    },
+    "rampGamma": {
+      "type": "double",
+      "default": 1.0,
+      "min": 0.0001,
+      "softMax": 4.0,
+      "step": 0.05
+    },
+    "edgeThreshold": {
+      "type": "double",
+      "default": 0.0,
+      "min": 0.0,
+      "softMax": 1.0,
+      "step": 0.01
+    },
+    "colorMode": {
+      "type": "enum",
+      "default": 0,
+      "enumValues": [
+        0,
+        1,
+        2
+      ]
+    },
+    "inkColor": {
+      "type": "color",
+      "default": {
+        "type": "Color",
+        "r": 255,
+        "g": 255,
+        "b": 255,
+        "a": 255
+      },
+      "dimming": "colorMode == 0"
+    },
+    "paperColor": {
+      "type": "color",
+      "default": {
+        "type": "Color",
+        "r": 26,
+        "g": 51,
+        "b": 230,
+        "a": 255
+      },
+      "dimming": "colorMode != 2"
+    },
+    "paletteLevels": {
+      "type": "double",
+      "default": 0.0,
+      "min": 0.0,
+      "softMax": 16.0,
+      "step": 1.0,
+      "dimming": "colorMode != 0"
+    },
+    "invert": {
+      "type": "bool",
+      "default": false
+    },
+    "randomChars": {
+      "type": "double",
+      "default": 0.0,
+      "min": 0.0,
+      "max": 1.0,
+      "step": 0.01
+    },
+    "seed": {
+      "type": "double",
+      "default": 0.0,
+      "softMin": 0.0,
+      "softMax": 100.0,
+      "step": 1.0,
+      "dimming": "randomChars <= 0"
+    },
+    "amount": {
+      "type": "double",
+      "default": 1.0,
+      "min": 0.0,
+      "max": 1.0,
+      "step": 0.01
+    }
+  },
+  "triggers": {
+    "out": [
+      "textSize",
+      "cellAspect",
+      "margin",
+      "charset",
+      "rampGamma",
+      "edgeThreshold",
+      "colorMode",
+      "inkColor",
+      "paperColor",
+      "paletteLevels",
+      "invert",
+      "randomChars",
+      "seed",
+      "amount"
+    ]
+  },
+  "UI": {
+    "icon": "ascii.png",
+    "attributeOrder": [
+      "textSize",
+      "cellAspect",
+      "margin",
+      "charset",
+      "rampGamma",
+      "---Edges",
+      "edgeThreshold",
+      "---Colour",
+      "colorMode",
+      "inkColor",
+      "paperColor",
+      "paletteLevels",
+      "invert",
+      "---Scatter",
+      "randomChars",
+      "seed",
+      "amount",
+      "---Glyph ramp from pixi.js filters (MIT)",
+      "---Letters & Full ASCII from Tom Thumb, Robey Pointer (CC0)"
+    ]
+  }
+}

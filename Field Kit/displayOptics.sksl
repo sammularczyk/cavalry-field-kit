@@ -1,0 +1,80 @@
+// Display, pass 1 of 3 - Field Kit
+// Chromatic aberration, animated RGB grain, and the brightness vignette.
+//
+// Inspired by "REALISTIC SUB-PIXEL OLD CRT :::." by ENDESGA (Shadertoy ms2fDV),
+// CC0 - this is its first pass, minus the corner rounding. The corners moved to
+// pass 3 so they share one antialiased rounded-rect mask with the tube edge;
+// the original cut them here with a hard `step()`, which is why the diagonals
+// were jaggy.
+//
+// Pass 0 must NOT declare `uniform shader original` - there is no such input on
+// the first pass and the shader fails to BUILD, silently contributing nothing.
+// On pass 0 `childShader` IS the layer.
+
+uniform float  vignette;
+uniform float  aberration;
+uniform float  grain;
+uniform float  time;         // frames
+
+uniform float2 resolution;
+uniform float2 rectCentre;
+
+uniform shader childShader;  // pass 1 input = the layer being filtered
+
+float hash3(float3 p) {
+    p = fract(p * 0.1031);
+    p += dot(p, p.yzx + 19.19);
+    return fract((p.x + p.y) * p.z);
+}
+
+float noise3(float3 x) {
+    float3 p = floor(x), f = fract(x), m = f * f * (3.0 - 2.0 * f);
+    float3 i = p + float3(1.0, 0.0, 0.0);
+    float4 h = float4(hash3(p), hash3(i),
+                      hash3(p + float3(0.0, 1.0, 0.0)),
+                      hash3(i + float3(0.0, 1.0, 0.0)));
+    return mix(mix(h.x, h.y, m.x), mix(h.z, h.w, m.x), m.y);
+}
+
+float grainAt(float3 x) {
+    return 0.5 + (4.0 * noise3(x) - noise3(x + 1.0) + noise3(x - 1.0)) / 4.0;
+}
+
+half4 main(float2 fragCoord) {
+    float2 res = max(resolution, float2(1.0));
+
+    // Zero-based pixel coordinates, so the ported maths matches the original's
+    // fragCoord exactly.
+    float2 F  = fragCoord - rectCentre + res * 0.5;
+    float2 uv = F / res;
+
+    float2 aberDis = (uv - 0.5) * aberration * length(uv - 0.5) * 0.05;
+
+    // Straight (unpremultiplied) samples: the channels are displaced against
+    // each other, so premultiplied maths would drag alpha into the colour.
+    half4 c0 = childShader.eval(fragCoord);
+    half4 c1 = childShader.eval((uv - aberDis       - 0.5) * res + rectCentre);
+    half4 c2 = childShader.eval((uv - 2.0 * aberDis - 0.5) * res + rectCentre);
+
+    float3 aber = float3(
+        c0.a > 0.0 ? float(c0.r / c0.a) : 0.0,
+        c1.a > 0.0 ? float(c1.g / c1.a) : 0.0,
+        c2.a > 0.0 ? float(c2.b / c2.a) : 0.0);
+
+    float3 col = aber;
+    if (grain > 0.0) {
+        float frame = floor(time);
+        float3 g = float3(grainAt(float3(F, frame)),
+                          grainAt(float3(F, frame + 9.0)),
+                          grainAt(float3(F, frame - 9.0)));
+        col = mix(aber, mix(aber * g, aber + (g - 1.0), 0.5), grain);
+    }
+
+    // Brightness falloff only. The tube SHAPE is pass 3's job.
+    float vig = 1.0 - clamp(smoothstep(0.25, 1.0,
+        length((uv - 0.5) * float2(1.0, res.y / res.x * 2.0))), 0.0, 1.0);
+    col *= mix(1.0, vig, vignette);
+
+    half a = c0.a;
+    return half4(half3(clamp(col, 0.0, 1.0)) * a, a);
+}

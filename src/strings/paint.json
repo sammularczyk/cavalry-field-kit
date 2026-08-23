@@ -1,0 +1,170 @@
+{
+  "type": "layerStrings",
+  "value": {
+    "author": "samMularczyk",
+    "layerType": "paint",
+    "niceName": "Paint",
+    "layerInfo": "Re-renders the layer as paint, three ways. Brush smears along the image's own structure; Oil displaces every pixel the same distance along a field's steepest slope, which is what reads as brushwork; Watercolour flattens into washes then transports pigment along them.",
+    "language": "en",
+    "attributes": {
+      "style": [
+        "Style",
+        "Which painting model to use. These are alternative renderings, not layers - stack two Paint filters if you want both."
+      ],
+      "estimatorRadius": [
+        "Search Radius",
+        "How far to look when working out which way the image runs. The most expensive control here."
+      ],
+      "estimatorTaps": [
+        "Search Samples",
+        "Samples used for that estimate. Drop it if playback suffers."
+      ],
+      "threshold": [
+        "Tone Tolerance",
+        "How similar in tone a neighbour must be to steer the stroke. Low values keep strokes inside one area."
+      ],
+      "blurRadius": [
+        "Field Smoothing",
+        "Smooths the direction field, so strokes follow broad structure rather than pixel noise."
+      ],
+      "blurTaps": [
+        "Smoothing Samples",
+        "Samples used for that smoothing."
+      ],
+      "strokeLength": [
+        "Stroke Length",
+        "Taps along each stroke."
+      ],
+      "strokeWidth": [
+        "Stroke Spacing",
+        "Pixels between those taps. Zero collapses the stroke to nothing."
+      ],
+      "fieldMode": [
+        "Direction From",
+        "What steers the strokes: the attached shader, the layer's own contours, or a blend."
+      ],
+      "flowMix": [
+        "Flow Mix",
+        "Balance between shader-driven and image-driven direction. Zero is all shader, one all image."
+      ],
+      "mapChannel": [
+        "Field Channel",
+        "Which channel of the field shader to differentiate."
+      ],
+      "fieldStep": [
+        "Gradient Step",
+        "Spacing of the samples measuring the field's slope. Larger ignores fine detail."
+      ],
+      "intensity": [
+        "Stroke Push",
+        "How far pixels are displaced. Every pixel moves this same distance, which is the point."
+      ],
+      "smear": [
+        "Stroke Length",
+        "Extra blur along the stroke direction. This is what turns displacement into a visible mark."
+      ],
+      "bristle": [
+        "Bristle",
+        "Randomises stroke length per pixel, so the smear breaks into hairs."
+      ],
+      "perpendicular": [
+        "Perpendicular",
+        "Rotates the stroke direction ninety degrees."
+      ],
+      "washes": [
+        "Washes",
+        "How many flat tones the image is reduced to."
+      ],
+      "washRadius": [
+        "Wash Radius",
+        "Size of the edge-preserving flatten that forms the washes."
+      ],
+      "washThreshold": [
+        "Wash Tolerance",
+        "How different a neighbour may be and still join the same wash."
+      ],
+      "transport": [
+        "Transport",
+        "How far pigment is carried, in pixels. Zero leaves flat washes with wobbly edges."
+      ],
+      "edgeFlow": [
+        "Edge Flow",
+        "Smears colour along wash boundaries, which is what leaves watercolour's dark rim."
+      ],
+      "washFlow": [
+        "Wash Flow",
+        "Carries pigment up the brightness gradient, draining dark areas and pooling colour at the edge."
+      ],
+      "flowJitter": [
+        "Flow Jitter",
+        "Randomises how far pigment travels. Even transport reads as a filter; irregular reads as water."
+      ],
+      "flowScale": [
+        "Jitter Scale",
+        "Size of the jitter field, in pixels."
+      ],
+      "wetEdge": [
+        "Wet Edge",
+        "How far wash boundaries wander, as pigment creeping through damp paper."
+      ],
+      "wetEdgeScale": [
+        "Wet Edge Scale",
+        "Size of that wander."
+      ],
+      "edgeDarkening": [
+        "Edge Pooling",
+        "Darkens where a wash ends, as watercolour dries."
+      ],
+      "granulation": [
+        "Granulation",
+        "Mottled density where pigment settles into the paper."
+      ],
+      "granulationScale": [
+        "Granulation Scale",
+        "Size of the mottling."
+      ],
+      "paperTexture": [
+        "Paper",
+        "Paper tooth, and the stock showing through pale washes."
+      ],
+      "paperColor": [
+        "Paper Colour",
+        "Colour of the stock."
+      ],
+      "amount": [
+        "Amount",
+        "Mix between the original layer and the painted result."
+      ],
+      "field": [
+        "Field",
+        "Shader whose slope sets the Oil stroke direction. Its Scale controls stroke size, its Evolution animates them."
+      ]
+    },
+    "enums": {
+      "style": {
+        "0": "Brush",
+        "1": "Oil",
+        "2": "Watercolour"
+      },
+      "fieldMode": {
+        "0": "Noise Flow",
+        "1": "Image Flow",
+        "2": "Mix"
+      },
+      "mapChannel": {
+        "0": "Luma",
+        "1": "Saturation",
+        "2": "Value",
+        "3": "Red",
+        "4": "Green",
+        "5": "Blue"
+      }
+    },
+    "tabs": {
+      "filter": "Style",
+      "brush": "Brush",
+      "oil": "Oil",
+      "water": "Watercolour"
+    }
+  }
+}

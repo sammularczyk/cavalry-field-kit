@@ -1,0 +1,84 @@
+{
+  "type": "layerStrings",
+  "value": {
+    "author": "samMularczyk",
+    "layerType": "ascii",
+    "niceName": "ASCII",
+    "layerInfo": "Draws the layer as a grid of 5x5 bitmap characters. Edge Glyphs traces outlines with line characters instead of tone.",
+    "language": "en",
+    "attributes": {
+      "textSize": [
+        "Text Size",
+        "Size of one character cell in pixels."
+      ],
+      "cellAspect": [
+        "Cell Aspect",
+        "Cell height as a multiple of its width. Above one gives tall cells, like real monospaced type."
+      ],
+      "margin": [
+        "Margin",
+        "Padding inside each cell, as a fraction of it. Higher values space the characters further apart."
+      ],
+      "charset": [
+        "Characters",
+        "Which glyph ramp to use. Classic is pixi.js's eight-level dot-to-hash ramp; Block Density, Dots, and Numeric are five, eight, and eleven steps native to this plugin; Letters and Full ASCII are twenty-six and ninety-five steps from the Tom Thumb font."
+      ],
+      "rampGamma": [
+        "Ramp Gamma",
+        "Bias of brightness onto the glyph ramp. Below one favours dense glyphs, above one sparse."
+      ],
+      "edgeThreshold": [
+        "Edge Glyphs",
+        "Above zero, cells on a boundary use a line glyph chosen by edge direction. This is the threshold the edge must clear."
+      ],
+      "colorMode": [
+        "Colour",
+        "Colour from the layer, one flat colour with transparency between glyphs, or ink on a filled paper."
+      ],
+      "inkColor": [
+        "Ink",
+        "Character colour, used by Single Colour and Ink On Paper."
+      ],
+      "paperColor": [
+        "Paper",
+        "Background colour, used by Ink On Paper."
+      ],
+      "paletteLevels": [
+        "Palette Levels",
+        "Quantises each cell's colour to this many steps per channel. Zero is off."
+      ],
+      "invert": [
+        "Invert",
+        "Flip the brightness ramp, so dark areas get the dense characters."
+      ],
+      "randomChars": [
+        "Scatter",
+        "Chance of a cell using a random glyph instead of its brightness one, for a scattered letterform look."
+      ],
+      "seed": [
+        "Seed",
+        "Changes which cells are scattered and which characters they get."
+      ],
+      "amount": [
+        "Amount",
+        "Mix between the original layer and the character result."
+      ]
+    },
+    "enums": {
+      "charset": {
+        "0": "Classic",
+        "1": "Block Density",
+        "2": "Dots",
+        "3": "Numeric",
+        "4": "Letters",
+        "5": "Full ASCII"
+      },
+      "colorMode": [
+        "From Layer",
+        "Single Colour",
+        "Ink On Paper"
+      ]
+    },
+    "tabs": {}
+  }
+}

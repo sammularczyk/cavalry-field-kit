@@ -1,0 +1,295 @@
+// VHS - Field Kit
+//
+// Consumer analogue-tape simulation: tape wander, tape crease, head-switching
+// noise at the bottom of frame, chroma lag, a drifting tracking-loss band,
+// mains hum, dropout dashes and tape hiss.
+//
+// This file does not derive from any Shadertoy source. It was rewritten from
+// scratch against three permissively-licensed references, none of which
+// contributed literal code (this is GLSL/Rust source; theirs is Rust or a
+// different GLSL dialect, so everything below is a fresh implementation of
+// the *ideas*, not a translation of anyone's statements):
+//   - ntsc-rs (github.com/ntsc-rs/ntsc-rs, Apache-2.0, excluding /crates/gui
+//     which sits under a separate licence there and was not consulted). Its
+//     `crates/ntscrs/src/ntsc.rs` is the reference for two things adopted
+//     here: proper YIQ luma/chroma bandwidth separation (see rgb2yiq below,
+//     used by the `format` modes) and modelling head-switching as a noisy,
+//     torn row with a bright transient at its leading edge rather than a
+//     flat colour permute.
+//     Per Apache-2.0 sec. 4: this file is a NOTICE that it has been changed
+//     from ntsc-rs's originals (concepts only; no ntsc-rs source file has
+//     been copied into this repository), and ntsc-rs ships no NOTICE file
+//     to reproduce.
+//   - punikonta/godot-shader-crt-vhs (github.com/punikonta/godot-shader-crt-vhs,
+//     MIT). Its shaders/vhs.gdshader is the reference for the general shape
+//     of a single-pass VHS filter (wobble, a bottom tracking band, weighted
+//     multi-tap chroma bleed, per-scanline dropouts) and for the hash/value-
+//     noise construction used throughout this file.
+//   - The Hi8/VHS bandwidth, noise-floor and chroma differences biased by
+//     `format` are common technical facts about the formats (documented on,
+//     e.g., Wikipedia's VHS/S-VHS/Video8/Hi8 pages), not code from any
+//     source; the only Hi8-specific repository looked at for this filter
+//     (github.com/cyanideoneup/Godot-Hi-8-Demo, MIT) carries its actual VHS
+//     look shaders under third-party CREDIT headers pointing at RetroArch
+//     and other Shadertoy authors of unstated licence, so nothing was taken
+//     from it beyond that general knowledge.
+//
+// Uniform order matches the attribute order in definitions.json.
+
+uniform float  time;            // auto-connected to comp time (frames)
+uniform float  speed;           // frames -> seconds-ish rate for every drift
+uniform float  noiseDetail;     // fBm octaves, 1..8 - the main cost control
+uniform float  format;          // enum: 0 VHS, 1 S-VHS, 2 Hi8, 3 Video8
+
+uniform float  waveAmount;      // slow tape wander
+uniform float  fineWave;        // fine per-line jitter
+
+uniform float  creaseAmount;    // crease gain
+uniform float  creaseFrequency;
+uniform float  creaseSpeed;
+uniform float  creaseThreshold;
+
+uniform float  switchingHeight; // head-switching band height
+uniform float  switchingShift;  // how far that band is dragged
+uniform float  jitter;          // horizontal jitter inside the band
+
+uniform float  bloomAmount;     // horizontal smear step
+uniform float  bloomStrength;   // per-tap weight
+uniform float  greenLag;
+uniform float  blueLag;
+
+uniform float  gain;
+uniform float  humAmount;
+uniform float  humSpeed;
+
+uniform half4  edgeColor;       // straight RGBA - fills where the wave pulls
+                                // the image off its own edge
+
+uniform float  dropout;         // dropout dash density, 0..1
+uniform float  dropoutLength;   // dash length in pixels
+uniform float  dropoutPolarity; // -1 black dashes, +1 white, 0 a mix
+
+uniform float  tracking;        // tracking-loss band strength, 0..1
+uniform float  trackingHeight;  // band height, fraction of frame height
+uniform float  trackingSpeed;   // how fast the band drifts up the frame
+
+uniform float  hiss;            // fine luma noise over the whole frame
+
+uniform float  amount;
+
+uniform float2 resolution;
+uniform float2 rectCentre;
+
+uniform shader image;           // input image - binds by position, must be last
+
+const float PI = 3.14159265;
+const int   MAX_OCTAVES = 8;
+
+// Hash and value noise, in the spirit of the `random()` / `smooth_noise()`
+// pair in punikonta's MIT-licensed vhs.gdshader, extended to 2D with a
+// bilinear lattice so it can drive both the tape wander and the fBm below.
+float hash(float2 p) {
+    // Non-trig hash. A fract(sin(dot(...))) hash degrades badly here: fed
+    // absolute fragCoord on an HD layer the dot product reaches tens of
+    // thousands, where float32 sin() is effectively quantised, so the "noise"
+    // gains correlated structure and visible discontinuities. This form has no
+    // such cliff at large coordinates.
+    p = fract(p * float2(0.1031, 0.11369));
+    p += dot(p, p.yx + 19.19);
+    return fract((p.x + p.y) * p.x);
+}
+
+float valueNoise(float2 p) {
+    float2 i = floor(p);
+    float2 f = fract(p);
+    float2 u = f * f * (3.0 - 2.0 * f);
+    float a = hash(i);
+    float b = hash(i + float2(1.0, 0.0));
+    float c = hash(i + float2(0.0, 1.0));
+    float d = hash(i + float2(1.0, 1.0));
+    return mix(mix(a, b, u.x), mix(c, d, u.x), u.y);
+}
+
+// Standard fBm: each octave halves in amplitude and doubles in frequency.
+// noiseDetail (1..8) caps how many octaves run; this is called several times
+// per fragment and dominates the cost.
+float noise(float2 p, float octaves) {
+    float sum  = 0.0;
+    float amp  = 0.5;
+    float freq = 1.0;
+    for (int i = 1; i <= MAX_OCTAVES; i++) {
+        if (float(i) > octaves) { continue; }
+        sum += valueNoise(p * freq + float2(float(i) * 7.0, 0.0)) * amp;
+        amp  *= 0.5;
+        freq *= 2.0;
+    }
+    return sum;
+}
+
+// Standard NTSC RGB<->YIQ matrices (CCIR/FCC coefficients - a public technical
+// spec, not anyone's creative work). Used only by the format-dependent
+// luma/chroma bandwidth separation below.
+float3 rgb2yiq(float3 c) {
+    return float3(
+        dot(c, float3(0.299,  0.587,  0.114)),
+        dot(c, float3(0.596, -0.274, -0.322)),
+        dot(c, float3(0.211, -0.523,  0.312)));
+}
+
+float3 yiq2rgb(float3 c) {
+    return float3(
+        c.x + 0.956 * c.y + 0.621 * c.z,
+        c.x - 0.272 * c.y - 0.647 * c.z,
+        c.x - 1.106 * c.y + 1.703 * c.z);
+}
+
+// Straight (unpremultiplied) RGB plus alpha, with the original's out-of-range
+// fill. The original returned a flat grey; here it is a user colour.
+// NOTE: SkSL forbids `shader` as a function parameter ("parameters of type
+// 'shader' not allowed"), so this reads the `image` uniform directly.
+float4 tex2D(float2 uvn) {
+    if (0.5 < abs(uvn.x - 0.5)) {
+        return float4(float3(edgeColor.rgb), float(edgeColor.a));
+    }
+    float2 res = max(resolution, float2(1.0));
+    half4 c = image.eval((uvn - 0.5) * res + rectCentre);
+    float3 lin = c.a > 0.0 ? float3(c.rgb / c.a) : float3(0.0);
+    return float4(lin, float(c.a));
+}
+
+half4 main(float2 fragCoord) {
+    half4 src = image.eval(fragCoord);
+
+    float2 res = max(resolution, float2(1.0));
+    float2 uv  = (fragCoord - rectCentre) / res + 0.5;
+    float2 uvn = uv;
+
+    float t   = time * speed;
+    float oct = clamp(noiseDetail, 1.0, float(MAX_OCTAVES));
+    int   fmt = int(format + 0.5);
+
+    // Format bias. VHS (0, the default) leaves every multiplier at 1/0, so
+    // the picture is identical to a build of this filter with no `format`
+    // control at all. S-VHS and Hi8 roughly double VHS's luma resolution
+    // (~400 vs ~240 horizontal lines) while keeping a similar narrowband
+    // chroma-under recording, so their luma stays comparatively sharp while
+    // chroma still bleeds; both also run on a cleaner tape stock, hence the
+    // lower noise floor. Video8 is closer to VHS on every axis.
+    float noiseFloor  = 1.0;  // multiplies hiss, dropout rate, tracking snow
+    float chromaBleed = 0.0;  // extra chroma-only softening, on top of Bloom
+    float lumaSharp   = 0.0;  // how much of that softening spares the luma
+    if (fmt == 1) {           // S-VHS
+        noiseFloor = 0.55; chromaBleed = 0.5; lumaSharp = 1.0;
+    } else if (fmt == 2) {    // Hi8
+        noiseFloor = 0.45; chromaBleed = 0.45; lumaSharp = 1.0;
+    } else if (fmt == 3) {    // Video8
+        noiseFloor = 0.85; chromaBleed = 0.8; lumaSharp = 0.35;
+    }
+
+    // tape wave
+    uvn.x += (noise(float2(uvn.y, t), oct) - 0.5) * waveAmount;
+    uvn.x += (noise(float2(uvn.y * 100.0, t * 10.0), oct) - 0.5) * fineWave;
+
+    // tape crease
+    float tcPhase = clamp((sin(uvn.y * creaseFrequency - t * PI * creaseSpeed) - creaseThreshold)
+                          * noise(float2(t), oct), 0.0, 0.01) * creaseAmount;
+    float tcNoise = max(noise(float2(uvn.y * 100.0, t * 10.0), oct) - 0.5, 0.0);
+    uvn.x = uvn.x - tcNoise * tcPhase;
+
+    // Head-switching band. +Y is up in Cavalry and in Shadertoy alike, so
+    // this band stays at the bottom of frame without a flip. snPhase runs
+    // from 0 at the top of the band to 1 at the very bottom edge.
+    float snPhase = smoothstep(max(switchingHeight, 0.0001), 0.0, uvn.y);
+    uvn.y += snPhase * switchingShift;
+    uvn.x += snPhase * ((noise(float2(uv.y * 100.0, t * 10.0), oct) - 0.5) * jitter);
+
+    // A torn, noisy row plus a bright transient right at the band's leading
+    // edge - the shape a real head-switch takes, per ntsc-rs's head_switching
+    // (a shifted/noised row with a transient pulse where the switch starts),
+    // rather than the flat channel permute a literal port would use.
+    float snStatic    = hash(fragCoord + t * 977.0);
+    float snTransient = smoothstep(0.0, 0.08, snPhase) * (1.0 - smoothstep(0.08, 0.3, snPhase));
+
+    // Tracking loss: a band of badly degraded picture drifting up the frame
+    // (+Y is up here, so an increasing offset climbs the frame as intended).
+    // fract() wraps the drift so it loops rather than running off the top.
+    float trackBandY = fract(t * trackingSpeed);
+    float trackDy     = uv.y - trackBandY;
+    trackDy -= floor(trackDy + 0.5); // shortest signed distance, wrapped
+    float trackMask = smoothstep(max(trackingHeight, 0.0001) * 0.5, 0.0, abs(trackDy))
+                     * clamp(tracking, 0.0, 1.0);
+    uvn.x += trackMask * (noise(float2(uv.y * 200.0, t * 40.0), oct) - 0.5) * 0.6;
+    uvn.y += trackMask * (noise(float2(uv.y * 37.0,  t * 11.0), oct) - 0.5) * 0.05;
+
+    float4 base = tex2D(uvn);
+    float3 col  = base.rgb;
+    float  a    = base.a;
+
+    col *= 1.0 - tcPhase;
+    col  = mix(col, float3(snStatic), snPhase * 0.6);
+    col += snTransient * 0.5;
+
+    // Inside the tracking band the picture collapses towards near-static.
+    float trackStatic = noise(uv * 400.0 + float2(0.0, t * 300.0), oct);
+    col = mix(col, float3(trackStatic), trackMask * 0.85 * noiseFloor);
+    col *= 1.0 - trackMask * 0.15;      // and loses a little level with it
+
+    // Horizontal RGB bloom: 7 taps, each channel lagging further behind -
+    // the cheap per-channel-lag approximation of chroma smear that the
+    // Green Lag / Blue Lag controls describe.
+    for (int i = 0; i < 7; i++) {
+        float x = float(i) - 4.0;
+        float3 tap = float3(
+            tex2D(uvn + float2(x,             0.0) * bloomAmount).x,
+            tex2D(uvn + float2(x - greenLag,  0.0) * bloomAmount).y,
+            tex2D(uvn + float2(x - blueLag,   0.0) * bloomAmount).z);
+        col += tap * bloomStrength;
+    }
+    col *= gain;
+
+    // Format-dependent luma/chroma bandwidth separation (see the format
+    // bias comment above). Zero-cost and bit-for-bit unchanged at the
+    // default VHS format, since chromaBleed and lumaSharp are both 0 there.
+    if (chromaBleed > 0.0005) {
+        float bw = max(bloomAmount, 0.0015) * 3.0;
+        float3 blurRGB = tex2D(uvn + float2(-bw, 0.0)).rgb * 0.25
+                        + tex2D(uvn).rgb                            * 0.5
+                        + tex2D(uvn + float2( bw, 0.0)).rgb * 0.25;
+        float3 yiqSharp = rgb2yiq(col);
+        float3 yiqBlur  = rgb2yiq(blurRGB);
+        col = yiq2rgb(float3(
+            mix(yiqSharp.x, yiqBlur.x, lumaSharp * 0.5),
+            mix(yiqSharp.y, yiqBlur.y, chromaBleed),
+            mix(yiqSharp.z, yiqBlur.z, chromaBleed)));
+    }
+
+    // AC hum beat
+    col *= 1.0 + clamp(noise(float2(0.0, uv.y + t * humSpeed), oct) * humAmount - 0.25, 0.0, 0.1);
+
+    // Tape hiss: fine per-pixel luma noise, independent of noiseDetail's fBm.
+    col += (hash(fragCoord + t * 613.0) - 0.5) * clamp(hiss, 0.0, 1.0) * 0.12 * noiseFloor;
+
+    // Dropout dashes: short horizontal marks where the tape has shed oxide.
+    // Picked per scanline per time-bucket so they scatter and flicker rather
+    // than sitting static; the >= 0 check on the hash guarantees exactly no
+    // dashes when dropout is 0.
+    float2 localPix  = uv * res;
+    float  rowId      = floor(localPix.y / 2.0);
+    float  timeBucket = floor(t * 6.0);
+    float  rowRand    = hash(float2(rowId, timeBucket));
+    if (rowRand < clamp(dropout, 0.0, 1.0) * 0.08 * noiseFloor) {
+        float xRand  = hash(float2(rowId, timeBucket) + float2(11.3, 0.0));
+        float distFromStart = mod(localPix.x - xRand * res.x, res.x);
+        if (distFromStart < max(dropoutLength, 0.0)) {
+            float polRand = hash(float2(rowId, timeBucket) + float2(29.7, 0.0));
+            float pol     = clamp(dropoutPolarity, -1.0, 1.0);
+            float isWhite = step(0.5 - pol * 0.5, polRand);
+            col = float3(isWhite);
+        }
+    }
+
+    col = clamp(col, 0.0, 1.0);
+    half ha = half(clamp(a, 0.0, 1.0));
+    half4 outCol = half4(half3(col) * ha, ha);
+    return mix(src, outCol, half(clamp(amount, 0.0, 1.0)));
+}

@@ -1,0 +1,222 @@
+[
+  {
+    "presetType": "layer",
+    "id": "1a50639b-3ea4-ee98-d6af-e865ac7870a8",
+    "author": "samMularczyk",
+    "name": "NTSC",
+    "layerType": [
+      "compositeVideo"
+    ],
+    "attrs": [
+      {
+        "attrId": "system",
+        "value": 0
+      },
+      {
+        "attrId": "phaseError",
+        "value": 18.0
+      },
+      {
+        "attrId": "qNarrow",
+        "value": 2.0
+      },
+      {
+        "attrId": "hanover",
+        "value": 0.0
+      },
+      {
+        "attrId": "crosstalk",
+        "value": 0.5
+      },
+      {
+        "attrId": "crossColour",
+        "value": 0.4
+      },
+      {
+        "attrId": "blur",
+        "value": 1.0
+      },
+      {
+        "attrId": "bandwidth",
+        "value": 1.0
+      },
+      {
+        "attrId": "peaking",
+        "value": 2.9
+      },
+      {
+        "attrId": "chromaBlur",
+        "value": 1.0
+      },
+      {
+        "attrId": "chromaSize",
+        "value": 6.0
+      }
+    ]
+  },
+  {
+    "presetType": "layer",
+    "id": "a5e06067-4773-b9cc-e696-b3a8cfb04e4d",
+    "author": "samMularczyk",
+    "name": "PAL",
+    "layerType": [
+      "compositeVideo"
+    ],
+    "attrs": [
+      {
+        "attrId": "system",
+        "value": 1
+      },
+      {
+        "attrId": "phaseError",
+        "value": 18.0
+      },
+      {
+        "attrId": "qNarrow",
+        "value": 1.0
+      },
+      {
+        "attrId": "hanover",
+        "value": 0.0
+      },
+      {
+        "attrId": "crosstalk",
+        "value": 0.35
+      },
+      {
+        "attrId": "crossColour",
+        "value": 0.3
+      },
+      {
+        "attrId": "blur",
+        "value": 1.0
+      },
+      {
+        "attrId": "bandwidth",
+        "value": 1.0
+      },
+      {
+        "attrId": "peaking",
+        "value": 2.6
+      },
+      {
+        "attrId": "chromaBlur",
+        "value": 1.0
+      },
+      {
+        "attrId": "chromaSize",
+        "value": 7.0
+      }
+    ]
+  },
+  {
+    "presetType": "layer",
+    "id": "dad57943-b653-8ad8-28d7-fa46c89ed646",
+    "author": "samMularczyk",
+    "name": "PAL Hanover Bars",
+    "layerType": [
+      "compositeVideo"
+    ],
+    "attrs": [
+      {
+        "attrId": "system",
+        "value": 1
+      },
+      {
+        "attrId": "phaseError",
+        "value": 35.0
+      },
+      {
+        "attrId": "qNarrow",
+        "value": 1.0
+      },
+      {
+        "attrId": "hanover",
+        "value": 0.7
+      },
+      {
+        "attrId": "crosstalk",
+        "value": 0.35
+      },
+      {
+        "attrId": "crossColour",
+        "value": 0.3
+      },
+      {
+        "attrId": "blur",
+        "value": 1.0
+      },
+      {
+        "attrId": "bandwidth",
+        "value": 1.0
+      },
+      {
+        "attrId": "peaking",
+        "value": 2.6
+      },
+      {
+        "attrId": "chromaBlur",
+        "value": 1.0
+      },
+      {
+        "attrId": "chromaSize",
+        "value": 7.0
+      }
+    ]
+  },
+  {
+    "presetType": "layer",
+    "id": "7c6c400e-b463-c2a4-8f4d-424bbb2151bb",
+    "author": "samMularczyk",
+    "name": "PAL-M",
+    "layerType": [
+      "compositeVideo"
+    ],
+    "attrs": [
+      {
+        "attrId": "system",
+        "value": 2
+      },
+      {
+        "attrId": "phaseError",
+        "value": 18.0
+      },
+      {
+        "attrId": "qNarrow",
+        "value": 1.0
+      },
+      {
+        "attrId": "hanover",
+        "value": 0.0
+      },
+      {
+        "attrId": "crosstalk",
+        "value": 0.5
+      },
+      {
+        "attrId": "crossColour",
+        "value": 0.4
+      },
+      {
+        "attrId": "blur",
+        "value": 1.0
+      },
+      {
+        "attrId": "bandwidth",
+        "value": 1.0
+      },
+      {
+        "attrId": "peaking",
+        "value": 2.9
+      },
+      {
+        "attrId": "chromaBlur",
+        "value": 1.0
+      },
+      {
+        "attrId": "chromaSize",
+        "value": 6.0
+      }
+    ]
+  }
+]

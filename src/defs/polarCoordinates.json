@@ -1,0 +1,81 @@
+{
+  "author": "samMularczyk",
+  "type": "polarCoordinates",
+  "superType": "thirdPartyFilter",
+  "version": 1,
+  "skslFile": "polarCoordinates.sksl",
+  "attributes": {
+    "mapping": {
+      "type": "enum",
+      "default": 0,
+      "enumValues": [
+        0,
+        1
+      ]
+    },
+    "interpolation": {
+      "type": "double",
+      "default": 1.0,
+      "min": 0.0,
+      "max": 1.0,
+      "step": 0.01
+    },
+    "centre": {
+      "type": "double2",
+      "default": [
+        0.0,
+        0.0
+      ],
+      "step": 1.0
+    },
+    "angleOffset": {
+      "type": "double",
+      "default": 0.0,
+      "softMin": -360.0,
+      "softMax": 360.0,
+      "step": 1.0
+    },
+    "tileMode": {
+      "type": "enum",
+      "default": 0,
+      "enumValues": [
+        0,
+        1,
+        2
+      ]
+    },
+    "amount": {
+      "type": "double",
+      "default": 1.0,
+      "min": 0.0,
+      "max": 1.0,
+      "step": 0.01
+    },
+    "allowViewportClipping": {
+      "default": false
+    }
+  },
+  "triggers": {
+    "out": [
+      "mapping",
+      "interpolation",
+      "centre",
+      "angleOffset",
+      "tileMode",
+      "amount"
+    ]
+  },
+  "UI": {
+    "icon": "polarCoordinates.png",
+    "attributeOrder": [
+      "mapping",
+      "interpolation",
+      "centre",
+      "angleOffset",
+      "tileMode",
+      "---Output",
+      "amount",
+      "---Inspired by After Effects' Polar Coordinates"
+    ]
+  }
+}

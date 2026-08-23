@@ -1,0 +1,88 @@
+// Glow, passes 2-4 of 13 - Field Kit
+// The directional smear, as a chained blur with a doubling step.
+//
+// WHY THE STREAK COMES FIRST. Bloom and streak both want to accumulate from the
+// same highlights, but a multipass chain carries only ONE image forward - there
+// is nowhere to keep two independent accumulations. So the streak is built
+// first and the bloom ladder then runs over it, which couples them: you get the
+// streak, plus bloom around the streak, plus bloom of the highlights. That is
+// closer to a real flare than two independent glows summed, because a real
+// streak does bloom.
+//
+// `stepScale` comes from the pass constants; the span doubles each pass, so
+// three passes of `samples` taps reach as far as a single gather would need
+// hundreds for, without the discrete ghost copies a sparse gather produces.
+//
+// One axis per filter. Chaining is what buys the quality and it cannot hold
+// several spike directions at once - blurring an already-starred image again
+// spreads it into a blob. Stack two Glows at different angles for a cross.
+
+uniform float  streakAmount;
+uniform float  reach;
+uniform float  angle;
+uniform float  samples;
+uniform float  streakFalloff;
+uniform float  blur;          // perpendicular softening, px
+uniform float  bidirectional;
+
+uniform float  stepScale;
+
+uniform float2 resolution;
+uniform float2 rectCentre;
+
+uniform shader childShader;   // pass 1: the highlights. Later: previous smear.
+
+const int MAX_TAPS = 32;
+
+// Sub-tap jitter, as in glowBloom.sksl: `samples` taps spread over `reach`
+// sit tens of pixels apart at the wide end, so a sharp highlight lands as that
+// many discrete copies. Shifting the kernel by a fraction of a tap per pixel
+// breaks them into noise the later passes smooth out. Position-keyed, so it
+// does not crawl between frames.
+float hash21(float2 p) {
+    p = fract(p * float2(127.1, 311.7));
+    p += dot(p, p + 34.23);
+    return fract(p.x * p.y);
+}
+
+half4 main(float2 fragCoord) {
+    // Nothing to do, and the bloom ladder should see the highlights untouched.
+    if (streakAmount <= 0.0) { return childShader.eval(fragCoord); }
+
+    float span = max(reach, 0.0) * stepScale;
+    float ang  = radians(angle);
+    float2 dir = float2(cos(ang), sin(ang));
+    float2 perp = float2(-dir.y, dir.x);
+    float  n    = clamp(floor(samples), 2.0, float(MAX_TAPS));
+    bool both   = bidirectional > 0.5;
+
+    float3 sum  = float3(0.0);
+    float  wsum = 0.0;
+
+    float jitter = hash21(fragCoord + dir * 31.0) - 0.5;
+
+    for (int i = 0; i < MAX_TAPS; i++) {
+        if (float(i) >= n) { continue; }
+        float t = clamp((float(i) + jitter) / max(n - 1.0, 1.0), 0.0, 1.0);
+        float u = both ? (t * 2.0 - 1.0) : t;
+        float w = exp(-abs(u) * max(streakFalloff, 0.0) * 4.0);
+
+        // Perpendicular offset spread across the taps: this is what Blur does,
+        // and it costs no extra samples. Chaining the passes smooths the
+        // pattern into a soft ribbon rather than leaving it visible.
+        float pOff = (mod(float(i), 5.0) / 4.0 - 0.5) * max(blur, 0.0);
+
+        float3 v = float3(childShader.eval(fragCoord + dir * (u * span)
+                                                     + perp * pOff).rgb);
+        sum  += v * w;
+        wsum += w;
+    }
+
+    float3 streak = sum / max(wsum, 0.0001);
+
+    // Mix so Streak Amount at 0 is exactly the untouched highlights.
+    float3 here = float3(childShader.eval(fragCoord).rgb);
+    float3 outRgb = mix(here, streak, clamp(streakAmount, 0.0, 1.0));
+
+    return half4(half3(clamp(outRgb, 0.0, 64.0)), half(1.0));
+}

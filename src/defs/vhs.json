@@ -1,0 +1,312 @@
+{
+  "author": "samMularczyk",
+  "type": "vhs",
+  "superType": "thirdPartyFilter",
+  "version": "1.0",
+  "skslFile": "vhs.sksl",
+  "attributes": {
+    "time": {
+      "type": "double",
+      "default": 0.0,
+      "compConnect": "time"
+    },
+    "speed": {
+      "type": "double",
+      "default": 0.0333,
+      "min": 0.0,
+      "softMax": 0.5,
+      "step": 0.001
+    },
+    "noiseDetail": {
+      "type": "double",
+      "default": 8.0,
+      "min": 1.0,
+      "max": 8.0,
+      "step": 1.0
+    },
+    "format": {
+      "type": "enum",
+      "default": 0,
+      "enumValues": [
+        0,
+        1,
+        2,
+        3
+      ]
+    },
+    "waveAmount": {
+      "type": "double",
+      "default": 0.005,
+      "min": 0.0,
+      "softMax": 0.1,
+      "step": 0.001
+    },
+    "fineWave": {
+      "type": "double",
+      "default": 0.01,
+      "min": 0.0,
+      "softMax": 0.2,
+      "step": 0.001
+    },
+    "creaseAmount": {
+      "type": "double",
+      "default": 10.0,
+      "min": 0.0,
+      "softMax": 40.0,
+      "step": 0.1
+    },
+    "creaseFrequency": {
+      "type": "double",
+      "default": 8.0,
+      "min": 0.0,
+      "softMax": 40.0,
+      "step": 0.1,
+      "dimming": "creaseAmount <= 0"
+    },
+    "creaseSpeed": {
+      "type": "double",
+      "default": 1.2,
+      "softMin": -5.0,
+      "softMax": 5.0,
+      "step": 0.01,
+      "dimming": "creaseAmount <= 0"
+    },
+    "creaseThreshold": {
+      "type": "double",
+      "default": 0.92,
+      "min": -1.0,
+      "max": 1.0,
+      "step": 0.01,
+      "dimming": "creaseAmount <= 0"
+    },
+    "switchingHeight": {
+      "type": "double",
+      "default": 0.03,
+      "min": 0.0,
+      "max": 1.0,
+      "step": 0.001
+    },
+    "switchingShift": {
+      "type": "double",
+      "default": 0.3,
+      "softMin": -1.0,
+      "softMax": 1.0,
+      "step": 0.01
+    },
+    "jitter": {
+      "type": "double",
+      "default": 0.2,
+      "min": 0.0,
+      "softMax": 1.0,
+      "step": 0.01
+    },
+    "bloomAmount": {
+      "type": "double",
+      "default": 0.007,
+      "min": 0.0,
+      "softMax": 0.05,
+      "step": 0.0005,
+      "dimming": "bloomStrength <= 0"
+    },
+    "bloomStrength": {
+      "type": "double",
+      "default": 0.1,
+      "min": 0.0,
+      "softMax": 0.5,
+      "step": 0.005
+    },
+    "greenLag": {
+      "type": "double",
+      "default": 2.0,
+      "softMin": -8.0,
+      "softMax": 8.0,
+      "step": 0.1,
+      "dimming": "bloomStrength <= 0 || bloomAmount <= 0"
+    },
+    "blueLag": {
+      "type": "double",
+      "default": 4.0,
+      "softMin": -8.0,
+      "softMax": 8.0,
+      "step": 0.1,
+      "dimming": "bloomStrength <= 0 || bloomAmount <= 0"
+    },
+    "gain": {
+      "type": "double",
+      "default": 0.6,
+      "min": 0.0,
+      "softMax": 3.0,
+      "step": 0.01
+    },
+    "humAmount": {
+      "type": "double",
+      "default": 0.6,
+      "min": 0.0,
+      "softMax": 3.0,
+      "step": 0.01
+    },
+    "humSpeed": {
+      "type": "double",
+      "default": 0.2,
+      "softMin": -2.0,
+      "softMax": 2.0,
+      "step": 0.01,
+      "dimming": "humAmount <= 0"
+    },
+    "edgeColor": {
+      "type": "color",
+      "default": {
+        "type": "Color",
+        "r": 26,
+        "g": 26,
+        "b": 26,
+        "a": 255
+      }
+    },
+    "dropout": {
+      "type": "double",
+      "default": 0.0,
+      "min": 0.0,
+      "max": 1.0,
+      "step": 0.01
+    },
+    "dropoutLength": {
+      "type": "double",
+      "default": 40.0,
+      "min": 0.0,
+      "softMax": 200.0,
+      "step": 1.0,
+      "dimming": "dropout <= 0"
+    },
+    "dropoutPolarity": {
+      "type": "double",
+      "default": 1.0,
+      "min": -1.0,
+      "max": 1.0,
+      "step": 0.01,
+      "dimming": "dropout <= 0"
+    },
+    "tracking": {
+      "type": "double",
+      "default": 0.0,
+      "min": 0.0,
+      "max": 1.0,
+      "step": 0.01
+    },
+    "trackingHeight": {
+      "type": "double",
+      "default": 0.12,
+      "min": 0.0,
+      "max": 1.0,
+      "step": 0.001,
+      "dimming": "tracking <= 0"
+    },
+    "trackingSpeed": {
+      "type": "double",
+      "default": 0.15,
+      "softMin": -2.0,
+      "softMax": 2.0,
+      "step": 0.01,
+      "dimming": "tracking <= 0"
+    },
+    "hiss": {
+      "type": "double",
+      "default": 0.0,
+      "min": 0.0,
+      "max": 1.0,
+      "step": 0.01
+    },
+    "amount": {
+      "type": "double",
+      "default": 1.0,
+      "min": 0.0,
+      "max": 1.0,
+      "step": 0.01
+    }
+  },
+  "triggers": {
+    "out": [
+      "time",
+      "speed",
+      "noiseDetail",
+      "format",
+      "waveAmount",
+      "fineWave",
+      "creaseAmount",
+      "creaseFrequency",
+      "creaseSpeed",
+      "creaseThreshold",
+      "switchingHeight",
+      "switchingShift",
+      "jitter",
+      "bloomAmount",
+      "bloomStrength",
+      "greenLag",
+      "blueLag",
+      "gain",
+      "humAmount",
+      "humSpeed",
+      "edgeColor",
+      "dropout",
+      "dropoutLength",
+      "dropoutPolarity",
+      "tracking",
+      "trackingHeight",
+      "trackingSpeed",
+      "hiss",
+      "amount"
+    ]
+  },
+  "UI": {
+    "icon": "vhs.png",
+    "tabs": [
+      {
+        "id": "filter",
+        "attributeOrder": [
+          "format",
+          "noiseDetail",
+          "speed",
+          "time",
+          "amount",
+          "---Tape",
+          "waveAmount",
+          "fineWave",
+          "---Head Switching",
+          "switchingHeight",
+          "switchingShift",
+          "jitter",
+          "---Crease",
+          "creaseAmount",
+          "creaseFrequency",
+          "creaseSpeed",
+          "creaseThreshold",
+          "---Dropout",
+          "dropout",
+          "dropoutLength",
+          "dropoutPolarity",
+          "---Tracking",
+          "tracking",
+          "trackingHeight",
+          "trackingSpeed",
+          "---Hiss",
+          "hiss"
+        ]
+      },
+      {
+        "id": "picture",
+        "attributeOrder": [
+          "gain",
+          "humAmount",
+          "humSpeed",
+          "edgeColor",
+          "---Bloom",
+          "bloomAmount",
+          "bloomStrength",
+          "greenLag",
+          "blueLag",
+          "---Inspired by ntsc-rs & punikonta's godot-shader-crt-vhs"
+        ]
+      }
+    ]
+  }
+}

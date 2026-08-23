@@ -1,0 +1,154 @@
+{
+  "author": "samMularczyk",
+  "type": "lightLeak",
+  "superType": "thirdPartyFilter",
+  "version": "1.0",
+  "skslFile": "lightLeak.sksl",
+  "attributes": {
+    "intensity": {
+      "type": "double",
+      "default": 1.0,
+      "min": 0.0,
+      "max": 1.0,
+      "step": 0.01
+    },
+    "source": {
+      "type": "enum",
+      "default": 0,
+      "enumValues": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8
+      ]
+    },
+    "position": {
+      "type": "double2",
+      "default": {
+        "x": 0.0,
+        "y": 0.0
+      },
+      "children": {
+        "*": {
+          "step": 1.0
+        }
+      },
+      "dimming": "source != 8"
+    },
+    "spread": {
+      "type": "double",
+      "default": 0.5,
+      "min": 0.05,
+      "softMax": 4.0,
+      "step": 0.05
+    },
+    "wander": {
+      "type": "double",
+      "default": 0.4,
+      "min": 0.0,
+      "max": 1.0,
+      "step": 0.01
+    },
+    "red": {
+      "type": "double",
+      "default": 1.0,
+      "min": 0.0,
+      "softMax": 3.0,
+      "step": 0.01
+    },
+    "yellow": {
+      "type": "double",
+      "default": 1.0,
+      "min": 0.0,
+      "softMax": 3.0,
+      "step": 0.01
+    },
+    "blue": {
+      "type": "double",
+      "default": 1.0,
+      "min": 0.0,
+      "softMax": 3.0,
+      "step": 0.01
+    },
+    "interact": {
+      "type": "double",
+      "default": 0.51,
+      "min": 0.0,
+      "max": 1.0,
+      "step": 0.01
+    },
+    "speed": {
+      "type": "double",
+      "default": 0.05,
+      "min": 0.0,
+      "softMax": 5.0,
+      "step": 0.01
+    },
+    "time": {
+      "type": "double",
+      "default": 0.0,
+      "compConnect": "time"
+    },
+    "blend": {
+      "type": "enum",
+      "default": 0,
+      "enumValues": [
+        0,
+        1,
+        2
+      ]
+    },
+    "amount": {
+      "type": "double",
+      "default": 1.0,
+      "min": 0.0,
+      "max": 1.0,
+      "step": 0.01
+    }
+  },
+  "triggers": {
+    "out": [
+      "intensity",
+      "source",
+      "position",
+      "spread",
+      "wander",
+      "red",
+      "yellow",
+      "blue",
+      "interact",
+      "speed",
+      "time",
+      "blend",
+      "amount"
+    ]
+  },
+  "UI": {
+    "icon": "lightLeak.png",
+    "attributeOrder": [
+      "intensity",
+      "---Source",
+      "source",
+      "position",
+      "spread",
+      "wander",
+      "---Colour",
+      "red",
+      "yellow",
+      "blue",
+      "interact",
+      "---Motion",
+      "speed",
+      "time",
+      "---Output",
+      "blend",
+      "amount",
+      "---Ported from LightLeaksUnity, danielzeller (MIT)"
+    ]
+  }
+}

@@ -1,0 +1,134 @@
+// Lens, pass 8 of 8 - Field Kit
+// Inspired by "Virtual_Lens" v1.5 by Florian Lorber - five of its sections.
+//
+// In that gizmo, Haze, Spherical Aberration, Axial Chromatic Aberration,
+// Astigmatism and Diffraction Glow are all the same operation: Convolve2
+// against a procedurally generated kernel. Only the kernel differs -
+// a soft 1/r halo, a disc, a disc at three per-channel scales, a rotated line,
+// and concentric rings from sin(r/size)^2 respectively.
+//
+// So this is one filter with a kernel shape control, sampled directly rather
+// than convolved, plus the per-channel scaling that produced its axial CA.
+//
+// Not ported from that gizmo: its Halation, Vignette and Veiling Glare (already
+// covered by Film Emulation, Old Film and Hex Bokeh / Fast Bokeh), and its
+// ZDefocus, which needs a depth channel.
+//
+// Uniform order matches the attribute order in definitions.json.
+
+uniform float  kernel;        // enum: 0 disc, 1 line, 2 rings, 3 halo
+uniform float  size;
+uniform float  kernelRotation;      // degrees, for the line kernel
+uniform float  ringFrequency;
+uniform float  axialRed;
+uniform float  axialGreen;
+uniform float  axialBlue;
+uniform float  scatterThreshold;     // only light above this scatters
+uniform float  scatterGain;
+uniform float  scatterBlend;         // enum: 0 screen, 1 plus, 2 replace
+uniform float  samples;
+uniform float  amount;
+
+uniform float2 resolution;
+uniform float2 rectCentre;
+
+uniform shader displaceMap;   // shaderData - binds BEFORE the image
+uniform shader defocusMap;    // shaderData - unused here, but every pass must
+                               // declare it or the binding order breaks
+uniform shader childShader;   // the distorted, aberrated, defocused chain
+uniform shader original;      // untouched input - MUST be declared last
+
+const int MAX_SAMPLES = 32;
+const float GOLDEN = 2.39996323;
+
+// Weight of a tap at polar offset (r in 0..1 of the kernel, angle a).
+float hash21(float2 p) {
+    // Non-trig hash. A fract(sin(dot(...))) hash degrades badly here: fed
+    // absolute fragCoord on an HD layer the dot product reaches tens of
+    // thousands, where float32 sin() is effectively quantised, so the "noise"
+    // gains correlated structure and visible discontinuities. This form has no
+    // such cliff at large coordinates.
+    p = fract(p * float2(0.1031, 0.11369));
+    p += dot(p, p.yx + 19.19);
+    return fract((p.x + p.y) * p.x);
+}
+
+float kernelWeight(int k, float r, float a, float rot) {
+    if (k == 1) {
+        // Line: astigmatism. Only taps near the rotation axis contribute.
+        float d = abs(sin(a - rot));
+        return (1.0 - smoothstep(0.0, 0.25, d)) * (1.0 - r * 0.5);
+    }
+    if (k == 2) {
+        // Rings: diffraction. The gizmo used sin(r/size)^2.
+        float s = sin(r * ringFrequency * 3.14159265);
+        return s * s * (1.0 - r);
+    }
+    if (k == 3) {
+        // Halo: haze. A 1/r falloff, clamped near the centre.
+        return 1.0 / (r * 8.0 + 0.35);
+    }
+    // Disc: spherical aberration. Flat, with a soft rim.
+    return 1.0 - smoothstep(0.85, 1.0, r);
+}
+
+half4 main(float2 fragCoord) {
+    // The scatter reads the CHAIN, but the final mix goes back to the untouched
+    // layer so Amount fades the whole lens, not just this pass.
+    half4 chain = childShader.eval(fragCoord);
+    half4 src   = original.eval(fragCoord);
+
+    int   k  = int(kernel);
+    float nq = clamp(samples, 3.0, float(MAX_SAMPLES));
+    float rot = radians(kernelRotation);
+    float thr = clamp(scatterThreshold, 0.0, 0.999);
+    float3 chScale = float3(max(axialRed, 0.0), max(axialGreen, 0.0), max(axialBlue, 0.0));
+
+    float3 acc  = float3(0.0);
+    float3 wsum = float3(0.0);
+    float  accA = 0.0;
+    float  aw   = 0.0;
+
+    // Rotate the spiral per pixel. A fixed set of taps over a large radius
+    // reads as discrete ghost copies of the source rather than a scatter,
+    // because the tap count is fixed while the radius is not.
+    float jit = hash21(fragCoord) * 6.28318530718;
+
+    for (int j = 0; j < MAX_SAMPLES; j++) {
+        if (float(j) >= nq) { continue; }
+
+        float t = (float(j) + 0.5) / nq;
+        float r = sqrt(t);                    // even area coverage
+        float a = float(j) * GOLDEN + jit;
+        float w = kernelWeight(k, r, a, rot);
+        float2 unit = float2(cos(a), sin(a)) * r * max(size, 0.0);
+
+        // Per-channel kernel scale - this is what made the gizmo's axial
+        // chromatic aberration: the same disc, sampled at three sizes.
+        for (int c = 0; c < 3; c++) {
+            half4 s = childShader.eval(fragCoord + unit * (c == 0 ? chScale.r : c == 1 ? chScale.g : chScale.b));
+            // A tap outside the layer is absent, not black. Counting it in the
+            // weight sum while contributing nothing to the numerator dimmed the
+            // scatter into a dark rim along the layer's edge.
+            if (s.a <= 0.001) { continue; }
+            float3 lin = float3(s.rgb / s.a);
+            float v = c == 0 ? lin.r : c == 1 ? lin.g : lin.b;
+            v = max(v - thr, 0.0) / (1.0 - thr);
+            if (c == 0) { acc.r += v * w; wsum.r += w; }
+            else if (c == 1) { acc.g += v * w; wsum.g += w; accA += float(s.a) * w; aw += w; }
+            else { acc.b += v * w; wsum.b += w; }
+        }
+    }
+
+    float3 scatter = clamp(acc / max(wsum, float3(0.0001)) * max(scatterGain, 0.0), 0.0, 1.0);
+    float3 lin = chain.a > 0.0 ? float3(chain.rgb / chain.a) : float3(0.0);
+
+    int bm = int(scatterBlend);
+    float3 outRgb =
+        bm == 1 ? min(lin + scatter, 1.0) :
+        bm == 2 ? scatter :
+        1.0 - (1.0 - lin) * (1.0 - scatter);
+
+    half a = half(clamp(max(float(chain.a), accA / max(aw, 0.0001)), 0.0, 1.0));
+    return mix(src, half4(half3(clamp(outRgb, 0.0, 1.0)) * a, a), half(clamp(amount, 0.0, 1.0)));
+}

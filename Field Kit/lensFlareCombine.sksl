@@ -1,0 +1,47 @@
+// Lens Flare, pass 4 of 4 - Field Kit
+// Grades and composites the accumulated flare over the untouched layer.
+//
+// Loosely inspired by the ghost/halo/starburst split in "Ultimate Lens Flare"
+// by ektogamat (CC0), adapted here to build every element from the layer's
+// own thresholded highlights - so the flare always tracks real image content,
+// even when the emitter is a Manual position far outside the frame - rather
+// than the fully procedural, position-only flare that reference renders.
+//
+// ---Ported from Ultimate Lens Flare, ektogamat (CC0)
+
+uniform float  intensity;
+uniform half4  tint;
+uniform float  blend;      // enum: 0 Add, 1 Screen, 2 Max, 3 Effect Only
+uniform float  amount;
+
+uniform float2 resolution;
+uniform float2 rectCentre;
+
+uniform shader childShader;   // pass 3: the finished flare buffer
+uniform shader original;      // untouched input - MUST be declared last
+
+half4 main(float2 fragCoord) {
+    // Exact passthrough at zero - nothing upstream should be visible.
+    if (intensity <= 0.0) { return original.eval(fragCoord); }
+
+    float3 flare = float3(childShader.eval(fragCoord).rgb);
+    flare = clamp(flare * max(intensity, 0.0) * float3(tint.rgb), 0.0, 64.0);
+
+    half4 src = original.eval(fragCoord);
+    float3 lin = src.a > 0.0 ? float3(src.rgb / src.a) : float3(0.0);
+
+    int bm = int(blend);
+    float3 outRgb =
+        bm == 1 ? 1.0 - (1.0 - lin) * (1.0 - flare) :
+        bm == 2 ? max(lin, flare) :
+        bm == 3 ? flare :
+        min(lin + flare, 1.0);
+
+    // A flare spreads well past the source, so alpha has to follow it out or
+    // it gets clipped to the layer's own shape.
+    float fa = clamp(dot(flare, float3(0.3333)), 0.0, 1.0);
+    half a = half(bm == 3 ? fa : clamp(max(float(src.a), fa), 0.0, 1.0));
+
+    return mix(src, half4(half3(clamp(outRgb, 0.0, 1.0)) * a, a),
+               half(clamp(amount, 0.0, 1.0)));
+}

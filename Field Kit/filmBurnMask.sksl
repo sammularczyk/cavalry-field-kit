@@ -1,0 +1,128 @@
+// Film Burn, pass 1 of 2 - Field Kit
+// Builds the burn-through boundary and hands pass 2 the two numbers it needs
+// to colour the edge: how deep into the hole a pixel is, and its signed
+// distance to the burn front.
+//
+// The boundary is a radial (or, for Edge, axial) distance from the origin
+// point, WARPED by fbm rather than used raw. A raw radial/axial ramp reads as
+// a wipe or an expanding circle; adding fbm noise to the same metric keeps it
+// monotonic - it still grows outward as progress increases - while making the
+// edge ragged and organic, the way a hole in film actually spreads. That is
+// the whole difference between "film burn" and "circle wipe".
+//
+// This pass has NO `original` input - there is nothing to fall back to on
+// pass 0, so declaring one fails the build silently. It also has no need for
+// `childShader`: this pass never samples the layer at all, it is pure
+// procedural geometry, so that uniform is left undeclared too.
+//
+// Uniform order matches this pass's `uniforms` entry in the definition.
+
+uniform float  progress;   // 0 = untouched, 1 = fully burnt away
+uniform float  origin;     // enum: 0 centre, 1 edge, 2 corner, 3 manual
+uniform float2 position;   // Manual only, pixels from the layer centre
+uniform float  scale;      // fbm feature size, pixels
+uniform float  roughness;  // how ragged the edge is
+uniform float  seed;
+
+uniform float2 resolution;
+uniform float2 rectCentre;
+
+// Pass 0 is pure procedural geometry and does not need the picture - but a
+// filter pass still has to DECLARE the input, because Cavalry binds the image
+// by position and a pass with no shader input fails to build. It reports only
+// "Pass 0: buildShader failed" with no SkSL error, since nothing failed to
+// compile: the pass failed to construct. Its alpha is used below, which also
+// keeps the burn from eating into empty space outside the layer.
+uniform shader childShader;
+
+float hash21(float2 p) {
+    return fract(sin(dot(p, float2(127.1, 311.7))) * 43758.5453123);
+}
+
+float vnoise(float2 p) {
+    float2 i = floor(p);
+    float2 f = fract(p);
+    f = f * f * (3.0 - 2.0 * f);
+    return mix(mix(hash21(i), hash21(i + float2(1.0, 0.0)), f.x),
+               mix(hash21(i + float2(0.0, 1.0)),
+                   hash21(i + float2(1.0, 1.0)), f.x), f.y);
+}
+
+const int OCTAVES = 5;
+
+// Fixed loop count with a runtime gain, per the compiler's constant-folding
+// trap: a loop that only ever sums literals gets folded to zero, but this one
+// accumulates vnoise(p) at runtime coordinates so it is safe.
+float fbm(float2 p, float gain) {
+    float v = 0.0;
+    float amp = 0.5;
+    for (int i = 0; i < OCTAVES; i++) {
+        v += amp * vnoise(p);
+        p *= 2.0;
+        amp *= gain;
+    }
+    return v;
+}
+
+// Where the burn starts from, in absolute (Y-up) pixels.
+float2 originPoint(float2 res, float2 centre, int o, float2 pos) {
+    if (o == 1) {
+        // Edge: a fuse lit along the bottom, burning upward.
+        return float2(centre.x, centre.y - res.y * 0.5);
+    }
+    if (o == 2) {
+        // Corner: top-left, Y-up so "top" is +y.
+        return float2(centre.x - res.x * 0.5, centre.y + res.y * 0.5);
+    }
+    if (o == 3) {
+        return centre + pos;
+    }
+    return centre; // Centre
+}
+
+// Distance from `from` to the farthest of the frame's four corners, used to
+// normalise the radial metric so progress sweeps sensibly across the canvas
+// regardless of where the origin point sits.
+float farthestCorner(float2 res, float2 centre, float2 from) {
+    float2 hw = res * 0.5;
+    float d0 = length((centre + float2(-hw.x, -hw.y)) - from);
+    float d1 = length((centre + float2( hw.x, -hw.y)) - from);
+    float d2 = length((centre + float2(-hw.x,  hw.y)) - from);
+    float d3 = length((centre + float2( hw.x,  hw.y)) - from);
+    return max(max(d0, d1), max(d2, d3));
+}
+
+half4 main(float2 fragCoord) {
+    float2 res = max(resolution, float2(1.0));
+    int    o   = int(origin);
+    float2 org = originPoint(res, rectCentre, o, position);
+
+    float freq = 1.0 / max(scale, 1.0);
+    float2 p = (fragCoord - rectCentre) * freq + float2(seed * 13.37, seed * 71.23);
+
+    float gain = clamp(0.3 + 0.25 * roughness, 0.25, 0.85);
+    float n = fbm(p, gain) - 0.5;   // recentred, roughly -0.5..0.5
+
+    float radial;
+    if (o == 1) {
+        radial = (fragCoord.y - org.y) / res.y;
+    } else {
+        radial = length(fragCoord - org) / max(farthestCorner(res, rectCentre, org), 1.0);
+    }
+
+    float perturb = clamp(roughness, 0.0, 4.0) * 0.5;
+    float level = radial + n * perturb;
+    float d = level - progress;   // signed distance to the burn edge
+
+    // Antialiased "how far inside the hole" mask, over a thin band in field
+    // units so the true zero-alpha edge doesn't crawl with the pixel grid.
+    float aa = 0.006;
+    float mask = 1.0 - smoothstep(0.0, aa, d);
+
+    // Gate on the layer's own coverage: nothing burns where there is no film.
+    // This is also what keeps `childShader` genuinely used, so the compiler
+    // cannot optimise the declaration away and reintroduce the build failure.
+    float cover = float(childShader.eval(fragCoord).a) > 0.0 ? 1.0 : 0.0;
+
+    return half4(half(clamp(mask, 0.0, 1.0) * cover), half(d), half(n), half(1.0));
+}

@@ -1,0 +1,467 @@
+// ASCII - Field Kit
+//
+// The glyph ramp and its decode formula are ported from pixi.js filters'
+// AsciiFilter (MIT licence), src/ascii/ascii.frag:
+// https://github.com/pixijs/filters. That file itself descends from the same
+// lineage as movAX13h's Shadertoy "Bitmap to ASCII", but movAX13h's own
+// shaders carry no licence (Shadertoy defaults to CC BY-NC-SA), which blocked
+// shipping their glyph constants here. pixi's file is MIT, so its constants
+// are what this filter now carries, copied and decoded exactly as it does.
+//
+// COVERAGE: pixi ships one 8-level ramp (a dot through a hash), not the four
+// sets (Blocks, Classic, Full A-Z, Minimal) the old movAX13h port had - the
+// old constants are gone rather than padded back in from an unlicensed
+// source. "Classic" below is that one pixi ramp. Block Density, Dots, and
+// Numeric are unaffected: they were authored for this plugin, not ported from
+// Shadertoy, so they carry on unchanged. Letters and Full ASCII restore the
+// missing letterforms from a different, unambiguously free source: Tom Thumb
+// (tom-thumb.bdf), a 4x6-cell / 3x5-usable-pixel font by Robey Pointer,
+// released CC0 - see https://opengameart.org/content/tom-thumb-tiny-ascii-font-3x5.
+// It descends from a VT100 emulator by Brian Swetland (BSD-3-clause), which
+// Swetland gave Pointer permission to relicense; Pointer chose CC0 (also
+// offered under CC-BY 3.0). Its glyph bitmaps were transcribed by counting
+// set pixels straight from the BDF, not eyeballed from a rendered sample.
+//
+// Each glyph is a 5x5 bitmap packed into a float bitmask, tested bit by bit
+// with float arithmetic - SkSL has no bitwise operators, `>>` fails with
+// "operator '>>' is not allowed". pixi's bit index is bx + 5*by (no
+// x-mirroring); this plugin's own five sets (including the two Tom Thumb
+// ones) keep their previous two-half, mirrored-index convention, since that
+// data was never in question and changing it would just be churn. `bitOfAny`
+// below picks the right decode per glyph by a sentinel in the unused half.
+//
+// Three additions to the original beyond the port:
+//
+//  - EDGE GLYPHS. Where a cell sits on a boundary, its glyph is chosen by edge
+//    DIRECTION rather than by brightness, from a set of four line glyphs. This
+//    is what makes outlines read as line art instead of tonal mush. The line
+//    bitmaps are authored here: horizontal 31744, vertical 4329604, forward
+//    slash 1118480, back slash 17043521, in this plugin's own mirrored
+//    convention.
+//  - CELL ASPECT, so glyphs can be taller than wide like real monospaced text.
+//  - RAMP GAMMA and PALETTE QUANTISE, to bias sparse against dense glyphs and
+//    to crush cell colour to a few steps for a terminal look.
+//
+// Uniform order matches the attribute order in definitions.json.
+
+uniform float  textSize;      // cell size in pixels
+uniform float  cellAspect;    // cell height / width
+uniform float  margin;        // padding inside each cell, 0..0.45
+uniform float  charset;       // enum: 0 classic (pixi), 1 block density,
+                              //       2 dots, 3 numeric, 4 letters, 5 full ascii
+uniform float  rampGamma;     // bias of brightness onto the glyph ramp
+uniform float  edgeThreshold; // 0 = no edge glyphs
+uniform float  colorMode;     // enum: 0 from layer, 1 single colour, 2 ink on paper
+uniform half4  inkColor;      // straight RGBA
+uniform half4  paperColor;    // straight RGBA
+uniform float  paletteLevels; // 0 = off, else steps per channel
+uniform float  invert;        // bool: flip the brightness ramp
+uniform float  randomChars;   // 0 = glyph by brightness, 1 = glyph at random
+uniform float  seed;
+uniform float  amount;
+
+uniform float2 resolution;
+uniform float2 rectCentre;
+
+uniform shader image;         // input image - binds by position, must be last
+
+// pixi.js filters' AsciiFilter ramp (MIT). Thresholds and packed floats are
+// copied verbatim from ascii.frag's `character()` table: . : * o & 8 @ #.
+// y = -1 flags pixi's convention to `bitOfAny` below - a single packed float
+// tested at bit index bx + 5*by, not this plugin's own mirrored two-half one.
+float2 glyphClassic(float g) {
+    float n = 65536.0;               // .
+    if (g > 0.2) { n = 65600.0; }     // :
+    if (g > 0.3) { n = 332772.0; }    // *
+    if (g > 0.4) { n = 15255086.0; }  // o
+    if (g > 0.5) { n = 23385164.0; }  // &
+    if (g > 0.6) { n = 15252014.0; }  // 8
+    if (g > 0.7) { n = 13199452.0; }  // @
+    if (g > 0.8) { n = 11512810.0; }  // #
+    return float2(n, -1.0);
+}
+
+float2 glyphClassicAt(float idx) {
+    int i = int(clamp(idx, 0.0, 7.0));
+    if (i == 0) { return float2(65536.0, -1.0); }
+    if (i == 1) { return float2(65600.0, -1.0); }
+    if (i == 2) { return float2(332772.0, -1.0); }
+    if (i == 3) { return float2(15255086.0, -1.0); }
+    if (i == 4) { return float2(23385164.0, -1.0); }
+    if (i == 5) { return float2(15252014.0, -1.0); }
+    if (i == 6) { return float2(13199452.0, -1.0); }
+    return float2(11512810.0, -1.0);
+}
+
+// Block density ramp: space, quarter, half, three-quarter, solid. Reads as a
+// mosaic rather than as text, and holds tone better than any letterform set.
+float2 glyphBlockDensity(float g) {
+    float2 v = float2(0.0, 0.0);
+    if (g > 0.200000) { v = float2(5141.0, 2690.0); }
+    if (g > 0.400000) { v = float2(5461.0, 2730.0); }
+    if (g > 0.600000) { v = float2(7871.0, 4055.0); }
+    if (g > 0.800000) { v = float2(8191.0, 4095.0); }
+    return v;
+}
+
+float2 glyphBlockDensityAt(float idx) {
+    int i = int(clamp(idx, 0.0, 4.0));
+    if (i == 0) { return float2(0.0, 0.0); }
+    if (i == 1) { return float2(5141.0, 2690.0); }
+    if (i == 2) { return float2(5461.0, 2730.0); }
+    if (i == 3) { return float2(7871.0, 4055.0); }
+    return float2(8191.0, 4095.0);
+}
+
+// Dots: an eight-step set of scattered points, braille-ish.
+float2 glyphDotsAt(float idx) {
+    int i = int(clamp(idx, 0.0, 7.0));
+    if (i == 0) { return float2(0.0, 0.0); }
+    if (i == 1) { return float2(0.0, 32.0); }
+    if (i == 2) { return float2(64.0, 32.0); }
+    if (i == 3) { return float2(72.0, 32.0); }
+    if (i == 4) { return float2(72.0, 288.0); }
+    if (i == 5) { return float2(4168.0, 288.0); }
+    if (i == 6) { return float2(4170.0, 288.0); }
+    return float2(4170.0, 1312.0);
+}
+
+float2 glyphDots(float g) {
+    return glyphDotsAt(floor(clamp(g, 0.0, 0.9999) * 8.0));
+}
+
+// Digits only, ordered by how much ink each one uses: 1 7 4 0 2 3 6 8 9 5.
+float2 glyphNumericAt(float idx) {
+    int i = int(clamp(idx, 0.0, 10.0));
+    if (i == 0) { return float2(0.0, 0.0); }
+    if (i == 1) { return float2(4238.0, 560.0); }
+    if (i == 2) { return float2(2180.0, 3972.0); }
+    if (i == 3) { return float2(7234.0, 2379.0); }
+    if (i == 4) { return float2(1582.0, 1862.0); }
+    if (i == 5) { return float2(6431.0, 1860.0); }
+    if (i == 6) { return float2(6206.0, 3845.0); }
+    if (i == 7) { return float2(6702.0, 1859.0); }
+    if (i == 8) { return float2(6702.0, 1861.0); }
+    if (i == 9) { return float2(7214.0, 1861.0); }
+    return float2(6206.0, 4035.0);
+}
+
+float2 glyphNumeric(float g) {
+    return glyphNumericAt(floor(clamp(g, 0.0, 0.9999) * 11.0));
+}
+
+// Letters and Full ASCII: glyph data transcribed from Tom Thumb (tom-thumb.bdf),
+// a 4x6-cell / 3x5-usable-pixel font by Robey Pointer, CC0 (see file header for
+// provenance). Each glyph is 3 columns wide, placed centred in this shader's
+// 5-wide bit space (columns 1-3, leaving column 0 and 4 as margin) and stored
+// in this plugin's own mirrored two-half convention (bitOf above) - the same
+// decode Block Density, Dots and Numeric already use, so bitOfAny needs no new
+// case. Rows are counted from the glyph's own baseline, not the BDF's literal
+// row order, because fragCoord's Y axis runs the opposite way to a font file's
+// (see bitOfAny/main below); this was checked against a decode of the existing
+// Numeric ramp before any of Tom Thumb's data was transcribed. Ink coverage
+// (bits set) increases monotonically through both tables below, since the
+// ramp is read out by brightness - ties are broken by ASCII code, since every
+// tied pair here is same-height, same-row-count uppercase or ASCII-order is
+// otherwise as good a tiebreak as any.
+float2 glyphLettersAt(float idx) {
+    int i = int(clamp(idx, 0.0, 25.0));
+    if (i == 0) { return float2(2372.0, 264.0); }  // J
+    if (i == 1) { return float2(262.0, 801.0); }  // C
+    if (i == 2) { return float2(270.0, 1057.0); }  // L
+    if (i == 3) { return float2(4172.0, 800.0); }  // S
+    if (i == 4) { return float2(4228.0, 1808.0); }  // T
+    if (i == 5) { return float2(4228.0, 1320.0); }  // Y
+    if (i == 6) { return float2(2372.0, 553.0); }  // O
+    if (i == 7) { return float2(4360.0, 1577.0); }  // P
+    if (i == 8) { return float2(2180.0, 1321.0); }  // V
+    if (i == 9) { return float2(6408.0, 1825.0); }  // F
+    if (i == 10) { return float2(4238.0, 1808.0); }  // I
+    if (i == 11) { return float2(4426.0, 1320.0); }  // X
+    if (i == 12) { return float2(4366.0, 1800.0); }  // Z
+    if (i == 13) { return float2(6474.0, 553.0); }  // A
+    if (i == 14) { return float2(4428.0, 1577.0); }  // B
+    if (i == 15) { return float2(2380.0, 1577.0); }  // D
+    if (i == 16) { return float2(6470.0, 801.0); }  // G
+    if (i == 17) { return float2(4426.0, 1321.0); }  // K
+    if (i == 18) { return float2(2502.0, 553.0); }  // Q
+    if (i == 19) { return float2(2374.0, 1321.0); }  // U
+    if (i == 20) { return float2(6414.0, 1825.0); }  // E
+    if (i == 21) { return float2(6474.0, 1321.0); }  // H
+    if (i == 22) { return float2(6538.0, 1577.0); }  // R
+    if (i == 23) { return float2(6474.0, 1337.0); }  // M
+    if (i == 24) { return float2(6602.0, 1321.0); }  // W
+    return float2(6602.0, 1337.0);  // N
+}
+
+float2 glyphLetters(float g) {
+    return glyphLettersAt(floor(clamp(g, 0.0, 0.9999) * 26.0));
+}
+
+// Full ASCII: all 95 printable characters (space through tilde), each a
+// distinct bitmap - Tom Thumb's descenders (g j p q y) lose their one
+// below-baseline row to fit this shader's 5-row cell, same as every other
+// glyph here, which still reads fine at this size.
+float2 glyphAsciiAt(float idx) {
+    int i = int(clamp(idx, 0.0, 94.0));
+    if (i == 0) { return float2(0.0, 0.0); }  // space
+    if (i == 1) { return float2(4.0, 0.0); }  // .
+    if (i == 2) { return float2(0.0, 528.0); }  // '
+    if (i == 3) { return float2(136.0, 0.0); }  // ,
+    if (i == 4) { return float2(128.0, 16.0); }  // :
+    if (i == 5) { return float2(0.0, 1040.0); }  // `
+    if (i == 6) { return float2(136.0, 16.0); }  // ;
+    if (i == 7) { return float2(4160.0, 32.0); }  // backslash
+    if (i == 8) { return float2(0.0, 552.0); }  // ^
+    if (i == 9) { return float2(6144.0, 1.0); }  // -
+    if (i == 10) { return float2(14.0, 0.0); }  // _
+    if (i == 11) { return float2(4100.0, 528.0); }  // !
+    if (i == 12) { return float2(4228.0, 512.0); }  // i
+    if (i == 13) { return float2(132.0, 528.0); }  // |
+    if (i == 14) { return float2(0.0, 1320.0); }  // "
+    if (i == 15) { return float2(0.0, 816.0); }  // ~
+    if (i == 16) { return float2(4354.0, 1032.0); }  // %
+    if (i == 17) { return float2(4226.0, 272.0); }  // (
+    if (i == 18) { return float2(4232.0, 1040.0); }  // )
+    if (i == 19) { return float2(4360.0, 264.0); }  // /
+    if (i == 20) { return float2(130.0, 273.0); }  // <
+    if (i == 21) { return float2(2184.0, 1040.0); }  // >
+    if (i == 22) { return float2(2122.0, 256.0); }  // j
+    if (i == 23) { return float2(264.0, 25.0); }  // r
+    if (i == 24) { return float2(2048.0, 1297.0); }  // *
+    if (i == 25) { return float2(6272.0, 17.0); }  // +
+    if (i == 26) { return float2(4228.0, 560.0); }  // 1
+    if (i == 27) { return float2(2372.0, 264.0); }  // J
+    if (i == 28) { return float2(4100.0, 1800.0); }  // ?
+    if (i == 29) { return float2(262.0, 25.0); }  // c
+    if (i == 30) { return float2(2372.0, 17.0); }  // o
+    if (i == 31) { return float2(4234.0, 40.0); }  // x
+    if (i == 32) { return float2(448.0, 56.0); }  // =
+    if (i == 33) { return float2(4172.0, 1544.0); }  // 3
+    if (i == 34) { return float2(4360.0, 1800.0); }  // 7
+    if (i == 35) { return float2(262.0, 801.0); }  // C
+    if (i == 36) { return float2(270.0, 1057.0); }  // L
+    if (i == 37) { return float2(4172.0, 800.0); }  // S
+    if (i == 38) { return float2(4228.0, 1808.0); }  // T
+    if (i == 39) { return float2(4228.0, 1320.0); }  // Y
+    if (i == 40) { return float2(6276.0, 273.0); }  // f
+    if (i == 41) { return float2(134.0, 785.0); }  // {
+    if (i == 42) { return float2(2188.0, 1552.0); }  // }
+    if (i == 43) { return float2(2242.0, 41.0); }  // y
+    if (i == 44) { return float2(4366.0, 1544.0); }  // 2
+    if (i == 45) { return float2(2372.0, 553.0); }  // O
+    if (i == 46) { return float2(4360.0, 1577.0); }  // P
+    if (i == 47) { return float2(2180.0, 1321.0); }  // V
+    if (i == 48) { return float2(4238.0, 1552.0); }  // l
+    if (i == 49) { return float2(4230.0, 568.0); }  // t
+    if (i == 50) { return float2(2438.0, 25.0); }  // e
+    if (i == 51) { return float2(2498.0, 25.0); }  // g
+    if (i == 52) { return float2(2378.0, 49.0); }  // n
+    if (i == 53) { return float2(2380.0, 49.0); }  // p
+    if (i == 54) { return float2(2374.0, 25.0); }  // q
+    if (i == 55) { return float2(4300.0, 25.0); }  // s
+    if (i == 56) { return float2(2374.0, 41.0); }  // u
+    if (i == 57) { return float2(2500.0, 41.0); }  // v
+    if (i == 58) { return float2(6532.0, 816.0); }  // $
+    if (i == 59) { return float2(6210.0, 1321.0); }  // 4
+    if (i == 60) { return float2(4172.0, 1825.0); }  // 5
+    if (i == 61) { return float2(6406.0, 553.0); }  // @
+    if (i == 62) { return float2(6408.0, 1825.0); }  // F
+    if (i == 63) { return float2(4238.0, 1808.0); }  // I
+    if (i == 64) { return float2(4426.0, 1320.0); }  // X
+    if (i == 65) { return float2(4366.0, 1800.0); }  // Z
+    if (i == 66) { return float2(270.0, 1825.0); }  // [
+    if (i == 67) { return float2(2126.0, 1800.0); }  // ]
+    if (i == 68) { return float2(2380.0, 1073.0); }  // b
+    if (i == 69) { return float2(2374.0, 281.0); }  // d
+    if (i == 70) { return float2(2378.0, 1073.0); }  // h
+    if (i == 71) { return float2(4490.0, 1065.0); }  // k
+    if (i == 72) { return float2(6478.0, 48.0); }  // a
+    if (i == 73) { return float2(2380.0, 809.0); }  // 0
+    if (i == 74) { return float2(6474.0, 553.0); }  // A
+    if (i == 75) { return float2(4428.0, 1577.0); }  // B
+    if (i == 76) { return float2(2380.0, 1577.0); }  // D
+    if (i == 77) { return float2(6470.0, 801.0); }  // G
+    if (i == 78) { return float2(4426.0, 1321.0); }  // K
+    if (i == 79) { return float2(2502.0, 553.0); }  // Q
+    if (i == 80) { return float2(2374.0, 1321.0); }  // U
+    if (i == 81) { return float2(6542.0, 56.0); }  // z
+    if (i == 82) { return float2(6470.0, 1585.0); }  // &
+    if (i == 83) { return float2(6478.0, 801.0); }  // 6
+    if (i == 84) { return float2(6220.0, 1833.0); }  // 9
+    if (i == 85) { return float2(6414.0, 1825.0); }  // E
+    if (i == 86) { return float2(6474.0, 1321.0); }  // H
+    if (i == 87) { return float2(6538.0, 1577.0); }  // R
+    if (i == 88) { return float2(6602.0, 57.0); }  // m
+    if (i == 89) { return float2(6606.0, 41.0); }  // w
+    if (i == 90) { return float2(2506.0, 1337.0); }  // #
+    if (i == 91) { return float2(6474.0, 1337.0); }  // M
+    if (i == 92) { return float2(6602.0, 1321.0); }  // W
+    if (i == 93) { return float2(6478.0, 1833.0); }  // 8
+    return float2(6602.0, 1337.0);  // N
+}
+
+float2 glyphAscii(float g) {
+    return glyphAsciiAt(floor(clamp(g, 0.0, 0.9999) * 95.0));
+}
+
+// Line glyphs, indexed by edge direction: 0 horizontal, 1 forward slash,
+// 2 vertical, 3 back slash.
+float2 glyphLine(float idx) {
+    int i = int(clamp(idx, 0.0, 3.0));
+    if (i == 0) { return float2(7168.0, 3.0); }
+    if (i == 1) { return float2(4368.0, 136.0); }
+    if (i == 2) { return float2(4228.0, 528.0); }
+    return float2(4161.0, 2080.0);
+}
+
+float setCount(int s) {
+    if (s == 1) { return 5.0; }  // Block Density
+    if (s == 2) { return 8.0; }  // Dots
+    if (s == 3) { return 11.0; } // Numeric
+    if (s == 4) { return 26.0; } // Letters
+    if (s == 5) { return 95.0; } // Full ASCII
+    return 8.0;                  // Classic (pixi)
+}
+
+float2 glyphByBrightness(float s, float g) {
+    int i = int(s);
+    if (i == 1) { return glyphBlockDensity(g); }
+    if (i == 2) { return glyphDots(g); }
+    if (i == 3) { return glyphNumeric(g); }
+    if (i == 4) { return glyphLetters(g); }
+    if (i == 5) { return glyphAscii(g); }
+    return glyphClassic(g);
+}
+
+float2 glyphByIndex(float s, float idx) {
+    int i = int(s);
+    if (i == 1) { return glyphBlockDensityAt(idx); }
+    if (i == 2) { return glyphDotsAt(idx); }
+    if (i == 3) { return glyphNumericAt(idx); }
+    if (i == 4) { return glyphLettersAt(idx); }
+    if (i == 5) { return glyphAsciiAt(idx); }
+    return glyphClassicAt(idx);
+}
+
+// Luminance of the cell whose centre is at `coord`, for the edge gradient.
+float cellLuma(float2 coord) {
+    half4 c = image.eval(coord);
+    float3 lin = c.a > 0.0 ? float3(c.rgb / c.a) : float3(0.0);
+    return dot(lin, float3(0.299, 0.587, 0.114));
+}
+
+float hash21(float2 p) {
+    return fract(sin(dot(p, float2(41.17, 289.3))) * 43758.5453);
+}
+
+// Test one bit of a glyph stored as two 13-bit halves, mirrored in x. Used by
+// this plugin's own three glyph sets (Block Density, Dots, Numeric) and the
+// edge line glyphs.
+float bitOf(float2 glyph, float bit) {
+    float v = bit < 13.0 ? glyph.x : glyph.y;
+    float b = bit < 13.0 ? bit : bit - 13.0;
+    return mod(floor(v / exp2(b)), 2.0);
+}
+
+// Dispatches to pixi's single-packed-float convention (y == -1, bit index
+// bx + 5*by) or this plugin's mirrored two-half one (bitOf above), by the
+// sentinel glyphClassic/glyphClassicAt leave in y. Two conventions, because
+// the pixi data has to stay exactly as pixi wrote it - see the file header.
+float bitOfAny(float2 glyph, float bx, float by) {
+    if (glyph.y < 0.0) {
+        return mod(floor(glyph.x / exp2(bx + 5.0 * by)), 2.0);
+    }
+    return bitOf(glyph, (4.0 - bx) + 5.0 * by);
+}
+
+half4 main(float2 fragCoord) {
+    half4 src = image.eval(fragCoord);
+
+    // Non-square cells, so glyphs can be taller than wide like real type.
+    float2 cell = float2(max(textSize, 4.0));
+    cell.y *= max(cellAspect, 0.05);
+
+    // Layer-local pixels, so the character grid does not swim when the layer
+    // moves and every Duplicator copy lines up.
+    float2 p    = fragCoord - rectCentre;
+    float2 cidx = floor(p / cell);
+    float2 centre = (cidx + 0.5) * cell + rectCentre;
+
+    // One sample per cell, taken at its centre.
+    half4 c = image.eval(centre);
+    float3 lin = c.a > 0.0 ? float3(c.rgb / c.a) : float3(0.0);
+
+    float gray = dot(lin, float3(0.299, 0.587, 0.114));
+    if (invert > 0.5) { gray = 1.0 - gray; }
+    // Gamma on the brightness-to-glyph mapping, to bias sparse against dense.
+    gray = pow(clamp(gray, 0.0, 1.0), max(rampGamma, 0.0001));
+
+    // Glyph choice: by brightness, or picked at random per cell. The random
+    // mode gives the scattered-letterform look rather than a tonal ramp.
+    float2 gl = glyphByBrightness(charset, gray);
+    if (hash21(cidx + seed + 7.3) < clamp(randomChars, 0.0, 1.0)) {
+        float pick = floor(hash21(cidx + seed) * setCount(int(charset)));
+        gl = glyphByIndex(charset, pick);
+    }
+
+    // Edge glyphs. The gradient is measured between CELL centres rather than
+    // between pixels, because the glyph is chosen per cell and a pixel-scale
+    // gradient would pick up detail the grid cannot represent. The line runs
+    // perpendicular to the gradient, so the tangent angle is what selects the
+    // glyph, quantised to four directions.
+    if (edgeThreshold > 0.0) {
+        float lR = cellLuma(centre + float2(cell.x, 0.0));
+        float lL = cellLuma(centre - float2(cell.x, 0.0));
+        float lU = cellLuma(centre + float2(0.0, cell.y));
+        float lD = cellLuma(centre - float2(0.0, cell.y));
+        float2 grad = float2(lR - lL, lU - lD);
+        float mag = length(grad);
+        if (mag > edgeThreshold) {
+            float ang = atan(grad.y, grad.x) + 1.57079633;
+            // 0..4 over 180 degrees, wrapped, then to the nearest of four.
+            float q = mod(ang / 3.14159265 * 4.0 + 8.0, 4.0);
+            gl = glyphLine(mod(floor(q + 0.5), 4.0));
+        }
+    }
+
+    // Position inside the 5x5 bitmap.
+    float m = clamp(margin, 0.0, 0.45);
+    float2 local = (p - cidx * cell) / cell;
+    float2 g = (local - m) / (1.0 - 2.0 * m) * 5.0;
+
+    float on = 0.0;
+    if (g.x >= 0.0 && g.x < 5.0 && g.y >= 0.0 && g.y < 5.0) {
+        float bx = floor(g.x);
+        float by = floor(g.y);
+        on = bitOfAny(gl, bx, by);
+    }
+
+    // Palette quantise: crush the cell colour to a few steps per channel, for
+    // a fixed-palette terminal look.
+    if (paletteLevels > 1.0) {
+        float n = floor(paletteLevels);
+        lin = floor(clamp(lin, 0.0, 1.0) * n + 0.5) / n;
+    }
+
+    int mode = int(colorMode);
+    float3 rgb;
+    float  a;
+    if (mode == 2) {
+        // Ink on paper: the paper fills the layer, glyphs are drawn in ink.
+        rgb = mix(float3(paperColor.rgb), float3(inkColor.rgb), on);
+        a   = float(c.a) * mix(float(paperColor.a), float(inkColor.a), on);
+    } else if (mode == 1) {
+        // One flat colour, transparent between glyphs.
+        rgb = float3(inkColor.rgb);
+        a   = float(c.a) * float(inkColor.a) * on;
+    } else {
+        // Colour taken from the layer.
+        rgb = lin;
+        a   = float(c.a) * on;
+    }
+
+    half ha = half(clamp(a, 0.0, 1.0));
+    half4 outCol = half4(half3(clamp(rgb, 0.0, 1.0)) * ha, ha);
+    return mix(src, outCol, half(clamp(amount, 0.0, 1.0)));
+}

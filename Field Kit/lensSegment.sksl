@@ -1,0 +1,148 @@
+// Lens, passes 4-6 of 8 - Field Kit
+//
+// A convex polygon aperture is the Minkowski sum of line segments, so chaining
+// N one-dimensional blurs at evenly spaced angles gives a 2N-gon: two segments
+// make a square, three a hexagon, four an octagon. That is what Blades controls.
+// Segments are spaced over 180 degrees rather than 360, because a segment is
+// undirected.
+//
+// Inspired by "post: bokeh blur, hexagon 5pass" by hornet (Shadertoy Xd33Ds),
+// whose three-segment decomposition this generalises, and "bokeh (ml approach)"
+// by NLIBS (Shadertoy 3tGcWt), whose focus-from-a-matte idea is kept while its
+// sparse kernel is not - the separable chain is better quality at similar cost.
+//
+// `segIndex` comes from the pass constants. A pass whose segment index is beyond
+// the blade count passes straight through, which is how one fixed set of passes
+// serves 4, 6 and 8 blades. Highlight extraction happens in bokehPrepare.sksl,
+// so every pass here is identical apart from its angle - see that file for why
+// that separation matters.
+
+uniform float  defocus;
+uniform float  blades;        // 4, 6 or 8
+uniform float  rotation;      // degrees, turns the whole aperture
+uniform float  catsEye;       // optical vignetting: clips the aperture off-axis
+uniform float  catsEyeFalloff;
+uniform float  ringBias;      // weights taps toward the aperture edge
+uniform float  cocSource;     // enum: 0 uniform, 1 alpha, 2 luminance, 3 ramp, 4 texture
+uniform float  focus;
+uniform float  aperture;
+uniform float  dither;
+
+uniform float  segIndex;
+
+uniform float2 resolution;
+uniform float2 rectCentre;
+
+uniform shader displaceMap;   // shaderData - binds BEFORE the image
+uniform shader defocusMap;    // shaderData - Focus From: Texture
+uniform shader childShader;   // previous pass
+uniform shader original;      // untouched input - MUST be declared last
+
+const int MAX_SAMPLES = 24;
+
+float hash12(float2 p) {
+    p = fract(p * float2(5.3987, 5.4421));
+    p += dot(p.yx, p.xy + float2(21.5351, 14.3137));
+    return fract(p.x * p.y * 95.4307);
+}
+
+// How defocused this pixel is, from whichever matte drives focus. Read from the
+// untouched input so every pass in the chain agrees.
+float cocAt(float2 coord) {
+    int m = int(cocSource);
+    if (m == 0) { return 1.0; }
+
+    half4 c = original.eval(coord);
+    float2 res = max(resolution, float2(1.0));
+    float z;
+    if (m == 1) {
+        z = float(c.a);
+    } else if (m == 2) {
+        float3 lin = c.a > 0.0 ? float3(c.rgb / c.a) : float3(0.0);
+        z = dot(lin, float3(0.299, 0.587, 0.114));
+    } else if (m == 4) {
+        // Texture: a real defocus map, rather than inferring CoC from the image.
+        half4 dm = defocusMap.eval(coord);
+        float3 lin = dm.a > 0.0 ? float3(dm.rgb / dm.a) : float3(dm.rgb);
+        z = dot(lin, float3(0.299, 0.587, 0.114));
+    } else {
+        z = (coord.y - rectCentre.y) / res.y + 0.5;
+    }
+    // Thin-lens style falloff either side of the focus value.
+    return clamp(abs(z - focus) / (z + 0.3) * aperture, 0.0, 4.0);
+}
+
+// Per-tap weight along one segment's 1D blur axis. `t` is the tap's position
+// along `dir`, roughly -0.5..0.5 of the segment length, so `t * 2.0` gives its
+// offset in aperture space (-1..1) - the same convention a 2D aperture mask
+// would use. Ring Bias favours taps near that edge; Cat's Eye additionally
+// clips the segment against a circle shifted toward frame centre, which is
+// the barrel-vignetting shape.
+float apertureWeight(float2 fragCoord, float2 dir, float t) {
+    float apertureRadius = abs(t) * 2.0;
+    float ringW = mix(1.0, smoothstep(0.35, 1.0, apertureRadius), clamp(ringBias, 0.0, 1.0));
+
+    if (catsEye <= 0.0) { return ringW; }
+
+    // Optical vignetting: the barrel clips the aperture off-axis, so the round
+    // aperture turns into a lemon pointing back at the centre of frame.
+    float2 res = max(resolution, float2(1.0));
+    float2 fromCentre = (fragCoord - rectCentre) / (0.5 * min(res.x, res.y));
+    float  r = clamp(length(fromCentre), 0.0, 1.0);
+    float2 clipDir = r > 1e-4 ? fromCentre / r : float2(0.0);
+    float  shift = catsEye * pow(r, max(catsEyeFalloff, 0.1));
+
+    float2 o = dir * (t * 2.0);   // tap offset in aperture space, -1..1
+    float  aa = 2.0 / float(MAX_SAMPLES);   // soften by about one sample step
+
+    // The barrel's clip is a circle the same size as the aperture, slid
+    // radially. Two things have to hold. Its radius carries the +aa, or the
+    // softened rim shaves the blob even on-axis where nothing should clip at
+    // all. And the slide is capped below 1.0: at a full aperture radius the
+    // two circles would barely overlap and the highlight would vanish rather
+    // than turn into a lemon, which is the entire point.
+    float  clipR = 1.0 + aa;
+    float  clipped = 1.0 - smoothstep(clipR - aa, clipR + aa,
+                                      length(o - clipDir * (shift * 0.7)));
+
+    return ringW * clipped;
+}
+
+half4 main(float2 fragCoord) {
+    // 4 blades -> 2 segments, 6 -> 3, 8 -> 4.
+    float segCount = max(floor(blades * 0.5 + 0.5), 1.0);
+
+    // Passes beyond the blade count copy their input through untouched.
+    if (segIndex >= segCount) { return childShader.eval(fragCoord); }
+
+    float r = max(defocus, 0.0) * cocAt(fragCoord);
+    if (r <= 0.0) { return childShader.eval(fragCoord); }
+
+    // Evenly spaced over 180 degrees.
+    float ang = radians(rotation) + 3.14159265 * segIndex / segCount;
+    float2 dir = float2(cos(ang), sin(ang));
+
+    float n = float(MAX_SAMPLES);
+    float jit = dither > 0.5 ? hash12(fragCoord + segIndex * 17.3) : 0.5;
+
+    float3 sum  = float3(0.0);
+    float  sumA = 0.0;
+    float  cnt  = 0.0;
+
+    for (int i = 0; i < MAX_SAMPLES; i++) {
+        // Centred segment, so the bokeh stays over the highlight that made it.
+        float t = (float(i) + jit) / n - 0.5;
+        float w = apertureWeight(fragCoord, dir, t);
+        half4 c = childShader.eval(fragCoord + dir * (t * r));
+        sum  += w * (c.a > 0.0 ? float3(c.rgb / c.a) : float3(c.rgb));
+        sumA += w * float(c.a);
+        cnt  += w;
+    }
+
+    sum  /= max(cnt, 0.0001);
+    sumA /= max(cnt, 0.0001);
+
+    half a = half(clamp(sumA, 0.0, 1.0));
+    // Intermediates stay in the gamma domain; the final pass undoes it.
+    return half4(half3(clamp(sum, 0.0, 16.0)) * a, a);
+}

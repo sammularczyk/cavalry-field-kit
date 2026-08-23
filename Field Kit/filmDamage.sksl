@@ -1,0 +1,354 @@
+// Film: damage pass - Field Kit
+// Gate weave, stepped frame rate, an exposure-responsive grain/dirt layer,
+// scratches, splotch-scale dirt, a flickering vignette and a flickering
+// exposure - the wear of a hand-cranked projector print.
+//
+// Grain and dirt model inspired by "Cinematic Grain"
+// (github.com/max-van-leeuwen/SnapLensStudio-GrainGenerator), MIT licence,
+// Max van Leeuwen. That repository ships only a compiled Lens Studio material
+// (a binary .lsmat) with no readable shader source, so there is nothing in it
+// to port line-for-line; what carries over is the idea its README and preview
+// describe - grain whose visible strength tracks the image's own exposure,
+// rather than a uniform noise field laid over everything at one constant
+// strength.
+//
+// The blob-shaped dirt above already plays the role tao-film-strip's
+// "splotches" would - a coarse, thresholded noise field re-shuffled a few
+// times a second gives multiple simultaneous irregular blemishes of varying
+// size, which is what a splotch is. A second, near-duplicate control for the
+// same visual idea was judged not worth adding.
+//
+// Scratches are new, and modelled on a film-damage synthesis paper's
+// description rather than tao-film-strip's (GPL-3.0) cruder sin()-indexed
+// line, which the paper's own geometry supersedes: a sinc^2-Gaussian hybrid
+// profile (the Fraunhofer diffraction pattern of a narrow slit), width
+// varying along the scratch's length, per-frame intensity flicker, a slowly
+// drifting (not mean-reverting) lateral position, and a 70/30 bright/dark
+// polarity split (emulsion abrasion vs surface contamination). A fixed-size
+// loop with per-index hashes stands in for the paper's independent random
+// lifetimes, since a shader cannot keep a persistent scratch registry across
+// frames.
+//
+// Gate weave models an Ornstein-Uhlenbeck process from the same paper:
+// temporally correlated and mean-reverting rather than a slow float. Bounded
+// low-frequency noise already reverts to its mean by construction, which
+// covers the first-order (horizontal) case; the paper's detail that matters is
+// that VERTICAL weave is second-order - its own mean-reversion strength
+// drifts over time - approximated here by modulating the vertical wander's
+// amplitude with a much slower second noise, so it alternates between calmer
+// and jitterier stretches instead of one constant character throughout.
+//
+// Exposure flicker uses the paper's log-normal distribution
+// (exp(N(0, 0.125)), clamped) in place of a uniform random wobble - real lamp/
+// shutter flicker is multiplicative and skewed, not symmetric.
+//
+// `damageDomain` follows the paper's negative-vs-positive distinction: capture
+// -stage corruption (here: dirt, scratches, vignette, flicker) happens to the
+// NEGATIVE, so applying it in the inverted domain (1-x, processed, 1-result)
+// changes how it distributes between highlights and shadows - cheap, and
+// physically grounded, so it is exposed as a control rather than assumed.
+//
+// Every formula here - the weave wander, the frame-locked flicker, the
+// vignette falloff, the exposure response curve, the scratch profile - is
+// this filter's own implementation of the ideas above; none of it is a line-
+// for-line port.
+//
+// Uniform order matches the attribute order in definitions.json.
+
+uniform float  damage;          // master: 0 = pristine print
+uniform float  damageDomain;    // enum: 0 positive print, 1 negative (inverted processing)
+uniform float  time;            // auto-connected to comp time, in SECONDS
+uniform float  speed;           // playback-rate multiplier for the damage clock (1 = real time)
+uniform float  frameRate;       // steps the clock to this rate, 0 = smooth
+
+uniform float  weave;           // gate weave / image wobble
+uniform float  dirt;            // grain + dirt/scratch density
+uniform float  dirtThreshold;
+uniform float  dirtScale;
+uniform float  scratches;       // scratch density/amount
+uniform float  scratchWidth;    // base scratch width, pixels
+uniform float  flicker;         // exposure flicker
+uniform float  vignetteAmount;
+uniform float  vignetteFlicker;
+
+uniform float  desaturate;      // 1 = full black and white
+uniform float  amount;
+
+uniform float2 resolution;
+uniform float2 rectCentre;
+
+uniform shader childShader;     // previous pass (graded image)
+uniform shader original;        // untouched input - MUST be declared last
+
+const float PI = 3.14159265359;
+
+// Ubiquitous IQ-style hashes - the generic building blocks behind every noise
+// field below, not specific to any one shader.
+float hash21(float2 p) {
+    p = fract(p * float2(0.1031, 0.11369));
+    p += dot(p, p.yx + 19.19);
+    return fract((p.x + p.y) * p.x);
+}
+
+float hash1(float n) {
+    return fract(sin(n) * 43758.5453123);
+}
+
+// Smooth value noise.
+float vnoise(float2 p) {
+    float2 i = floor(p), f = fract(p);
+    float2 u = f * f * (3.0 - 2.0 * f);
+    return mix(mix(hash21(i),                   hash21(i + float2(1.0, 0.0)), u.x),
+               mix(hash21(i + float2(0.0, 1.0)), hash21(i + float2(1.0, 1.0)), u.x), u.y);
+}
+
+// Box-Muller from two hashes - a real Gaussian sample for the log-normal
+// flicker below, rather than a uniform one.
+float gauss1(float n) {
+    float u1 = max(hash1(n), 1e-6);
+    float u2 = hash1(n + 91.7);
+    return sqrt(-2.0 * log(u1)) * cos(2.0 * PI * u2);
+}
+
+// First-order OU approximation: bounded, temporally correlated low-frequency
+// wander. Bounded noise reverts to its mean by construction, which is the
+// property that matters - it does not need a literal recurrence relation.
+float ouHoriz(float t) {
+    return vnoise(float2(t, 11.7)) + vnoise(float2(t * 2.3 + 4.1, 5.2)) - 1.0;
+}
+
+// Second-order OU approximation for vertical weave: the SAME kind of wander,
+// but its amplitude breathes according to a much slower noise, standing in for
+// the paper's mean-reversion strength itself following an OU process. A floor
+// keeps it from ever going fully flat.
+float ouVert(float t) {
+    float amp = 0.4 + 1.2 * (0.5 + 0.5 * vnoise(float2(t * 0.07 + 91.3, 4.2)));
+    float wander = vnoise(float2(t + 8.3, 27.4)) + vnoise(float2(t * 2.3 + 1.7, 9.9)) - 1.0;
+    return wander * amp;
+}
+
+float2 wanderNoise(float t) { return float2(ouHoriz(t), ouVert(t)); }
+
+// Exposure response: how strongly grain and dirt show against a given
+// luminance. Rises steeply out of black, peaks in the mid-shadows (lum = 1/3)
+// and falls away again toward white, normalised so the peak reads 1.0. This
+// is what makes the effect react to the picture instead of sitting uniformly
+// over the top of it.
+float exposureResponse(float lum) {
+    float l = clamp(lum, 0.0, 1.0);
+    return sqrt(l) * (1.0 - l) * 2.598076;
+}
+
+// Combined grain + dirt multiplier, both gated by exposureResponse.
+//   - Grain: a fine per-pixel field, re-seeded every quantised frame.
+//   - Dirt: a much coarser field thresholded into sparse dark specks,
+//     re-shuffled a few times a second since real specks sit still on the
+//     gate for many frames rather than reshuffling every one. This is also
+//     what stands in for "splotches" - see the header.
+float filmDamageMul(float2 px, float t, float lum) {
+    float amt = clamp(dirt, 0.0, 1.0);
+    if (amt <= 0.0) { return 1.0; }
+
+    float resp = exposureResponse(lum);
+    float scale = max(dirtScale, 0.001);
+
+    // Both the grain re-seed and the dirt reshuffle step on PROJECTOR frames.
+    // They were hardcoded at 24 and 4 times a second, so neither tracked Frame
+    // Rate - the dirt kept its own cadence no matter what the projector was set
+    // to, which is exactly what it looked like. `t` is already quantised to the
+    // projector rate, so multiplying it back up recovers the frame index.
+    float fr = frameRate > 0.0 ? frameRate : 24.0;
+    float frameIdx = floor(t * fr + 0.5);
+
+    float2 cell = floor(px / scale);
+    float g = hash21(cell + frameIdx * float2(17.31, 9.13)) - 0.5;
+
+    float jSeed = frameIdx;
+    float2 jitter = float2(hash1(jSeed * 12.9), hash1(jSeed * 78.2 + 3.0)) * 71.0;
+    // /12 rather than /44: a speck is a few pixels of opaque dust, not a
+    // 20-pixel cloud.
+    float2 q = px / (scale * 12.0) + jitter;
+    float n = (vnoise(q) + 0.5 * vnoise(q * 3.7) + 0.25 * vnoise(q * 9.1)) / 1.75;
+
+    float thresh = clamp(dirtThreshold, 0.0, 1.0);
+    // A hard edge, because a dust particle is opaque - a soft ramp reads as
+    // a stain rather than as dirt.
+    float speckMask = smoothstep(thresh - 0.012, thresh + 0.012, n);
+    float speckDarken = 1.0 - speckMask * 0.85;
+
+    float mul = 1.0 + g * 0.5 * resp;
+    mul *= mix(1.0, speckDarken, resp);
+
+    return mix(1.0, mul, amt);
+}
+
+// Radial corner darkening, breathing gently with a frame-locked flicker.
+float vignetteAt(float2 uv, float t) {
+    float2 c = uv - 0.5;
+    float r = length(c) * 1.5;
+    float vig = 1.0 - smoothstep(0.55, 1.15, r);
+
+    float fl = hash1(floor(t * 10.0) * 5.37) - 0.5;
+    vig = clamp(vig + fl * 0.08 * vignetteFlicker, 0.0, 1.0);
+
+    return mix(1.0, vig, clamp(vignetteAmount, 0.0, 1.0));
+}
+
+// Normalised sinc, with the x=0 singularity handled.
+float sincN(float x) {
+    float ax = abs(x);
+    if (ax < 1e-4) { return 1.0; }
+    float px = PI * x;
+    return sin(px) / px;
+}
+
+// One scratch's contribution at this pixel. `secs` is the damage pass's clock
+// in SECONDS, so scratch timing shares it with everything
+// else rather than the paper's hard-coded speed constants.
+// Returns (mask, isBright) packed as mask in .x and a 0/1 bright flag in .y.
+float2 scratchAt(int idx, float2 px, float secs) {
+    float seedI = float(idx) * 91.7 + 3.1;
+
+    // 20-70 "frame" lifespan, respawning into a fresh instance each cycle -
+    // the fixed-loop, per-index-hash stand-in for independent random
+    // lifetimes, since there is no persistent state across frames to draw on.
+    // In SECONDS, not in the stepped projector clock. That clock advances
+    // frameRate/compFps per rendered frame - about 0.4 - so a nominal
+    // "20 to 70 frames" of life was really 50 to 175 frames, two to six
+    // seconds, which is why scratches outstayed their welcome. Seconds are
+    // also frameRate-independent, so changing the projector rate no longer
+    // silently changes how long a scratch lives.
+    float lifespan = mix(0.7, 2.3, hash1(seedI));
+    float gen       = floor(secs / lifespan);
+    float instSeed  = seedI + gen * 13.1;
+
+    // Respawn chance: not every generation actually spawns an instance, which
+    // is what keeps the average count nearer 3-4 of the fixed 5 slots than a
+    // constant 5.
+    if (hash1(instSeed * 3.7) > 0.82) { return float2(0.0, 0.0); }
+
+    float age      = mod(secs, lifespan);
+    float lifeFrac = clamp(age / lifespan, 0.0, 1.0);
+    float envelope = smoothstep(0.0, 0.08, lifeFrac) * smoothstep(1.0, 0.92, lifeFrac);
+
+    // Base width 1-4px (real scratches are THIN), varying along the length by
+    // summed low-frequency noise - an approximation of the paper's cumulative
+    // random walk, since a true running sum needs per-frame state this filter
+    // does not have.
+    float baseWidth = mix(1.0, 4.0, hash1(instSeed * 5.9)) * max(scratchWidth, 0.001) * 0.5;
+    float walk = vnoise(float2(px.y * 0.02, instSeed)) * 0.7
+               + vnoise(float2(px.y * 0.08, instSeed + 5.0)) * 0.3;
+    float w = max(baseWidth * (0.6 + 0.8 * walk), 0.25);
+
+    // Lateral position: a slow, PERIODIC drift, not mean-reverting like gate
+    // weave - a fixed projector defect wandering back and forth, not settling.
+    float freq1 = mix(0.02, 0.05, hash1(instSeed * 2.1));
+    float freq2 = mix(0.005, 0.015, hash1(instSeed * 4.4));
+    float phase1 = hash1(instSeed * 6.6) * 6.28318530718;
+    float phase2 = hash1(instSeed * 8.8) * 6.28318530718;
+    float driftX = sin(secs * freq1 + phase1) * 6.0 + sin(secs * freq2 + phase2) * 3.0;
+    float baseX = mix(-0.5, 0.5, hash1(instSeed)) * resolution.x;
+
+    float dx = (px.x - baseX - driftX) / w;
+    float sinc = sincN(dx);
+    float k = sinc * sinc * exp(-(dx * dx * w * w) / (2.0 * pow(1.5 * w, 2.0)));
+
+    // Per-frame intensity flicker, +/-20%.
+    float flick = 1.0 + (hash1(instSeed * 7.0 + floor(secs * 24.0)) - 0.5) * 0.4;
+
+    float mask = clamp(k * envelope * flick, 0.0, 1.0);
+
+    // Polarity: 70% bright (emulsion abrasion), 30% dark (surface contamination).
+    float bright = hash1(instSeed * 5.3) < 0.7 ? 1.0 : 0.0;
+
+    return float2(mask, bright);
+}
+
+const int MAX_SCRATCHES = 5;
+
+// Combined scratch contribution: strongest bright hit and strongest dark hit
+// across the fixed loop, so overlapping scratches do not stack into a solid
+// bar.
+float2 scratchesAt(float2 px, float secs) {
+    float bright = 0.0;
+    float dark = 0.0;
+    for (int i = 0; i < MAX_SCRATCHES; i++) {
+        float2 s = scratchAt(i, px, secs);
+        if (s.y > 0.5) { bright = max(bright, s.x); } else { dark = max(dark, s.x); }
+    }
+    float amt = clamp(scratches, 0.0, 1.0);
+    return float2(bright, dark) * amt;
+}
+
+half4 main(float2 fragCoord) {
+    half4 orig = original.eval(fragCoord);
+    float dmg = clamp(damage, 0.0, 1.0);
+
+    float2 res = max(resolution, float2(1.0));
+
+    // `time` is the composition's time in FRAMES, so `speed` converts it to
+    // seconds - at its 0.0333 default that is 1/30, i.e. a 30 fps comp. This
+    // was briefly "corrected" to seconds on the assumption that compConnect
+    // hands over seconds; it does not. A scene saved at frame 1159 of a
+    // 1200-frame, 30 fps comp records time = 1159, and seconds would have
+    // capped at 40.
+    //
+    // So frameRate's stepping is real but subtle rather than absent: at 12 the
+    // clock advances every 2.5 frames, which on slow-moving damage is easy to
+    // miss. If it still reads as doing nothing, the honest fix is to make the
+    // artefacts it drives more obviously frame-locked, not to rescale time.
+    float secs = time * speed;
+    float t = frameRate > 0.0 ? floor(secs * frameRate) / frameRate : secs;
+
+    // Gate weave: an Ornstein-Uhlenbeck-style wander - see ouHoriz/ouVert.
+    float2 off = dmg * weave * wanderNoise(t * 0.6);
+
+    float2 uv = (fragCoord - rectCentre) / res + 0.5 + off;
+    // The weave moves the whole frame, so without this a transparent band
+    // tracks around the edge on every frame. A real gate would show the frame
+    // line there, but nothing compositing this wants a hole - and the wander is
+    // a few pixels at most, so clamping smears a rim too thin to see. No
+    // control for it: transparent is never the wanted answer here.
+    uv = clamp(uv, 0.5 / res, 1.0 - 0.5 / res);
+    half4 c = childShader.eval((uv - 0.5) * res + rectCentre);
+
+    float3 lin = c.a > 0.0 ? float3(c.rgb / c.a) : float3(0.0);
+    float lum = dot(lin, float3(0.2126, 0.7152, 0.0722));
+
+    // Grain and dirt work in layer-local pixels, so their feature size is
+    // predictable and independent of the layer's aspect ratio.
+    float2 px = fragCoord - rectCentre;
+
+    float d = filmDamageMul(px, t, lum);
+    float v = vignetteAt(uv, t);
+    float2 scratch = scratchesAt(px, secs);   // x = bright mask, y = dark mask
+
+    // Exposure flicker: log-normal (paper's exp(N(0, 0.125))) rather than a
+    // uniform wobble - real lamp/shutter flicker is multiplicative and skewed,
+    // not symmetric about 1. `flicker` scales the underlying Gaussian's sigma,
+    // so 0 gives exp(0) = 1 exactly.
+    float fSeed = floor(t * 24.0);
+    float f = clamp(exp(0.125 * gauss1(fSeed * 3.71) * clamp(flicker, 0.0, 4.0)), 0.2, 4.0);
+
+    d = mix(1.0, d, dmg);
+    v = mix(1.0, v, dmg);
+    f = mix(1.0, f, dmg);
+    scratch *= dmg;
+
+    // Negative-domain processing: capture-stage corruption happens on the
+    // negative, not the print. Working in 1-x changes how dirt, scratches,
+    // vignette and flicker distribute between highlights and shadows -
+    // shadows in the positive are highlights on the negative, and vice versa.
+    bool negDomain = damageDomain > 0.5;
+    float3 work = negDomain ? (1.0 - lin) : lin;
+    work = work * d * v * f;
+    work = clamp(work * (1.0 - scratch.y * 0.8) + scratch.x * 0.9, 0.0, 4.0);
+    float3 col = negDomain ? clamp(1.0 - work, 0.0, 1.0) : clamp(work, 0.0, 1.0);
+
+    float lum2 = dot(col, float3(0.299, 0.587, 0.114));
+    col = mix(col, float3(lum2), clamp(desaturate, 0.0, 1.0) * dmg);
+    col = clamp(col, 0.0, 1.0);
+
+    half a = c.a;
+    return mix(orig, half4(half3(col) * a, a), half(clamp(amount, 0.0, 1.0)));
+}

@@ -1,0 +1,185 @@
+{
+ "type": "layerStrings",
+ "value": {
+  "author": "samMularczyk",
+  "layerType": "print",
+  "niceName": "Print",
+  "layerInfo": "Riso, screen print and newsprint are the same mechanism: separate the image into spot-ink plates, screen each plate, offset it slightly out of register, then overprint translucent ink onto paper. Ink Density separation solves for the actual inks by density rather than tonal band, so a blue-plus-yellow riso genuinely reproduces greens.",
+  "language": "en",
+  "attributes": {
+   "process": [
+    "Process",
+    "Biases mottle character and ink translucency to suit the printing process. Use the presets for the full look of each - this only nudges the residual difference at matched settings."
+   ],
+   "separation": [
+    "Separation",
+    "How the image is split across plates. Ink Density solves each plate's density from the chosen inks' own colours, so overprints mix like real ink. Tonal Bands splits by shadow/mid/highlight, ignoring hue. Channel gives plate n the image's colour channel n."
+   ],
+   "inkCount": [
+    "Ink Count",
+    "How many plates print, from one to four."
+   ],
+   "flatten": [
+    "Flatten",
+    "Edge-preserving smooth of the source before separation. The single biggest quality win: without it, source noise scatters band edges pixel to pixel and contours crawl. 0 is off."
+   ],
+   "levels": [
+    "Levels",
+    "Quantises each plate's ink density to this many discrete steps. 0 is continuous tone."
+   ],
+   "levelBias": [
+    "Level Bias",
+    "Gamma on density before quantising, so levels are not evenly spaced. 1.0 is even."
+   ],
+   "bandDither": [
+    "Band Dither",
+    "Perturbs the quantisation threshold near a band edge, so banding breaks up only where it would otherwise show."
+   ],
+   "screenType": [
+    "Screen",
+    "The halftone pattern used to build tone from ink. Flat prints solid density with no pattern at all - the default for Riso. Grain adds a random speckle instead of a regular screen."
+   ],
+   "frequency": [
+    "Frequency",
+    "Screen cell size in pixels. Smaller cells read as a finer, higher-line-count screen."
+   ],
+   "dotGain": [
+    "Dot Gain",
+    "Grows or chokes the printed dots, as ink spread on press does."
+   ],
+   "ink1Color": [
+    "Ink 1 Colour",
+    "First plate's ink."
+   ],
+   "ink1Angle": [
+    "Ink 1 Angle",
+    "Screen angle for plate 1. Classic separations use differing angles to avoid moir\u00e9."
+   ],
+   "ink1Coverage": [
+    "Ink 1 Coverage",
+    "How strongly plate 1 inks. 0 switches the plate off."
+   ],
+   "ink2Color": [
+    "Ink 2 Colour",
+    "Second plate's ink."
+   ],
+   "ink2Angle": [
+    "Ink 2 Angle",
+    "Screen angle for plate 2."
+   ],
+   "ink2Coverage": [
+    "Ink 2 Coverage",
+    "How strongly plate 2 inks. 0 switches the plate off."
+   ],
+   "ink3Color": [
+    "Ink 3 Colour",
+    "Third plate's ink."
+   ],
+   "ink3Angle": [
+    "Ink 3 Angle",
+    "Screen angle for plate 3."
+   ],
+   "ink3Coverage": [
+    "Ink 3 Coverage",
+    "How strongly plate 3 inks. 0 switches the plate off."
+   ],
+   "ink4Color": [
+    "Ink 4 Colour",
+    "Fourth plate's ink."
+   ],
+   "ink4Angle": [
+    "Ink 4 Angle",
+    "Screen angle for plate 4."
+   ],
+   "ink4Coverage": [
+    "Ink 4 Coverage",
+    "How strongly plate 4 inks. 0 switches the plate off."
+   ],
+   "inkOpacity": [
+    "Ink Opacity",
+    "Translucency of all inks. Lower values build density more gradually where plates overlap - soy-based riso ink is quite translucent."
+   ],
+   "registrationError": [
+    "Registration Error",
+    "How far the plates drift out of alignment, in pixels. Real presses commonly drift a few millimetres between passes."
+   ],
+   "inkLoss": [
+    "Ink Loss",
+    "Patchy ink transfer - areas where the ink fails to take."
+   ],
+   "mottle": [
+    "Mottle",
+    "Uneven ink laydown breaking up flat areas of density."
+   ],
+   "ghosting": [
+    "Ghosting",
+    "A faint second impression offset from the first."
+   ],
+   "seed": [
+    "Seed",
+    "Re-rolls the registration drift, speckle, and mottle."
+   ],
+   "paperColor": [
+    "Paper Colour",
+    "The stock the plates print onto."
+   ],
+   "paperGrain": [
+    "Paper Grain",
+    "Paper fibre structure. Textures the blank stock."
+   ],
+   "trueColour": [
+    "True Colour",
+    "Brings the original colours back through the print. The screen, grain and paper texture all stay - only the hue returns. Unlike Amount, which fades the whole effect out."
+   ],
+   "paperTooth": [
+    "Paper Tooth",
+    "Fibre texture that shows through where ink has already printed, darkest in the densest areas."
+   ],
+   "outputMode": [
+    "Output",
+    "What the filter produces: the full print on paper, ink printed over the source, ink alone on transparency, or a single plate proof."
+   ],
+   "amount": [
+    "Amount",
+    "Mix between the original layer and the printed result."
+   ]
+  },
+  "enums": {
+   "process": {
+    "0": "Riso",
+    "1": "Screen Print",
+    "2": "Newsprint"
+   },
+   "separation": {
+    "0": "Ink Density",
+    "1": "Tonal Bands",
+    "2": "Channel"
+   },
+   "screenType": {
+    "0": "Flat",
+    "1": "Grain",
+    "2": "Dots",
+    "3": "Lines",
+    "4": "Stipple",
+    "5": "Bayer",
+    "6": "Voronoi"
+   },
+   "outputMode": {
+    "0": "Paper",
+    "1": "Print on Source",
+    "2": "Ink Only",
+    "3": "Plate 1 Proof",
+    "4": "Plate 2 Proof",
+    "5": "Plate 3 Proof",
+    "6": "Plate 4 Proof"
+   }
+  },
+  "tabs": {
+   "filter": "Separation",
+   "screen": "Screen",
+   "inks": "Inks",
+   "press": "Press",
+   "paper": "Paper"
+  }
+ }
+}

@@ -1,0 +1,310 @@
+{
+  "author": "samMularczyk",
+  "type": "lightwrap",
+  "superType": "thirdPartyFilter",
+  "version": "1.0",
+  "passes": [
+    {
+      "skslFile": "lightwrapFirst.sksl",
+      "uniforms": [
+        "size",
+        "falloff",
+        "aspect",
+        "useLuminance",
+        "threshold",
+        "bgSize",
+        "bgScale"
+      ],
+      "constants": {
+        "dirX": 1.0,
+        "dirY": 0.0,
+        "radiusMul": 0.125
+      }
+    },
+    {
+      "skslFile": "lightwrapBlur.sksl",
+      "uniforms": [
+        "size",
+        "falloff",
+        "aspect",
+        "useLuminance",
+        "threshold",
+        "bgSize",
+        "bgScale"
+      ],
+      "constants": {
+        "dirX": 0.0,
+        "dirY": 1.0,
+        "radiusMul": 0.125,
+        "addH": 1.0
+      }
+    },
+    {
+      "skslFile": "lightwrapBlur.sksl",
+      "uniforms": [
+        "size",
+        "falloff",
+        "aspect",
+        "useLuminance",
+        "threshold",
+        "bgSize",
+        "bgScale"
+      ],
+      "constants": {
+        "dirX": 1.0,
+        "dirY": 0.0,
+        "radiusMul": 0.25,
+        "addH": 0.0
+      }
+    },
+    {
+      "skslFile": "lightwrapBlur.sksl",
+      "uniforms": [
+        "size",
+        "falloff",
+        "aspect",
+        "useLuminance",
+        "threshold",
+        "bgSize",
+        "bgScale"
+      ],
+      "constants": {
+        "dirX": 0.0,
+        "dirY": 1.0,
+        "radiusMul": 0.25,
+        "addH": 1.0
+      }
+    },
+    {
+      "skslFile": "lightwrapBlur.sksl",
+      "uniforms": [
+        "size",
+        "falloff",
+        "aspect",
+        "useLuminance",
+        "threshold",
+        "bgSize",
+        "bgScale"
+      ],
+      "constants": {
+        "dirX": 1.0,
+        "dirY": 0.0,
+        "radiusMul": 0.5,
+        "addH": 0.0
+      }
+    },
+    {
+      "skslFile": "lightwrapBlur.sksl",
+      "uniforms": [
+        "size",
+        "falloff",
+        "aspect",
+        "useLuminance",
+        "threshold",
+        "bgSize",
+        "bgScale"
+      ],
+      "constants": {
+        "dirX": 0.0,
+        "dirY": 1.0,
+        "radiusMul": 0.5,
+        "addH": 1.0
+      }
+    },
+    {
+      "skslFile": "lightwrapBlur.sksl",
+      "uniforms": [
+        "size",
+        "falloff",
+        "aspect",
+        "useLuminance",
+        "threshold",
+        "bgSize",
+        "bgScale"
+      ],
+      "constants": {
+        "dirX": 1.0,
+        "dirY": 0.0,
+        "radiusMul": 1.0,
+        "addH": 0.0
+      }
+    },
+    {
+      "skslFile": "lightwrapBlur.sksl",
+      "uniforms": [
+        "size",
+        "falloff",
+        "aspect",
+        "useLuminance",
+        "threshold",
+        "bgSize",
+        "bgScale"
+      ],
+      "constants": {
+        "dirX": 0.0,
+        "dirY": 1.0,
+        "radiusMul": 1.0,
+        "addH": 1.0
+      }
+    },
+    {
+      "skslFile": "lightwrapCombine.sksl",
+      "uniforms": [
+        "brightness",
+        "gamma",
+        "saturation",
+        "blend",
+        "amount"
+      ]
+    }
+  ],
+  "attributes": {
+    "size": {
+      "type": "double",
+      "default": 40.0,
+      "min": 0.0,
+      "softMax": 500.0,
+      "step": 0.5
+    },
+    "falloff": {
+      "type": "double",
+      "default": 1.0,
+      "min": 0.05,
+      "softMax": 6.0,
+      "step": 0.05
+    },
+    "aspect": {
+      "type": "double",
+      "default": 1.0,
+      "min": 0.01,
+      "softMax": 3.0,
+      "step": 0.01
+    },
+    "useLuminance": {
+      "type": "bool",
+      "default": true
+    },
+    "threshold": {
+      "type": "double",
+      "default": 0.2,
+      "min": 0.0,
+      "max": 1.0,
+      "step": 0.01,
+      "dimming": "useLuminance == false"
+    },
+    "bgSize": {
+      "type": "double2",
+      "default": {
+        "x": 1920.0,
+        "y": 1080.0
+      },
+      "children": {
+        "*": {
+          "step": 1.0
+        }
+      }
+    },
+    "bgScale": {
+      "type": "double2",
+      "default": {
+        "x": 1.0,
+        "y": 1.0
+      },
+      "children": {
+        "*": {
+          "step": 0.01
+        }
+      }
+    },
+    "brightness": {
+      "type": "double",
+      "default": 1.0,
+      "min": 0.0,
+      "softMax": 5.0,
+      "step": 0.01
+    },
+    "gamma": {
+      "type": "double",
+      "default": 1.0,
+      "min": 0.0001,
+      "softMax": 3.0,
+      "step": 0.01
+    },
+    "saturation": {
+      "type": "double",
+      "default": 1.0,
+      "min": 0.0,
+      "softMax": 3.0,
+      "step": 0.01,
+      "dimming": "brightness <= 0"
+    },
+    "blend": {
+      "type": "enum",
+      "default": 0,
+      "enumValues": [
+        0,
+        1,
+        2,
+        3
+      ]
+    },
+    "amount": {
+      "type": "double",
+      "default": 1.0,
+      "min": 0.0,
+      "max": 1.0,
+      "step": 0.01
+    },
+    "background": {
+      "type": "shaderData",
+      "supportedInputNodeTypes": [
+        "shader",
+        "shaderArray"
+      ],
+      "subUI": true
+    }
+  },
+  "triggers": {
+    "out": [
+      "size",
+      "falloff",
+      "aspect",
+      "useLuminance",
+      "threshold",
+      "bgSize",
+      "bgScale",
+      "brightness",
+      "gamma",
+      "saturation",
+      "blend",
+      "amount",
+      "background"
+    ]
+  },
+  "UI": {
+    "icon": "lightwrap.png",
+    "attributeOrder": [
+      "background",
+      "bgSize",
+      "bgScale",
+      "---Wrap",
+      "size",
+      "falloff",
+      "aspect",
+      "---Source",
+      "useLuminance",
+      "threshold",
+      "---Look",
+      "brightness",
+      "gamma",
+      "saturation",
+      "---Output",
+      "blend",
+      "amount",
+      "---Inspired by bm_Lightwrap, Ben McEwan"
+    ],
+    "controls": {
+      "background": "nodeInput"
+    }
+  }
+}

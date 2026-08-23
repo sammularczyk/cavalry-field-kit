@@ -1,0 +1,58 @@
+// Paint, pass 2 of 4 - Field Kit
+// Brush only: the horizontal half of the tangent-field blur. Because a blur's
+// weights sum to one, blurring the ENCODED vector is equivalent to blurring the
+// vector itself, so smoothing the 0..1 encoding from pass 1 is valid.
+//
+// Every other style copies through.
+
+uniform float  style;
+uniform float  blurRadius;
+uniform float  blurTaps;
+
+uniform float2 resolution;
+uniform float2 rectCentre;
+
+uniform shader field;         // shaderData - binds BEFORE the image
+uniform shader childShader;   // previous pass
+
+const int MAX_TAPS = 31;
+
+// Gaussian probability density function, sigma = 0.144, normalised so the
+// kernel integrates to one - the standard weighting for a discrete gaussian
+// blur (Kyprianidis & Döllner use the same separable-blur shape to smooth a
+// structure tensor's integration scale).
+float pdf(float x) {
+    return 2.77043 * exp(-24.1126 * x * x);
+}
+
+half4 main(float2 fragCoord) {
+    if (int(style) != 0) { return childShader.eval(fragCoord); }
+
+    float n = clamp(blurTaps, 1.0, float(MAX_TAPS));
+    float r = max(blurRadius, 0.001);
+    float2 dir = float2(1.0, 0.0);
+
+    float3 sum = float3(0.0);
+    float  sumA = 0.0;
+    float  den = 0.0;
+
+    for (int i = -MAX_TAPS; i <= MAX_TAPS; i++) {
+        if (abs(float(i)) > n) { continue; }
+
+        float f = float(i) / n;
+        float w = pdf(f / r);
+
+        half4 c = childShader.eval(fragCoord + dir * f * r * n);
+        float3 lin = c.a > 0.0 ? float3(c.rgb / c.a) : float3(0.0);
+
+        sum  += lin * w;
+        sumA += float(c.a) * w;
+        den  += w;
+    }
+
+    sum  /= max(den, 0.0001);
+    sumA /= max(den, 0.0001);
+
+    half a = half(clamp(sumA, 0.0, 1.0));
+    return half4(half3(clamp(sum, 0.0, 1.0)) * a, a);
+}

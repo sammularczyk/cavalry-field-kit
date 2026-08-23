@@ -1,0 +1,251 @@
+// Paint, pass 4 of 4 - Field Kit
+// The stroke itself, per style, then composite over the untouched layer.
+//
+//   BRUSH  - smears along the smoothed tangent field from passes 1-3, so
+//            strokes run along the image's own structure. A line-integral-
+//            convolution-style walk along a structure tensor's edge-tangent
+//            direction: Kyprianidis & Döllner, "Image Abstraction by
+//            Structure Adaptive Filtering" (2008), and the flow-based
+//            abstraction literature that follows it.
+//   OIL    - displaces every pixel the SAME distance along the direction of
+//            steepest ascent of a field. That uniform distance is the whole
+//            trick: direction stays spatially coherent then flips hard across
+//            ridges, so colour gathers into strokes with clean breaks. Displace
+//            by the field's VALUE instead and it degenerates into an ordinary
+//            noise warp, which native Distortion already does.
+//            Inspired by "Oil Painting" by Spi3lot (Shadertoy 43s3D8).
+//   WATER  - wet edges, edge pooling, granulation and paper over the
+//            transported washes. Those four are the named phenomena from
+//            Curtis, Anderson, Seims, Fleischer & Salesin, "Computer-Generated
+//            Watercolor" (SIGGRAPH 1997), which is where this takes them from;
+//            the transport model itself is in paintPass3.
+//            Also inspired by "Mt. Fuji Watercolor" by noztol (Shadertoy f3lSRH).
+
+uniform float  style;
+uniform float  strokeLength;     // Brush
+uniform float  strokeWidth;      // Brush
+uniform float  fieldMode;        // Oil
+uniform float  flowMix;          // Oil
+uniform float  mapChannel;       // Oil
+uniform float  fieldStep;        // Oil
+uniform float  intensity;        // Oil
+uniform float  smear;            // Oil
+uniform float  bristle;          // Oil
+uniform float  perpendicular;    // Oil
+uniform float  wetEdge;          // Watercolour
+uniform float  wetEdgeScale;     // Watercolour
+uniform float  edgeDarkening;    // Watercolour
+uniform float  granulation;      // Watercolour
+uniform float  granulationScale; // Watercolour
+uniform float  paperTexture;     // Watercolour
+uniform half4  paperColor;       // Watercolour
+uniform float  amount;
+
+uniform float2 resolution;
+uniform float2 rectCentre;
+
+uniform shader field;            // shaderData - binds BEFORE the image
+uniform shader childShader;      // previous pass
+uniform shader original;         // untouched input - MUST be declared last
+
+const int MAX_STROKE = 16;
+const int OIL_TAPS = 8;
+
+float hash12(float2 p) {
+    p = fract(p * float2(5.3987, 5.4421));
+    p += dot(p.yx, p.xy + float2(21.5351, 14.3137));
+    return fract(p.x * p.y * 95.4307);
+}
+
+float hash21(float2 p) {
+    p = fract(p * float2(123.34, 456.21));
+    p += dot(p, p + 45.32);
+    return fract(p.x * p.y);
+}
+
+float vnoise(float2 p) {
+    float2 i = floor(p), f = fract(p);
+    f = f * f * (3.0 - 2.0 * f);
+    return mix(mix(hash21(i), hash21(i + float2(1.0, 0.0)), f.x),
+               mix(hash21(i + float2(0.0, 1.0)),
+                   hash21(i + float2(1.0, 1.0)), f.x), f.y);
+}
+
+float fbm(float2 p) {
+    float v = 0.0, amp = 0.5;
+    for (int i = 0; i < 5; i++) { v += amp * vnoise(p); p *= 2.0; amp *= 0.5; }
+    return v;
+}
+
+float luma(float3 c) { return dot(c, float3(0.2126, 0.7152, 0.0722)); }
+
+// Scalar read out of the field shader, mirroring the native Distortion
+// filter's sample modes so the two behave the same way on the same input.
+float fieldAt(float2 coord) {
+    half4 s = field.eval(coord);
+    float3 c = s.a > 0.0 ? float3(s.rgb / s.a) : float3(s.rgb);
+    int m = int(mapChannel);
+    if (m == 1) {
+        float mx = max(max(c.r, c.g), c.b);
+        float mn = min(min(c.r, c.g), c.b);
+        return mx > 0.0 ? (mx - mn) / mx : 0.0;
+    }
+    if (m == 2) { return max(max(c.r, c.g), c.b); }
+    if (m == 3) { return c.r; }
+    if (m == 4) { return c.g; }
+    if (m == 5) { return c.b; }
+    return luma(c);
+}
+
+float lumaAt(float2 coord) {
+    half4 s = original.eval(coord);
+    return luma(s.a > 0.0 ? float3(s.rgb / s.a) : float3(0.0));
+}
+
+half4 main(float2 fragCoord) {
+    int st = int(style);
+    half4 src = original.eval(fragCoord);
+
+    if (st == 0) {
+        // ---- Brush --------------------------------------------------------
+        half4 f4 = childShader.eval(fragCoord);
+        float3 f = f4.a > 0.0 ? float3(f4.rgb / f4.a) : float3(0.0);
+
+        float2 v   = float2(f.x, f.y) * 2.0 - 1.0;   // undo pass 1's encoding
+        float  mag = f.z;
+
+        if (mag < 0.0001 || dot(v, v) < 1e-12) { return src; }
+
+        // Halving the angle undoes the double-angle encoding from pass 1.
+        float t = atan(v.y, v.x) * 0.5;
+        float2 dir = float2(cos(t), sin(t)) * max(strokeWidth, 0.0);
+
+        float n = clamp(strokeLength, 1.0, float(MAX_STROKE));
+
+        float3 sum = float3(0.0);
+        float  sumA = 0.0;
+        float  cnt = 0.0;
+
+        for (int i = -MAX_STROKE; i <= MAX_STROKE; i++) {
+            if (abs(float(i)) > n) { continue; }
+            half4 c = original.eval(fragCoord + dir * float(i));
+            sum  += c.a > 0.0 ? float3(c.rgb / c.a) : float3(0.0);
+            sumA += float(c.a);
+            cnt  += 1.0;
+        }
+
+        sum  /= max(cnt, 1.0);
+        sumA /= max(cnt, 1.0);
+
+        half a = half(clamp(sumA, 0.0, 1.0));
+        return mix(src, half4(half3(clamp(sum, 0.0, 1.0)) * a, a),
+                   half(clamp(amount, 0.0, 1.0)));
+    }
+
+    if (st == 1) {
+        // ---- Oil ----------------------------------------------------------
+        float e = max(fieldStep, 0.01);
+
+        // Central differences rather than a one-sided pair: same tap cost once
+        // both fields are needed, and no half-pixel bias.
+        float2 gField = float2(fieldAt(fragCoord + float2(e, 0.0))
+                             - fieldAt(fragCoord - float2(e, 0.0)),
+                               fieldAt(fragCoord + float2(0.0, e))
+                             - fieldAt(fragCoord - float2(0.0, e)));
+
+        float2 gImage = float2(lumaAt(fragCoord + float2(e, 0.0))
+                             - lumaAt(fragCoord - float2(e, 0.0)),
+                               lumaAt(fragCoord + float2(0.0, e))
+                             - lumaAt(fragCoord - float2(0.0, e)));
+
+        float2 nDir = dot(gField, gField) > 1e-12 ? normalize(gField) : float2(0.0);
+        // Perpendicular of the image gradient is the contour tangent.
+        float2 iDir = dot(gImage, gImage) > 1e-12
+                    ? normalize(float2(-gImage.y, gImage.x)) : float2(0.0);
+
+        int mode = int(fieldMode);
+        float w = mode == 0 ? 0.0 : mode == 1 ? 1.0 : clamp(flowMix, 0.0, 1.0);
+
+        float2 dir = mix(nDir, iDir, w);
+        // Flat field, flat image, or the two blends cancelling all leave no
+        // direction; pass the pixel through rather than picking an arbitrary one.
+        if (dot(dir, dir) < 1e-12) { return src; }
+        dir = normalize(dir);
+        if (perpendicular > 0.5) { dir = float2(-dir.y, dir.x); }
+
+        // Bristle jitters the stroke length per pixel so the smear breaks into
+        // hairs instead of arriving as one clean push.
+        float jit = mix(1.0, hash12(fragCoord * 0.37), clamp(bristle, 0.0, 1.0));
+        float push = max(intensity, 0.0) * jit;
+        float run  = max(smear, 0.0) * jit;
+
+        float3 sum  = float3(0.0);
+        float  sumA = 0.0;
+        for (int i = 0; i < OIL_TAPS; i++) {
+            // Centred on the displaced position, so the stroke straddles it.
+            float t = float(i) / float(OIL_TAPS - 1) - 0.5;
+            half4 c = original.eval(fragCoord + dir * (push + t * run));
+            // Premultiplied accumulation: an absent tap adds nothing to colour
+            // AND nothing to the weight, so a stroke running off the layer's
+            // edge no longer smears black back into it.
+            sum  += float3(c.rgb);
+            sumA += float(c.a);
+        }
+        // Dividing colour by the summed alpha un-premultiplies and averages in
+        // one step; alpha still averages over every tap so the edge feathers.
+        float oilCov = sumA;
+        sum  /= max(oilCov, 0.0001);
+        sumA /= float(OIL_TAPS);
+
+        half a = half(clamp(sumA, 0.0, 1.0));
+        return mix(src, half4(half3(clamp(sum, 0.0, 1.0)) * a, a),
+                   half(clamp(amount, 0.0, 1.0)));
+    }
+
+    // ---- Watercolour ------------------------------------------------------
+    float2 px = fragCoord - rectCentre;
+
+    // Wet edge: displace the lookup so wash boundaries wander like pigment
+    // creeping through damp paper.
+    float2 wp = px / max(wetEdgeScale, 0.001);
+    float2 disp = (float2(fbm(wp), fbm(wp + 31.7)) - 0.5) * 2.0 * wetEdge;
+
+    half4 c = childShader.eval(fragCoord + disp);
+    float3 col = c.a > 0.0 ? float3(c.rgb / c.a) : float3(0.0);
+
+    // Edge pooling: watercolour dries darker where a wash ends.
+    if (edgeDarkening > 0.0) {
+        float2 ee = float2(1.5, 0.0);
+        half4 cx0 = childShader.eval(fragCoord + disp - ee.xy);
+        half4 cx1 = childShader.eval(fragCoord + disp + ee.xy);
+        half4 cy0 = childShader.eval(fragCoord + disp - ee.yx);
+        half4 cy1 = childShader.eval(fragCoord + disp + ee.yx);
+
+        float3 gx = float3(cx1.rgb - cx0.rgb);
+        float3 gy = float3(cy1.rgb - cy0.rgb);
+        float g = clamp(length(gx) + length(gy), 0.0, 1.0);
+
+        col *= 1.0 - g * edgeDarkening;
+    }
+
+    // Pigment granulation: mottled density where pigment settles in the paper.
+    if (granulation > 0.0) {
+        float gr = fbm(px / max(granulationScale, 0.001));
+        col *= 1.0 - granulation * 0.5 + granulation * gr;
+    }
+
+    // Paper tooth, and the paper colour showing through pale washes.
+    if (paperTexture > 0.0) {
+        float tooth = fbm(px / 6.0);
+        float3 paper = float3(paperColor.rgb) * (1.0 - tooth * 0.12 * paperTexture);
+        // Pigment is transmissive: paper shows through in proportion to how
+        // light the wash is.
+        float lightness = dot(col, float3(0.299, 0.587, 0.114));
+        col = mix(col, col * paper, paperTexture * lightness);
+        col = min(col, paper);
+    }
+
+    col = clamp(col, 0.0, 1.0);
+    half wa = c.a;
+    return mix(src, half4(half3(col) * wa, wa), half(clamp(amount, 0.0, 1.0)));
+}

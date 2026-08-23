@@ -1,0 +1,195 @@
+// Display, pass 3 of 3 - Field Kit
+// Screen curvature, a weighted bloom, and the tube mask - then composite.
+//
+// Inspired by "REALISTIC SUB-PIXEL OLD CRT :::." by ENDESGA (Shadertoy ms2fDV),
+// CC0, whose barrel gather and finite-difference edge antialiasing this keeps.
+//
+// THE CORNER FIX. The old Sub-Pixel CRT had two separate edge treatments: an
+// antialiased mask for the frame edge here, and a rounded-rect cut back in pass
+// 1 done with `step(sdf, 0.0)` - a hard binary test, which is why the diagonals
+// were jaggy. Its radius was also scaled by the MEAN of width and height, so on
+// a non-square layer it could exceed half the short side and degenerate.
+//
+// Both are now one antialiased superellipse field, evaluated in SCREEN space.
+// Two corrections to the previous version:
+//
+// SPACE. It used to be evaluated in barrel-mapped space, on the reasoning that
+// the corners should bow with the glass. That is backwards. The barrel maps
+// outward, so a frame corner lands beyond the half-extent and the boundary at
+// +-0.5 in mapped space sits INBOARD of the real frame - the tube shrank as
+// distortion rose and clipped the picture off square across the corners. The
+// physical object does not work that way: a tube's faceplate is a fixed outline
+// on the glass, and the raster bows around INSIDE it. So the mask is a fixed
+// screen-space shape and only the picture warps.
+//
+// SHAPE. A rounded rectangle is straight edges plus four corner arcs, with a
+// curvature discontinuity where they meet. A real faceplate has no such joint -
+// its curvature is spread along the whole edge, which is a superellipse
+// (|x|^n + |y|^n = 1). Corner Radius now drives the exponent: n = 1/r, so 0.5
+// of the short side is a true ellipse, a quarter is n=4, and small values
+// approach a sharp rectangle. Same control, same units, better outline.
+//
+// The field is not a true distance function, but the edge antialiasing takes a
+// finite-difference gradient and normalises by it, so any monotonic field
+// works - only the zero crossing has to be right.
+
+uniform float  distortion;
+uniform float  overscan;       // 1 = raster exactly fills the tube
+uniform float  edges;          // enum: 0 transparent, 1 clamp, 2 mirror
+uniform float2 edgeTrim;       // px inset on the rect that clamp/mirror fold against
+uniform float  cornerRadius;   // px
+uniform float  bloom;
+uniform float  bloomRadius;
+uniform float  diffusion;
+uniform float  amount;
+
+uniform float2 resolution;
+uniform float2 rectCentre;
+
+uniform shader childShader;    // pass 2 result
+uniform shader original;       // untouched input - MUST be declared last
+
+// The original's weight[7] array, as a function - SkSL has no array
+// constructor syntax.
+float wt(int i) {
+    int a = i < 0 ? -i : i;
+    return a == 0 ? 2.0 : a == 1 ? 1.0 : a == 2 ? 0.5 : 0.25;
+}
+
+// Barrel-distorted uv for a zero-based pixel coordinate.
+//
+// The original form is (1 - sqrt(1 - u)) / (u/2) with u = 0.4*d*r*r, which is
+// 0/0 at the centre and at zero distortion. Guarding the denominator is not
+// enough: near the centre it computes a huge number times a tiny one, and the
+// cancellation error shows up as concentric rings around the middle of frame -
+// worst exactly where the picture should be untouched. Multiplying through by
+// the conjugate gives the algebraically identical 2 / (1 + sqrt(1 - u)), which
+// needs no guard and is exactly 1.0 at u = 0.
+float2 barrel(float2 F, float2 res, float d) {
+    float2 uv = (F / res) * 2.0 - 1.0;
+    float r = length(uv);
+    float u = 0.4 * d * r * r;
+    float k = 2.0 / (1.0 + sqrt(max(1.0 - u, 0.0)));
+
+    // Overscan. The barrel pushes sample positions outward, so at any non-zero
+    // distortion the edges of the tube read from outside the layer and come
+    // back empty - the picture looked cropped square across the sides. A real
+    // set solves this the same way: it OVERSCANS, drawing the raster larger
+    // than the faceplate so the picture runs off the glass rather than the
+    // glass showing an unpainted border. Broadcast safe areas exist because of
+    // exactly this.
+    //
+    // The corner is the worst case, at r^2 = 2, so scaling everything by the
+    // corner's own k makes the frame corner sample the layer corner exactly -
+    // nothing lands outside, at any distortion, with no control to tune. That
+    // is overscan 1. Below 1 the raster shrinks back inside the faceplate and
+    // its bowed edge becomes visible, which is the authentic look on a badly
+    // adjusted set; above 1 it pushes further off the glass.
+    float kCorner = 2.0 / (1.0 + sqrt(max(1.0 - 0.8 * d, 0.0)));
+    k /= max(mix(1.0, kCorner, clamp(overscan, 0.0, 4.0)), 1e-4);
+
+    return (uv * k + 1.0) / 2.0;
+}
+
+// Edge handling for the barrel gather. The distortion samples outside the
+// layer along the edges, where there is no picture - Clamp smears the rim
+// outward, Mirror reflects the picture back. edgeTrim insets the rect they
+// fold against, because a layer's outermost pixels are antialiased and
+// reflecting them doubles the rim into a seam.
+float2 applyEdges(float2 c) {
+    if (edges < 0.5) { return c; }
+    float2 res = max(resolution, float2(1.0));
+    float2 trim = clamp(max(edgeTrim, float2(0.0)), float2(0.0), res * 0.45);
+    float2 inner = res - trim * 2.0;
+    float2 lo = rectCentre - res * 0.5 + trim;
+    float2 t = (c - lo) / inner;
+    if (edges < 1.5) {
+        t = clamp(t, 0.0, 1.0);
+    } else {
+        float2 m = mod(t, 2.0);
+        t = 1.0 - abs(1.0 - m);
+    }
+    float2 half_px = 0.5 / inner;
+    return lo + clamp(t, half_px, 1.0 - half_px) * inner;
+}
+
+// Superellipse field for the tube faceplate, in screen space. Negative inside.
+float tubeSdf(float2 F, float2 res, float n) {
+    float2 p = (F / res) * 2.0 - 1.0;
+    float2 a = abs(p);
+    return pow(a.x, n) + pow(a.y, n) - 1.0;
+}
+
+half4 main(float2 fragCoord) {
+    float2 res = max(resolution, float2(1.0));
+    float2 F   = fragCoord - rectCentre + res * 0.5;
+
+    float d  = max(distortion, 1e-4);
+    float2 uv = barrel(F, res, d);
+    float2 at = (uv - 0.5) * res + rectCentre;
+
+    // 7x7 weighted bloom.
+    // The gather is still 7x7, but the taps step by bloomRadius/3 px so the
+    // kernel can span a whole mask cell. At bloomRadius 3 the step is 1 and
+    // this is the original kernel exactly.
+    float tapStep = max(bloomRadius, 0.0) / 3.0;
+    // Diffusion reads this same gather, so it has to run whenever EITHER is
+    // asked for. Gating it on bloom alone made diffusion silently do nothing
+    // with bloom at zero - which is exactly how a CRT preset wants to be set,
+    // since the veiling is the point and the highlight halo often is not.
+    float4 acc = float4(0.0);
+    if (bloom > 0.0 || diffusion > 0.0) {
+        for (int x = -3; x <= 3; x++) {
+            for (int y = -3; y <= 3; y++) {
+                half4 s = childShader.eval(applyEdges(at + float2(float(x), float(y)) * tapStep));
+                acc += wt(x) * wt(y) * float4(s);
+            }
+        }
+    }
+
+    half4 centre = childShader.eval(applyEdges(at));
+
+    // The original divided the 7x7 gather by 7 although its weights sum to
+    // 30.25, so every pixel came out 4.3x too bright and a mid grey clipped to
+    // white before the mask was even visible. Normalise properly, then add only
+    // the part of the blur that is BRIGHTER than the pixel itself: that is what
+    // a bloom is - haloing from highlights - and it leaves flat areas at their
+    // own level instead of lifting the whole picture.
+    const float WT_SUM = 30.25;
+    float4 blurred = acc / WT_SUM;
+    float4 col = bloom > 0.0
+        ? float4(centre) + max(blurred - float4(centre), float4(0.0)) * bloom
+        : float4(centre);
+
+    // Diffusion: light refracting through imperfections in the glass face, as
+    // Cathode-Retro models it. This is NOT bloom. Bloom adds only the part of
+    // the blur that is brighter than the pixel, so it haloes highlights and
+    // leaves flat areas alone; diffusion adds the blur outright, so it lifts
+    // everything and washes blacks toward grey. That veiling is why a real
+    // tube never looks truly black, and why a lit room kills its contrast.
+    // It shares bloom's gather, and so its radius - raise Bloom Radius to
+    // spread it wider.
+    if (diffusion > 0.0) {
+        col += blurred * diffusion;
+    }
+
+    // Tube mask. Radius as a fraction of the short side, turned into the
+    // superellipse exponent: half the short side is a true ellipse (n = 2),
+    // and the exponent is capped rather than allowed to run to infinity
+    // because pow() of a large exponent overflows before the shape converges
+    // any further - by n = 64 it is a rectangle to well under a pixel.
+    float shortSide = min(res.x, res.y);
+    float r01 = clamp(cornerRadius / max(shortSide, 1.0), 0.0, 0.5);
+    float n = r01 > 0.0 ? clamp(1.0 / r01, 2.0, 64.0) : 64.0;
+
+    // One-pixel finite difference for the edge gradient - SkSL has no dFdx.
+    float v  = tubeSdf(F, res, n);
+    float vx = tubeSdf(F + float2(1.0, 0.0), res, n);
+    float vy = tubeSdf(F + float2(0.0, 1.0), res, n);
+    float aa = max(2.0 * length(float2(vx - v, vy - v)), 1e-5);
+    col *= smoothstep(aa, -aa, v);      // 1 inside, 0 outside
+
+    half4 outCol = half4(clamp(col, 0.0, 1.0));
+    half4 src = original.eval(fragCoord);
+    return mix(src, outCol, half(clamp(amount, 0.0, 1.0)));
+}

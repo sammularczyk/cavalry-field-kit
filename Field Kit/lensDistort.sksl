@@ -1,0 +1,237 @@
+// Lens, pass 1 of 8 - Field Kit
+// Geometric distortion, with optional chromatic fringing through it.
+//
+// Lens profiles ported from Hawk_Anamorphic.gizmo, part of
+// "Hawk-Anamorphic-Nuke" by Slava Sexton (MIT licence):
+// https://github.com/SlavaSexton/Hawk-Anamorphic-Nuke. The gizmo's own
+// LD_3DE4_Anamorphic_Standard_Degree_4 nodes carry solved 3DEqualizer
+// coefficients for seven real HAWK anamorphic focal lengths (28, 35, 45, 55,
+// 65, 80, 110mm), captured on an ARRI ALEXA in 4:3 anamorphic mode. The
+// previous table - 53-54 profiles ported from "aeAnamorphic" by Aitor
+// Echeveste - is gone: that repository declares no licence at all, which
+// blocked shipping its numbers. Coverage is honestly smaller: seven lenses,
+// not fifty-three, because that is what the MIT-licensed source actually
+// measured.
+//
+// DIFFERENT MODEL, so the evaluation changed with it, not just the numbers.
+// aeAnamorphic's profiles were Brown-Conrady: two radial coefficients (k0,
+// k1) divided into the coordinate. The 3DE4 "Anamorphic, Standard, Degree 4"
+// model Hawk uses is a multiplicative polynomial with SEPARATE x/y
+// coefficients (so it captures anamorphic mumps, not just a circular radial
+// term): Cx02, Cy02, Cx22, Cy22 at degree 2, and Cx04, Cy04, Cx24, Cy24, Cx44,
+// Cy44 at degree 4. The combination formula (grouping into per-axis x2/y2/x4/
+// x2y2/y4 weights) is the published one from 3DEqualizer's own Lens
+// Distortion Plugin Kit, reimplemented here rather than copied - only the
+// solved per-lens numbers come from Hawk's file, the polynomial itself is
+// 3DE4's documented model.
+//
+// DROPPED FROM THE SOURCE DATA: the gizmo's coefficients are animated curves
+// over focus distance (lens breathing, 1m out to 100m) - this pass has no
+// focus input and the old table was static too, so each profile below is the
+// far-focus (100m) sample, which is the lens's resting distortion. The gizmo
+// also carries a small Lens_Rotation (under 9 degrees) and a per-lens
+// Squeeze_X/Y close to 1.0 for each focal length; both are folded into this
+// filter's own `squeeze` and `centreOffset` controls rather than baked in, so
+// they are left off the table rather than approximated.
+//
+// FRINGING replaces what used to be Spectral Displacement's separate Barrel
+// model. That model was distortion plus per-wavelength taps, i.e. exactly this
+// pass with a spectrum, so keeping both meant two filters doing the same
+// geometry. Sampling the spectrum ACROSS the distortion strength is what makes
+// the fringe follow the glass rather than sitting on top of it.
+//
+// Pass 0 must NOT declare `uniform shader original` - there is no such input on
+// the first pass and the shader fails to BUILD, silently doing nothing.
+
+uniform float  profile;
+uniform float  distortion;    // scales the profile's strength
+uniform float  squeeze;       // anamorphic squeeze, applied on x
+uniform float2 centreOffset;  // added to the profile's own lens centre
+uniform float  expand;        // scales the sampled area, to pull the edges in
+uniform float  edges;         // enum: 0 transparent, 1 clamp, 2 mirror
+uniform float2 edgeTrim;      // px inset on the rect that clamp/mirror fold against
+uniform float  fringing;      // chromatic spread across the distortion
+uniform float  samples;
+
+uniform float2 resolution;
+uniform float2 rectCentre;
+
+uniform shader displaceMap;   // shaderData - binds BEFORE the image
+uniform shader defocusMap;    // shaderData - unused here, but every pass must
+                               // declare it or the binding order breaks
+uniform shader childShader;   // pass 1 input = the layer being filtered
+
+// The slider goes to 32, so the loop has to as well - it was capped at 16,
+// which meant every value above 16 silently rendered the same 16 discrete
+// spectral copies. That cap WAS the visible stepping.
+const int MAX_ITER = 32;
+
+// Non-trig hash - a fract(sin(dot())) one degrades badly at absolute
+// fragCoord magnitudes on an HD layer.
+float hash21(float2 p) {
+    p = fract(p * float2(0.1031, 0.11369));
+    p += dot(p, p.yx + 19.19);
+    return fract((p.x + p.y) * p.x);
+}
+
+// Edge handling. A distorted coordinate that lands outside the layer reads as
+// transparent, which is the honest answer - there is no picture out there. But
+// a barrel distortion pulls the corners in and leaves wedges of nothing, so
+// Clamp (smear the rim outward) and Mirror (reflect the picture back) both
+// fill them. Mirror reads better on texture, Clamp on gradients.
+float2 applyEdges(float2 c) {
+    if (edges < 0.5) { return c; }
+    float2 res = max(resolution, float2(1.0));
+    // Fold against a rect INSET by edgeTrim. A layer's outermost pixels are
+    // antialiased - partial alpha, and often a dark premultiplied rim - and
+    // reflecting those doubles them into a hard seam. Trimming a pixel or two
+    // folds against real picture instead.
+    float2 trim = clamp(max(edgeTrim, float2(0.0)), float2(0.0), res * 0.45);
+    float2 inner = res - trim * 2.0;
+    float2 lo = rectCentre - res * 0.5 + trim;
+    float2 t = (c - lo) / inner;
+    if (edges < 1.5) {
+        t = clamp(t, 0.0, 1.0);
+    } else {
+        // Triangle wave, period 2: 0 -> 0, 1 -> 1, 1.5 -> 0.5, 2 -> 0.
+        float2 m = mod(t, 2.0);
+        t = 1.0 - abs(1.0 - m);
+    }
+    // Stay half a pixel inside, or the outermost tap still straddles the
+    // border and reintroduces the rim this was meant to remove.
+    float2 half_px = 0.5 / inner;
+    return lo + clamp(t, half_px, 1.0 - half_px) * inner;
+}
+
+// Spectrum weights, so the accumulated taps recombine to white.
+float3 spectrumOffsetRgb(float t) {
+    float t0 = 3.0 * t - 1.5;
+    return clamp(float3(-t0, 1.0 - abs(t0), t0), 0.0, 1.0);
+}
+
+// Degree-2 coefficients per profile: Cx02, Cy02, Cx22, Cy22.
+float4 lensProfileDeg2(int p) {
+    if (p == 0) { return float4(0.24912, 0.1930532, -0.0078924, 0.1288241); }      // HAWK Anamorphic 28mm
+    if (p == 1) { return float4(0.1524741, 0.112784, -0.0435742, 0.0419747); }     // HAWK Anamorphic 35mm
+    if (p == 2) { return float4(0.0668225, 0.0823106, 0.010306, 0.0179416); }      // HAWK Anamorphic 45mm
+    if (p == 3) { return float4(0.0582335, 0.049141, -0.0030184, 0.0215574); }     // HAWK Anamorphic 55mm
+    if (p == 4) { return float4(0.0428927, 0.0373184, 0.0023691, 0.0199411); }     // HAWK Anamorphic 65mm
+    if (p == 5) { return float4(0.0315887, 0.0333753, -0.0038585, 0.0101285); }    // HAWK Anamorphic 80mm
+    return float4(-0.0153744, -0.0196256, 0.0220801, 0.0351075);                  // HAWK Anamorphic 110mm
+}
+
+// Degree-4 coefficients per profile: Cx04, Cy04, Cx24, Cy24.
+float4 lensProfileDeg4(int p) {
+    if (p == 0) { return float4(-0.0810558, 0.0693156, -0.0207045, -0.0748056); }  // HAWK Anamorphic 28mm
+    if (p == 1) { return float4(-0.0054138, 0.0912108, 0.0008992, -0.1004125); }   // HAWK Anamorphic 35mm
+    if (p == 2) { return float4(0.0122812, 0.0360449, 0.0087367, -0.0256253); }    // HAWK Anamorphic 45mm
+    if (p == 3) { return float4(-0.0249766, 0.0165627, 0.0408321, -0.0127521); }   // HAWK Anamorphic 55mm
+    if (p == 4) { return float4(-0.0154615, 0.0042237, 0.0284158, 0.002869); }     // HAWK Anamorphic 65mm
+    if (p == 5) { return float4(-0.0026138, -0.0005207, 0.0180689, 0.006981); }    // HAWK Anamorphic 80mm
+    return float4(-0.0079626, 0.0110996, 0.0119082, -0.0156967);                  // HAWK Anamorphic 110mm
+}
+
+// Remaining degree-4 pair per profile: Cx44, Cy44.
+float2 lensProfileDeg4b(int p) {
+    if (p == 0) { return float2(0.0080689, 0.0086244); }    // HAWK Anamorphic 28mm
+    if (p == 1) { return float2(0.0039296, 0.0175469); }    // HAWK Anamorphic 35mm
+    if (p == 2) { return float2(-0.002432, 0.0021373); }    // HAWK Anamorphic 45mm
+    if (p == 3) { return float2(-0.0098076, -0.0002078); }  // HAWK Anamorphic 55mm
+    if (p == 4) { return float2(-0.0063483, -0.0015086); }  // HAWK Anamorphic 65mm
+    if (p == 5) { return float2(-0.0011312, -0.0002162); }  // HAWK Anamorphic 80mm
+    return float2(-0.0023847, 0.0039955);                   // HAWK Anamorphic 110mm
+}
+
+// One distorted sample position, for profile `p` at distortion scaled by `s`.
+// This is 3DEqualizer's "Anamorphic, Standard, Degree 4" polynomial: each
+// axis is displaced by a weighted sum of x2, y2, x4, x2*y2 and y4 terms,
+// where the weights are combinations of the ten solved Cx/Cy coefficients
+// (see ldpk_generic_anamorphic_distortion.h's degree-4 specialisation for the
+// combination rule). Unlike the old Brown-Conrady division model there is no
+// pole to guard against - the polynomial is finite everywhere.
+float2 warpRaw(float2 fragCoord, int p, float s) {
+    float2 res = max(resolution, float2(1.0));
+    float half_h = max(res.y * 0.5, 1.0);
+    float2 centre = rectCentre + centreOffset * half_h;
+    float2 pp = (fragCoord - centre) / half_h;
+
+    // Undo the anamorphic squeeze before measuring radius, so the distortion
+    // stays circular in the lens's own space rather than the stretched frame.
+    float sq = max(squeeze, 0.01);
+    float2 q = float2(pp.x * sq, pp.y);
+
+    float4 d2 = lensProfileDeg2(p) * s;
+    float4 d4 = lensProfileDeg4(p) * s;
+    float2 d4b = lensProfileDeg4b(p) * s;
+    float cx02 = d2.x, cy02 = d2.y, cx22 = d2.z, cy22 = d2.w;
+    float cx04 = d4.x, cy04 = d4.y, cx24 = d4.z, cy24 = d4.w;
+    float cx44 = d4b.x, cy44 = d4b.y;
+
+    float cxX2  = cx02 + cx22;
+    float cxY2  = cx02 - cx22;
+    float cxX4  = cx04 + cx24 + cx44;
+    float cxX2Y2 = 2.0 * cx04 - 6.0 * cx44;
+    float cxY4  = cx04 - cx24 + cx44;
+
+    float cyX2  = cy02 + cy22;
+    float cyY2  = cy02 - cy22;
+    float cyX4  = cy04 + cy24 + cy44;
+    float cyX2Y2 = 2.0 * cy04 - 6.0 * cy44;
+    float cyY4  = cy04 - cy24 + cy44;
+
+    float x = q.x, x2 = x * x, x4 = x2 * x2;
+    float y = q.y, y2 = y * y, y4 = y2 * y2;
+
+    float xq = x * (1.0 + x2 * cxX2 + y2 * cxY2 + x4 * cxX4 + x2 * y2 * cxX2Y2 + y4 * cxY4);
+    float yq = y * (1.0 + x2 * cyX2 + y2 * cyY2 + x4 * cyX4 + x2 * y2 * cyX2Y2 + y4 * cyY4);
+
+    float2 u = float2(xq, yq) * max(expand, 0.01);
+    return centre + float2(u.x / sq, u.y) * half_h;
+}
+
+float2 warp(float2 fragCoord, int p, float s) {
+    return applyEdges(warpRaw(fragCoord, p, s));
+}
+
+half4 main(float2 fragCoord) {
+    int p = int(profile);
+    float fr = max(fringing, 0.0);
+
+
+    if (fr <= 0.0) {
+        return childShader.eval(warp(fragCoord, p, distortion));
+    }
+
+    // Sweep the distortion strength across the spectrum and recombine.
+    float n = clamp(samples, 3.0, float(MAX_ITER));
+    // Raising the tap count alone only makes the steps finer, never removes
+    // them: a fixed ladder of spectral positions is a ladder at any length.
+    // Offsetting the whole ladder by a sub-step amount that differs per pixel
+    // turns what stepping remains into fine noise instead - the same treatment
+    // the bloom ladder and the halo blur needed. This is what makes a low
+    // sample count look smooth, so it does more than more taps would.
+    float jitter = (hash21(fragCoord) - 0.5) / max(n - 1.0, 1.0);
+    float3 sumcol = float3(0.0);
+    float3 sumw   = float3(0.0);
+    float  sumA   = 0.0;
+    float  taps   = 0.0;
+
+    for (int i = 0; i < MAX_ITER; i++) {
+        if (float(i) >= n) { continue; }
+        float t = n > 1.0 ? clamp(float(i) / (n - 1.0) + jitter, 0.0, 1.0) : 0.0;
+        float3 w = spectrumOffsetRgb(t);
+        sumw += w;
+
+        float s = distortion * mix(1.0 - fr * 0.5, 1.0 + fr * 0.5, t);
+        half4 tap = childShader.eval(warp(fragCoord, p, s));
+        float3 lin = tap.a > 0.0 ? float3(tap.rgb / tap.a) : float3(0.0);
+
+        sumcol += w * lin;
+        sumA   += float(tap.a);
+        taps   += 1.0;
+    }
+
+    float3 col = sumcol / max(sumw, float3(0.0001));
+    half a = half(clamp(sumA / max(taps, 1.0), 0.0, 1.0));
+    return half4(half3(clamp(col, 0.0, 1.0)) * a, a);
+}

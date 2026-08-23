@@ -1,0 +1,106 @@
+// Lens Flare, pass 1 of 4 - Field Kit
+// Finds the emitter: the point every other pass builds the flare from.
+//
+// Two placement modes, because a real flare's source is usually OFF SCREEN -
+// automatic detection can never find a light that isn't in the frame, so
+// Manual has to be a first-class mode rather than a fallback.
+//
+//   Auto   - thresholds the layer and takes the weighted centroid of the
+//            brightest region, so the flare tracks whatever is blowing out.
+//            Sampled on a fixed 8x8 grid (a compile-time constant loop count,
+//            since loop bounds cannot be a uniform) - coarse, but this only
+//            needs to find WHERE the light roughly is, not resolve its shape.
+//   Manual - `position`, a pixel offset from the layer centre. Works the same
+//            whether that position lands inside the frame or far outside it,
+//            because it is never clamped anywhere in this chain.
+//
+// This pass exists on its own, before any highlight buffer exists, so the
+// three passes downstream (Ghosts, Halo, Combine) all agree on one emitter
+// position without repeating the grid search. It writes that position into
+// EVERY pixel of its output - a one-value buffer - because a later pass can
+// then read it back from any coordinate, including one outside the frame.
+//
+// Pass 0 must NOT declare `uniform shader original` - there is no such input
+// on the first pass and the shader fails to BUILD, silently contributing
+// nothing while the rest of the chain runs anyway. On pass 0 `childShader` IS
+// the layer.
+
+uniform float  placement;   // enum: 0 Auto, 1 Manual
+uniform float2 position;    // Manual only - layer-local pixels
+uniform float  threshold;
+uniform float  gamma;
+
+uniform float2 resolution;
+uniform float2 rectCentre;
+
+uniform shader childShader;   // pass 1 input = the layer being filtered
+
+const int GRID = 20;  // 20x20 = 400 taps, once, for the whole frame
+
+// Luma of the highlight grade at one point, used only as a centroid weight -
+// the real per-channel grade is recomputed downstream from the untouched
+// layer, same as Glow's bloom ladder does with `original`.
+float highlightWeight(float2 coord) {
+    half4 c = childShader.eval(coord);
+    float3 lin = c.a > 0.0 ? float3(c.rgb / c.a) : float3(0.0);
+    float luma = dot(lin, float3(0.2126, 0.7152, 0.0722));
+    float bp = clamp(threshold, 0.0, 0.999);
+    float h = pow(clamp((luma - bp) / max(1.0 - bp, 0.0001), 0.0, 1e4),
+                  max(gamma, 0.0001));
+    return h;
+}
+
+half4 main(float2 fragCoord) {
+    float2 offset;
+
+    if (placement > 0.5) {
+        offset = position;
+    } else {
+        float2 res = max(resolution, float2(1.0));
+        // The BRIGHTEST POINT, not the centroid. A centroid of a frame with two
+        // bright regions - say a blown-out arch and a bright sky - lands
+        // between them, which is usually near the middle and nowhere a light
+        // source actually is. A flare belongs on the source, so this takes the
+        // argmax and then refines it locally.
+        float2 bestPos = rectCentre;
+        float  bestW   = 0.0;
+
+        for (int y = 0; y < GRID; y++) {
+            for (int x = 0; x < GRID; x++) {
+                float2 uv = (float2(float(x), float(y)) + 0.5) / float(GRID);
+                float2 coord = rectCentre + (uv - 0.5) * res;
+                float  w = highlightWeight(coord);
+                if (w > bestW) { bestW = w; bestPos = coord; }
+            }
+        }
+
+        // One refinement pass over the winning cell, so the emitter lands on
+        // the peak rather than on the coarse grid point nearest it.
+        float2 cellHalf = res / float(GRID) * 0.5;
+        for (int y = -2; y <= 2; y++) {
+            for (int x = -2; x <= 2; x++) {
+                float2 coord = bestPos + float2(float(x), float(y)) * cellHalf * 0.5;
+                float  w = highlightWeight(coord);
+                if (w > bestW) { bestW = w; bestPos = coord; }
+            }
+        }
+
+        // Nothing bright enough anywhere: sit at centre rather than latching
+        // onto whatever noise happened to win.
+        offset = bestW > 0.0001 ? bestPos - rectCentre : float2(0.0);
+    }
+
+    // A constant buffer: every pixel carries the same value, so any later pass
+    // can read the emitter position from any coordinate it likes.
+    //
+    // ENCODED, because a pass target clamps to 0..1 and this offset is in
+    // PIXELS - up to about +/-960 on an HD layer. Written raw it clamped to
+    // 1.0 (or 0.0 when negative), so every downstream pass read an offset of
+    // roughly one pixel and the emitter sat at frame centre no matter where
+    // the highlights were, in Manual mode as well as Auto. Half the layer
+    // diagonal is the range, which comfortably contains an off-screen source.
+    float2 res2 = max(resolution, float2(1.0));
+    float  range = length(res2);
+    float2 enc = clamp(offset / range + 0.5, 0.0, 1.0);
+    return half4(half(enc.x), half(enc.y), half(0.0), half(1.0));
+}

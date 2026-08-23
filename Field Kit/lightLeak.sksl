@@ -1,0 +1,172 @@
+// Light Leak - Field Kit
+// Ported from "LightLeaksUnity" by danielzeller (MIT) - see the credit in the
+// UI's trailing separator.
+//
+// The original is a purely procedural light leak: three colour bands (red,
+// yellow, blue) built from sin/cos combinations of UV and a wobbling time
+// term, summed and then Screened or Lightened over the picture by an
+// intensity slider. That trig recipe is ported near-verbatim below -
+// redBand/yellowBand/blueBand match the original's redPosition/
+// yellowPosition/bluePosition constant-for-constant, and t is built the same
+// way from the clock: _Time.y + cos(_Time.y * _MoveSpeed).
+//
+// Two things the original does not do, which real light leaks do:
+//
+//  1. ENTER FROM AN EDGE. The original's bands sit centred on the whole
+//     frame with no sense of where the light is coming from - film fogs at
+//     the edge of the camera back, not in the middle. `source` picks an
+//     edge, a corner, or a manual point, and the leak is strongest there and
+//     decays with distance, at a rate set by `spread`.
+//  2. INTERACT WITH THE PICTURE. A light leak is light bouncing inside the
+//     camera, so it blooms where the frame is already bright and all but
+//     disappears into deep shadow. `interact` remixes the leak's strength by
+//     the image's own luminance so it reads as part of the photograph
+//     rather than a sticker laid on top of it.
+//
+// Uniform order matches the attribute order in definitions.json.
+
+uniform float  intensity;   // overall strength; 0 = exact passthrough
+uniform float  source;      // enum: 0 Top, 1 Bottom, 2 Left, 3 Right,
+                             //       4 TopLeft, 5 TopRight, 6 BottomLeft,
+                             //       7 BottomRight, 8 Manual
+uniform float2 position;    // Manual only: offset from layer centre, pixels
+uniform float  spread;      // how far the leak reaches from its source
+uniform float  wander;      // how far the leak drifts in and out of frame over time
+uniform float  red;         // strength of the red band
+uniform float  yellow;      // strength of the yellow band
+uniform float  blue;        // strength of the blue band
+uniform float  interact;    // 0..1, how much scene luminance drives the leak
+uniform float  speed;       // wobble rate of the animated bands
+uniform float  time;        // auto-connected to comp time (frames)
+uniform float  blend;       // enum: 0 Screen, 1 Lighten, 2 Add
+                             // NOT named blendMode: thirdPartyFilter already
+                             // provides that attribute, and declaring it
+                             // again collides so the shader never runs.
+uniform float  amount;
+
+uniform float2 resolution;
+uniform float2 rectCentre;
+
+uniform shader image;       // input image - binds by position, must be last
+
+// The three band functions, ported constant-for-constant from the original's
+// redPosition/yellowPosition/bluePosition.
+float yellowBand(float2 uv, float t) {
+    return sin(uv.x * cos(t) * 6.0 * cos(uv.y * t / 232.0))
+         + sin(uv.y * sin(t) * 3.0 * cos(uv.x * t / 212.0));
+}
+float redBand(float2 uv, float t) {
+    return cos(uv.x * sin(t) * 5.0 * cos(uv.y * t / 211.0))
+         + sin(uv.y * sin(t) * 6.0 * cos(uv.x * t / 234.0));
+}
+float blueBand(float2 uv, float t) {
+    return cos(uv.x * cos(t) * 4.0 * cos(uv.y * t / 311.0))
+         + sin(uv.y * sin(t) * 7.0 * cos(uv.x * t / 321.0));
+}
+
+float3 screenBlend(float3 a, float3 b)  { return 1.0 - (1.0 - a) * (1.0 - b); }
+float3 lightenBlend(float3 a, float3 b) { return max(a, b); }
+
+// Distance in pixels from the chosen source. A straight edge measures
+// perpendicular distance from that edge, so the whole edge leaks evenly; a
+// corner or the manual point measures radial distance from that point.
+// fragCoord/rectCentre are world-space and Y-UP, so "Top" is +y.
+// Smooth 1D value noise. A sine would give the leak a metronome, which is the
+// one thing a real light leak never has.
+float hash1(float x) {
+    return fract(sin(x * 12.9898) * 43758.5453);
+}
+
+float vnoise1(float x) {
+    float i = floor(x);
+    float f = fract(x);
+    float u = f * f * (3.0 - 2.0 * f);
+    return mix(hash1(i), hash1(i + 1.0), u);
+}
+
+float sourceDistance(float2 fragCoord, float2 res, int src) {
+    float2 p = fragCoord - rectCentre;
+    if (src == 0) { return max(res.y * 0.5 - p.y, 0.0); }              // Top
+    if (src == 1) { return max(res.y * 0.5 + p.y, 0.0); }              // Bottom
+    if (src == 2) { return max(res.x * 0.5 + p.x, 0.0); }              // Left
+    if (src == 3) { return max(res.x * 0.5 - p.x, 0.0); }              // Right
+    if (src == 4) { return length(p - float2(-res.x,  res.y) * 0.5); } // Top Left
+    if (src == 5) { return length(p - float2( res.x,  res.y) * 0.5); } // Top Right
+    if (src == 6) { return length(p - float2(-res.x, -res.y) * 0.5); } // Bottom Left
+    if (src == 7) { return length(p - float2( res.x, -res.y) * 0.5); } // Bottom Right
+    return length(p - position);                                      // Manual
+}
+
+half4 main(float2 fragCoord) {
+    half4 src = image.eval(fragCoord);
+
+    // Exact passthrough at zero strength - guaranteed regardless of any
+    // float edge case in the blend maths below.
+    if (intensity <= 0.0) { return src; }
+
+    float2 res = max(resolution, float2(1.0));
+
+    // Un-premultiply before doing any colour maths.
+    float3 lin = src.a > 0.0 ? float3(src.rgb / src.a) : float3(0.0);
+
+    // uv in 0..1, v = 1 at the TOP, matching what the original sampled its
+    // bands across.
+    float2 uv = (fragCoord - rectCentre) / res + 0.5;
+
+    float t = time * speed;
+    t = t + cos(t * 3.0); // the original's wobble: _Time.y + cos(_Time.y*_MoveSpeed)
+
+    // Bands can run negative; a light leak only ever adds light, so clamp
+    // each to its positive half before tinting.
+    float yPos = max(yellowBand(uv, t), 0.0);
+    float rPos = max(redBand(uv, t), 0.0);
+    float bPos = max(blueBand(uv, t), 0.0);
+
+    float3 leak = float3(1.0, 0.9, 0.63) * yPos * yellow
+                + float3(1.0, 0.0, 0.0)  * rPos * red
+                + float3(0.0, 0.0, 1.0)  * bPos * blue;
+
+    // Falls off from the source. `reach` is in units of half the frame
+    // diagonal so `spread` behaves the same regardless of the source picked.
+    float dist  = sourceDistance(fragCoord, res, int(source));
+    float reach = max(spread, 0.001) * length(res) * 0.5;
+
+    // Wander: the gap the light gets through is not fixed - the camera moves,
+    // the body flexes, and the leak slides away and comes back. Pushing the
+    // source further out is what "moves out of frame" means for an edge, since
+    // sliding ALONG an edge changes nothing about the distance to it.
+    //
+    // The threshold is what makes it intermittent rather than merely breathing:
+    // for stretches of the noise the leak is simply gone, which is what happens
+    // on real footage.
+    float w = clamp(wander, 0.0, 1.0);
+    if (w > 0.0) {
+        float phase  = time * max(speed, 0.0) * 0.35;
+        float recede = smoothstep(0.35, 0.95, vnoise1(phase));
+        dist += recede * w * reach * 5.0;
+    }
+
+    float mask  = exp(-dist / max(reach, 1.0));
+
+    // Bloom where the picture is already bright, fade into shadow.
+    float lum         = dot(lin, float3(0.2126, 0.7152, 0.0722));
+    float interactMul = mix(1.0, clamp(lum * 1.5, 0.0, 1.0), clamp(interact, 0.0, 1.0));
+
+    float strength = clamp(intensity, 0.0, 1.0) * mask * interactMul;
+    leak *= strength;
+
+    int bm = int(blend);
+    float3 blended =
+        bm == 1 ? lightenBlend(lin, leak) :
+        bm == 2 ? lin + leak :
+        screenBlend(lin, leak);
+
+    // The leak can extend past the layer's own alpha - over a transparent
+    // background it should still glow rather than being clipped to the
+    // layer's shape - so alpha follows the same falloff out.
+    float outA   = clamp(max(float(src.a), strength), 0.0, 1.0);
+    float3 outRgb = clamp(blended, 0.0, 1.0);
+
+    half4 outCol = half4(half3(outRgb) * half(outA), half(outA));
+    return mix(src, outCol, half(clamp(amount, 0.0, 1.0)));
+}

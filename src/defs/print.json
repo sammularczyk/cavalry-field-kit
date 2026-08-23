@@ -1,0 +1,570 @@
+{
+  "author": "samMularczyk",
+  "type": "print",
+  "superType": "thirdPartyFilter",
+  "version": "1.0",
+  "paddingExpression": "ceil(registrationError + ghosting * 8 + flatten + 2)",
+  "passes": [
+    {
+      "skslFile": "printPaper.sksl",
+      "uniforms": [
+        "outputMode",
+        "paperColor",
+        "paperGrain",
+        "seed"
+      ]
+    },
+    {
+      "skslFile": "printPlate.sksl",
+      "constants": {
+        "plateIndex": 0
+      },
+      "uniforms": [
+        "process",
+        "separation",
+        "inkCount",
+        "flatten",
+        "levels",
+        "levelBias",
+        "bandDither",
+        "screenType",
+        "frequency",
+        "dotGain",
+        "ink1Color",
+        "ink1Angle",
+        "ink1Coverage",
+        "ink2Color",
+        "ink2Angle",
+        "ink2Coverage",
+        "ink3Color",
+        "ink3Angle",
+        "ink3Coverage",
+        "ink4Color",
+        "ink4Angle",
+        "ink4Coverage",
+        "inkOpacity",
+        "registrationError",
+        "inkLoss",
+        "mottle",
+        "ghosting",
+        "seed",
+        "paperColor",
+        "outputMode"
+      ]
+    },
+    {
+      "skslFile": "printPlate.sksl",
+      "constants": {
+        "plateIndex": 1
+      },
+      "uniforms": [
+        "process",
+        "separation",
+        "inkCount",
+        "flatten",
+        "levels",
+        "levelBias",
+        "bandDither",
+        "screenType",
+        "frequency",
+        "dotGain",
+        "ink1Color",
+        "ink1Angle",
+        "ink1Coverage",
+        "ink2Color",
+        "ink2Angle",
+        "ink2Coverage",
+        "ink3Color",
+        "ink3Angle",
+        "ink3Coverage",
+        "ink4Color",
+        "ink4Angle",
+        "ink4Coverage",
+        "inkOpacity",
+        "registrationError",
+        "inkLoss",
+        "mottle",
+        "ghosting",
+        "seed",
+        "paperColor",
+        "outputMode"
+      ]
+    },
+    {
+      "skslFile": "printPlate.sksl",
+      "constants": {
+        "plateIndex": 2
+      },
+      "uniforms": [
+        "process",
+        "separation",
+        "inkCount",
+        "flatten",
+        "levels",
+        "levelBias",
+        "bandDither",
+        "screenType",
+        "frequency",
+        "dotGain",
+        "ink1Color",
+        "ink1Angle",
+        "ink1Coverage",
+        "ink2Color",
+        "ink2Angle",
+        "ink2Coverage",
+        "ink3Color",
+        "ink3Angle",
+        "ink3Coverage",
+        "ink4Color",
+        "ink4Angle",
+        "ink4Coverage",
+        "inkOpacity",
+        "registrationError",
+        "inkLoss",
+        "mottle",
+        "ghosting",
+        "seed",
+        "paperColor",
+        "outputMode"
+      ]
+    },
+    {
+      "skslFile": "printPlate.sksl",
+      "constants": {
+        "plateIndex": 3
+      },
+      "uniforms": [
+        "process",
+        "separation",
+        "inkCount",
+        "flatten",
+        "levels",
+        "levelBias",
+        "bandDither",
+        "screenType",
+        "frequency",
+        "dotGain",
+        "ink1Color",
+        "ink1Angle",
+        "ink1Coverage",
+        "ink2Color",
+        "ink2Angle",
+        "ink2Coverage",
+        "ink3Color",
+        "ink3Angle",
+        "ink3Coverage",
+        "ink4Color",
+        "ink4Angle",
+        "ink4Coverage",
+        "inkOpacity",
+        "registrationError",
+        "inkLoss",
+        "mottle",
+        "ghosting",
+        "seed",
+        "paperColor",
+        "outputMode"
+      ]
+    },
+    {
+      "skslFile": "printComposite.sksl",
+      "uniforms": [
+        "trueColour",
+        "paperTooth",
+        "seed",
+        "amount"
+      ]
+    }
+  ],
+  "attributes": {
+    "process": {
+      "type": "enum",
+      "default": 0,
+      "enumValues": [
+        0,
+        1,
+        2
+      ]
+    },
+    "separation": {
+      "type": "enum",
+      "default": 0,
+      "enumValues": [
+        0,
+        1,
+        2
+      ]
+    },
+    "inkCount": {
+      "type": "int",
+      "default": 2,
+      "min": 1,
+      "max": 4,
+      "step": 1
+    },
+    "flatten": {
+      "type": "double",
+      "default": 1.5,
+      "min": 0.0,
+      "softMax": 8.0,
+      "step": 0.1
+    },
+    "levels": {
+      "type": "double",
+      "default": 0.0,
+      "min": 0.0,
+      "softMax": 8.0,
+      "step": 1.0
+    },
+    "levelBias": {
+      "type": "double",
+      "default": 1.0,
+      "min": 0.1,
+      "softMax": 4.0,
+      "step": 0.05,
+      "dimming": "levels <= 0"
+    },
+    "bandDither": {
+      "type": "double",
+      "default": 0.5,
+      "min": 0.0,
+      "max": 1.0,
+      "step": 0.01,
+      "dimming": "levels <= 0"
+    },
+    "screenType": {
+      "type": "enum",
+      "default": 0,
+      "enumValues": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5,
+        6
+      ]
+    },
+    "frequency": {
+      "type": "double",
+      "default": 8.0,
+      "min": 2.0,
+      "max": 64.0,
+      "step": 0.1,
+      "dimming": "screenType <= 1"
+    },
+    "dotGain": {
+      "type": "double",
+      "default": 0.0,
+      "min": -1.0,
+      "max": 1.0,
+      "step": 0.01,
+      "dimming": "screenType <= 1"
+    },
+    "ink1Color": {
+      "type": "color",
+      "default": {
+        "type": "Color",
+        "r": 0,
+        "g": 90,
+        "b": 181,
+        "a": 255
+      }
+    },
+    "ink1Angle": {
+      "type": "double",
+      "default": 15.0,
+      "min": 0.0,
+      "max": 180.0,
+      "step": 1.0
+    },
+    "ink1Coverage": {
+      "type": "double",
+      "default": 1.0,
+      "min": 0.0,
+      "max": 2.0,
+      "step": 0.01
+    },
+    "ink2Color": {
+      "type": "color",
+      "default": {
+        "type": "Color",
+        "r": 255,
+        "g": 214,
+        "b": 0,
+        "a": 255
+      },
+      "dimming": "inkCount <= 1"
+    },
+    "ink2Angle": {
+      "type": "double",
+      "default": 45.0,
+      "min": 0.0,
+      "max": 180.0,
+      "step": 1.0,
+      "dimming": "inkCount <= 1"
+    },
+    "ink2Coverage": {
+      "type": "double",
+      "default": 1.0,
+      "min": 0.0,
+      "max": 2.0,
+      "step": 0.01,
+      "dimming": "inkCount <= 1"
+    },
+    "ink3Color": {
+      "type": "color",
+      "default": {
+        "type": "Color",
+        "r": 226,
+        "g": 61,
+        "b": 130,
+        "a": 255
+      },
+      "dimming": "inkCount <= 2"
+    },
+    "ink3Angle": {
+      "type": "double",
+      "default": 75.0,
+      "min": 0.0,
+      "max": 180.0,
+      "step": 1.0,
+      "dimming": "inkCount <= 2"
+    },
+    "ink3Coverage": {
+      "type": "double",
+      "default": 1.0,
+      "min": 0.0,
+      "max": 2.0,
+      "step": 0.01,
+      "dimming": "inkCount <= 2"
+    },
+    "ink4Color": {
+      "type": "color",
+      "default": {
+        "type": "Color",
+        "r": 20,
+        "g": 20,
+        "b": 22,
+        "a": 255
+      },
+      "dimming": "inkCount <= 3"
+    },
+    "ink4Angle": {
+      "type": "double",
+      "default": 105.0,
+      "min": 0.0,
+      "max": 180.0,
+      "step": 1.0,
+      "dimming": "inkCount <= 3"
+    },
+    "ink4Coverage": {
+      "type": "double",
+      "default": 1.0,
+      "min": 0.0,
+      "max": 2.0,
+      "step": 0.01,
+      "dimming": "inkCount <= 3"
+    },
+    "inkOpacity": {
+      "type": "double",
+      "default": 0.85,
+      "min": 0.0,
+      "max": 1.0,
+      "step": 0.01
+    },
+    "registrationError": {
+      "type": "double",
+      "default": 1.5,
+      "min": 0.0,
+      "softMax": 20.0,
+      "step": 0.1
+    },
+    "inkLoss": {
+      "type": "double",
+      "default": 0.15,
+      "min": 0.0,
+      "max": 1.0,
+      "step": 0.01
+    },
+    "mottle": {
+      "type": "double",
+      "default": 0.2,
+      "min": 0.0,
+      "max": 1.0,
+      "step": 0.01
+    },
+    "ghosting": {
+      "type": "double",
+      "default": 0.0,
+      "min": 0.0,
+      "max": 1.0,
+      "step": 0.01
+    },
+    "seed": {
+      "type": "int",
+      "default": 1,
+      "min": 0
+    },
+    "paperColor": {
+      "type": "color",
+      "default": {
+        "type": "Color",
+        "r": 247,
+        "g": 243,
+        "b": 233,
+        "a": 255
+      }
+    },
+    "paperGrain": {
+      "type": "double",
+      "default": 0.3,
+      "min": 0.0,
+      "max": 1.0,
+      "step": 0.01
+    },
+    "trueColour": {
+      "type": "double",
+      "default": 0.0,
+      "min": 0.0,
+      "max": 1.0,
+      "step": 0.01
+    },
+    "paperTooth": {
+      "type": "double",
+      "default": 0.15,
+      "min": 0.0,
+      "max": 1.0,
+      "step": 0.01
+    },
+    "outputMode": {
+      "type": "enum",
+      "default": 0,
+      "enumValues": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5,
+        6
+      ]
+    },
+    "amount": {
+      "type": "double",
+      "default": 1.0,
+      "min": 0.0,
+      "max": 1.0,
+      "step": 0.01
+    }
+  },
+  "triggers": {
+    "out": [
+      "process",
+      "separation",
+      "inkCount",
+      "flatten",
+      "levels",
+      "levelBias",
+      "bandDither",
+      "screenType",
+      "frequency",
+      "dotGain",
+      "ink1Color",
+      "ink1Angle",
+      "ink1Coverage",
+      "ink2Color",
+      "ink2Angle",
+      "ink2Coverage",
+      "ink3Color",
+      "ink3Angle",
+      "ink3Coverage",
+      "ink4Color",
+      "ink4Angle",
+      "ink4Coverage",
+      "inkOpacity",
+      "registrationError",
+      "inkLoss",
+      "mottle",
+      "ghosting",
+      "seed",
+      "paperColor",
+      "paperGrain",
+      "trueColour",
+      "paperTooth",
+      "outputMode",
+      "amount"
+    ]
+  },
+  "UI": {
+    "icon": "print.png",
+    "tabs": [
+      {
+        "id": "filter",
+        "attributeOrder": [
+          "process",
+          "---Separation",
+          "separation",
+          "inkCount",
+          "flatten",
+          "---Quantisation",
+          "levels",
+          "levelBias",
+          "bandDither"
+        ]
+      },
+      {
+        "id": "screen",
+        "attributeOrder": [
+          "screenType",
+          "frequency",
+          "dotGain"
+        ]
+      },
+      {
+        "id": "inks",
+        "attributeOrder": [
+          "ink1Color",
+          "ink1Angle",
+          "ink1Coverage",
+          "---Ink 2",
+          "ink2Color",
+          "ink2Angle",
+          "ink2Coverage",
+          "---Ink 3",
+          "ink3Color",
+          "ink3Angle",
+          "ink3Coverage",
+          "---Ink 4",
+          "ink4Color",
+          "ink4Angle",
+          "ink4Coverage",
+          "---Shared",
+          "inkOpacity"
+        ]
+      },
+      {
+        "id": "press",
+        "attributeOrder": [
+          "registrationError",
+          "inkLoss",
+          "mottle",
+          "ghosting",
+          "seed"
+        ]
+      },
+      {
+        "id": "paper",
+        "attributeOrder": [
+          "paperColor",
+          "paperGrain",
+          "trueColour",
+          "paperTooth",
+          "outputMode",
+          "amount",
+          "---Screen model adapted from the Cavalry SDK's Screen Print example"
+        ]
+      }
+    ]
+  }
+}

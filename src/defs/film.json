@@ -1,0 +1,604 @@
+{
+  "author": "samMularczyk",
+  "type": "film",
+  "superType": "thirdPartyFilter",
+  "version": "1.0",
+  "paddingExpression": "ceil(max(halationRadius, clarityRadius))",
+  "passes": [
+    {
+      "skslFile": "filmClarityBlur.sksl",
+      "uniforms": [
+        "clarityRadius"
+      ],
+      "constants": {
+        "dirX": 1.0,
+        "dirY": 0.0,
+        "firstPass": 1.0
+      }
+    },
+    {
+      "skslFile": "filmClarityBlur.sksl",
+      "uniforms": [
+        "clarityRadius"
+      ],
+      "constants": {
+        "dirX": 0.0,
+        "dirY": 1.0,
+        "firstPass": 0.0
+      }
+    },
+    {
+      "skslFile": "filmRecipe.sksl",
+      "uniforms": [
+        "base",
+        "colour",
+        "highlightTone",
+        "shadowTone",
+        "colourChrome",
+        "colourChromeBlue",
+        "wbShiftR",
+        "wbShiftB",
+        "clarity",
+        "clarityRadius",
+        "highlightProtect",
+        "monoToning",
+        "recipe"
+      ]
+    },
+    {
+      "skslFile": "filmHalationBlur.sksl",
+      "uniforms": [
+        "halation",
+        "halationRadius",
+        "halationThreshold",
+        "halationDensity",
+        "halationTint"
+      ],
+      "constants": {
+        "dirX": 1.0,
+        "dirY": 0.0,
+        "lastPass": 0.0
+      }
+    },
+    {
+      "skslFile": "filmHalationBlur.sksl",
+      "uniforms": [
+        "halation",
+        "halationRadius",
+        "halationThreshold",
+        "halationDensity",
+        "halationTint"
+      ],
+      "constants": {
+        "dirX": 0.0,
+        "dirY": 1.0,
+        "lastPass": 1.0
+      }
+    },
+    {
+      "skslFile": "filmTone.sksl",
+      "uniforms": [
+        "linearise",
+        "exposure",
+        "rolloff",
+        "gamutExtension",
+        "grain",
+        "grainSize",
+        "grainBlur",
+        "grainResponse",
+        "grainDomain",
+        "scannerNoise",
+        "time"
+      ]
+    },
+    {
+      "skslFile": "filmDamage.sksl",
+      "uniforms": [
+        "damage",
+        "damageDomain",
+        "time",
+        "speed",
+        "frameRate",
+        "weave",
+        "dirt",
+        "dirtThreshold",
+        "dirtScale",
+        "scratches",
+        "scratchWidth",
+        "flicker",
+        "vignetteAmount",
+        "vignetteFlicker",
+        "desaturate",
+        "amount"
+      ]
+    }
+  ],
+  "attributes": {
+    "halation": {
+      "type": "double",
+      "default": 0.1,
+      "min": 0.0,
+      "max": 1.0,
+      "step": 0.01
+    },
+    "halationRadius": {
+      "type": "double",
+      "default": 12.0,
+      "min": 0.0,
+      "softMax": 120.0,
+      "step": 0.5,
+      "dimming": "halation <= 0"
+    },
+    "halationThreshold": {
+      "type": "double",
+      "default": 0.75,
+      "min": 0.0,
+      "softMax": 2.0,
+      "step": 0.01,
+      "dimming": "halation <= 0"
+    },
+    "halationDensity": {
+      "type": "double",
+      "default": 2.0,
+      "min": 1.0,
+      "softMax": 4.0,
+      "step": 0.1,
+      "dimming": "halation <= 0"
+    },
+    "halationTint": {
+      "type": "color",
+      "default": {
+        "type": "Color",
+        "r": 237,
+        "g": 18,
+        "b": 0,
+        "a": 255
+      },
+      "dimming": "halation <= 0"
+    },
+    "linearise": {
+      "type": "enum",
+      "default": 0,
+      "enumValues": [
+        0,
+        1
+      ]
+    },
+    "exposure": {
+      "type": "double",
+      "default": 0.0,
+      "softMin": -4.0,
+      "softMax": 4.0,
+      "step": 0.05
+    },
+    "rolloff": {
+      "type": "double",
+      "default": 0.0,
+      "min": 0.0,
+      "max": 1.0,
+      "step": 0.01,
+      "dimming": "exposure <= 0 && halation <= 0"
+    },
+    "gamutExtension": {
+      "type": "double",
+      "default": 1.0,
+      "min": 0.0,
+      "max": 1.0,
+      "step": 0.01,
+      "dimming": "rolloff <= 0"
+    },
+    "recipe": {
+      "type": "double",
+      "default": 1.0,
+      "min": 0.0,
+      "max": 1.0,
+      "step": 0.01
+    },
+    "base": {
+      "type": "enum",
+      "default": 3,
+      "enumValues": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8
+      ],
+      "dimming": "recipe <= 0"
+    },
+    "colour": {
+      "type": "double",
+      "default": 0.0,
+      "min": -4.0,
+      "max": 4.0,
+      "step": 1.0,
+      "dimming": "recipe <= 0 || base >= 7"
+    },
+    "highlightTone": {
+      "type": "double",
+      "default": 0.0,
+      "min": -2.0,
+      "max": 4.0,
+      "step": 0.5,
+      "dimming": "recipe <= 0"
+    },
+    "shadowTone": {
+      "type": "double",
+      "default": 0.0,
+      "min": -2.0,
+      "max": 4.0,
+      "step": 0.5,
+      "dimming": "recipe <= 0"
+    },
+    "highlightProtect": {
+      "type": "enum",
+      "default": 0,
+      "enumValues": [
+        0,
+        1,
+        2
+      ],
+      "dimming": "recipe <= 0"
+    },
+    "colourChrome": {
+      "type": "double",
+      "default": 0.0,
+      "min": 0.0,
+      "max": 1.0,
+      "step": 0.5,
+      "dimming": "recipe <= 0 || base >= 7"
+    },
+    "colourChromeBlue": {
+      "type": "double",
+      "default": 0.0,
+      "min": 0.0,
+      "max": 1.0,
+      "step": 0.5,
+      "dimming": "recipe <= 0 || base >= 7"
+    },
+    "wbShiftR": {
+      "type": "double",
+      "default": 0.0,
+      "min": -9.0,
+      "max": 9.0,
+      "step": 1.0,
+      "dimming": "recipe <= 0"
+    },
+    "wbShiftB": {
+      "type": "double",
+      "default": 0.0,
+      "min": -9.0,
+      "max": 9.0,
+      "step": 1.0,
+      "dimming": "recipe <= 0"
+    },
+    "monoToning": {
+      "type": "double",
+      "default": 0.0,
+      "min": -1.0,
+      "max": 1.0,
+      "step": 0.05,
+      "dimming": "recipe <= 0 || base <= 6"
+    },
+    "clarity": {
+      "type": "double",
+      "default": 0.0,
+      "min": -5.0,
+      "max": 5.0,
+      "step": 0.5,
+      "dimming": "recipe <= 0"
+    },
+    "clarityRadius": {
+      "type": "double",
+      "default": 24.0,
+      "min": 0.0,
+      "softMax": 200.0,
+      "step": 1.0,
+      "dimming": "recipe <= 0 || clarity == 0"
+    },
+    "grain": {
+      "type": "double",
+      "default": 0.04,
+      "min": 0.0,
+      "softMax": 0.5,
+      "step": 0.005
+    },
+    "grainSize": {
+      "type": "double",
+      "default": 1.0,
+      "min": 0.25,
+      "softMax": 16.0,
+      "step": 0.25,
+      "dimming": "grain <= 0"
+    },
+    "grainBlur": {
+      "type": "double",
+      "default": 0.75,
+      "min": 0.0,
+      "max": 1.0,
+      "step": 0.01,
+      "dimming": "grain <= 0"
+    },
+    "grainResponse": {
+      "type": "double",
+      "default": 0.5,
+      "min": 0.05,
+      "softMax": 2.0,
+      "step": 0.05,
+      "dimming": "grain <= 0"
+    },
+    "grainDomain": {
+      "type": "enum",
+      "default": 0,
+      "enumValues": [
+        0,
+        1
+      ],
+      "dimming": "grain <= 0"
+    },
+    "scannerNoise": {
+      "type": "double",
+      "default": 0.0,
+      "min": 0.0,
+      "softMax": 0.5,
+      "step": 0.01,
+      "dimming": "grain <= 0"
+    },
+    "time": {
+      "type": "double",
+      "default": 0.0,
+      "compConnect": "time",
+      "dimming": "grain <= 0 && damage <= 0"
+    },
+    "damage": {
+      "type": "double",
+      "default": 0.0,
+      "min": 0.0,
+      "max": 1.0,
+      "step": 0.01
+    },
+    "damageDomain": {
+      "type": "enum",
+      "default": 0,
+      "enumValues": [
+        0,
+        1
+      ],
+      "dimming": "damage <= 0"
+    },
+    "frameRate": {
+      "type": "double",
+      "default": 12.0,
+      "min": 0.0,
+      "softMax": 60.0,
+      "step": 1.0,
+      "dimming": "damage <= 0"
+    },
+    "speed": {
+      "type": "double",
+      "default": 0.0333,
+      "min": 0.0,
+      "softMax": 4.0,
+      "step": 0.05,
+      "dimming": "damage <= 0"
+    },
+    "weave": {
+      "type": "double",
+      "default": 0.002,
+      "min": 0.0,
+      "softMax": 0.05,
+      "step": 0.0005,
+      "dimming": "damage <= 0"
+    },
+    "flicker": {
+      "type": "double",
+      "default": 0.06,
+      "min": 0.0,
+      "softMax": 1.0,
+      "step": 0.01,
+      "dimming": "damage <= 0"
+    },
+    "dirt": {
+      "type": "double",
+      "default": 1.0,
+      "min": 0.0,
+      "max": 1.0,
+      "step": 0.01,
+      "dimming": "damage <= 0"
+    },
+    "dirtThreshold": {
+      "type": "double",
+      "default": 0.8,
+      "min": 0.0,
+      "max": 1.0,
+      "step": 0.01,
+      "dimming": "damage <= 0 || dirt <= 0"
+    },
+    "dirtScale": {
+      "type": "double",
+      "default": 0.5,
+      "min": 0.001,
+      "softMax": 8.0,
+      "step": 0.01,
+      "dimming": "damage <= 0 || dirt <= 0"
+    },
+    "scratches": {
+      "type": "double",
+      "default": 0.0,
+      "min": 0.0,
+      "max": 1.0,
+      "step": 0.01,
+      "dimming": "damage <= 0"
+    },
+    "scratchWidth": {
+      "type": "double",
+      "default": 2.0,
+      "min": 0.5,
+      "softMax": 6.0,
+      "step": 0.1,
+      "dimming": "damage <= 0 || scratches <= 0"
+    },
+    "vignetteAmount": {
+      "type": "double",
+      "default": 1.0,
+      "min": 0.0,
+      "max": 1.0,
+      "step": 0.01,
+      "dimming": "damage <= 0"
+    },
+    "vignetteFlicker": {
+      "type": "double",
+      "default": 1.0,
+      "min": 0.0,
+      "softMax": 4.0,
+      "step": 0.01,
+      "dimming": "damage <= 0 || vignetteAmount <= 0"
+    },
+    "desaturate": {
+      "type": "double",
+      "default": 1.0,
+      "min": 0.0,
+      "max": 1.0,
+      "step": 0.01,
+      "dimming": "damage <= 0"
+    },
+    "amount": {
+      "type": "double",
+      "default": 1.0,
+      "min": 0.0,
+      "max": 1.0,
+      "step": 0.01
+    }
+  },
+  "triggers": {
+    "out": [
+      "halation",
+      "halationRadius",
+      "halationThreshold",
+      "halationDensity",
+      "halationTint",
+      "linearise",
+      "exposure",
+      "rolloff",
+      "gamutExtension",
+      "recipe",
+      "base",
+      "colour",
+      "highlightTone",
+      "shadowTone",
+      "highlightProtect",
+      "colourChrome",
+      "colourChromeBlue",
+      "wbShiftR",
+      "wbShiftB",
+      "monoToning",
+      "clarity",
+      "clarityRadius",
+      "grain",
+      "grainSize",
+      "grainBlur",
+      "grainResponse",
+      "grainDomain",
+      "scannerNoise",
+      "time",
+      "damage",
+      "damageDomain",
+      "frameRate",
+      "speed",
+      "weave",
+      "flicker",
+      "dirt",
+      "dirtThreshold",
+      "dirtScale",
+      "scratches",
+      "scratchWidth",
+      "vignetteAmount",
+      "vignetteFlicker",
+      "desaturate",
+      "amount"
+    ]
+  },
+  "UI": {
+    "icon": "film.png",
+    "tabs": [
+      {
+        "id": "filter",
+        "attributeOrder": [
+          "recipe",
+          "base",
+          "---Tone",
+          "highlightTone",
+          "shadowTone",
+          "highlightProtect",
+          "---Colour",
+          "colour",
+          "colourChrome",
+          "colourChromeBlue",
+          "wbShiftR",
+          "wbShiftB",
+          "monoToning",
+          "---Clarity",
+          "clarity",
+          "clarityRadius",
+          "---Inspired by Fujifilm film simulations"
+        ]
+      },
+      {
+        "id": "grade",
+        "attributeOrder": [
+          "---Halation",
+          "halation",
+          "halationRadius",
+          "halationThreshold",
+          "halationDensity",
+          "halationTint",
+          "---Tone",
+          "linearise",
+          "exposure",
+          "rolloff",
+          "gamutExtension",
+          "---Output",
+          "amount",
+          "---Gamut transform from flim, bean_mhm"
+        ]
+      },
+      {
+        "id": "damage",
+        "attributeOrder": [
+          "damage",
+          "damageDomain",
+          "---Projector",
+          "frameRate",
+          "speed",
+          "weave",
+          "flicker",
+          "---Dirt",
+          "dirt",
+          "dirtThreshold",
+          "dirtScale",
+          "---Scratches",
+          "scratches",
+          "scratchWidth",
+          "---Vignette",
+          "vignetteAmount",
+          "vignetteFlicker",
+          "---Grade",
+          "desaturate",
+          "---Grain",
+          "grain",
+          "grainSize",
+          "grainBlur",
+          "grainResponse",
+          "grainDomain",
+          "scannerNoise",
+          "time",
+          "---Grain from cinegrain (MIT); scratches from a film-damage synthesis paper; dirt and vignette inspired by Cinematic Grain, Max van Leeuwen (MIT)"
+        ]
+      }
+    ]
+  }
+}

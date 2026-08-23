@@ -1,0 +1,5980 @@
+[
+  {
+    "author": "samMularczyk",
+    "type": "ascii",
+    "superType": "thirdPartyFilter",
+    "version": "1.0",
+    "skslFile": "ascii.sksl",
+    "attributes": {
+      "textSize": {
+        "type": "double",
+        "default": 12,
+        "min": 4,
+        "softMax": 128,
+        "step": 1
+      },
+      "cellAspect": {
+        "type": "double",
+        "default": 1,
+        "min": 0.05,
+        "softMax": 3,
+        "step": 0.05
+      },
+      "margin": {
+        "type": "double",
+        "default": 0.1,
+        "min": 0,
+        "max": 0.45,
+        "step": 0.01
+      },
+      "charset": {
+        "type": "enum",
+        "default": 0,
+        "enumValues": [
+          0,
+          1,
+          2,
+          3,
+          4,
+          5
+        ]
+      },
+      "rampGamma": {
+        "type": "double",
+        "default": 1,
+        "min": 0.0001,
+        "softMax": 4,
+        "step": 0.05
+      },
+      "edgeThreshold": {
+        "type": "double",
+        "default": 0,
+        "min": 0,
+        "softMax": 1,
+        "step": 0.01
+      },
+      "colorMode": {
+        "type": "enum",
+        "default": 0,
+        "enumValues": [
+          0,
+          1,
+          2
+        ]
+      },
+      "inkColor": {
+        "type": "color",
+        "default": {
+          "type": "Color",
+          "r": 255,
+          "g": 255,
+          "b": 255,
+          "a": 255
+        },
+        "dimming": "colorMode == 0"
+      },
+      "paperColor": {
+        "type": "color",
+        "default": {
+          "type": "Color",
+          "r": 26,
+          "g": 51,
+          "b": 230,
+          "a": 255
+        },
+        "dimming": "colorMode != 2"
+      },
+      "paletteLevels": {
+        "type": "double",
+        "default": 0,
+        "min": 0,
+        "softMax": 16,
+        "step": 1,
+        "dimming": "colorMode != 0"
+      },
+      "invert": {
+        "type": "bool",
+        "default": false
+      },
+      "randomChars": {
+        "type": "double",
+        "default": 0,
+        "min": 0,
+        "max": 1,
+        "step": 0.01
+      },
+      "seed": {
+        "type": "double",
+        "default": 0,
+        "softMin": 0,
+        "softMax": 100,
+        "step": 1,
+        "dimming": "randomChars <= 0"
+      },
+      "amount": {
+        "type": "double",
+        "default": 1,
+        "min": 0,
+        "max": 1,
+        "step": 0.01
+      }
+    },
+    "triggers": {
+      "out": [
+        "textSize",
+        "cellAspect",
+        "margin",
+        "charset",
+        "rampGamma",
+        "edgeThreshold",
+        "colorMode",
+        "inkColor",
+        "paperColor",
+        "paletteLevels",
+        "invert",
+        "randomChars",
+        "seed",
+        "amount"
+      ]
+    },
+    "UI": {
+      "icon": "ascii.png",
+      "attributeOrder": [
+        "textSize",
+        "cellAspect",
+        "margin",
+        "charset",
+        "rampGamma",
+        "---Edges",
+        "edgeThreshold",
+        "---Colour",
+        "colorMode",
+        "inkColor",
+        "paperColor",
+        "paletteLevels",
+        "invert",
+        "---Scatter",
+        "randomChars",
+        "seed",
+        "amount",
+        "---Glyph ramp from pixi.js filters (MIT)",
+        "---Letters & Full ASCII from Tom Thumb, Robey Pointer (CC0)"
+      ]
+    }
+  },
+  {
+    "author": "samMularczyk",
+    "type": "compositeVideo",
+    "superType": "thirdPartyFilter",
+    "version": "1.0",
+    "passes": [
+      {
+        "skslFile": "compositeEncode.sksl",
+        "uniforms": [
+          "system",
+          "virtualRes"
+        ]
+      },
+      {
+        "skslFile": "compositeDecode.sksl",
+        "uniforms": [
+          "system",
+          "time",
+          "speed",
+          "virtualRes",
+          "brightness",
+          "saturation",
+          "blur",
+          "bandwidth",
+          "peaking",
+          "blurSize",
+          "chromaBlur",
+          "chromaSize",
+          "qNarrow",
+          "phaseError",
+          "subcarrier",
+          "crosstalk",
+          "crossColour",
+          "hanover",
+          "scanlines",
+          "scanFlicker",
+          "interference1",
+          "interference2",
+          "fishEye",
+          "tubeOverscan",
+          "vignetteRounding",
+          "vignetteSmoothness",
+          "amount",
+          "vRoll",
+          "vRollJump",
+          "hTear",
+          "hTearDensity",
+          "ghostAmount",
+          "ghostDelay",
+          "snow",
+          "snowBurst"
+        ]
+      }
+    ],
+    "attributes": {
+      "system": {
+        "type": "enum",
+        "default": 0,
+        "enumValues": [
+          0,
+          1,
+          2
+        ]
+      },
+      "time": {
+        "type": "double",
+        "default": 0,
+        "compConnect": "time"
+      },
+      "speed": {
+        "type": "double",
+        "default": 0.0333,
+        "min": 0,
+        "softMax": 0.5,
+        "step": 0.001
+      },
+      "virtualRes": {
+        "type": "double2",
+        "default": {
+          "x": 432,
+          "y": 264
+        },
+        "children": {
+          "*": {
+            "step": 1
+          }
+        }
+      },
+      "brightness": {
+        "type": "double",
+        "default": 1.1,
+        "min": 0,
+        "softMax": 4,
+        "step": 0.01
+      },
+      "saturation": {
+        "type": "double",
+        "default": 1,
+        "min": 0,
+        "softMax": 4,
+        "step": 0.01
+      },
+      "blur": {
+        "type": "double",
+        "default": 0.7,
+        "min": 0,
+        "max": 1,
+        "step": 0.01
+      },
+      "bandwidth": {
+        "type": "double",
+        "default": 1,
+        "min": 0.05,
+        "softMax": 3,
+        "step": 0.01,
+        "dimming": "blur <= 0 && chromaBlur <= 0"
+      },
+      "peaking": {
+        "type": "double",
+        "default": 2.9,
+        "min": 0,
+        "softMax": 6,
+        "step": 0.05,
+        "dimming": "blur <= 0"
+      },
+      "blurSize": {
+        "type": "double",
+        "default": 0.2,
+        "min": 0,
+        "softMax": 4,
+        "step": 0.01,
+        "dimming": "blur <= 0"
+      },
+      "chromaBlur": {
+        "type": "double",
+        "default": 0.7,
+        "min": 0,
+        "max": 1,
+        "step": 0.01
+      },
+      "chromaSize": {
+        "type": "double",
+        "default": 6,
+        "min": 0,
+        "softMax": 30,
+        "step": 0.1,
+        "dimming": "chromaBlur <= 0"
+      },
+      "qNarrow": {
+        "type": "double",
+        "default": 2.6,
+        "min": 1,
+        "softMax": 6,
+        "step": 0.1,
+        "dimming": "system != 0"
+      },
+      "subcarrier": {
+        "type": "double",
+        "default": 2.1,
+        "min": 0,
+        "softMax": 10,
+        "step": 0.01
+      },
+      "phaseError": {
+        "type": "double",
+        "default": 18,
+        "softMin": -90,
+        "softMax": 90,
+        "step": 0.5
+      },
+      "crosstalk": {
+        "type": "double",
+        "default": 0.1,
+        "min": 0,
+        "softMax": 2,
+        "step": 0.01,
+        "dimming": "subcarrier <= 0"
+      },
+      "crossColour": {
+        "type": "double",
+        "default": 0,
+        "min": 0,
+        "softMax": 2,
+        "step": 0.01
+      },
+      "hanover": {
+        "type": "double",
+        "default": 0,
+        "min": 0,
+        "max": 1,
+        "step": 0.01,
+        "dimming": "system == 0"
+      },
+      "scanlines": {
+        "type": "double",
+        "default": 1,
+        "min": 0,
+        "max": 1,
+        "step": 0.01
+      },
+      "scanFlicker": {
+        "type": "double",
+        "default": 0.33,
+        "min": 0,
+        "softMax": 2,
+        "step": 0.01
+      },
+      "interference1": {
+        "type": "double",
+        "default": 1,
+        "min": 0,
+        "softMax": 10,
+        "step": 0.01
+      },
+      "interference2": {
+        "type": "double",
+        "default": 0.001,
+        "min": 0,
+        "softMax": 0.05,
+        "step": 0.0005
+      },
+      "fishEye": {
+        "type": "double2",
+        "default": {
+          "x": 0.1,
+          "y": 0.24
+        },
+        "children": {
+          "*": {
+            "step": 0.01
+          }
+        }
+      },
+      "tubeOverscan": {
+        "type": "double",
+        "default": 1.02,
+        "min": 0.5,
+        "softMax": 1.5,
+        "step": 0.005
+      },
+      "vignetteRounding": {
+        "type": "double",
+        "default": 160,
+        "min": 2,
+        "softMax": 400,
+        "step": 1
+      },
+      "vignetteSmoothness": {
+        "type": "double",
+        "default": 0.7,
+        "min": 0.001,
+        "softMax": 2,
+        "step": 0.01
+      },
+      "amount": {
+        "type": "double",
+        "default": 1,
+        "min": 0,
+        "max": 1,
+        "step": 0.01
+      },
+      "vRoll": {
+        "type": "double",
+        "default": 0,
+        "softMin": -2,
+        "softMax": 2,
+        "step": 0.01
+      },
+      "vRollJump": {
+        "type": "double",
+        "default": 0,
+        "min": 0,
+        "max": 1,
+        "step": 0.01,
+        "dimming": "vRoll == 0"
+      },
+      "hTear": {
+        "type": "double",
+        "default": 0,
+        "min": 0,
+        "softMax": 30,
+        "step": 0.5
+      },
+      "hTearDensity": {
+        "type": "double",
+        "default": 0.3,
+        "min": 0,
+        "max": 1,
+        "step": 0.01,
+        "dimming": "hTear <= 0"
+      },
+      "ghostAmount": {
+        "type": "double",
+        "default": 0,
+        "min": 0,
+        "max": 1,
+        "step": 0.01
+      },
+      "ghostDelay": {
+        "type": "double",
+        "default": 12,
+        "min": 0,
+        "softMax": 60,
+        "step": 0.5,
+        "dimming": "ghostAmount <= 0"
+      },
+      "snow": {
+        "type": "double",
+        "default": 0,
+        "min": 0,
+        "max": 1,
+        "step": 0.01
+      },
+      "snowBurst": {
+        "type": "double",
+        "default": 0,
+        "min": 0,
+        "max": 1,
+        "step": 0.01,
+        "dimming": "snow <= 0"
+      }
+    },
+    "triggers": {
+      "out": [
+        "system",
+        "time",
+        "speed",
+        "virtualRes",
+        "brightness",
+        "saturation",
+        "blur",
+        "bandwidth",
+        "peaking",
+        "blurSize",
+        "chromaBlur",
+        "chromaSize",
+        "qNarrow",
+        "subcarrier",
+        "phaseError",
+        "crosstalk",
+        "crossColour",
+        "hanover",
+        "scanlines",
+        "scanFlicker",
+        "interference1",
+        "interference2",
+        "fishEye",
+        "tubeOverscan",
+        "vignetteRounding",
+        "vignetteSmoothness",
+        "amount",
+        "vRoll",
+        "vRollJump",
+        "hTear",
+        "hTearDensity",
+        "ghostAmount",
+        "ghostDelay",
+        "snow",
+        "snowBurst"
+      ]
+    },
+    "UI": {
+      "icon": "compositeVideo.png",
+      "tabs": [
+        {
+          "id": "filter",
+          "attributeOrder": [
+            "speed",
+            "time",
+            "amount",
+            "---Signal",
+            "system",
+            "virtualRes",
+            "---Picture",
+            "brightness",
+            "saturation",
+            "---Filtering",
+            "blur",
+            "bandwidth",
+            "peaking",
+            "blurSize",
+            "chromaBlur",
+            "chromaSize",
+            "qNarrow",
+            "---Subcarrier",
+            "phaseError",
+            "subcarrier",
+            "crosstalk",
+            "crossColour",
+            "hanover",
+            "---Artefacts",
+            "scanlines",
+            "scanFlicker",
+            "interference1",
+            "interference2"
+          ]
+        },
+        {
+          "id": "tube",
+          "attributeOrder": [
+            "fishEye",
+            "tubeOverscan",
+            "vignetteRounding",
+            "vignetteSmoothness"
+          ]
+        },
+        {
+          "id": "sync",
+          "attributeOrder": [
+            "vRoll",
+            "vRollJump",
+            "---Sync Tear",
+            "hTear",
+            "hTearDensity",
+            "---Multipath",
+            "ghostAmount",
+            "ghostDelay",
+            "---Snow",
+            "snow",
+            "snowBurst",
+            "---Inspired by C64 NTSC filter, BitOfGold"
+          ]
+        }
+      ]
+    }
+  },
+  {
+    "author": "samMularczyk",
+    "type": "display",
+    "superType": "thirdPartyFilter",
+    "version": "1.0",
+    "passes": [
+      {
+        "skslFile": "displayOptics.sksl",
+        "uniforms": [
+          "vignette",
+          "aberration",
+          "grain",
+          "time"
+        ]
+      },
+      {
+        "skslFile": "displayMask.sksl",
+        "uniforms": [
+          "mask",
+          "pixelSize",
+          "pixelate",
+          "maskAmount",
+          "gridGap",
+          "stagger",
+          "dotSize",
+          "maskSaturation",
+          "maskSoftness",
+          "scanlines",
+          "scanlineThickness",
+          "gain",
+          "beamAmount",
+          "beamHeight",
+          "beamSpeed",
+          "beamDecay",
+          "beamPhase",
+          "time"
+        ]
+      },
+      {
+        "skslFile": "displayFinal.sksl",
+        "uniforms": [
+          "distortion",
+          "overscan",
+          "edges",
+          "edgeTrim",
+          "cornerRadius",
+          "bloom",
+          "bloomRadius",
+          "diffusion",
+          "amount"
+        ]
+      }
+    ],
+    "attributes": {
+      "distortion": {
+        "type": "double",
+        "default": 0.16,
+        "min": 0,
+        "softMax": 3,
+        "step": 0.01
+      },
+      "overscan": {
+        "type": "double",
+        "default": 1,
+        "min": 0,
+        "softMax": 1.5,
+        "step": 0.01,
+        "dimming": "distortion == 0"
+      },
+      "edges": {
+        "type": "enum",
+        "default": 0,
+        "enumValues": [
+          0,
+          1,
+          2
+        ],
+        "dimming": "distortion == 0"
+      },
+      "edgeTrim": {
+        "type": "double2",
+        "default": {
+          "x": 1,
+          "y": 1
+        },
+        "children": {
+          "*": {
+            "step": 0.5
+          }
+        },
+        "dimming": "edges == 0"
+      },
+      "cornerRadius": {
+        "type": "double",
+        "default": 18,
+        "min": 0,
+        "softMax": 400,
+        "step": 1
+      },
+      "vignette": {
+        "type": "double",
+        "default": 1,
+        "min": 0,
+        "max": 1,
+        "step": 0.01
+      },
+      "mask": {
+        "type": "enum",
+        "default": 2,
+        "enumValues": [
+          0,
+          1,
+          2,
+          3,
+          4
+        ]
+      },
+      "pixelSize": {
+        "type": "double",
+        "default": 8,
+        "min": 1,
+        "softMax": 40,
+        "step": 1
+      },
+      "pixelate": {
+        "type": "double",
+        "default": 0.3,
+        "min": 0,
+        "max": 1,
+        "step": 0.01
+      },
+      "maskAmount": {
+        "type": "double",
+        "default": 0.31,
+        "min": 0,
+        "max": 1,
+        "step": 0.01,
+        "dimming": "mask == 4"
+      },
+      "gridGap": {
+        "type": "double",
+        "default": 1,
+        "min": 0,
+        "max": 1,
+        "step": 0.01,
+        "dimming": "mask != 3"
+      },
+      "stagger": {
+        "type": "double",
+        "default": 0,
+        "min": 0,
+        "max": 1,
+        "step": 0.01,
+        "dimming": "mask != 3"
+      },
+      "dotSize": {
+        "type": "double",
+        "default": 0.33,
+        "min": 0,
+        "max": 1,
+        "step": 0.01,
+        "dimming": "mask == 3 || mask == 4"
+      },
+      "maskSaturation": {
+        "type": "double",
+        "default": 0.11,
+        "min": 0,
+        "max": 1,
+        "step": 0.01,
+        "dimming": "maskAmount <= 0"
+      },
+      "maskSoftness": {
+        "type": "double",
+        "default": 1,
+        "min": 0,
+        "softMax": 6,
+        "step": 0.05,
+        "dimming": "maskAmount <= 0"
+      },
+      "scanlines": {
+        "type": "double",
+        "default": 0.13,
+        "min": 0,
+        "max": 1,
+        "step": 0.01
+      },
+      "scanlineThickness": {
+        "type": "double",
+        "default": 0.05,
+        "min": 0.05,
+        "max": 0.95,
+        "step": 0.01,
+        "dimming": "scanlines <= 0"
+      },
+      "gain": {
+        "type": "double",
+        "default": 0.95,
+        "min": 0,
+        "softMax": 6,
+        "step": 0.05
+      },
+      "beamAmount": {
+        "type": "double",
+        "default": 0.13,
+        "min": 0,
+        "max": 1,
+        "step": 0.01
+      },
+      "beamHeight": {
+        "type": "double",
+        "default": 0.15,
+        "min": 0.01,
+        "softMax": 1,
+        "step": 0.01,
+        "dimming": "beamAmount <= 0"
+      },
+      "beamSpeed": {
+        "type": "double",
+        "default": 0.37,
+        "min": 0,
+        "softMax": 5,
+        "step": 0.01,
+        "dimming": "beamAmount <= 0"
+      },
+      "beamDecay": {
+        "type": "double",
+        "default": 2,
+        "min": 0,
+        "softMax": 2,
+        "step": 0.01,
+        "dimming": "beamAmount <= 0"
+      },
+      "beamPhase": {
+        "type": "double",
+        "default": 0,
+        "min": 0,
+        "softMax": 1,
+        "step": 0.01,
+        "dimming": "beamAmount <= 0"
+      },
+      "aberration": {
+        "type": "double",
+        "default": 0.25,
+        "min": 0,
+        "softMax": 10,
+        "step": 0.05
+      },
+      "grain": {
+        "type": "double",
+        "default": 0.21,
+        "min": 0,
+        "max": 1,
+        "step": 0.01
+      },
+      "bloom": {
+        "type": "double",
+        "default": 0,
+        "min": 0,
+        "softMax": 2,
+        "step": 0.01
+      },
+      "bloomRadius": {
+        "type": "double",
+        "default": 40,
+        "min": 0,
+        "softMax": 40,
+        "step": 0.5,
+        "dimming": "bloom <= 0 && diffusion <= 0"
+      },
+      "diffusion": {
+        "type": "double",
+        "default": 0.31,
+        "min": 0,
+        "max": 1,
+        "step": 0.01
+      },
+      "time": {
+        "type": "double",
+        "default": 0,
+        "compConnect": "time",
+        "dimming": "grain <= 0 && beamAmount <= 0"
+      },
+      "amount": {
+        "type": "double",
+        "default": 1,
+        "min": 0,
+        "max": 1,
+        "step": 0.01
+      }
+    },
+    "triggers": {
+      "out": [
+        "distortion",
+        "overscan",
+        "edges",
+        "edgeTrim",
+        "cornerRadius",
+        "vignette",
+        "mask",
+        "pixelSize",
+        "pixelate",
+        "maskAmount",
+        "gridGap",
+        "stagger",
+        "dotSize",
+        "maskSaturation",
+        "maskSoftness",
+        "scanlines",
+        "scanlineThickness",
+        "gain",
+        "beamAmount",
+        "beamHeight",
+        "beamSpeed",
+        "beamDecay",
+        "beamPhase",
+        "aberration",
+        "grain",
+        "bloom",
+        "bloomRadius",
+        "diffusion",
+        "time",
+        "amount"
+      ]
+    },
+    "UI": {
+      "tabs": [
+        {
+          "id": "filter",
+          "attributeOrder": [
+            "amount",
+            "aberration",
+            "grain",
+            "bloom",
+            "bloomRadius",
+            "diffusion",
+            "time",
+            "---Distortion",
+            "distortion",
+            "overscan",
+            "edges",
+            "edgeTrim",
+            "cornerRadius",
+            "vignette",
+            "---Inspired by ENDESGA & Cathode-Retro"
+          ]
+        },
+        {
+          "id": "texture",
+          "attributeOrder": [
+            "mask",
+            "---Pixels",
+            "pixelSize",
+            "pixelate",
+            "---Mask",
+            "maskAmount",
+            "gridGap",
+            "stagger",
+            "dotSize",
+            "maskSaturation",
+            "maskSoftness",
+            "scanlines",
+            "scanlineThickness",
+            "gain",
+            "---Beam",
+            "beamAmount",
+            "beamHeight",
+            "beamSpeed",
+            "beamDecay",
+            "beamPhase",
+            "---Inspired by Blur Busters' CRT Beam Simulator"
+          ]
+        }
+      ],
+      "icon": "display.png"
+    }
+  },
+  {
+    "author": "samMularczyk",
+    "type": "film",
+    "superType": "thirdPartyFilter",
+    "version": "1.0",
+    "paddingExpression": "ceil(max(halationRadius, clarityRadius))",
+    "passes": [
+      {
+        "skslFile": "filmClarityBlur.sksl",
+        "uniforms": [
+          "clarityRadius"
+        ],
+        "constants": {
+          "dirX": 1,
+          "dirY": 0,
+          "firstPass": 1
+        }
+      },
+      {
+        "skslFile": "filmClarityBlur.sksl",
+        "uniforms": [
+          "clarityRadius"
+        ],
+        "constants": {
+          "dirX": 0,
+          "dirY": 1,
+          "firstPass": 0
+        }
+      },
+      {
+        "skslFile": "filmRecipe.sksl",
+        "uniforms": [
+          "base",
+          "colour",
+          "highlightTone",
+          "shadowTone",
+          "colourChrome",
+          "colourChromeBlue",
+          "wbShiftR",
+          "wbShiftB",
+          "clarity",
+          "clarityRadius",
+          "highlightProtect",
+          "monoToning",
+          "recipe"
+        ]
+      },
+      {
+        "skslFile": "filmHalationBlur.sksl",
+        "uniforms": [
+          "halation",
+          "halationRadius",
+          "halationThreshold",
+          "halationDensity",
+          "halationTint"
+        ],
+        "constants": {
+          "dirX": 1,
+          "dirY": 0,
+          "lastPass": 0
+        }
+      },
+      {
+        "skslFile": "filmHalationBlur.sksl",
+        "uniforms": [
+          "halation",
+          "halationRadius",
+          "halationThreshold",
+          "halationDensity",
+          "halationTint"
+        ],
+        "constants": {
+          "dirX": 0,
+          "dirY": 1,
+          "lastPass": 1
+        }
+      },
+      {
+        "skslFile": "filmTone.sksl",
+        "uniforms": [
+          "linearise",
+          "exposure",
+          "rolloff",
+          "gamutExtension",
+          "grain",
+          "grainSize",
+          "grainBlur",
+          "grainResponse",
+          "grainDomain",
+          "scannerNoise",
+          "time"
+        ]
+      },
+      {
+        "skslFile": "filmDamage.sksl",
+        "uniforms": [
+          "damage",
+          "damageDomain",
+          "time",
+          "speed",
+          "frameRate",
+          "weave",
+          "dirt",
+          "dirtThreshold",
+          "dirtScale",
+          "scratches",
+          "scratchWidth",
+          "flicker",
+          "vignetteAmount",
+          "vignetteFlicker",
+          "desaturate",
+          "amount"
+        ]
+      }
+    ],
+    "attributes": {
+      "halation": {
+        "type": "double",
+        "default": 0.1,
+        "min": 0,
+        "max": 1,
+        "step": 0.01
+      },
+      "halationRadius": {
+        "type": "double",
+        "default": 12,
+        "min": 0,
+        "softMax": 120,
+        "step": 0.5,
+        "dimming": "halation <= 0"
+      },
+      "halationThreshold": {
+        "type": "double",
+        "default": 0.75,
+        "min": 0,
+        "softMax": 2,
+        "step": 0.01,
+        "dimming": "halation <= 0"
+      },
+      "halationDensity": {
+        "type": "double",
+        "default": 2,
+        "min": 1,
+        "softMax": 4,
+        "step": 0.1,
+        "dimming": "halation <= 0"
+      },
+      "halationTint": {
+        "type": "color",
+        "default": {
+          "type": "Color",
+          "r": 237,
+          "g": 18,
+          "b": 0,
+          "a": 255
+        },
+        "dimming": "halation <= 0"
+      },
+      "linearise": {
+        "type": "enum",
+        "default": 0,
+        "enumValues": [
+          0,
+          1
+        ]
+      },
+      "exposure": {
+        "type": "double",
+        "default": 0,
+        "softMin": -4,
+        "softMax": 4,
+        "step": 0.05
+      },
+      "rolloff": {
+        "type": "double",
+        "default": 0,
+        "min": 0,
+        "max": 1,
+        "step": 0.01,
+        "dimming": "exposure <= 0 && halation <= 0"
+      },
+      "gamutExtension": {
+        "type": "double",
+        "default": 1,
+        "min": 0,
+        "max": 1,
+        "step": 0.01,
+        "dimming": "rolloff <= 0"
+      },
+      "recipe": {
+        "type": "double",
+        "default": 1,
+        "min": 0,
+        "max": 1,
+        "step": 0.01
+      },
+      "base": {
+        "type": "enum",
+        "default": 3,
+        "enumValues": [
+          0,
+          1,
+          2,
+          3,
+          4,
+          5,
+          6,
+          7,
+          8
+        ],
+        "dimming": "recipe <= 0"
+      },
+      "colour": {
+        "type": "double",
+        "default": 0,
+        "min": -4,
+        "max": 4,
+        "step": 1,
+        "dimming": "recipe <= 0 || base >= 7"
+      },
+      "highlightTone": {
+        "type": "double",
+        "default": 0,
+        "min": -2,
+        "max": 4,
+        "step": 0.5,
+        "dimming": "recipe <= 0"
+      },
+      "shadowTone": {
+        "type": "double",
+        "default": 0,
+        "min": -2,
+        "max": 4,
+        "step": 0.5,
+        "dimming": "recipe <= 0"
+      },
+      "highlightProtect": {
+        "type": "enum",
+        "default": 0,
+        "enumValues": [
+          0,
+          1,
+          2
+        ],
+        "dimming": "recipe <= 0"
+      },
+      "colourChrome": {
+        "type": "double",
+        "default": 0,
+        "min": 0,
+        "max": 1,
+        "step": 0.5,
+        "dimming": "recipe <= 0 || base >= 7"
+      },
+      "colourChromeBlue": {
+        "type": "double",
+        "default": 0,
+        "min": 0,
+        "max": 1,
+        "step": 0.5,
+        "dimming": "recipe <= 0 || base >= 7"
+      },
+      "wbShiftR": {
+        "type": "double",
+        "default": 0,
+        "min": -9,
+        "max": 9,
+        "step": 1,
+        "dimming": "recipe <= 0"
+      },
+      "wbShiftB": {
+        "type": "double",
+        "default": 0,
+        "min": -9,
+        "max": 9,
+        "step": 1,
+        "dimming": "recipe <= 0"
+      },
+      "monoToning": {
+        "type": "double",
+        "default": 0,
+        "min": -1,
+        "max": 1,
+        "step": 0.05,
+        "dimming": "recipe <= 0 || base <= 6"
+      },
+      "clarity": {
+        "type": "double",
+        "default": 0,
+        "min": -5,
+        "max": 5,
+        "step": 0.5,
+        "dimming": "recipe <= 0"
+      },
+      "clarityRadius": {
+        "type": "double",
+        "default": 24,
+        "min": 0,
+        "softMax": 200,
+        "step": 1,
+        "dimming": "recipe <= 0 || clarity == 0"
+      },
+      "grain": {
+        "type": "double",
+        "default": 0.04,
+        "min": 0,
+        "softMax": 0.5,
+        "step": 0.005
+      },
+      "grainSize": {
+        "type": "double",
+        "default": 1,
+        "min": 0.25,
+        "softMax": 16,
+        "step": 0.25,
+        "dimming": "grain <= 0"
+      },
+      "grainBlur": {
+        "type": "double",
+        "default": 0.75,
+        "min": 0,
+        "max": 1,
+        "step": 0.01,
+        "dimming": "grain <= 0"
+      },
+      "grainResponse": {
+        "type": "double",
+        "default": 0.5,
+        "min": 0.05,
+        "softMax": 2,
+        "step": 0.05,
+        "dimming": "grain <= 0"
+      },
+      "grainDomain": {
+        "type": "enum",
+        "default": 0,
+        "enumValues": [
+          0,
+          1
+        ],
+        "dimming": "grain <= 0"
+      },
+      "scannerNoise": {
+        "type": "double",
+        "default": 0,
+        "min": 0,
+        "softMax": 0.5,
+        "step": 0.01,
+        "dimming": "grain <= 0"
+      },
+      "time": {
+        "type": "double",
+        "default": 0,
+        "compConnect": "time",
+        "dimming": "grain <= 0 && damage <= 0"
+      },
+      "damage": {
+        "type": "double",
+        "default": 0,
+        "min": 0,
+        "max": 1,
+        "step": 0.01
+      },
+      "damageDomain": {
+        "type": "enum",
+        "default": 0,
+        "enumValues": [
+          0,
+          1
+        ],
+        "dimming": "damage <= 0"
+      },
+      "frameRate": {
+        "type": "double",
+        "default": 12,
+        "min": 0,
+        "softMax": 60,
+        "step": 1,
+        "dimming": "damage <= 0"
+      },
+      "speed": {
+        "type": "double",
+        "default": 0.0333,
+        "min": 0,
+        "softMax": 4,
+        "step": 0.05,
+        "dimming": "damage <= 0"
+      },
+      "weave": {
+        "type": "double",
+        "default": 0.002,
+        "min": 0,
+        "softMax": 0.05,
+        "step": 0.0005,
+        "dimming": "damage <= 0"
+      },
+      "flicker": {
+        "type": "double",
+        "default": 0.06,
+        "min": 0,
+        "softMax": 1,
+        "step": 0.01,
+        "dimming": "damage <= 0"
+      },
+      "dirt": {
+        "type": "double",
+        "default": 1,
+        "min": 0,
+        "max": 1,
+        "step": 0.01,
+        "dimming": "damage <= 0"
+      },
+      "dirtThreshold": {
+        "type": "double",
+        "default": 0.8,
+        "min": 0,
+        "max": 1,
+        "step": 0.01,
+        "dimming": "damage <= 0 || dirt <= 0"
+      },
+      "dirtScale": {
+        "type": "double",
+        "default": 0.5,
+        "min": 0.001,
+        "softMax": 8,
+        "step": 0.01,
+        "dimming": "damage <= 0 || dirt <= 0"
+      },
+      "scratches": {
+        "type": "double",
+        "default": 0,
+        "min": 0,
+        "max": 1,
+        "step": 0.01,
+        "dimming": "damage <= 0"
+      },
+      "scratchWidth": {
+        "type": "double",
+        "default": 2,
+        "min": 0.5,
+        "softMax": 6,
+        "step": 0.1,
+        "dimming": "damage <= 0 || scratches <= 0"
+      },
+      "vignetteAmount": {
+        "type": "double",
+        "default": 1,
+        "min": 0,
+        "max": 1,
+        "step": 0.01,
+        "dimming": "damage <= 0"
+      },
+      "vignetteFlicker": {
+        "type": "double",
+        "default": 1,
+        "min": 0,
+        "softMax": 4,
+        "step": 0.01,
+        "dimming": "damage <= 0 || vignetteAmount <= 0"
+      },
+      "desaturate": {
+        "type": "double",
+        "default": 1,
+        "min": 0,
+        "max": 1,
+        "step": 0.01,
+        "dimming": "damage <= 0"
+      },
+      "amount": {
+        "type": "double",
+        "default": 1,
+        "min": 0,
+        "max": 1,
+        "step": 0.01
+      }
+    },
+    "triggers": {
+      "out": [
+        "halation",
+        "halationRadius",
+        "halationThreshold",
+        "halationDensity",
+        "halationTint",
+        "linearise",
+        "exposure",
+        "rolloff",
+        "gamutExtension",
+        "recipe",
+        "base",
+        "colour",
+        "highlightTone",
+        "shadowTone",
+        "highlightProtect",
+        "colourChrome",
+        "colourChromeBlue",
+        "wbShiftR",
+        "wbShiftB",
+        "monoToning",
+        "clarity",
+        "clarityRadius",
+        "grain",
+        "grainSize",
+        "grainBlur",
+        "grainResponse",
+        "grainDomain",
+        "scannerNoise",
+        "time",
+        "damage",
+        "damageDomain",
+        "frameRate",
+        "speed",
+        "weave",
+        "flicker",
+        "dirt",
+        "dirtThreshold",
+        "dirtScale",
+        "scratches",
+        "scratchWidth",
+        "vignetteAmount",
+        "vignetteFlicker",
+        "desaturate",
+        "amount"
+      ]
+    },
+    "UI": {
+      "icon": "film.png",
+      "tabs": [
+        {
+          "id": "filter",
+          "attributeOrder": [
+            "recipe",
+            "base",
+            "---Tone",
+            "highlightTone",
+            "shadowTone",
+            "highlightProtect",
+            "---Colour",
+            "colour",
+            "colourChrome",
+            "colourChromeBlue",
+            "wbShiftR",
+            "wbShiftB",
+            "monoToning",
+            "---Clarity",
+            "clarity",
+            "clarityRadius",
+            "---Inspired by Fujifilm film simulations"
+          ]
+        },
+        {
+          "id": "grade",
+          "attributeOrder": [
+            "---Halation",
+            "halation",
+            "halationRadius",
+            "halationThreshold",
+            "halationDensity",
+            "halationTint",
+            "---Tone",
+            "linearise",
+            "exposure",
+            "rolloff",
+            "gamutExtension",
+            "---Output",
+            "amount",
+            "---Gamut transform from flim, bean_mhm"
+          ]
+        },
+        {
+          "id": "damage",
+          "attributeOrder": [
+            "damage",
+            "damageDomain",
+            "---Projector",
+            "frameRate",
+            "speed",
+            "weave",
+            "flicker",
+            "---Dirt",
+            "dirt",
+            "dirtThreshold",
+            "dirtScale",
+            "---Scratches",
+            "scratches",
+            "scratchWidth",
+            "---Vignette",
+            "vignetteAmount",
+            "vignetteFlicker",
+            "---Grade",
+            "desaturate",
+            "---Grain",
+            "grain",
+            "grainSize",
+            "grainBlur",
+            "grainResponse",
+            "grainDomain",
+            "scannerNoise",
+            "time",
+            "---Grain from cinegrain (MIT); scratches from a film-damage synthesis paper; dirt and vignette inspired by Cinematic Grain, Max van Leeuwen (MIT)"
+          ]
+        }
+      ]
+    }
+  },
+  {
+    "author": "samMularczyk",
+    "type": "filmBurn",
+    "superType": "thirdPartyFilter",
+    "version": "1.0",
+    "passes": [
+      {
+        "skslFile": "filmBurnMask.sksl",
+        "uniforms": [
+          "progress",
+          "origin",
+          "position",
+          "scale",
+          "roughness",
+          "seed"
+        ]
+      },
+      {
+        "skslFile": "filmBurnColour.sksl",
+        "uniforms": [
+          "progress",
+          "charWidth",
+          "charColor",
+          "burnWidth",
+          "burnColor",
+          "bloomWidth",
+          "bloomIntensity",
+          "amount"
+        ]
+      }
+    ],
+    "attributes": {
+      "progress": {
+        "type": "double",
+        "default": 0,
+        "min": 0,
+        "max": 1,
+        "step": 0.01
+      },
+      "origin": {
+        "type": "enum",
+        "default": 0,
+        "enumValues": [
+          0,
+          1,
+          2,
+          3
+        ]
+      },
+      "position": {
+        "type": "double2",
+        "default": {
+          "x": 0,
+          "y": 0
+        },
+        "children": {
+          "*": {
+            "step": 1
+          }
+        },
+        "dimming": "origin != 3"
+      },
+      "scale": {
+        "type": "double",
+        "default": 220,
+        "min": 1,
+        "softMax": 1000,
+        "step": 1
+      },
+      "roughness": {
+        "type": "double",
+        "default": 1,
+        "min": 0,
+        "softMax": 3,
+        "step": 0.01
+      },
+      "seed": {
+        "type": "double",
+        "default": 0,
+        "min": 0,
+        "softMax": 100,
+        "step": 1
+      },
+      "charWidth": {
+        "type": "double",
+        "default": 0.03,
+        "min": 0,
+        "softMax": 0.2,
+        "step": 0.001
+      },
+      "charColor": {
+        "type": "color",
+        "default": {
+          "type": "Color",
+          "r": 33,
+          "g": 20,
+          "b": 12,
+          "a": 255
+        }
+      },
+      "burnWidth": {
+        "type": "double",
+        "default": 0.04,
+        "min": 0,
+        "softMax": 0.2,
+        "step": 0.001
+      },
+      "burnColor": {
+        "type": "color",
+        "default": {
+          "type": "Color",
+          "r": 255,
+          "g": 120,
+          "b": 20,
+          "a": 255
+        }
+      },
+      "bloomWidth": {
+        "type": "double",
+        "default": 0.05,
+        "min": 0,
+        "softMax": 0.3,
+        "step": 0.001
+      },
+      "bloomIntensity": {
+        "type": "double",
+        "default": 0.6,
+        "min": 0,
+        "softMax": 3,
+        "step": 0.01
+      },
+      "amount": {
+        "type": "double",
+        "default": 1,
+        "min": 0,
+        "max": 1,
+        "step": 0.01
+      }
+    },
+    "triggers": {
+      "out": [
+        "progress",
+        "origin",
+        "position",
+        "scale",
+        "roughness",
+        "seed",
+        "charWidth",
+        "charColor",
+        "burnWidth",
+        "burnColor",
+        "bloomWidth",
+        "bloomIntensity",
+        "amount"
+      ]
+    },
+    "UI": {
+      "icon": "filmBurn.png",
+      "attributeOrder": [
+        "progress",
+        "---Origin",
+        "origin",
+        "position",
+        "---Edge",
+        "scale",
+        "roughness",
+        "seed",
+        "---Char",
+        "charWidth",
+        "charColor",
+        "---Burn",
+        "burnWidth",
+        "burnColor",
+        "---Bloom",
+        "bloomWidth",
+        "bloomIntensity",
+        "---Output",
+        "amount",
+        "---Written from the maths"
+      ]
+    }
+  },
+  {
+    "author": "samMularczyk",
+    "type": "glow",
+    "superType": "thirdPartyFilter",
+    "version": "1.0",
+    "paddingExpression": "ceil(max(size, reach * 2))",
+    "passes": [
+      {
+        "skslFile": "glowHighlights.sksl",
+        "uniforms": [
+          "srcBlack",
+          "srcWhite",
+          "response"
+        ]
+      },
+      {
+        "skslFile": "glowStreak.sksl",
+        "uniforms": [
+          "streakAmount",
+          "reach",
+          "angle",
+          "samples",
+          "streakFalloff",
+          "blur",
+          "bidirectional"
+        ],
+        "constants": {
+          "stepScale": 0.25
+        }
+      },
+      {
+        "skslFile": "glowStreak.sksl",
+        "uniforms": [
+          "streakAmount",
+          "reach",
+          "angle",
+          "samples",
+          "streakFalloff",
+          "blur",
+          "bidirectional"
+        ],
+        "constants": {
+          "stepScale": 0.5
+        }
+      },
+      {
+        "skslFile": "glowStreak.sksl",
+        "uniforms": [
+          "streakAmount",
+          "reach",
+          "angle",
+          "samples",
+          "streakFalloff",
+          "blur",
+          "bidirectional"
+        ],
+        "constants": {
+          "stepScale": 1
+        }
+      },
+      {
+        "skslFile": "glowBloom.sksl",
+        "uniforms": [
+          "srcBlack",
+          "srcWhite",
+          "response",
+          "bloomAmount",
+          "size",
+          "falloff"
+        ],
+        "constants": {
+          "dirX": 1,
+          "dirY": 0,
+          "radiusMul": 0.125,
+          "addH": 0
+        }
+      },
+      {
+        "skslFile": "glowBloom.sksl",
+        "uniforms": [
+          "srcBlack",
+          "srcWhite",
+          "response",
+          "bloomAmount",
+          "size",
+          "falloff"
+        ],
+        "constants": {
+          "dirX": 0,
+          "dirY": 1,
+          "radiusMul": 0.125,
+          "addH": 1
+        }
+      },
+      {
+        "skslFile": "glowBloom.sksl",
+        "uniforms": [
+          "srcBlack",
+          "srcWhite",
+          "response",
+          "bloomAmount",
+          "size",
+          "falloff"
+        ],
+        "constants": {
+          "dirX": 1,
+          "dirY": 0,
+          "radiusMul": 0.25,
+          "addH": 0
+        }
+      },
+      {
+        "skslFile": "glowBloom.sksl",
+        "uniforms": [
+          "srcBlack",
+          "srcWhite",
+          "response",
+          "bloomAmount",
+          "size",
+          "falloff"
+        ],
+        "constants": {
+          "dirX": 0,
+          "dirY": 1,
+          "radiusMul": 0.25,
+          "addH": 1
+        }
+      },
+      {
+        "skslFile": "glowBloom.sksl",
+        "uniforms": [
+          "srcBlack",
+          "srcWhite",
+          "response",
+          "bloomAmount",
+          "size",
+          "falloff"
+        ],
+        "constants": {
+          "dirX": 1,
+          "dirY": 0,
+          "radiusMul": 0.5,
+          "addH": 0
+        }
+      },
+      {
+        "skslFile": "glowBloom.sksl",
+        "uniforms": [
+          "srcBlack",
+          "srcWhite",
+          "response",
+          "bloomAmount",
+          "size",
+          "falloff"
+        ],
+        "constants": {
+          "dirX": 0,
+          "dirY": 1,
+          "radiusMul": 0.5,
+          "addH": 1
+        }
+      },
+      {
+        "skslFile": "glowBloom.sksl",
+        "uniforms": [
+          "srcBlack",
+          "srcWhite",
+          "response",
+          "bloomAmount",
+          "size",
+          "falloff"
+        ],
+        "constants": {
+          "dirX": 1,
+          "dirY": 0,
+          "radiusMul": 1,
+          "addH": 0
+        }
+      },
+      {
+        "skslFile": "glowBloom.sksl",
+        "uniforms": [
+          "srcBlack",
+          "srcWhite",
+          "response",
+          "bloomAmount",
+          "size",
+          "falloff"
+        ],
+        "constants": {
+          "dirX": 0,
+          "dirY": 1,
+          "radiusMul": 1,
+          "addH": 1
+        }
+      },
+      {
+        "skslFile": "glowCombine.sksl",
+        "uniforms": [
+          "angle",
+          "chromatic",
+          "dispersion",
+          "bloomAmount",
+          "steps",
+          "persistence",
+          "intensity",
+          "tint",
+          "blend",
+          "amount"
+        ]
+      }
+    ],
+    "attributes": {
+      "srcBlack": {
+        "type": "double",
+        "default": 0.6,
+        "min": 0,
+        "max": 0.999,
+        "step": 0.01
+      },
+      "srcWhite": {
+        "type": "double",
+        "default": 1,
+        "min": 0.001,
+        "softMax": 4,
+        "step": 0.01
+      },
+      "response": {
+        "type": "double",
+        "default": 1.5,
+        "min": 0.1,
+        "softMax": 8,
+        "step": 0.05
+      },
+      "streakAmount": {
+        "type": "double",
+        "default": 0,
+        "min": 0,
+        "max": 1,
+        "step": 0.01
+      },
+      "reach": {
+        "type": "double",
+        "default": 300,
+        "min": 0,
+        "softMax": 2000,
+        "step": 1,
+        "dimming": "streakAmount <= 0"
+      },
+      "angle": {
+        "type": "double",
+        "default": 0,
+        "softMin": -180,
+        "softMax": 180,
+        "step": 0.5,
+        "dimming": "streakAmount <= 0"
+      },
+      "samples": {
+        "type": "double",
+        "default": 16,
+        "min": 2,
+        "max": 32,
+        "step": 1,
+        "dimming": "streakAmount <= 0"
+      },
+      "streakFalloff": {
+        "type": "double",
+        "default": 1.5,
+        "min": 0,
+        "softMax": 6,
+        "step": 0.05,
+        "dimming": "streakAmount <= 0"
+      },
+      "blur": {
+        "type": "double",
+        "default": 0,
+        "min": 0,
+        "softMax": 60,
+        "step": 0.5,
+        "dimming": "streakAmount <= 0"
+      },
+      "bidirectional": {
+        "type": "bool",
+        "default": true,
+        "dimming": "streakAmount <= 0"
+      },
+      "chromatic": {
+        "type": "double",
+        "default": 0,
+        "min": 0,
+        "max": 1,
+        "step": 0.01,
+        "dimming": "streakAmount <= 0"
+      },
+      "dispersion": {
+        "type": "double",
+        "default": 12,
+        "softMin": -100,
+        "softMax": 100,
+        "step": 0.5,
+        "dimming": "streakAmount <= 0 || chromatic <= 0"
+      },
+      "bloomAmount": {
+        "type": "double",
+        "default": 1,
+        "min": 0,
+        "max": 1,
+        "step": 0.01
+      },
+      "size": {
+        "type": "double",
+        "default": 300,
+        "min": 0,
+        "softMax": 2000,
+        "step": 1,
+        "dimming": "bloomAmount <= 0"
+      },
+      "falloff": {
+        "type": "double",
+        "default": 1,
+        "min": 0.05,
+        "softMax": 6,
+        "step": 0.05,
+        "dimming": "bloomAmount <= 0"
+      },
+      "steps": {
+        "type": "double",
+        "default": 4,
+        "min": 1,
+        "softMax": 8,
+        "step": 1,
+        "dimming": "bloomAmount <= 0"
+      },
+      "persistence": {
+        "type": "double",
+        "default": 1,
+        "min": 0.1,
+        "softMax": 4,
+        "step": 0.05,
+        "dimming": "bloomAmount <= 0"
+      },
+      "intensity": {
+        "type": "double",
+        "default": 2,
+        "min": 0,
+        "softMax": 20,
+        "step": 0.05
+      },
+      "tint": {
+        "type": "color",
+        "default": {
+          "type": "Color",
+          "r": 255,
+          "g": 255,
+          "b": 255,
+          "a": 255
+        },
+        "dimming": "intensity <= 0"
+      },
+      "blend": {
+        "type": "enum",
+        "default": 0,
+        "enumValues": [
+          0,
+          1,
+          2,
+          3
+        ]
+      },
+      "amount": {
+        "type": "double",
+        "default": 1,
+        "min": 0,
+        "max": 1,
+        "step": 0.01
+      }
+    },
+    "triggers": {
+      "out": [
+        "srcBlack",
+        "srcWhite",
+        "response",
+        "streakAmount",
+        "reach",
+        "angle",
+        "samples",
+        "streakFalloff",
+        "blur",
+        "bidirectional",
+        "chromatic",
+        "dispersion",
+        "bloomAmount",
+        "size",
+        "falloff",
+        "steps",
+        "persistence",
+        "intensity",
+        "tint",
+        "blend",
+        "amount"
+      ]
+    },
+    "UI": {
+      "tabs": [
+        {
+          "id": "filter",
+          "attributeOrder": [
+            "srcBlack",
+            "srcWhite",
+            "response",
+            "---A",
+            "intensity",
+            "tint",
+            "blend",
+            "amount"
+          ]
+        },
+        {
+          "id": "bloom",
+          "attributeOrder": [
+            "bloomAmount",
+            "size",
+            "falloff",
+            "steps",
+            "persistence"
+          ]
+        },
+        {
+          "id": "streak",
+          "attributeOrder": [
+            "streakAmount",
+            "reach",
+            "angle",
+            "samples",
+            "streakFalloff",
+            "blur",
+            "bidirectional",
+            "---Chromatic",
+            "chromatic",
+            "dispersion",
+            "---Inspired by apGlow, Adrian Pueyo"
+          ]
+        }
+      ],
+      "icon": "glow.png"
+    }
+  },
+  {
+    "author": "samMularczyk",
+    "type": "godray",
+    "superType": "thirdPartyFilter",
+    "version": "1.0",
+    "skslFile": "godray.sksl",
+    "attributes": {
+      "angle": {
+        "type": "double",
+        "default": 30,
+        "softMin": -180,
+        "softMax": 180,
+        "step": 0.5,
+        "dimming": "parallel == false"
+      },
+      "parallel": {
+        "type": "bool",
+        "default": true
+      },
+      "light": {
+        "type": "double2",
+        "default": {
+          "x": 0,
+          "y": 0
+        },
+        "children": {
+          "*": {
+            "step": 1
+          }
+        },
+        "dimming": "parallel == true"
+      },
+      "gain": {
+        "type": "double",
+        "default": 0.5,
+        "min": 0,
+        "max": 1,
+        "step": 0.01
+      },
+      "lacunarity": {
+        "type": "double",
+        "default": 2.5,
+        "min": 0.1,
+        "softMax": 6,
+        "step": 0.05,
+        "dimming": "gain <= 0"
+      },
+      "density": {
+        "type": "double",
+        "default": 8,
+        "min": 0.1,
+        "softMax": 64,
+        "step": 0.5,
+        "dimming": "gain <= 0"
+      },
+      "speed": {
+        "type": "double",
+        "default": 0.05,
+        "min": 0,
+        "softMax": 1,
+        "step": 0.005
+      },
+      "blur": {
+        "type": "double",
+        "default": 0,
+        "min": 0,
+        "max": 1,
+        "step": 0.01
+      },
+      "time": {
+        "type": "double",
+        "default": 0,
+        "compConnect": "time",
+        "dimming": "gain <= 0 || amount <= 0"
+      },
+      "amount": {
+        "type": "double",
+        "default": 1,
+        "min": 0,
+        "max": 1,
+        "step": 0.01
+      }
+    },
+    "triggers": {
+      "out": [
+        "angle",
+        "parallel",
+        "light",
+        "gain",
+        "lacunarity",
+        "density",
+        "speed",
+        "blur",
+        "time",
+        "amount"
+      ]
+    },
+    "UI": {
+      "icon": "godray.png",
+      "attributeOrder": [
+        "parallel",
+        "angle",
+        "light",
+        "---Turbulence",
+        "gain",
+        "lacunarity",
+        "density",
+        "speed",
+        "blur",
+        "time",
+        "---Output",
+        "amount",
+        "---Ported from pixi.js filters (MIT)"
+      ]
+    }
+  },
+  {
+    "author": "samMularczyk",
+    "type": "hatching",
+    "superType": "thirdPartyFilter",
+    "version": "1.0",
+    "skslFile": "hatching.sksl",
+    "attributes": {
+      "pattern": {
+        "type": "enum",
+        "default": 0,
+        "enumValues": [
+          0,
+          1,
+          2,
+          3,
+          4,
+          5,
+          6
+        ]
+      },
+      "size": {
+        "type": "double",
+        "default": 10,
+        "min": 1,
+        "softMax": 128,
+        "step": 0.1
+      },
+      "lineWidth": {
+        "type": "double",
+        "default": 1.5,
+        "min": 0.5,
+        "softMax": 64,
+        "step": 0.1
+      },
+      "angle": {
+        "type": "double",
+        "default": 0,
+        "softMin": -180,
+        "softMax": 180,
+        "step": 0.5,
+        "dimming": "pattern != 3"
+      },
+      "softness": {
+        "type": "double",
+        "default": 0.06,
+        "min": 0.001,
+        "max": 0.5,
+        "step": 0.005,
+        "dimming": "pattern <= 2"
+      },
+      "threshold1": {
+        "type": "double",
+        "default": 1,
+        "min": 0,
+        "max": 1.74,
+        "step": 0.01,
+        "dimming": "pattern != 0"
+      },
+      "threshold2": {
+        "type": "double",
+        "default": 0.7,
+        "min": 0,
+        "max": 1.74,
+        "step": 0.01,
+        "dimming": "pattern != 0"
+      },
+      "threshold3": {
+        "type": "double",
+        "default": 0.5,
+        "min": 0,
+        "max": 1.74,
+        "step": 0.01,
+        "dimming": "pattern != 0"
+      },
+      "threshold4": {
+        "type": "double",
+        "default": 0.3,
+        "min": 0,
+        "max": 1.74,
+        "step": 0.01,
+        "dimming": "pattern != 0"
+      },
+      "offset": {
+        "type": "double",
+        "default": 5,
+        "step": 0.1,
+        "dimming": "pattern != 0"
+      },
+      "warpAmount": {
+        "type": "double",
+        "default": 0.03,
+        "min": 0,
+        "softMax": 0.5,
+        "step": 0.001,
+        "dimming": "pattern != 1"
+      },
+      "warpFrequency": {
+        "type": "double",
+        "default": 10,
+        "min": 0,
+        "softMax": 60,
+        "step": 0.1,
+        "dimming": "pattern != 1"
+      },
+      "layers": {
+        "type": "double",
+        "default": 6,
+        "min": 1,
+        "max": 6,
+        "step": 1,
+        "dimming": "pattern != 1"
+      },
+      "brightness": {
+        "type": "double",
+        "default": 1.4,
+        "min": 0,
+        "softMax": 4,
+        "step": 0.01,
+        "dimming": "pattern != 2"
+      },
+      "invert": {
+        "type": "bool",
+        "default": false,
+        "dimming": "pattern != 2"
+      },
+      "inkColor": {
+        "type": "color",
+        "default": {
+          "type": "Color",
+          "r": 0,
+          "g": 0,
+          "b": 0,
+          "a": 255
+        }
+      },
+      "paperColor": {
+        "type": "color",
+        "default": {
+          "type": "Color",
+          "r": 255,
+          "g": 255,
+          "b": 255,
+          "a": 255
+        },
+        "dimming": "transparentPaper == true"
+      },
+      "transparentPaper": {
+        "type": "bool",
+        "default": false
+      },
+      "amount": {
+        "type": "double",
+        "default": 1,
+        "min": 0,
+        "max": 1,
+        "step": 0.01
+      }
+    },
+    "triggers": {
+      "out": [
+        "pattern",
+        "size",
+        "lineWidth",
+        "angle",
+        "softness",
+        "threshold1",
+        "threshold2",
+        "threshold3",
+        "threshold4",
+        "offset",
+        "warpAmount",
+        "warpFrequency",
+        "layers",
+        "brightness",
+        "invert",
+        "inkColor",
+        "paperColor",
+        "transparentPaper",
+        "amount"
+      ]
+    },
+    "UI": {
+      "icon": "hatching.png",
+      "tabs": [
+        {
+          "id": "filter",
+          "attributeOrder": [
+            "pattern",
+            "size",
+            "lineWidth",
+            "---A",
+            "angle",
+            "softness"
+          ]
+        },
+        {
+          "id": "levels",
+          "attributeOrder": [
+            "---Crosshatch",
+            "threshold1",
+            "threshold2",
+            "threshold3",
+            "threshold4",
+            "offset",
+            "---Currency",
+            "warpAmount",
+            "warpFrequency",
+            "layers",
+            "---Cross Stitch",
+            "brightness",
+            "invert"
+          ]
+        },
+        {
+          "id": "output",
+          "attributeOrder": [
+            "inkColor",
+            "paperColor",
+            "transparentPaper",
+            "---A",
+            "amount",
+            "---Inspired by JeGX & Preciado"
+          ]
+        }
+      ]
+    }
+  },
+  {
+    "author": "samMularczyk",
+    "type": "led",
+    "superType": "thirdPartyFilter",
+    "version": "1.0",
+    "skslFile": "led.sksl",
+    "attributes": {
+      "cellSize": {
+        "type": "double",
+        "default": 16,
+        "min": 2,
+        "softMax": 128,
+        "step": 0.5
+      },
+      "stagger": {
+        "type": "double",
+        "default": 0,
+        "min": 0,
+        "max": 1,
+        "step": 0.01
+      },
+      "dotSize": {
+        "type": "double",
+        "default": 0.8,
+        "min": 0,
+        "softMax": 2,
+        "step": 0.01
+      },
+      "roundness": {
+        "type": "double",
+        "default": 1,
+        "min": 0,
+        "max": 1,
+        "step": 0.01
+      },
+      "softness": {
+        "type": "double",
+        "default": 1.5,
+        "min": 0.01,
+        "softMax": 20,
+        "step": 0.1
+      },
+      "sizeFromBrightness": {
+        "type": "double",
+        "default": 0,
+        "min": 0,
+        "max": 1,
+        "step": 0.01
+      },
+      "perChannel": {
+        "type": "bool",
+        "default": false
+      },
+      "bgColor": {
+        "type": "color",
+        "default": {
+          "type": "Color",
+          "r": 0,
+          "g": 0,
+          "b": 0,
+          "a": 255
+        }
+      },
+      "amount": {
+        "type": "double",
+        "default": 1,
+        "min": 0,
+        "max": 1,
+        "step": 0.01
+      }
+    },
+    "triggers": {
+      "out": [
+        "cellSize",
+        "stagger",
+        "dotSize",
+        "roundness",
+        "softness",
+        "sizeFromBrightness",
+        "perChannel",
+        "bgColor",
+        "amount"
+      ]
+    },
+    "UI": {
+      "icon": "led.png",
+      "attributeOrder": [
+        "cellSize",
+        "stagger",
+        "---Dot",
+        "dotSize",
+        "roundness",
+        "softness",
+        "---Brightness",
+        "sizeFromBrightness",
+        "perChannel",
+        "bgColor",
+        "amount",
+        "---Inspired by lightbulb screen & Golfing Mosaic"
+      ]
+    }
+  },
+  {
+    "author": "samMularczyk",
+    "type": "lens",
+    "superType": "thirdPartyFilter",
+    "version": "1.0",
+    "passes": [
+      {
+        "skslFile": "lensDistort.sksl",
+        "uniforms": [
+          "profile",
+          "distortion",
+          "squeeze",
+          "centreOffset",
+          "expand",
+          "edges",
+          "edgeTrim",
+          "fringing",
+          "samples"
+        ]
+      },
+      {
+        "skslFile": "lensAberration.sksl",
+        "uniforms": [
+          "abModel",
+          "geometry",
+          "centre",
+          "angle",
+          "dispersion",
+          "focusWave",
+          "smoothing",
+          "aberration",
+          "redScale",
+          "greenScale",
+          "blueScale",
+          "smear",
+          "falloff",
+          "mapChannel",
+          "mapAmplitude",
+          "mapFromGradient",
+          "abIntensity",
+          "samples"
+        ]
+      },
+      {
+        "skslFile": "lensPrepare.sksl",
+        "uniforms": [
+          "bokehThreshold",
+          "bokehGamma"
+        ]
+      },
+      {
+        "skslFile": "lensSegment.sksl",
+        "uniforms": [
+          "defocus",
+          "blades",
+          "rotation",
+          "catsEye",
+          "catsEyeFalloff",
+          "ringBias",
+          "cocSource",
+          "focus",
+          "aperture",
+          "dither"
+        ],
+        "constants": {
+          "segIndex": 0
+        }
+      },
+      {
+        "skslFile": "lensSegment.sksl",
+        "uniforms": [
+          "defocus",
+          "blades",
+          "rotation",
+          "catsEye",
+          "catsEyeFalloff",
+          "ringBias",
+          "cocSource",
+          "focus",
+          "aperture",
+          "dither"
+        ],
+        "constants": {
+          "segIndex": 1
+        }
+      },
+      {
+        "skslFile": "lensSegment.sksl",
+        "uniforms": [
+          "defocus",
+          "blades",
+          "rotation",
+          "catsEye",
+          "catsEyeFalloff",
+          "ringBias",
+          "cocSource",
+          "focus",
+          "aperture",
+          "dither"
+        ],
+        "constants": {
+          "segIndex": 2
+        }
+      },
+      {
+        "skslFile": "lensDefocus.sksl",
+        "uniforms": [
+          "bokehGamma",
+          "defocus",
+          "blades",
+          "rotation",
+          "catsEye",
+          "catsEyeFalloff",
+          "ringBias",
+          "cocSource",
+          "focus",
+          "aperture",
+          "exposure",
+          "gain",
+          "dither"
+        ],
+        "constants": {
+          "segIndex": 3
+        }
+      },
+      {
+        "skslFile": "lensScatter.sksl",
+        "uniforms": [
+          "kernel",
+          "size",
+          "kernelRotation",
+          "ringFrequency",
+          "axialRed",
+          "axialGreen",
+          "axialBlue",
+          "scatterThreshold",
+          "scatterGain",
+          "scatterBlend",
+          "samples",
+          "amount"
+        ]
+      }
+    ],
+    "attributes": {
+      "profile": {
+        "type": "enum",
+        "default": 5,
+        "enumValues": [
+          0,
+          1,
+          2,
+          3,
+          4,
+          5,
+          6
+        ],
+        "dimming": "distortion == 0"
+      },
+      "distortion": {
+        "type": "double",
+        "default": 1,
+        "softMin": -4,
+        "softMax": 4,
+        "step": 0.05
+      },
+      "squeeze": {
+        "type": "double",
+        "default": 1,
+        "min": 0.01,
+        "softMax": 2.5,
+        "step": 0.01,
+        "dimming": "distortion == 0"
+      },
+      "centreOffset": {
+        "type": "double2",
+        "default": {
+          "x": 0,
+          "y": 0
+        },
+        "children": {
+          "*": {
+            "step": 0.005
+          }
+        }
+      },
+      "expand": {
+        "type": "double",
+        "default": 1,
+        "min": 0.01,
+        "softMax": 2,
+        "step": 0.01
+      },
+      "edges": {
+        "type": "enum",
+        "default": 0,
+        "enumValues": [
+          0,
+          1,
+          2
+        ]
+      },
+      "edgeTrim": {
+        "type": "double2",
+        "default": {
+          "x": 1,
+          "y": 1
+        },
+        "children": {
+          "*": {
+            "step": 0.5
+          }
+        },
+        "dimming": "edges == 0"
+      },
+      "fringing": {
+        "type": "double",
+        "default": 0.5,
+        "min": 0,
+        "softMax": 4,
+        "step": 0.05
+      },
+      "abModel": {
+        "type": "enum",
+        "default": 3,
+        "enumValues": [
+          0,
+          1,
+          2,
+          3
+        ]
+      },
+      "geometry": {
+        "type": "enum",
+        "default": 0,
+        "enumValues": [
+          0,
+          1,
+          2
+        ],
+        "dimming": "abModel == 2 || abModel == 3"
+      },
+      "centre": {
+        "type": "double2",
+        "default": {
+          "x": 0,
+          "y": 0
+        },
+        "children": {
+          "*": {
+            "step": 1
+          }
+        },
+        "dimming": "abModel == 2 || abModel == 3"
+      },
+      "angle": {
+        "type": "double",
+        "default": 0,
+        "softMin": -180,
+        "softMax": 180,
+        "step": 0.5,
+        "dimming": "abModel == 3"
+      },
+      "dispersion": {
+        "type": "double",
+        "default": 0.02,
+        "softMin": -1,
+        "softMax": 1,
+        "step": 0.005,
+        "dimming": "abModel == 1 || abModel == 3"
+      },
+      "focusWave": {
+        "type": "double",
+        "default": 0,
+        "softMin": -1,
+        "softMax": 1,
+        "step": 0.05,
+        "dimming": "abModel == 1 || abModel == 3"
+      },
+      "smoothing": {
+        "type": "double",
+        "default": 0,
+        "min": 0,
+        "softMax": 2,
+        "step": 0.05,
+        "dimming": "abModel != 0"
+      },
+      "aberration": {
+        "type": "double",
+        "default": 6,
+        "softMin": -60,
+        "softMax": 60,
+        "step": 0.5,
+        "dimming": "abModel != 1"
+      },
+      "redScale": {
+        "type": "double",
+        "default": 1,
+        "softMin": -3,
+        "softMax": 3,
+        "step": 0.05,
+        "dimming": "abModel != 1"
+      },
+      "greenScale": {
+        "type": "double",
+        "default": 0,
+        "softMin": -3,
+        "softMax": 3,
+        "step": 0.05,
+        "dimming": "abModel != 1"
+      },
+      "blueScale": {
+        "type": "double",
+        "default": -1,
+        "softMin": -3,
+        "softMax": 3,
+        "step": 0.05,
+        "dimming": "abModel != 1"
+      },
+      "smear": {
+        "type": "double",
+        "default": 0,
+        "min": 0,
+        "max": 1,
+        "step": 0.01,
+        "dimming": "abModel != 1"
+      },
+      "falloff": {
+        "type": "double",
+        "default": 1,
+        "min": 0.0001,
+        "softMax": 6,
+        "step": 0.05,
+        "dimming": "abModel != 1 || geometry == 2"
+      },
+      "mapChannel": {
+        "type": "enum",
+        "default": 0,
+        "enumValues": [
+          0,
+          1,
+          2,
+          3,
+          4,
+          5
+        ],
+        "dimming": "abModel != 2"
+      },
+      "mapAmplitude": {
+        "type": "double",
+        "default": 40,
+        "softMin": -400,
+        "softMax": 400,
+        "step": 1,
+        "dimming": "abModel != 2"
+      },
+      "mapFromGradient": {
+        "type": "bool",
+        "default": true,
+        "dimming": "abModel != 2"
+      },
+      "abIntensity": {
+        "type": "double",
+        "default": 1,
+        "min": 0,
+        "softMax": 4,
+        "step": 0.05,
+        "dimming": "abModel == 1 || abModel == 3"
+      },
+      "bokehThreshold": {
+        "type": "double",
+        "default": 0,
+        "min": 0,
+        "max": 0.999,
+        "step": 0.01,
+        "dimming": "defocus <= 0"
+      },
+      "bokehGamma": {
+        "type": "double",
+        "default": 1,
+        "min": 0.1,
+        "softMax": 8,
+        "step": 0.05,
+        "dimming": "defocus <= 0"
+      },
+      "defocus": {
+        "type": "double",
+        "default": 0,
+        "min": 0,
+        "softMax": 400,
+        "step": 0.5
+      },
+      "blades": {
+        "type": "enum",
+        "default": 6,
+        "enumValues": [
+          4,
+          6,
+          8
+        ],
+        "dimming": "defocus <= 0"
+      },
+      "rotation": {
+        "type": "double",
+        "default": 0,
+        "softMin": -180,
+        "softMax": 180,
+        "step": 0.5,
+        "dimming": "defocus <= 0"
+      },
+      "catsEye": {
+        "type": "double",
+        "default": 0,
+        "min": 0,
+        "max": 1,
+        "step": 0.01,
+        "dimming": "defocus <= 0"
+      },
+      "catsEyeFalloff": {
+        "type": "double",
+        "default": 1,
+        "min": 0.1,
+        "softMax": 4,
+        "step": 0.05,
+        "dimming": "catsEye <= 0"
+      },
+      "ringBias": {
+        "type": "double",
+        "default": 0,
+        "min": 0,
+        "max": 1,
+        "step": 0.01,
+        "dimming": "defocus <= 0"
+      },
+      "cocSource": {
+        "type": "enum",
+        "default": 0,
+        "enumValues": [
+          0,
+          1,
+          2,
+          3,
+          4
+        ],
+        "dimming": "defocus <= 0"
+      },
+      "focus": {
+        "type": "double",
+        "default": 0.5,
+        "min": 0,
+        "max": 1,
+        "step": 0.01,
+        "dimming": "defocus <= 0 || cocSource == 0"
+      },
+      "aperture": {
+        "type": "double",
+        "default": 2.5,
+        "min": 0,
+        "softMax": 8,
+        "step": 0.05,
+        "dimming": "defocus <= 0 || cocSource == 0"
+      },
+      "exposure": {
+        "type": "double",
+        "default": 0,
+        "min": 0,
+        "softMax": 8,
+        "step": 0.05,
+        "dimming": "defocus <= 0"
+      },
+      "gain": {
+        "type": "double",
+        "default": 1,
+        "min": 0,
+        "softMax": 8,
+        "step": 0.05,
+        "dimming": "defocus <= 0"
+      },
+      "dither": {
+        "type": "bool",
+        "default": true,
+        "dimming": "defocus <= 0"
+      },
+      "kernel": {
+        "type": "enum",
+        "default": 0,
+        "enumValues": [
+          0,
+          1,
+          2,
+          3
+        ],
+        "dimming": "size <= 0"
+      },
+      "size": {
+        "type": "double",
+        "default": 0,
+        "min": 0,
+        "softMax": 300,
+        "step": 0.5
+      },
+      "kernelRotation": {
+        "type": "double",
+        "default": 0,
+        "softMin": -180,
+        "softMax": 180,
+        "step": 0.5,
+        "dimming": "size <= 0 || kernel != 1"
+      },
+      "ringFrequency": {
+        "type": "double",
+        "default": 6,
+        "min": 0.1,
+        "softMax": 40,
+        "step": 0.1,
+        "dimming": "size <= 0 || kernel != 2"
+      },
+      "axialRed": {
+        "type": "double",
+        "default": 1,
+        "min": 0,
+        "softMax": 3,
+        "step": 0.05,
+        "dimming": "size <= 0"
+      },
+      "axialGreen": {
+        "type": "double",
+        "default": 1,
+        "min": 0,
+        "softMax": 3,
+        "step": 0.05,
+        "dimming": "size <= 0"
+      },
+      "axialBlue": {
+        "type": "double",
+        "default": 1,
+        "min": 0,
+        "softMax": 3,
+        "step": 0.05,
+        "dimming": "size <= 0"
+      },
+      "scatterThreshold": {
+        "type": "double",
+        "default": 0.7,
+        "min": 0,
+        "max": 0.999,
+        "step": 0.01,
+        "dimming": "size <= 0"
+      },
+      "scatterGain": {
+        "type": "double",
+        "default": 1,
+        "min": 0,
+        "softMax": 8,
+        "step": 0.05,
+        "dimming": "size <= 0"
+      },
+      "scatterBlend": {
+        "type": "enum",
+        "default": 0,
+        "enumValues": [
+          0,
+          1,
+          2
+        ],
+        "dimming": "size <= 0"
+      },
+      "samples": {
+        "type": "double",
+        "default": 16,
+        "min": 2,
+        "max": 32,
+        "step": 1
+      },
+      "amount": {
+        "type": "double",
+        "default": 1,
+        "min": 0,
+        "max": 1,
+        "step": 0.01
+      },
+      "displaceMap": {
+        "type": "shaderData",
+        "supportedInputNodeTypes": [
+          "shader",
+          "shaderArray"
+        ],
+        "subUI": true,
+        "defaultSubnodeType": "noiseShader",
+        "dimming": "abModel != 2"
+      },
+      "defocusMap": {
+        "type": "shaderData",
+        "supportedInputNodeTypes": [
+          "shader",
+          "shaderArray"
+        ],
+        "subUI": true,
+        "defaultSubnodeType": "noiseShader",
+        "dimming": "cocSource != 4"
+      }
+    },
+    "triggers": {
+      "out": [
+        "profile",
+        "distortion",
+        "squeeze",
+        "centreOffset",
+        "expand",
+        "edges",
+        "edgeTrim",
+        "fringing",
+        "abModel",
+        "geometry",
+        "centre",
+        "angle",
+        "dispersion",
+        "focusWave",
+        "smoothing",
+        "aberration",
+        "redScale",
+        "greenScale",
+        "blueScale",
+        "smear",
+        "falloff",
+        "mapChannel",
+        "mapAmplitude",
+        "mapFromGradient",
+        "abIntensity",
+        "bokehThreshold",
+        "bokehGamma",
+        "defocus",
+        "blades",
+        "rotation",
+        "catsEye",
+        "catsEyeFalloff",
+        "ringBias",
+        "cocSource",
+        "focus",
+        "aperture",
+        "exposure",
+        "gain",
+        "dither",
+        "kernel",
+        "size",
+        "kernelRotation",
+        "ringFrequency",
+        "axialRed",
+        "axialGreen",
+        "axialBlue",
+        "scatterThreshold",
+        "scatterGain",
+        "scatterBlend",
+        "samples",
+        "amount",
+        "displaceMap",
+        "defocusMap"
+      ]
+    },
+    "UI": {
+      "tabs": [
+        {
+          "id": "filter",
+          "attributeOrder": [
+            "profile",
+            "distortion",
+            "squeeze",
+            "centreOffset",
+            "expand",
+            "edges",
+            "edgeTrim",
+            "---Fringing",
+            "fringing",
+            "---A",
+            "samples",
+            "amount"
+          ]
+        },
+        {
+          "id": "aberration",
+          "attributeOrder": [
+            "abModel",
+            "geometry",
+            "centre",
+            "angle",
+            "---Spectral",
+            "dispersion",
+            "focusWave",
+            "smoothing",
+            "abIntensity",
+            "---Channel",
+            "aberration",
+            "redScale",
+            "greenScale",
+            "blueScale",
+            "smear",
+            "falloff",
+            "---Prism",
+            "displaceMap",
+            "mapChannel",
+            "mapAmplitude",
+            "mapFromGradient"
+          ]
+        },
+        {
+          "id": "defocus",
+          "attributeOrder": [
+            "defocus",
+            "blades",
+            "rotation",
+            "---Bokeh Shape",
+            "catsEye",
+            "catsEyeFalloff",
+            "ringBias",
+            "---Focus",
+            "cocSource",
+            "focus",
+            "aperture",
+            "defocusMap",
+            "---Highlights",
+            "bokehThreshold",
+            "bokehGamma",
+            "exposure",
+            "gain",
+            "dither"
+          ]
+        },
+        {
+          "id": "artefacts",
+          "attributeOrder": [
+            "size",
+            "kernel",
+            "kernelRotation",
+            "ringFrequency",
+            "---Axial Chromatic",
+            "axialRed",
+            "axialGreen",
+            "axialBlue",
+            "---Output",
+            "scatterThreshold",
+            "scatterGain",
+            "scatterBlend",
+            "---Inspired by Hawk-Anamorphic-Nuke (MIT), M. Blumen, hornet & F. Lorber"
+          ]
+        }
+      ],
+      "controls": {
+        "displaceMap": "nodeInput",
+        "defocusMap": "nodeInput"
+      },
+      "icon": "lens.png"
+    }
+  },
+  {
+    "author": "samMularczyk",
+    "type": "lensFlare",
+    "superType": "thirdPartyFilter",
+    "version": "1.0",
+    "paddingExpression": "ceil(max(max(haloRadius + haloWidth, streakLength), max(starLength, ghostSpacing * 9.0 * 300.0)))",
+    "passes": [
+      {
+        "skslFile": "lensFlareEmitter.sksl",
+        "uniforms": [
+          "placement",
+          "position",
+          "threshold",
+          "gamma"
+        ]
+      },
+      {
+        "skslFile": "lensFlareGhosts.sksl",
+        "uniforms": [
+          "colourSource",
+          "brightnessSource",
+          "flareColour",
+          "threshold",
+          "gamma",
+          "lens",
+          "ghostCount",
+          "ghostSpacing",
+          "ghostScale",
+          "ghostChromatic",
+          "ghostCatsEye",
+          "ghostCatsEyeFalloff",
+          "ghostIntensity",
+          "ghostSoft",
+          "blades",
+          "streakLength",
+          "streakAngle",
+          "streakTint",
+          "streakIntensity",
+          "starLength",
+          "starRotation",
+          "starSoftness",
+          "starGlow",
+          "starIntensity"
+        ]
+      },
+      {
+        "skslFile": "lensFlareHalo.sksl",
+        "uniforms": [
+          "threshold",
+          "gamma",
+          "haloRadius",
+          "haloWidth",
+          "haloChromatic",
+          "haloBlur",
+          "colourSource",
+          "brightnessSource",
+          "flareColour",
+          "haloIntensity"
+        ]
+      },
+      {
+        "skslFile": "lensFlareCombine.sksl",
+        "uniforms": [
+          "intensity",
+          "tint",
+          "blend",
+          "amount"
+        ]
+      }
+    ],
+    "attributes": {
+      "placement": {
+        "type": "enum",
+        "default": 1,
+        "enumValues": [
+          0,
+          1
+        ]
+      },
+      "position": {
+        "type": "double2",
+        "default": {
+          "x": 0,
+          "y": 0
+        },
+        "children": {
+          "*": {
+            "step": 1
+          }
+        },
+        "dimming": "placement == 0"
+      },
+      "colourSource": {
+        "type": "enum",
+        "default": 1,
+        "enumValues": [
+          0,
+          1
+        ]
+      },
+      "brightnessSource": {
+        "type": "enum",
+        "default": 1,
+        "enumValues": [
+          0,
+          1
+        ]
+      },
+      "flareColour": {
+        "type": "color",
+        "default": {
+          "type": "Color",
+          "r": 255,
+          "g": 214,
+          "b": 170,
+          "a": 255
+        },
+        "dimming": "colourSource == 0"
+      },
+      "threshold": {
+        "type": "double",
+        "default": 0.8,
+        "min": 0,
+        "max": 0.999,
+        "step": 0.01,
+        "dimming": "placement == 1"
+      },
+      "gamma": {
+        "type": "double",
+        "default": 1,
+        "min": 0.1,
+        "softMax": 8,
+        "step": 0.05,
+        "dimming": "placement == 1"
+      },
+      "lens": {
+        "type": "enum",
+        "default": 0,
+        "enumValues": [
+          0,
+          1,
+          2
+        ],
+        "dimming": "ghostIntensity <= 0"
+      },
+      "ghostIntensity": {
+        "type": "double",
+        "default": 0.6,
+        "min": 0,
+        "softMax": 4,
+        "step": 0.05
+      },
+      "ghostSoft": {
+        "type": "double",
+        "default": 0.7,
+        "min": 0,
+        "max": 1,
+        "step": 0.01
+      },
+      "ghostCount": {
+        "type": "double",
+        "default": 5,
+        "min": 0,
+        "max": 8,
+        "step": 1,
+        "dimming": "ghostIntensity <= 0"
+      },
+      "ghostSpacing": {
+        "type": "double",
+        "default": 0.5,
+        "min": 0,
+        "softMax": 3,
+        "step": 0.05,
+        "dimming": "ghostIntensity <= 0"
+      },
+      "ghostScale": {
+        "type": "double",
+        "default": 0.5,
+        "min": 0.01,
+        "softMax": 3,
+        "step": 0.01,
+        "dimming": "ghostIntensity <= 0"
+      },
+      "ghostChromatic": {
+        "type": "double",
+        "default": 0.5,
+        "min": 0,
+        "softMax": 40,
+        "step": 0.5,
+        "dimming": "ghostIntensity <= 0"
+      },
+      "ghostCatsEye": {
+        "type": "double",
+        "default": 0.4,
+        "min": 0,
+        "max": 1,
+        "step": 0.01,
+        "dimming": "ghostIntensity <= 0"
+      },
+      "ghostCatsEyeFalloff": {
+        "type": "double",
+        "default": 1,
+        "min": 0.1,
+        "softMax": 4,
+        "step": 0.05,
+        "dimming": "ghostIntensity <= 0"
+      },
+      "blades": {
+        "type": "double",
+        "default": 6,
+        "min": 0,
+        "softMax": 12,
+        "step": 1,
+        "dimming": "ghostIntensity <= 0"
+      },
+      "haloIntensity": {
+        "type": "double",
+        "default": 0.4,
+        "min": 0,
+        "softMax": 4,
+        "step": 0.05
+      },
+      "haloRadius": {
+        "type": "double",
+        "default": 250,
+        "min": 0,
+        "softMax": 2000,
+        "step": 1,
+        "dimming": "haloIntensity <= 0"
+      },
+      "haloWidth": {
+        "type": "double",
+        "default": 40,
+        "min": 0.5,
+        "softMax": 400,
+        "step": 1,
+        "dimming": "haloIntensity <= 0"
+      },
+      "haloChromatic": {
+        "type": "double",
+        "default": 0.5,
+        "min": 0,
+        "softMax": 40,
+        "step": 0.5,
+        "dimming": "haloIntensity <= 0"
+      },
+      "haloBlur": {
+        "type": "double",
+        "default": 10,
+        "min": 0,
+        "softMax": 120,
+        "step": 0.5,
+        "dimming": "haloIntensity <= 0"
+      },
+      "starIntensity": {
+        "type": "double",
+        "default": 0.5,
+        "min": 0,
+        "softMax": 4,
+        "step": 0.05
+      },
+      "starLength": {
+        "type": "double",
+        "default": 400,
+        "min": 0,
+        "softMax": 3000,
+        "step": 1,
+        "dimming": "starIntensity <= 0"
+      },
+      "starRotation": {
+        "type": "double",
+        "default": 0,
+        "softMin": -180,
+        "softMax": 180,
+        "step": 0.5,
+        "dimming": "starIntensity <= 0"
+      },
+      "starSoftness": {
+        "type": "double",
+        "default": 1,
+        "min": 0,
+        "softMax": 4,
+        "step": 0.05,
+        "dimming": "starIntensity <= 0"
+      },
+      "starGlow": {
+        "type": "double",
+        "default": 0.45,
+        "min": 0,
+        "max": 1,
+        "step": 0.01,
+        "dimming": "starIntensity <= 0"
+      },
+      "streakIntensity": {
+        "type": "double",
+        "default": 0,
+        "min": 0,
+        "softMax": 4,
+        "step": 0.05
+      },
+      "streakLength": {
+        "type": "double",
+        "default": 600,
+        "min": 0,
+        "softMax": 4000,
+        "step": 1,
+        "dimming": "streakIntensity <= 0"
+      },
+      "streakAngle": {
+        "type": "double",
+        "default": 0,
+        "softMin": -180,
+        "softMax": 180,
+        "step": 0.5,
+        "dimming": "streakIntensity <= 0"
+      },
+      "streakTint": {
+        "type": "color",
+        "default": {
+          "type": "Color",
+          "r": 255,
+          "g": 255,
+          "b": 255,
+          "a": 255
+        },
+        "dimming": "streakIntensity <= 0"
+      },
+      "intensity": {
+        "type": "double",
+        "default": 0.5,
+        "min": 0,
+        "softMax": 8,
+        "step": 0.05
+      },
+      "tint": {
+        "type": "color",
+        "default": {
+          "type": "Color",
+          "r": 255,
+          "g": 255,
+          "b": 255,
+          "a": 255
+        },
+        "dimming": "intensity <= 0"
+      },
+      "blend": {
+        "type": "enum",
+        "default": 0,
+        "enumValues": [
+          0,
+          1,
+          2,
+          3
+        ]
+      },
+      "amount": {
+        "type": "double",
+        "default": 1,
+        "min": 0,
+        "max": 1,
+        "step": 0.01
+      }
+    },
+    "triggers": {
+      "out": [
+        "placement",
+        "position",
+        "colourSource",
+        "brightnessSource",
+        "flareColour",
+        "threshold",
+        "gamma",
+        "lens",
+        "ghostIntensity",
+        "ghostSoft",
+        "ghostCount",
+        "ghostSpacing",
+        "ghostScale",
+        "ghostChromatic",
+        "ghostCatsEye",
+        "ghostCatsEyeFalloff",
+        "blades",
+        "haloIntensity",
+        "haloRadius",
+        "haloWidth",
+        "haloChromatic",
+        "haloBlur",
+        "starIntensity",
+        "starLength",
+        "starRotation",
+        "starSoftness",
+        "starGlow",
+        "streakIntensity",
+        "streakLength",
+        "streakAngle",
+        "streakTint",
+        "intensity",
+        "tint",
+        "blend",
+        "amount"
+      ]
+    },
+    "UI": {
+      "tabs": [
+        {
+          "id": "filter",
+          "attributeOrder": [
+            "placement",
+            "position",
+            "intensity",
+            "colourSource",
+            "brightnessSource",
+            "flareColour",
+            "tint",
+            "amount",
+            "blend",
+            "---Auto placement",
+            "threshold",
+            "gamma",
+            "---Starburst",
+            "starIntensity",
+            "starLength",
+            "starRotation",
+            "starSoftness",
+            "starGlow",
+            "blades",
+            "---Streak",
+            "streakIntensity",
+            "streakLength",
+            "streakAngle",
+            "streakTint"
+          ]
+        },
+        {
+          "id": "artifacts",
+          "attributeOrder": [
+            "lens",
+            "ghostIntensity",
+            "ghostSoft",
+            "ghostCount",
+            "ghostSpacing",
+            "ghostScale",
+            "ghostChromatic",
+            "ghostCatsEye",
+            "ghostCatsEyeFalloff",
+            "---Halo",
+            "haloIntensity",
+            "haloRadius",
+            "haloWidth",
+            "haloChromatic",
+            "haloBlur",
+            "---Ghosts ported from flaresim_nuke, LocalStarlight (MIT). Streak/halo inspired by Ultimate Lens Flare, ektogamat (CC0)"
+          ]
+        }
+      ],
+      "icon": "lensFlare.png"
+    }
+  },
+  {
+    "author": "samMularczyk",
+    "type": "lightLeak",
+    "superType": "thirdPartyFilter",
+    "version": "1.0",
+    "skslFile": "lightLeak.sksl",
+    "attributes": {
+      "intensity": {
+        "type": "double",
+        "default": 1,
+        "min": 0,
+        "max": 1,
+        "step": 0.01
+      },
+      "source": {
+        "type": "enum",
+        "default": 0,
+        "enumValues": [
+          0,
+          1,
+          2,
+          3,
+          4,
+          5,
+          6,
+          7,
+          8
+        ]
+      },
+      "position": {
+        "type": "double2",
+        "default": {
+          "x": 0,
+          "y": 0
+        },
+        "children": {
+          "*": {
+            "step": 1
+          }
+        },
+        "dimming": "source != 8"
+      },
+      "spread": {
+        "type": "double",
+        "default": 0.5,
+        "min": 0.05,
+        "softMax": 4,
+        "step": 0.05
+      },
+      "wander": {
+        "type": "double",
+        "default": 0.4,
+        "min": 0,
+        "max": 1,
+        "step": 0.01
+      },
+      "red": {
+        "type": "double",
+        "default": 1,
+        "min": 0,
+        "softMax": 3,
+        "step": 0.01
+      },
+      "yellow": {
+        "type": "double",
+        "default": 1,
+        "min": 0,
+        "softMax": 3,
+        "step": 0.01
+      },
+      "blue": {
+        "type": "double",
+        "default": 1,
+        "min": 0,
+        "softMax": 3,
+        "step": 0.01
+      },
+      "interact": {
+        "type": "double",
+        "default": 0.51,
+        "min": 0,
+        "max": 1,
+        "step": 0.01
+      },
+      "speed": {
+        "type": "double",
+        "default": 0.05,
+        "min": 0,
+        "softMax": 5,
+        "step": 0.01
+      },
+      "time": {
+        "type": "double",
+        "default": 0,
+        "compConnect": "time"
+      },
+      "blend": {
+        "type": "enum",
+        "default": 0,
+        "enumValues": [
+          0,
+          1,
+          2
+        ]
+      },
+      "amount": {
+        "type": "double",
+        "default": 1,
+        "min": 0,
+        "max": 1,
+        "step": 0.01
+      }
+    },
+    "triggers": {
+      "out": [
+        "intensity",
+        "source",
+        "position",
+        "spread",
+        "wander",
+        "red",
+        "yellow",
+        "blue",
+        "interact",
+        "speed",
+        "time",
+        "blend",
+        "amount"
+      ]
+    },
+    "UI": {
+      "icon": "lightLeak.png",
+      "attributeOrder": [
+        "intensity",
+        "---Source",
+        "source",
+        "position",
+        "spread",
+        "wander",
+        "---Colour",
+        "red",
+        "yellow",
+        "blue",
+        "interact",
+        "---Motion",
+        "speed",
+        "time",
+        "---Output",
+        "blend",
+        "amount",
+        "---Ported from LightLeaksUnity, danielzeller (MIT)"
+      ]
+    }
+  },
+  {
+    "author": "samMularczyk",
+    "type": "lightwrap",
+    "superType": "thirdPartyFilter",
+    "version": "1.0",
+    "passes": [
+      {
+        "skslFile": "lightwrapFirst.sksl",
+        "uniforms": [
+          "size",
+          "falloff",
+          "aspect",
+          "useLuminance",
+          "threshold",
+          "bgSize",
+          "bgScale"
+        ],
+        "constants": {
+          "dirX": 1,
+          "dirY": 0,
+          "radiusMul": 0.125
+        }
+      },
+      {
+        "skslFile": "lightwrapBlur.sksl",
+        "uniforms": [
+          "size",
+          "falloff",
+          "aspect",
+          "useLuminance",
+          "threshold",
+          "bgSize",
+          "bgScale"
+        ],
+        "constants": {
+          "dirX": 0,
+          "dirY": 1,
+          "radiusMul": 0.125,
+          "addH": 1
+        }
+      },
+      {
+        "skslFile": "lightwrapBlur.sksl",
+        "uniforms": [
+          "size",
+          "falloff",
+          "aspect",
+          "useLuminance",
+          "threshold",
+          "bgSize",
+          "bgScale"
+        ],
+        "constants": {
+          "dirX": 1,
+          "dirY": 0,
+          "radiusMul": 0.25,
+          "addH": 0
+        }
+      },
+      {
+        "skslFile": "lightwrapBlur.sksl",
+        "uniforms": [
+          "size",
+          "falloff",
+          "aspect",
+          "useLuminance",
+          "threshold",
+          "bgSize",
+          "bgScale"
+        ],
+        "constants": {
+          "dirX": 0,
+          "dirY": 1,
+          "radiusMul": 0.25,
+          "addH": 1
+        }
+      },
+      {
+        "skslFile": "lightwrapBlur.sksl",
+        "uniforms": [
+          "size",
+          "falloff",
+          "aspect",
+          "useLuminance",
+          "threshold",
+          "bgSize",
+          "bgScale"
+        ],
+        "constants": {
+          "dirX": 1,
+          "dirY": 0,
+          "radiusMul": 0.5,
+          "addH": 0
+        }
+      },
+      {
+        "skslFile": "lightwrapBlur.sksl",
+        "uniforms": [
+          "size",
+          "falloff",
+          "aspect",
+          "useLuminance",
+          "threshold",
+          "bgSize",
+          "bgScale"
+        ],
+        "constants": {
+          "dirX": 0,
+          "dirY": 1,
+          "radiusMul": 0.5,
+          "addH": 1
+        }
+      },
+      {
+        "skslFile": "lightwrapBlur.sksl",
+        "uniforms": [
+          "size",
+          "falloff",
+          "aspect",
+          "useLuminance",
+          "threshold",
+          "bgSize",
+          "bgScale"
+        ],
+        "constants": {
+          "dirX": 1,
+          "dirY": 0,
+          "radiusMul": 1,
+          "addH": 0
+        }
+      },
+      {
+        "skslFile": "lightwrapBlur.sksl",
+        "uniforms": [
+          "size",
+          "falloff",
+          "aspect",
+          "useLuminance",
+          "threshold",
+          "bgSize",
+          "bgScale"
+        ],
+        "constants": {
+          "dirX": 0,
+          "dirY": 1,
+          "radiusMul": 1,
+          "addH": 1
+        }
+      },
+      {
+        "skslFile": "lightwrapCombine.sksl",
+        "uniforms": [
+          "brightness",
+          "gamma",
+          "saturation",
+          "blend",
+          "amount"
+        ]
+      }
+    ],
+    "attributes": {
+      "size": {
+        "type": "double",
+        "default": 40,
+        "min": 0,
+        "softMax": 500,
+        "step": 0.5
+      },
+      "falloff": {
+        "type": "double",
+        "default": 1,
+        "min": 0.05,
+        "softMax": 6,
+        "step": 0.05
+      },
+      "aspect": {
+        "type": "double",
+        "default": 1,
+        "min": 0.01,
+        "softMax": 3,
+        "step": 0.01
+      },
+      "useLuminance": {
+        "type": "bool",
+        "default": true
+      },
+      "threshold": {
+        "type": "double",
+        "default": 0.2,
+        "min": 0,
+        "max": 1,
+        "step": 0.01,
+        "dimming": "useLuminance == false"
+      },
+      "bgSize": {
+        "type": "double2",
+        "default": {
+          "x": 1920,
+          "y": 1080
+        },
+        "children": {
+          "*": {
+            "step": 1
+          }
+        }
+      },
+      "bgScale": {
+        "type": "double2",
+        "default": {
+          "x": 1,
+          "y": 1
+        },
+        "children": {
+          "*": {
+            "step": 0.01
+          }
+        }
+      },
+      "brightness": {
+        "type": "double",
+        "default": 1,
+        "min": 0,
+        "softMax": 5,
+        "step": 0.01
+      },
+      "gamma": {
+        "type": "double",
+        "default": 1,
+        "min": 0.0001,
+        "softMax": 3,
+        "step": 0.01
+      },
+      "saturation": {
+        "type": "double",
+        "default": 1,
+        "min": 0,
+        "softMax": 3,
+        "step": 0.01,
+        "dimming": "brightness <= 0"
+      },
+      "blend": {
+        "type": "enum",
+        "default": 0,
+        "enumValues": [
+          0,
+          1,
+          2,
+          3
+        ]
+      },
+      "amount": {
+        "type": "double",
+        "default": 1,
+        "min": 0,
+        "max": 1,
+        "step": 0.01
+      },
+      "background": {
+        "type": "shaderData",
+        "supportedInputNodeTypes": [
+          "shader",
+          "shaderArray"
+        ],
+        "subUI": true
+      }
+    },
+    "triggers": {
+      "out": [
+        "size",
+        "falloff",
+        "aspect",
+        "useLuminance",
+        "threshold",
+        "bgSize",
+        "bgScale",
+        "brightness",
+        "gamma",
+        "saturation",
+        "blend",
+        "amount",
+        "background"
+      ]
+    },
+    "UI": {
+      "icon": "lightwrap.png",
+      "attributeOrder": [
+        "background",
+        "bgSize",
+        "bgScale",
+        "---Wrap",
+        "size",
+        "falloff",
+        "aspect",
+        "---Source",
+        "useLuminance",
+        "threshold",
+        "---Look",
+        "brightness",
+        "gamma",
+        "saturation",
+        "---Output",
+        "blend",
+        "amount",
+        "---Inspired by bm_Lightwrap, Ben McEwan"
+      ],
+      "controls": {
+        "background": "nodeInput"
+      }
+    }
+  },
+  {
+    "author": "samMularczyk",
+    "type": "paint",
+    "superType": "thirdPartyFilter",
+    "version": "1.0",
+    "passes": [
+      {
+        "skslFile": "paintPass1.sksl",
+        "uniforms": [
+          "style",
+          "estimatorRadius",
+          "estimatorTaps",
+          "threshold",
+          "washes",
+          "washRadius",
+          "washThreshold"
+        ]
+      },
+      {
+        "skslFile": "paintPass2.sksl",
+        "uniforms": [
+          "style",
+          "blurRadius",
+          "blurTaps"
+        ]
+      },
+      {
+        "skslFile": "paintPass3.sksl",
+        "uniforms": [
+          "style",
+          "blurRadius",
+          "blurTaps",
+          "transport",
+          "edgeFlow",
+          "washFlow",
+          "flowJitter",
+          "flowScale"
+        ]
+      },
+      {
+        "skslFile": "paintFinal.sksl",
+        "uniforms": [
+          "style",
+          "strokeLength",
+          "strokeWidth",
+          "fieldMode",
+          "flowMix",
+          "mapChannel",
+          "fieldStep",
+          "intensity",
+          "smear",
+          "bristle",
+          "perpendicular",
+          "wetEdge",
+          "wetEdgeScale",
+          "edgeDarkening",
+          "granulation",
+          "granulationScale",
+          "paperTexture",
+          "paperColor",
+          "amount"
+        ]
+      }
+    ],
+    "attributes": {
+      "style": {
+        "type": "enum",
+        "default": 0,
+        "enumValues": [
+          0,
+          1,
+          2
+        ]
+      },
+      "estimatorRadius": {
+        "type": "double",
+        "default": 24,
+        "min": 1,
+        "softMax": 200,
+        "step": 1,
+        "dimming": "style != 0"
+      },
+      "estimatorTaps": {
+        "type": "double",
+        "default": 24,
+        "min": 4,
+        "max": 64,
+        "step": 1,
+        "dimming": "style != 0"
+      },
+      "threshold": {
+        "type": "double",
+        "default": 0.12,
+        "min": 0.001,
+        "softMax": 1,
+        "step": 0.01,
+        "dimming": "style != 0"
+      },
+      "blurRadius": {
+        "type": "double",
+        "default": 0.35,
+        "min": 0.001,
+        "softMax": 2,
+        "step": 0.01,
+        "dimming": "style != 0"
+      },
+      "blurTaps": {
+        "type": "double",
+        "default": 15,
+        "min": 1,
+        "max": 31,
+        "step": 1,
+        "dimming": "style != 0"
+      },
+      "strokeLength": {
+        "type": "double",
+        "default": 8,
+        "min": 1,
+        "max": 16,
+        "step": 1,
+        "dimming": "style != 0"
+      },
+      "strokeWidth": {
+        "type": "double",
+        "default": 2,
+        "min": 0,
+        "softMax": 20,
+        "step": 0.1,
+        "dimming": "style != 0"
+      },
+      "fieldMode": {
+        "type": "enum",
+        "default": 0,
+        "enumValues": [
+          0,
+          1,
+          2
+        ],
+        "dimming": "style != 1"
+      },
+      "flowMix": {
+        "type": "double",
+        "default": 0.5,
+        "min": 0,
+        "max": 1,
+        "step": 0.01,
+        "dimming": "style != 1 || fieldMode != 2"
+      },
+      "mapChannel": {
+        "type": "enum",
+        "default": 0,
+        "enumValues": [
+          0,
+          1,
+          2,
+          3,
+          4,
+          5
+        ],
+        "dimming": "style != 1 || fieldMode == 1"
+      },
+      "fieldStep": {
+        "type": "double",
+        "default": 2,
+        "min": 0.01,
+        "softMax": 32,
+        "step": 0.1,
+        "dimming": "style != 1"
+      },
+      "intensity": {
+        "type": "double",
+        "default": 6,
+        "min": 0,
+        "softMax": 80,
+        "step": 0.5,
+        "dimming": "style != 1"
+      },
+      "smear": {
+        "type": "double",
+        "default": 8,
+        "min": 0,
+        "softMax": 120,
+        "step": 0.5,
+        "dimming": "style != 1"
+      },
+      "bristle": {
+        "type": "double",
+        "default": 0.35,
+        "min": 0,
+        "max": 1,
+        "step": 0.01,
+        "dimming": "style != 1"
+      },
+      "perpendicular": {
+        "type": "bool",
+        "default": false,
+        "dimming": "style != 1"
+      },
+      "washes": {
+        "type": "double",
+        "default": 6,
+        "min": 2,
+        "softMax": 32,
+        "step": 1,
+        "dimming": "style != 2"
+      },
+      "washRadius": {
+        "type": "double",
+        "default": 6,
+        "min": 0,
+        "softMax": 40,
+        "step": 0.5,
+        "dimming": "style != 2"
+      },
+      "washThreshold": {
+        "type": "double",
+        "default": 0.12,
+        "min": 0.001,
+        "softMax": 1,
+        "step": 0.01,
+        "dimming": "style != 2"
+      },
+      "transport": {
+        "type": "double",
+        "default": 10,
+        "min": 0,
+        "softMax": 80,
+        "step": 0.5,
+        "dimming": "style != 2"
+      },
+      "edgeFlow": {
+        "type": "double",
+        "default": 0.7,
+        "min": 0,
+        "max": 1,
+        "step": 0.01,
+        "dimming": "style != 2 || transport <= 0"
+      },
+      "washFlow": {
+        "type": "double",
+        "default": 0.4,
+        "min": 0,
+        "max": 1,
+        "step": 0.01,
+        "dimming": "style != 2 || transport <= 0"
+      },
+      "flowJitter": {
+        "type": "double",
+        "default": 0.5,
+        "min": 0,
+        "max": 1,
+        "step": 0.01,
+        "dimming": "style != 2 || transport <= 0"
+      },
+      "flowScale": {
+        "type": "double",
+        "default": 40,
+        "min": 0.001,
+        "softMax": 300,
+        "step": 1,
+        "dimming": "style != 2 || transport <= 0 || flowJitter <= 0"
+      },
+      "wetEdge": {
+        "type": "double",
+        "default": 4,
+        "min": 0,
+        "softMax": 40,
+        "step": 0.5,
+        "dimming": "style != 2"
+      },
+      "wetEdgeScale": {
+        "type": "double",
+        "default": 30,
+        "min": 0.001,
+        "softMax": 200,
+        "step": 1,
+        "dimming": "style != 2 || wetEdge <= 0"
+      },
+      "edgeDarkening": {
+        "type": "double",
+        "default": 0.5,
+        "min": 0,
+        "max": 1,
+        "step": 0.01,
+        "dimming": "style != 2"
+      },
+      "granulation": {
+        "type": "double",
+        "default": 0.3,
+        "min": 0,
+        "max": 1,
+        "step": 0.01,
+        "dimming": "style != 2"
+      },
+      "granulationScale": {
+        "type": "double",
+        "default": 8,
+        "min": 0.001,
+        "softMax": 80,
+        "step": 0.5,
+        "dimming": "style != 2 || granulation <= 0"
+      },
+      "paperTexture": {
+        "type": "double",
+        "default": 0.4,
+        "min": 0,
+        "max": 1,
+        "step": 0.01,
+        "dimming": "style != 2"
+      },
+      "paperColor": {
+        "type": "color",
+        "default": {
+          "type": "Color",
+          "r": 247,
+          "g": 244,
+          "b": 235,
+          "a": 255
+        },
+        "dimming": "style != 2 || paperTexture <= 0"
+      },
+      "amount": {
+        "type": "double",
+        "default": 1,
+        "min": 0,
+        "max": 1,
+        "step": 0.01
+      },
+      "field": {
+        "type": "shaderData",
+        "supportedInputNodeTypes": [
+          "shader",
+          "shaderArray"
+        ],
+        "subUI": true,
+        "defaultSubnodeType": "noiseShader",
+        "dimming": "style != 1"
+      }
+    },
+    "triggers": {
+      "out": [
+        "style",
+        "estimatorRadius",
+        "estimatorTaps",
+        "threshold",
+        "blurRadius",
+        "blurTaps",
+        "strokeLength",
+        "strokeWidth",
+        "fieldMode",
+        "flowMix",
+        "mapChannel",
+        "fieldStep",
+        "intensity",
+        "smear",
+        "bristle",
+        "perpendicular",
+        "washes",
+        "washRadius",
+        "washThreshold",
+        "transport",
+        "edgeFlow",
+        "washFlow",
+        "flowJitter",
+        "flowScale",
+        "wetEdge",
+        "wetEdgeScale",
+        "edgeDarkening",
+        "granulation",
+        "granulationScale",
+        "paperTexture",
+        "paperColor",
+        "amount",
+        "field"
+      ]
+    },
+    "UI": {
+      "tabs": [
+        {
+          "id": "filter",
+          "attributeOrder": [
+            "style",
+            "---A",
+            "amount"
+          ]
+        },
+        {
+          "id": "brush",
+          "attributeOrder": [
+            "estimatorRadius",
+            "estimatorTaps",
+            "threshold",
+            "---Smoothing",
+            "blurRadius",
+            "blurTaps",
+            "---Stroke",
+            "strokeLength",
+            "strokeWidth"
+          ]
+        },
+        {
+          "id": "oil",
+          "attributeOrder": [
+            "fieldMode",
+            "field",
+            "mapChannel",
+            "flowMix",
+            "fieldStep",
+            "---Stroke",
+            "intensity",
+            "smear",
+            "bristle",
+            "perpendicular"
+          ]
+        },
+        {
+          "id": "water",
+          "attributeOrder": [
+            "washes",
+            "washRadius",
+            "washThreshold",
+            "---Transport",
+            "transport",
+            "edgeFlow",
+            "washFlow",
+            "flowJitter",
+            "flowScale",
+            "---Wet Edges",
+            "wetEdge",
+            "wetEdgeScale",
+            "edgeDarkening",
+            "---Pigment",
+            "granulation",
+            "granulationScale",
+            "paperTexture",
+            "paperColor",
+            "---Brush from the flow-based abstraction literature; Oil inspired by Spi3lot, Watercolour by noztol"
+          ]
+        }
+      ],
+      "controls": {
+        "field": "nodeInput"
+      },
+      "icon": "paint.png"
+    }
+  },
+  {
+    "author": "samMularczyk",
+    "type": "photocopy",
+    "superType": "thirdPartyFilter",
+    "version": "1.0",
+    "passes": [
+      {
+        "skslFile": "photocopyBlur.sksl",
+        "uniforms": [
+          "blurRadius"
+        ],
+        "constants": {
+          "dirX": 1,
+          "dirY": 0,
+          "firstPass": 1
+        }
+      },
+      {
+        "skslFile": "photocopyBlur.sksl",
+        "uniforms": [
+          "blurRadius"
+        ],
+        "constants": {
+          "dirX": 0,
+          "dirY": 1,
+          "firstPass": 0
+        }
+      },
+      {
+        "skslFile": "photocopy.sksl",
+        "uniforms": [
+          "exposure",
+          "contrastAmount",
+          "blurRadius",
+          "edgeBlowout",
+          "threshold",
+          "softness",
+          "dither",
+          "ditherAmount",
+          "speckle",
+          "speckleScale",
+          "banding",
+          "bandingScale",
+          "paperAmount",
+          "paperScale",
+          "inkColor",
+          "paperColor",
+          "amount"
+        ]
+      }
+    ],
+    "attributes": {
+      "exposure": {
+        "type": "double",
+        "default": 0,
+        "softMin": -0.5,
+        "softMax": 0.5,
+        "step": 0.01
+      },
+      "contrastAmount": {
+        "type": "double",
+        "default": 1.6,
+        "min": 0,
+        "softMax": 8,
+        "step": 0.05,
+        "dimming": "blurRadius <= 0.499"
+      },
+      "blurRadius": {
+        "type": "double",
+        "default": 8,
+        "min": 0,
+        "softMax": 80,
+        "step": 0.5
+      },
+      "edgeBlowout": {
+        "type": "double",
+        "default": 0.5,
+        "min": 0,
+        "softMax": 3,
+        "step": 0.01,
+        "dimming": "blurRadius <= 0.499"
+      },
+      "threshold": {
+        "type": "double",
+        "default": 0.5,
+        "min": 0,
+        "max": 1,
+        "step": 0.01
+      },
+      "softness": {
+        "type": "double",
+        "default": 0.12,
+        "min": 0,
+        "softMax": 0.5,
+        "step": 0.005
+      },
+      "dither": {
+        "type": "enum",
+        "default": 0,
+        "enumValues": [
+          0,
+          1,
+          2
+        ]
+      },
+      "ditherAmount": {
+        "type": "double",
+        "default": 0.15,
+        "min": 0,
+        "softMax": 1,
+        "step": 0.01,
+        "dimming": "dither == 2"
+      },
+      "speckle": {
+        "type": "double",
+        "default": 0.15,
+        "min": 0,
+        "max": 1,
+        "step": 0.01
+      },
+      "speckleScale": {
+        "type": "double",
+        "default": 0.06,
+        "min": 0.0001,
+        "softMax": 0.5,
+        "step": 0.005,
+        "dimming": "speckle <= 0"
+      },
+      "banding": {
+        "type": "double",
+        "default": 0,
+        "min": 0,
+        "softMax": 0.5,
+        "step": 0.005
+      },
+      "bandingScale": {
+        "type": "double",
+        "default": 0.02,
+        "min": 0.0001,
+        "softMax": 0.5,
+        "step": 0.005,
+        "dimming": "banding <= 0"
+      },
+      "paperAmount": {
+        "type": "double",
+        "default": 0,
+        "min": 0,
+        "max": 1,
+        "step": 0.01
+      },
+      "paperScale": {
+        "type": "double",
+        "default": 0.35,
+        "min": 0.0001,
+        "softMax": 2,
+        "step": 0.01,
+        "dimming": "paperAmount <= 0"
+      },
+      "inkColor": {
+        "type": "color",
+        "default": {
+          "type": "Color",
+          "r": 18,
+          "g": 18,
+          "b": 20,
+          "a": 255
+        }
+      },
+      "paperColor": {
+        "type": "color",
+        "default": {
+          "type": "Color",
+          "r": 246,
+          "g": 244,
+          "b": 236,
+          "a": 255
+        }
+      },
+      "amount": {
+        "type": "double",
+        "default": 1,
+        "min": 0,
+        "max": 1,
+        "step": 0.01
+      }
+    },
+    "triggers": {
+      "out": [
+        "exposure",
+        "contrastAmount",
+        "blurRadius",
+        "edgeBlowout",
+        "threshold",
+        "softness",
+        "dither",
+        "ditherAmount",
+        "speckle",
+        "speckleScale",
+        "banding",
+        "bandingScale",
+        "paperAmount",
+        "paperScale",
+        "inkColor",
+        "paperColor",
+        "amount"
+      ]
+    },
+    "UI": {
+      "icon": "photocopy.png",
+      "tabs": [
+        {
+          "id": "filter",
+          "attributeOrder": [
+            "exposure",
+            "contrastAmount",
+            "blurRadius",
+            "edgeBlowout"
+          ]
+        },
+        {
+          "id": "toner",
+          "attributeOrder": [
+            "threshold",
+            "softness",
+            "dither",
+            "ditherAmount",
+            "speckle",
+            "speckleScale",
+            "---Machine",
+            "banding",
+            "bandingScale"
+          ]
+        },
+        {
+          "id": "paper",
+          "attributeOrder": [
+            "paperAmount",
+            "paperScale",
+            "inkColor",
+            "paperColor"
+          ]
+        },
+        {
+          "id": "output",
+          "attributeOrder": [
+            "amount",
+            "---Inspired by copier artefacts"
+          ]
+        }
+      ]
+    }
+  },
+  {
+    "author": "samMularczyk",
+    "type": "polarCoordinates",
+    "superType": "thirdPartyFilter",
+    "version": 1,
+    "skslFile": "polarCoordinates.sksl",
+    "attributes": {
+      "mapping": {
+        "type": "enum",
+        "default": 0,
+        "enumValues": [
+          0,
+          1
+        ]
+      },
+      "interpolation": {
+        "type": "double",
+        "default": 1,
+        "min": 0,
+        "max": 1,
+        "step": 0.01
+      },
+      "centre": {
+        "type": "double2",
+        "default": [
+          0,
+          0
+        ],
+        "step": 1
+      },
+      "angleOffset": {
+        "type": "double",
+        "default": 0,
+        "softMin": -360,
+        "softMax": 360,
+        "step": 1
+      },
+      "tileMode": {
+        "type": "enum",
+        "default": 0,
+        "enumValues": [
+          0,
+          1,
+          2
+        ]
+      },
+      "amount": {
+        "type": "double",
+        "default": 1,
+        "min": 0,
+        "max": 1,
+        "step": 0.01
+      },
+      "allowViewportClipping": {
+        "default": false
+      }
+    },
+    "triggers": {
+      "out": [
+        "mapping",
+        "interpolation",
+        "centre",
+        "angleOffset",
+        "tileMode",
+        "amount"
+      ]
+    },
+    "UI": {
+      "icon": "polarCoordinates.png",
+      "attributeOrder": [
+        "mapping",
+        "interpolation",
+        "centre",
+        "angleOffset",
+        "tileMode",
+        "---Output",
+        "amount",
+        "---Inspired by After Effects' Polar Coordinates"
+      ]
+    }
+  },
+  {
+    "author": "samMularczyk",
+    "type": "print",
+    "superType": "thirdPartyFilter",
+    "version": "1.0",
+    "paddingExpression": "ceil(registrationError + ghosting * 8 + flatten + 2)",
+    "passes": [
+      {
+        "skslFile": "printPaper.sksl",
+        "uniforms": [
+          "outputMode",
+          "paperColor",
+          "paperGrain",
+          "seed"
+        ]
+      },
+      {
+        "skslFile": "printPlate.sksl",
+        "constants": {
+          "plateIndex": 0
+        },
+        "uniforms": [
+          "process",
+          "separation",
+          "inkCount",
+          "flatten",
+          "levels",
+          "levelBias",
+          "bandDither",
+          "screenType",
+          "frequency",
+          "dotGain",
+          "ink1Color",
+          "ink1Angle",
+          "ink1Coverage",
+          "ink2Color",
+          "ink2Angle",
+          "ink2Coverage",
+          "ink3Color",
+          "ink3Angle",
+          "ink3Coverage",
+          "ink4Color",
+          "ink4Angle",
+          "ink4Coverage",
+          "inkOpacity",
+          "registrationError",
+          "inkLoss",
+          "mottle",
+          "ghosting",
+          "seed",
+          "paperColor",
+          "outputMode"
+        ]
+      },
+      {
+        "skslFile": "printPlate.sksl",
+        "constants": {
+          "plateIndex": 1
+        },
+        "uniforms": [
+          "process",
+          "separation",
+          "inkCount",
+          "flatten",
+          "levels",
+          "levelBias",
+          "bandDither",
+          "screenType",
+          "frequency",
+          "dotGain",
+          "ink1Color",
+          "ink1Angle",
+          "ink1Coverage",
+          "ink2Color",
+          "ink2Angle",
+          "ink2Coverage",
+          "ink3Color",
+          "ink3Angle",
+          "ink3Coverage",
+          "ink4Color",
+          "ink4Angle",
+          "ink4Coverage",
+          "inkOpacity",
+          "registrationError",
+          "inkLoss",
+          "mottle",
+          "ghosting",
+          "seed",
+          "paperColor",
+          "outputMode"
+        ]
+      },
+      {
+        "skslFile": "printPlate.sksl",
+        "constants": {
+          "plateIndex": 2
+        },
+        "uniforms": [
+          "process",
+          "separation",
+          "inkCount",
+          "flatten",
+          "levels",
+          "levelBias",
+          "bandDither",
+          "screenType",
+          "frequency",
+          "dotGain",
+          "ink1Color",
+          "ink1Angle",
+          "ink1Coverage",
+          "ink2Color",
+          "ink2Angle",
+          "ink2Coverage",
+          "ink3Color",
+          "ink3Angle",
+          "ink3Coverage",
+          "ink4Color",
+          "ink4Angle",
+          "ink4Coverage",
+          "inkOpacity",
+          "registrationError",
+          "inkLoss",
+          "mottle",
+          "ghosting",
+          "seed",
+          "paperColor",
+          "outputMode"
+        ]
+      },
+      {
+        "skslFile": "printPlate.sksl",
+        "constants": {
+          "plateIndex": 3
+        },
+        "uniforms": [
+          "process",
+          "separation",
+          "inkCount",
+          "flatten",
+          "levels",
+          "levelBias",
+          "bandDither",
+          "screenType",
+          "frequency",
+          "dotGain",
+          "ink1Color",
+          "ink1Angle",
+          "ink1Coverage",
+          "ink2Color",
+          "ink2Angle",
+          "ink2Coverage",
+          "ink3Color",
+          "ink3Angle",
+          "ink3Coverage",
+          "ink4Color",
+          "ink4Angle",
+          "ink4Coverage",
+          "inkOpacity",
+          "registrationError",
+          "inkLoss",
+          "mottle",
+          "ghosting",
+          "seed",
+          "paperColor",
+          "outputMode"
+        ]
+      },
+      {
+        "skslFile": "printComposite.sksl",
+        "uniforms": [
+          "trueColour",
+          "paperTooth",
+          "seed",
+          "amount"
+        ]
+      }
+    ],
+    "attributes": {
+      "process": {
+        "type": "enum",
+        "default": 0,
+        "enumValues": [
+          0,
+          1,
+          2
+        ]
+      },
+      "separation": {
+        "type": "enum",
+        "default": 0,
+        "enumValues": [
+          0,
+          1,
+          2
+        ]
+      },
+      "inkCount": {
+        "type": "int",
+        "default": 2,
+        "min": 1,
+        "max": 4,
+        "step": 1
+      },
+      "flatten": {
+        "type": "double",
+        "default": 1.5,
+        "min": 0,
+        "softMax": 8,
+        "step": 0.1
+      },
+      "levels": {
+        "type": "double",
+        "default": 0,
+        "min": 0,
+        "softMax": 8,
+        "step": 1
+      },
+      "levelBias": {
+        "type": "double",
+        "default": 1,
+        "min": 0.1,
+        "softMax": 4,
+        "step": 0.05,
+        "dimming": "levels <= 0"
+      },
+      "bandDither": {
+        "type": "double",
+        "default": 0.5,
+        "min": 0,
+        "max": 1,
+        "step": 0.01,
+        "dimming": "levels <= 0"
+      },
+      "screenType": {
+        "type": "enum",
+        "default": 0,
+        "enumValues": [
+          0,
+          1,
+          2,
+          3,
+          4,
+          5,
+          6
+        ]
+      },
+      "frequency": {
+        "type": "double",
+        "default": 8,
+        "min": 2,
+        "max": 64,
+        "step": 0.1,
+        "dimming": "screenType <= 1"
+      },
+      "dotGain": {
+        "type": "double",
+        "default": 0,
+        "min": -1,
+        "max": 1,
+        "step": 0.01,
+        "dimming": "screenType <= 1"
+      },
+      "ink1Color": {
+        "type": "color",
+        "default": {
+          "type": "Color",
+          "r": 0,
+          "g": 90,
+          "b": 181,
+          "a": 255
+        }
+      },
+      "ink1Angle": {
+        "type": "double",
+        "default": 15,
+        "min": 0,
+        "max": 180,
+        "step": 1
+      },
+      "ink1Coverage": {
+        "type": "double",
+        "default": 1,
+        "min": 0,
+        "max": 2,
+        "step": 0.01
+      },
+      "ink2Color": {
+        "type": "color",
+        "default": {
+          "type": "Color",
+          "r": 255,
+          "g": 214,
+          "b": 0,
+          "a": 255
+        },
+        "dimming": "inkCount <= 1"
+      },
+      "ink2Angle": {
+        "type": "double",
+        "default": 45,
+        "min": 0,
+        "max": 180,
+        "step": 1,
+        "dimming": "inkCount <= 1"
+      },
+      "ink2Coverage": {
+        "type": "double",
+        "default": 1,
+        "min": 0,
+        "max": 2,
+        "step": 0.01,
+        "dimming": "inkCount <= 1"
+      },
+      "ink3Color": {
+        "type": "color",
+        "default": {
+          "type": "Color",
+          "r": 226,
+          "g": 61,
+          "b": 130,
+          "a": 255
+        },
+        "dimming": "inkCount <= 2"
+      },
+      "ink3Angle": {
+        "type": "double",
+        "default": 75,
+        "min": 0,
+        "max": 180,
+        "step": 1,
+        "dimming": "inkCount <= 2"
+      },
+      "ink3Coverage": {
+        "type": "double",
+        "default": 1,
+        "min": 0,
+        "max": 2,
+        "step": 0.01,
+        "dimming": "inkCount <= 2"
+      },
+      "ink4Color": {
+        "type": "color",
+        "default": {
+          "type": "Color",
+          "r": 20,
+          "g": 20,
+          "b": 22,
+          "a": 255
+        },
+        "dimming": "inkCount <= 3"
+      },
+      "ink4Angle": {
+        "type": "double",
+        "default": 105,
+        "min": 0,
+        "max": 180,
+        "step": 1,
+        "dimming": "inkCount <= 3"
+      },
+      "ink4Coverage": {
+        "type": "double",
+        "default": 1,
+        "min": 0,
+        "max": 2,
+        "step": 0.01,
+        "dimming": "inkCount <= 3"
+      },
+      "inkOpacity": {
+        "type": "double",
+        "default": 0.85,
+        "min": 0,
+        "max": 1,
+        "step": 0.01
+      },
+      "registrationError": {
+        "type": "double",
+        "default": 1.5,
+        "min": 0,
+        "softMax": 20,
+        "step": 0.1
+      },
+      "inkLoss": {
+        "type": "double",
+        "default": 0.15,
+        "min": 0,
+        "max": 1,
+        "step": 0.01
+      },
+      "mottle": {
+        "type": "double",
+        "default": 0.2,
+        "min": 0,
+        "max": 1,
+        "step": 0.01
+      },
+      "ghosting": {
+        "type": "double",
+        "default": 0,
+        "min": 0,
+        "max": 1,
+        "step": 0.01
+      },
+      "seed": {
+        "type": "int",
+        "default": 1,
+        "min": 0
+      },
+      "paperColor": {
+        "type": "color",
+        "default": {
+          "type": "Color",
+          "r": 247,
+          "g": 243,
+          "b": 233,
+          "a": 255
+        }
+      },
+      "paperGrain": {
+        "type": "double",
+        "default": 0.3,
+        "min": 0,
+        "max": 1,
+        "step": 0.01
+      },
+      "trueColour": {
+        "type": "double",
+        "default": 0,
+        "min": 0,
+        "max": 1,
+        "step": 0.01
+      },
+      "paperTooth": {
+        "type": "double",
+        "default": 0.15,
+        "min": 0,
+        "max": 1,
+        "step": 0.01
+      },
+      "outputMode": {
+        "type": "enum",
+        "default": 0,
+        "enumValues": [
+          0,
+          1,
+          2,
+          3,
+          4,
+          5,
+          6
+        ]
+      },
+      "amount": {
+        "type": "double",
+        "default": 1,
+        "min": 0,
+        "max": 1,
+        "step": 0.01
+      }
+    },
+    "triggers": {
+      "out": [
+        "process",
+        "separation",
+        "inkCount",
+        "flatten",
+        "levels",
+        "levelBias",
+        "bandDither",
+        "screenType",
+        "frequency",
+        "dotGain",
+        "ink1Color",
+        "ink1Angle",
+        "ink1Coverage",
+        "ink2Color",
+        "ink2Angle",
+        "ink2Coverage",
+        "ink3Color",
+        "ink3Angle",
+        "ink3Coverage",
+        "ink4Color",
+        "ink4Angle",
+        "ink4Coverage",
+        "inkOpacity",
+        "registrationError",
+        "inkLoss",
+        "mottle",
+        "ghosting",
+        "seed",
+        "paperColor",
+        "paperGrain",
+        "trueColour",
+        "paperTooth",
+        "outputMode",
+        "amount"
+      ]
+    },
+    "UI": {
+      "icon": "print.png",
+      "tabs": [
+        {
+          "id": "filter",
+          "attributeOrder": [
+            "process",
+            "---Separation",
+            "separation",
+            "inkCount",
+            "flatten",
+            "---Quantisation",
+            "levels",
+            "levelBias",
+            "bandDither"
+          ]
+        },
+        {
+          "id": "screen",
+          "attributeOrder": [
+            "screenType",
+            "frequency",
+            "dotGain"
+          ]
+        },
+        {
+          "id": "inks",
+          "attributeOrder": [
+            "ink1Color",
+            "ink1Angle",
+            "ink1Coverage",
+            "---Ink 2",
+            "ink2Color",
+            "ink2Angle",
+            "ink2Coverage",
+            "---Ink 3",
+            "ink3Color",
+            "ink3Angle",
+            "ink3Coverage",
+            "---Ink 4",
+            "ink4Color",
+            "ink4Angle",
+            "ink4Coverage",
+            "---Shared",
+            "inkOpacity"
+          ]
+        },
+        {
+          "id": "press",
+          "attributeOrder": [
+            "registrationError",
+            "inkLoss",
+            "mottle",
+            "ghosting",
+            "seed"
+          ]
+        },
+        {
+          "id": "paper",
+          "attributeOrder": [
+            "paperColor",
+            "paperGrain",
+            "trueColour",
+            "paperTooth",
+            "outputMode",
+            "amount",
+            "---Screen model adapted from the Cavalry SDK's Screen Print example"
+          ]
+        }
+      ]
+    }
+  },
+  {
+    "author": "samMularczyk",
+    "type": "vhs",
+    "superType": "thirdPartyFilter",
+    "version": "1.0",
+    "skslFile": "vhs.sksl",
+    "attributes": {
+      "time": {
+        "type": "double",
+        "default": 0,
+        "compConnect": "time"
+      },
+      "speed": {
+        "type": "double",
+        "default": 0.0333,
+        "min": 0,
+        "softMax": 0.5,
+        "step": 0.001
+      },
+      "noiseDetail": {
+        "type": "double",
+        "default": 8,
+        "min": 1,
+        "max": 8,
+        "step": 1
+      },
+      "format": {
+        "type": "enum",
+        "default": 0,
+        "enumValues": [
+          0,
+          1,
+          2,
+          3
+        ]
+      },
+      "waveAmount": {
+        "type": "double",
+        "default": 0.005,
+        "min": 0,
+        "softMax": 0.1,
+        "step": 0.001
+      },
+      "fineWave": {
+        "type": "double",
+        "default": 0.01,
+        "min": 0,
+        "softMax": 0.2,
+        "step": 0.001
+      },
+      "creaseAmount": {
+        "type": "double",
+        "default": 10,
+        "min": 0,
+        "softMax": 40,
+        "step": 0.1
+      },
+      "creaseFrequency": {
+        "type": "double",
+        "default": 8,
+        "min": 0,
+        "softMax": 40,
+        "step": 0.1,
+        "dimming": "creaseAmount <= 0"
+      },
+      "creaseSpeed": {
+        "type": "double",
+        "default": 1.2,
+        "softMin": -5,
+        "softMax": 5,
+        "step": 0.01,
+        "dimming": "creaseAmount <= 0"
+      },
+      "creaseThreshold": {
+        "type": "double",
+        "default": 0.92,
+        "min": -1,
+        "max": 1,
+        "step": 0.01,
+        "dimming": "creaseAmount <= 0"
+      },
+      "switchingHeight": {
+        "type": "double",
+        "default": 0.03,
+        "min": 0,
+        "max": 1,
+        "step": 0.001
+      },
+      "switchingShift": {
+        "type": "double",
+        "default": 0.3,
+        "softMin": -1,
+        "softMax": 1,
+        "step": 0.01
+      },
+      "jitter": {
+        "type": "double",
+        "default": 0.2,
+        "min": 0,
+        "softMax": 1,
+        "step": 0.01
+      },
+      "bloomAmount": {
+        "type": "double",
+        "default": 0.007,
+        "min": 0,
+        "softMax": 0.05,
+        "step": 0.0005,
+        "dimming": "bloomStrength <= 0"
+      },
+      "bloomStrength": {
+        "type": "double",
+        "default": 0.1,
+        "min": 0,
+        "softMax": 0.5,
+        "step": 0.005
+      },
+      "greenLag": {
+        "type": "double",
+        "default": 2,
+        "softMin": -8,
+        "softMax": 8,
+        "step": 0.1,
+        "dimming": "bloomStrength <= 0 || bloomAmount <= 0"
+      },
+      "blueLag": {
+        "type": "double",
+        "default": 4,
+        "softMin": -8,
+        "softMax": 8,
+        "step": 0.1,
+        "dimming": "bloomStrength <= 0 || bloomAmount <= 0"
+      },
+      "gain": {
+        "type": "double",
+        "default": 0.6,
+        "min": 0,
+        "softMax": 3,
+        "step": 0.01
+      },
+      "humAmount": {
+        "type": "double",
+        "default": 0.6,
+        "min": 0,
+        "softMax": 3,
+        "step": 0.01
+      },
+      "humSpeed": {
+        "type": "double",
+        "default": 0.2,
+        "softMin": -2,
+        "softMax": 2,
+        "step": 0.01,
+        "dimming": "humAmount <= 0"
+      },
+      "edgeColor": {
+        "type": "color",
+        "default": {
+          "type": "Color",
+          "r": 26,
+          "g": 26,
+          "b": 26,
+          "a": 255
+        }
+      },
+      "dropout": {
+        "type": "double",
+        "default": 0,
+        "min": 0,
+        "max": 1,
+        "step": 0.01
+      },
+      "dropoutLength": {
+        "type": "double",
+        "default": 40,
+        "min": 0,
+        "softMax": 200,
+        "step": 1,
+        "dimming": "dropout <= 0"
+      },
+      "dropoutPolarity": {
+        "type": "double",
+        "default": 1,
+        "min": -1,
+        "max": 1,
+        "step": 0.01,
+        "dimming": "dropout <= 0"
+      },
+      "tracking": {
+        "type": "double",
+        "default": 0,
+        "min": 0,
+        "max": 1,
+        "step": 0.01
+      },
+      "trackingHeight": {
+        "type": "double",
+        "default": 0.12,
+        "min": 0,
+        "max": 1,
+        "step": 0.001,
+        "dimming": "tracking <= 0"
+      },
+      "trackingSpeed": {
+        "type": "double",
+        "default": 0.15,
+        "softMin": -2,
+        "softMax": 2,
+        "step": 0.01,
+        "dimming": "tracking <= 0"
+      },
+      "hiss": {
+        "type": "double",
+        "default": 0,
+        "min": 0,
+        "max": 1,
+        "step": 0.01
+      },
+      "amount": {
+        "type": "double",
+        "default": 1,
+        "min": 0,
+        "max": 1,
+        "step": 0.01
+      }
+    },
+    "triggers": {
+      "out": [
+        "time",
+        "speed",
+        "noiseDetail",
+        "format",
+        "waveAmount",
+        "fineWave",
+        "creaseAmount",
+        "creaseFrequency",
+        "creaseSpeed",
+        "creaseThreshold",
+        "switchingHeight",
+        "switchingShift",
+        "jitter",
+        "bloomAmount",
+        "bloomStrength",
+        "greenLag",
+        "blueLag",
+        "gain",
+        "humAmount",
+        "humSpeed",
+        "edgeColor",
+        "dropout",
+        "dropoutLength",
+        "dropoutPolarity",
+        "tracking",
+        "trackingHeight",
+        "trackingSpeed",
+        "hiss",
+        "amount"
+      ]
+    },
+    "UI": {
+      "icon": "vhs.png",
+      "tabs": [
+        {
+          "id": "filter",
+          "attributeOrder": [
+            "format",
+            "noiseDetail",
+            "speed",
+            "time",
+            "amount",
+            "---Tape",
+            "waveAmount",
+            "fineWave",
+            "---Head Switching",
+            "switchingHeight",
+            "switchingShift",
+            "jitter",
+            "---Crease",
+            "creaseAmount",
+            "creaseFrequency",
+            "creaseSpeed",
+            "creaseThreshold",
+            "---Dropout",
+            "dropout",
+            "dropoutLength",
+            "dropoutPolarity",
+            "---Tracking",
+            "tracking",
+            "trackingHeight",
+            "trackingSpeed",
+            "---Hiss",
+            "hiss"
+          ]
+        },
+        {
+          "id": "picture",
+          "attributeOrder": [
+            "gain",
+            "humAmount",
+            "humSpeed",
+            "edgeColor",
+            "---Bloom",
+            "bloomAmount",
+            "bloomStrength",
+            "greenLag",
+            "blueLag",
+            "---Inspired by ntsc-rs & punikonta's godot-shader-crt-vhs"
+          ]
+        }
+      ]
+    }
+  }
+]

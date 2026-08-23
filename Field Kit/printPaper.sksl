@@ -1,0 +1,55 @@
+// Print, pass 0 of 6 - Field Kit
+// Lays the base the plates print onto: stock colour shaded by fibre grain, or
+// one of the alternate bases the Output control asks for.
+//
+// Adapted from the Cavalry SDK's own Screen Print example (paper.sksl) -
+// see printPlate.sksl for how the ink separation itself differs.
+//
+// Pass 0 must NOT declare `uniform shader original` - there is no such input on
+// the first pass and the shader fails to BUILD, silently contributing nothing.
+// On pass 0 `childShader` IS the layer.
+
+uniform float  outputMode;   // enum: 0 Paper, 1 Print on Source, 2 Ink Only, 3-6 Plate proofs
+uniform float4 paperColor;
+uniform float  paperGrain;
+uniform float  seed;
+
+uniform float2 resolution;
+uniform float2 rectCentre;
+
+uniform shader childShader;  // pass 0 input = the layer being filtered
+
+float hash2(float2 p) {
+    p = fract(p * float2(123.34, 456.21) + seed * 0.123);
+    p += dot(p, p + 45.32);
+    return fract(p.x * p.y);
+}
+
+// Two octaves of value noise stand in for paper fibre.
+float fibre(float2 p) {
+    float2 i = floor(p);
+    float2 f = fract(p);
+    float2 u = f * f * (3.0 - 2.0 * f);
+    float a = hash2(i);
+    float b = hash2(i + float2(1.0, 0.0));
+    float c = hash2(i + float2(0.0, 1.0));
+    float d = hash2(i + float2(1.0, 1.0));
+    return mix(mix(a, b, u.x), mix(c, d, u.x), u.y);
+}
+
+half4 main(float2 fragCoord) {
+    int mode = int(outputMode);
+    if (mode == 1) { return childShader.eval(fragCoord); }   // the source is the substrate
+    if (mode == 2) { return half4(0.0); }                    // ink only: transparent base
+    if (mode >= 3) { return half4(1.0); }                    // plate proofs print on white
+
+    // Paper exists only where the layer does. Returning it opaque everywhere
+    // filled the filter's padding - which grows with registration, ghosting and
+    // flatten - with bare paper, so the print carried a border that widened as
+    // those went up. The sheet is the image's shape, not the padded bounds.
+    half a = childShader.eval(fragCoord).a;
+
+    float g = fibre(fragCoord * 0.35) * 0.6 + fibre(fragCoord * 1.7) * 0.4;
+    float shade = 1.0 - paperGrain * 0.18 * g;
+    return half4(half3(paperColor.rgb) * half(shade) * a, a);
+}

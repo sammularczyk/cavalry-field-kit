@@ -1,0 +1,447 @@
+{
+  "author": "samMularczyk",
+  "type": "glow",
+  "superType": "thirdPartyFilter",
+  "version": "1.0",
+  "paddingExpression": "ceil(max(size, reach * 2))",
+  "passes": [
+    {
+      "skslFile": "glowHighlights.sksl",
+      "uniforms": [
+        "srcBlack",
+        "srcWhite",
+        "response"
+      ]
+    },
+    {
+      "skslFile": "glowStreak.sksl",
+      "uniforms": [
+        "streakAmount",
+        "reach",
+        "angle",
+        "samples",
+        "streakFalloff",
+        "blur",
+        "bidirectional"
+      ],
+      "constants": {
+        "stepScale": 0.25
+      }
+    },
+    {
+      "skslFile": "glowStreak.sksl",
+      "uniforms": [
+        "streakAmount",
+        "reach",
+        "angle",
+        "samples",
+        "streakFalloff",
+        "blur",
+        "bidirectional"
+      ],
+      "constants": {
+        "stepScale": 0.5
+      }
+    },
+    {
+      "skslFile": "glowStreak.sksl",
+      "uniforms": [
+        "streakAmount",
+        "reach",
+        "angle",
+        "samples",
+        "streakFalloff",
+        "blur",
+        "bidirectional"
+      ],
+      "constants": {
+        "stepScale": 1.0
+      }
+    },
+    {
+      "skslFile": "glowBloom.sksl",
+      "uniforms": [
+        "srcBlack",
+        "srcWhite",
+        "response",
+        "bloomAmount",
+        "size",
+        "falloff"
+      ],
+      "constants": {
+        "dirX": 1.0,
+        "dirY": 0.0,
+        "radiusMul": 0.125,
+        "addH": 0.0
+      }
+    },
+    {
+      "skslFile": "glowBloom.sksl",
+      "uniforms": [
+        "srcBlack",
+        "srcWhite",
+        "response",
+        "bloomAmount",
+        "size",
+        "falloff"
+      ],
+      "constants": {
+        "dirX": 0.0,
+        "dirY": 1.0,
+        "radiusMul": 0.125,
+        "addH": 1.0
+      }
+    },
+    {
+      "skslFile": "glowBloom.sksl",
+      "uniforms": [
+        "srcBlack",
+        "srcWhite",
+        "response",
+        "bloomAmount",
+        "size",
+        "falloff"
+      ],
+      "constants": {
+        "dirX": 1.0,
+        "dirY": 0.0,
+        "radiusMul": 0.25,
+        "addH": 0.0
+      }
+    },
+    {
+      "skslFile": "glowBloom.sksl",
+      "uniforms": [
+        "srcBlack",
+        "srcWhite",
+        "response",
+        "bloomAmount",
+        "size",
+        "falloff"
+      ],
+      "constants": {
+        "dirX": 0.0,
+        "dirY": 1.0,
+        "radiusMul": 0.25,
+        "addH": 1.0
+      }
+    },
+    {
+      "skslFile": "glowBloom.sksl",
+      "uniforms": [
+        "srcBlack",
+        "srcWhite",
+        "response",
+        "bloomAmount",
+        "size",
+        "falloff"
+      ],
+      "constants": {
+        "dirX": 1.0,
+        "dirY": 0.0,
+        "radiusMul": 0.5,
+        "addH": 0.0
+      }
+    },
+    {
+      "skslFile": "glowBloom.sksl",
+      "uniforms": [
+        "srcBlack",
+        "srcWhite",
+        "response",
+        "bloomAmount",
+        "size",
+        "falloff"
+      ],
+      "constants": {
+        "dirX": 0.0,
+        "dirY": 1.0,
+        "radiusMul": 0.5,
+        "addH": 1.0
+      }
+    },
+    {
+      "skslFile": "glowBloom.sksl",
+      "uniforms": [
+        "srcBlack",
+        "srcWhite",
+        "response",
+        "bloomAmount",
+        "size",
+        "falloff"
+      ],
+      "constants": {
+        "dirX": 1.0,
+        "dirY": 0.0,
+        "radiusMul": 1.0,
+        "addH": 0.0
+      }
+    },
+    {
+      "skslFile": "glowBloom.sksl",
+      "uniforms": [
+        "srcBlack",
+        "srcWhite",
+        "response",
+        "bloomAmount",
+        "size",
+        "falloff"
+      ],
+      "constants": {
+        "dirX": 0.0,
+        "dirY": 1.0,
+        "radiusMul": 1.0,
+        "addH": 1.0
+      }
+    },
+    {
+      "skslFile": "glowCombine.sksl",
+      "uniforms": [
+        "angle",
+        "chromatic",
+        "dispersion",
+        "bloomAmount",
+        "steps",
+        "persistence",
+        "intensity",
+        "tint",
+        "blend",
+        "amount"
+      ]
+    }
+  ],
+  "attributes": {
+    "srcBlack": {
+      "type": "double",
+      "default": 0.6,
+      "min": 0.0,
+      "max": 0.999,
+      "step": 0.01
+    },
+    "srcWhite": {
+      "type": "double",
+      "default": 1.0,
+      "min": 0.001,
+      "softMax": 4.0,
+      "step": 0.01
+    },
+    "response": {
+      "type": "double",
+      "default": 1.5,
+      "min": 0.1,
+      "softMax": 8.0,
+      "step": 0.05
+    },
+    "streakAmount": {
+      "type": "double",
+      "default": 0.0,
+      "min": 0.0,
+      "max": 1.0,
+      "step": 0.01
+    },
+    "reach": {
+      "type": "double",
+      "default": 300.0,
+      "min": 0.0,
+      "softMax": 2000.0,
+      "step": 1.0,
+      "dimming": "streakAmount <= 0"
+    },
+    "angle": {
+      "type": "double",
+      "default": 0.0,
+      "softMin": -180.0,
+      "softMax": 180.0,
+      "step": 0.5,
+      "dimming": "streakAmount <= 0"
+    },
+    "samples": {
+      "type": "double",
+      "default": 16.0,
+      "min": 2.0,
+      "max": 32.0,
+      "step": 1.0,
+      "dimming": "streakAmount <= 0"
+    },
+    "streakFalloff": {
+      "type": "double",
+      "default": 1.5,
+      "min": 0.0,
+      "softMax": 6.0,
+      "step": 0.05,
+      "dimming": "streakAmount <= 0"
+    },
+    "blur": {
+      "type": "double",
+      "default": 0.0,
+      "min": 0.0,
+      "softMax": 60.0,
+      "step": 0.5,
+      "dimming": "streakAmount <= 0"
+    },
+    "bidirectional": {
+      "type": "bool",
+      "default": true,
+      "dimming": "streakAmount <= 0"
+    },
+    "chromatic": {
+      "type": "double",
+      "default": 0.0,
+      "min": 0.0,
+      "max": 1.0,
+      "step": 0.01,
+      "dimming": "streakAmount <= 0"
+    },
+    "dispersion": {
+      "type": "double",
+      "default": 12.0,
+      "softMin": -100.0,
+      "softMax": 100.0,
+      "step": 0.5,
+      "dimming": "streakAmount <= 0 || chromatic <= 0"
+    },
+    "bloomAmount": {
+      "type": "double",
+      "default": 1.0,
+      "min": 0.0,
+      "max": 1.0,
+      "step": 0.01
+    },
+    "size": {
+      "type": "double",
+      "default": 300.0,
+      "min": 0.0,
+      "softMax": 2000.0,
+      "step": 1.0,
+      "dimming": "bloomAmount <= 0"
+    },
+    "falloff": {
+      "type": "double",
+      "default": 1.0,
+      "min": 0.05,
+      "softMax": 6.0,
+      "step": 0.05,
+      "dimming": "bloomAmount <= 0"
+    },
+    "steps": {
+      "type": "double",
+      "default": 4.0,
+      "min": 1.0,
+      "softMax": 8.0,
+      "step": 1.0,
+      "dimming": "bloomAmount <= 0"
+    },
+    "persistence": {
+      "type": "double",
+      "default": 1.0,
+      "min": 0.1,
+      "softMax": 4.0,
+      "step": 0.05,
+      "dimming": "bloomAmount <= 0"
+    },
+    "intensity": {
+      "type": "double",
+      "default": 2.0,
+      "min": 0.0,
+      "softMax": 20.0,
+      "step": 0.05
+    },
+    "tint": {
+      "type": "color",
+      "default": {
+        "type": "Color",
+        "r": 255,
+        "g": 255,
+        "b": 255,
+        "a": 255
+      },
+      "dimming": "intensity <= 0"
+    },
+    "blend": {
+      "type": "enum",
+      "default": 0,
+      "enumValues": [
+        0,
+        1,
+        2,
+        3
+      ]
+    },
+    "amount": {
+      "type": "double",
+      "default": 1.0,
+      "min": 0.0,
+      "max": 1.0,
+      "step": 0.01
+    }
+  },
+  "triggers": {
+    "out": [
+      "srcBlack",
+      "srcWhite",
+      "response",
+      "streakAmount",
+      "reach",
+      "angle",
+      "samples",
+      "streakFalloff",
+      "blur",
+      "bidirectional",
+      "chromatic",
+      "dispersion",
+      "bloomAmount",
+      "size",
+      "falloff",
+      "steps",
+      "persistence",
+      "intensity",
+      "tint",
+      "blend",
+      "amount"
+    ]
+  },
+  "UI": {
+    "tabs": [
+      {
+        "id": "filter",
+        "attributeOrder": [
+          "srcBlack",
+          "srcWhite",
+          "response",
+          "---A",
+          "intensity",
+          "tint",
+          "blend",
+          "amount"
+        ]
+      },
+      {
+        "id": "bloom",
+        "attributeOrder": [
+          "bloomAmount",
+          "size",
+          "falloff",
+          "steps",
+          "persistence"
+        ]
+      },
+      {
+        "id": "streak",
+        "attributeOrder": [
+          "streakAmount",
+          "reach",
+          "angle",
+          "samples",
+          "streakFalloff",
+          "blur",
+          "bidirectional",
+          "---Chromatic",
+          "chromatic",
+          "dispersion",
+          "---Inspired by apGlow, Adrian Pueyo"
+        ]
+      }
+    ],
+    "icon": "glow.png"
+  }
+}

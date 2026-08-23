@@ -1,0 +1,109 @@
+{
+ "type": "layerStrings",
+ "value": {
+  "author": "samMularczyk",
+  "layerType": "glow",
+  "niceName": "Ultra Glow",
+  "layerInfo": "Bloom and anamorphic streak from the same highlights, and both can run at once - which is what a lens flare is. Built as chained separable blurs, so it never rings or ghosts at any size. The streak is built first and the bloom ladder runs over it, so the streak blooms too.",
+  "language": "en",
+  "attributes": {
+   "srcBlack": [
+    "Threshold",
+    "Only light above this emits. This is the black point of the grade that isolates the highlights."
+   ],
+   "srcWhite": [
+    "White Point",
+    "Level that counts as fully lit. Below 1 pushes more of the picture into the glow."
+   ],
+   "response": [
+    "Response",
+    "Curve of the highlight grade. Higher keeps the glow tight around genuinely bright areas."
+   ],
+   "streakAmount": [
+    "Streak",
+    "Strength of the directional smear. Zero leaves a pure bloom."
+   ],
+   "reach": [
+    "Length",
+    "Total streak length in pixels. The layer bounds expand to match."
+   ],
+   "angle": [
+    "Angle",
+    "Streak axis in degrees. Zero is the classic horizontal anamorphic bar."
+   ],
+   "samples": [
+    "Samples",
+    "Taps per pass along the streak. Low values band a long streak into steps."
+   ],
+   "streakFalloff": [
+    "Streak Falloff",
+    "How quickly the streak fades along its length."
+   ],
+   "blur": [
+    "Streak Blur",
+    "Softens the streak across its axis, turning a hard line into a ribbon. Costs no extra samples."
+   ],
+   "bidirectional": [
+    "Both Directions",
+    "Smear both ways for a symmetric bar. Off gives a comet trail."
+   ],
+   "chromatic": [
+    "Chromatic",
+    "Splits the streak into seven spectral bands, so it fringes warm one way and cool the other."
+   ],
+   "dispersion": [
+    "Dispersion",
+    "How far the colour bands separate, in pixels. Negative swaps which end is warm."
+   ],
+   "bloomAmount": [
+    "Bloom",
+    "Strength of the isotropic glow. Zero leaves a pure streak."
+   ],
+   "size": [
+    "Size",
+    "Widest radius in the bloom ladder, in pixels."
+   ],
+   "falloff": [
+    "Bloom Falloff",
+    "Scales the whole ladder. Above one pulls the bloom in tighter."
+   ],
+   "steps": [
+    "Steps",
+    "How many widths the ladder sums. Also normalises it, so raising this dims each step."
+   ],
+   "persistence": [
+    "Persistence",
+    "Gains the wide end of the ladder, for a longer, softer tail."
+   ],
+   "intensity": [
+    "Intensity",
+    "Glow brightness. A wide glow spreads a highlight's energy far, so expect to push this up."
+   ],
+   "tint": [
+    "Tint",
+    "Colour multiplier on the glow."
+   ],
+   "blend": [
+    "Blend",
+    "How the glow combines with the layer. Effect Only shows the glow alone."
+   ],
+   "amount": [
+    "Amount",
+    "Mix between the original layer and the result."
+   ]
+  },
+  "enums": {
+   "blend": {
+    "0": "Add",
+    "1": "Screen",
+    "2": "Max",
+    "3": "Effect Only"
+   }
+  },
+  "tabs": {
+   "filter": "Highlights",
+   "bloom": "Bloom",
+   "streak": "Streak"
+  }
+ }
+}

@@ -1,0 +1,173 @@
+[
+  {
+    "presetType": "layer",
+    "id": "822951b6-3d87-45e0-a946-4b79867c87a9",
+    "author": "samMularczyk",
+    "name": "Fast Prime",
+    "layerType": [
+      "lensFlare"
+    ],
+    "attrs": [
+      {
+        "attrId": "lens",
+        "value": 0
+      },
+      {
+        "attrId": "ghostIntensity",
+        "value": 0.7
+      },
+      {
+        "attrId": "ghostCount",
+        "value": 8
+      },
+      {
+        "attrId": "ghostSpacing",
+        "value": 0.6
+      },
+      {
+        "attrId": "ghostScale",
+        "value": 0.6
+      },
+      {
+        "attrId": "ghostChromatic",
+        "value": 3.0
+      },
+      {
+        "attrId": "ghostCatsEye",
+        "value": 0.5
+      },
+      {
+        "attrId": "ghostCatsEyeFalloff",
+        "value": 1.2
+      },
+      {
+        "attrId": "blades",
+        "value": 9
+      },
+      {
+        "attrId": "haloIntensity",
+        "value": 0.5
+      },
+      {
+        "attrId": "haloRadius",
+        "value": 220
+      },
+      {
+        "attrId": "starIntensity",
+        "value": 0.6
+      },
+      {
+        "attrId": "starLength",
+        "value": 450
+      },
+      {
+        "attrId": "streakIntensity",
+        "value": 0.0
+      }
+    ],
+    "resetsTransforms": false,
+    "resetsLayer": true
+  },
+  {
+    "presetType": "layer",
+    "id": "afacbf6b-da95-48a6-9328-2c7605e663ee",
+    "author": "samMularczyk",
+    "name": "Standard Zoom",
+    "layerType": [
+      "lensFlare"
+    ],
+    "attrs": [
+      {
+        "attrId": "lens",
+        "value": 1
+      },
+      {
+        "attrId": "ghostIntensity",
+        "value": 0.6
+      },
+      {
+        "attrId": "ghostCount",
+        "value": 8
+      },
+      {
+        "attrId": "ghostSpacing",
+        "value": 0.35
+      },
+      {
+        "attrId": "ghostScale",
+        "value": 0.45
+      },
+      {
+        "attrId": "ghostChromatic",
+        "value": 5.0
+      },
+      {
+        "attrId": "ghostCatsEye",
+        "value": 0.6
+      },
+      {
+        "attrId": "ghostCatsEyeFalloff",
+        "value": 1.0
+      },
+      {
+        "attrId": "blades",
+        "value": 9
+      },
+      {
+        "attrId": "haloIntensity",
+        "value": 0.35
+      },
+      {
+        "attrId": "haloRadius",
+        "value": 300
+      },
+      {
+        "attrId": "starIntensity",
+        "value": 0.4
+      },
+      {
+        "attrId": "starLength",
+        "value": 350
+      },
+      {
+        "attrId": "streakIntensity",
+        "value": 0.0
+      }
+    ],
+    "resetsTransforms": false,
+    "resetsLayer": true
+  },
+  {
+    "presetType": "layer",
+    "id": "f80e1310-82be-e5fb-f090-5f7b8ef7dc17",
+    "author": "samMularczyk",
+    "name": "Anamorphic",
+    "layerType": [
+      "lensFlare"
+    ],
+    "attrs": [
+      {
+        "attrId": "blades",
+        "value": 2
+      },
+      {
+        "attrId": "colourSource",
+        "value": 1
+      },
+      {
+        "attrId": "brightnessSource",
+        "value": 1
+      },
+      {
+        "attrId": "intensity",
+        "value": 0.1
+      },
+      {
+        "attrId": "streakIntensity",
+        "value": 2.0
+      }
+    ],
+    "resetsTransforms": false,
+    "resetsLayer": true
+  }
+]

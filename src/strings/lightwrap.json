@@ -1,0 +1,73 @@
+{
+  "type": "layerStrings",
+  "value": {
+    "author": "samMularczyk",
+    "layerType": "lightwrap",
+    "niceName": "Lightwrap",
+    "layerInfo": "Bleeds light from a background layer inward from this layer's edges. Needs Background Input connected AND Background Size set.",
+    "language": "en",
+    "attributes": {
+      "size": [
+        "Size",
+        "How far light wraps in from the edge, in pixels."
+      ],
+      "falloff": [
+        "Falloff",
+        "Scales the whole blur ladder. Above one pulls the wrap tighter to the edge, below one spreads it further in."
+      ],
+      "aspect": [
+        "Aspect",
+        "Stretches the wrap horizontally against vertically."
+      ],
+      "useLuminance": [
+        "Bright Areas Only",
+        "Only let the brighter parts of the background wrap, rather than all of it."
+      ],
+      "threshold": [
+        "Threshold",
+        "How bright the background must be to wrap, when Bright Areas Only is on."
+      ],
+      "bgSize": [
+        "Background Size",
+        "Pixel resolution of the background image. Sets where it sits; without it the background reads as almost black."
+      ],
+      "bgScale": [
+        "Background Scale",
+        "Corrects for the background being shown at a different size to its native resolution. 1.0 if shown at 100%."
+      ],
+      "brightness": [
+        "Brightness",
+        "Gain on the wrapped light."
+      ],
+      "gamma": [
+        "Gamma",
+        "Falloff curve of the wrap from the edge inward."
+      ],
+      "saturation": [
+        "Saturation",
+        "Colour strength of the wrapped light."
+      ],
+      "blend": [
+        "Blend",
+        "How the wrap combines with the layer. Effect Only shows the wrap alone."
+      ],
+      "amount": [
+        "Amount",
+        "Mix between the original layer and the wrapped result."
+      ],
+      "background": [
+        "Background Input",
+        "The background layer's shader. Nothing happens until this is connected."
+      ]
+    },
+    "enums": {
+      "blend": [
+        "Plus",
+        "Screen",
+        "Max",
+        "Effect Only"
+      ]
+    },
+    "tabs": {}
+  }
+}

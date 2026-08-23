@@ -1,0 +1,426 @@
+{
+  "author": "samMularczyk",
+  "type": "compositeVideo",
+  "superType": "thirdPartyFilter",
+  "version": "1.0",
+  "passes": [
+    {
+      "skslFile": "compositeEncode.sksl",
+      "uniforms": [
+        "system",
+        "virtualRes"
+      ]
+    },
+    {
+      "skslFile": "compositeDecode.sksl",
+      "uniforms": [
+        "system",
+        "time",
+        "speed",
+        "virtualRes",
+        "brightness",
+        "saturation",
+        "blur",
+        "bandwidth",
+        "peaking",
+        "blurSize",
+        "chromaBlur",
+        "chromaSize",
+        "qNarrow",
+        "phaseError",
+        "subcarrier",
+        "crosstalk",
+        "crossColour",
+        "hanover",
+        "scanlines",
+        "scanFlicker",
+        "interference1",
+        "interference2",
+        "fishEye",
+        "tubeOverscan",
+        "vignetteRounding",
+        "vignetteSmoothness",
+        "amount",
+        "vRoll",
+        "vRollJump",
+        "hTear",
+        "hTearDensity",
+        "ghostAmount",
+        "ghostDelay",
+        "snow",
+        "snowBurst"
+      ]
+    }
+  ],
+  "attributes": {
+    "system": {
+      "type": "enum",
+      "default": 0,
+      "enumValues": [
+        0,
+        1,
+        2
+      ]
+    },
+    "time": {
+      "type": "double",
+      "default": 0.0,
+      "compConnect": "time"
+    },
+    "speed": {
+      "type": "double",
+      "default": 0.0333,
+      "min": 0.0,
+      "softMax": 0.5,
+      "step": 0.001
+    },
+    "virtualRes": {
+      "type": "double2",
+      "default": {
+        "x": 432.0,
+        "y": 264.0
+      },
+      "children": {
+        "*": {
+          "step": 1.0
+        }
+      }
+    },
+    "brightness": {
+      "type": "double",
+      "default": 1.1,
+      "min": 0.0,
+      "softMax": 4.0,
+      "step": 0.01
+    },
+    "saturation": {
+      "type": "double",
+      "default": 1.0,
+      "min": 0.0,
+      "softMax": 4.0,
+      "step": 0.01
+    },
+    "blur": {
+      "type": "double",
+      "default": 0.7,
+      "min": 0.0,
+      "max": 1.0,
+      "step": 0.01
+    },
+    "bandwidth": {
+      "type": "double",
+      "default": 1.0,
+      "min": 0.05,
+      "softMax": 3.0,
+      "step": 0.01,
+      "dimming": "blur <= 0 && chromaBlur <= 0"
+    },
+    "peaking": {
+      "type": "double",
+      "default": 2.9,
+      "min": 0.0,
+      "softMax": 6.0,
+      "step": 0.05,
+      "dimming": "blur <= 0"
+    },
+    "blurSize": {
+      "type": "double",
+      "default": 0.2,
+      "min": 0.0,
+      "softMax": 4.0,
+      "step": 0.01,
+      "dimming": "blur <= 0"
+    },
+    "chromaBlur": {
+      "type": "double",
+      "default": 0.7,
+      "min": 0.0,
+      "max": 1.0,
+      "step": 0.01
+    },
+    "chromaSize": {
+      "type": "double",
+      "default": 6.0,
+      "min": 0.0,
+      "softMax": 30.0,
+      "step": 0.1,
+      "dimming": "chromaBlur <= 0"
+    },
+    "qNarrow": {
+      "type": "double",
+      "default": 2.6,
+      "min": 1.0,
+      "softMax": 6.0,
+      "step": 0.1,
+      "dimming": "system != 0"
+    },
+    "subcarrier": {
+      "type": "double",
+      "default": 2.1,
+      "min": 0.0,
+      "softMax": 10.0,
+      "step": 0.01
+    },
+    "phaseError": {
+      "type": "double",
+      "default": 18.0,
+      "softMin": -90.0,
+      "softMax": 90.0,
+      "step": 0.5
+    },
+    "crosstalk": {
+      "type": "double",
+      "default": 0.1,
+      "min": 0.0,
+      "softMax": 2.0,
+      "step": 0.01,
+      "dimming": "subcarrier <= 0"
+    },
+    "crossColour": {
+      "type": "double",
+      "default": 0.0,
+      "min": 0.0,
+      "softMax": 2.0,
+      "step": 0.01
+    },
+    "hanover": {
+      "type": "double",
+      "default": 0.0,
+      "min": 0.0,
+      "max": 1.0,
+      "step": 0.01,
+      "dimming": "system == 0"
+    },
+    "scanlines": {
+      "type": "double",
+      "default": 1.0,
+      "min": 0.0,
+      "max": 1.0,
+      "step": 0.01
+    },
+    "scanFlicker": {
+      "type": "double",
+      "default": 0.33,
+      "min": 0.0,
+      "softMax": 2.0,
+      "step": 0.01
+    },
+    "interference1": {
+      "type": "double",
+      "default": 1.0,
+      "min": 0.0,
+      "softMax": 10.0,
+      "step": 0.01
+    },
+    "interference2": {
+      "type": "double",
+      "default": 0.001,
+      "min": 0.0,
+      "softMax": 0.05,
+      "step": 0.0005
+    },
+    "fishEye": {
+      "type": "double2",
+      "default": {
+        "x": 0.1,
+        "y": 0.24
+      },
+      "children": {
+        "*": {
+          "step": 0.01
+        }
+      }
+    },
+    "tubeOverscan": {
+      "type": "double",
+      "default": 1.02,
+      "min": 0.5,
+      "softMax": 1.5,
+      "step": 0.005
+    },
+    "vignetteRounding": {
+      "type": "double",
+      "default": 160.0,
+      "min": 2.0,
+      "softMax": 400.0,
+      "step": 1.0
+    },
+    "vignetteSmoothness": {
+      "type": "double",
+      "default": 0.7,
+      "min": 0.001,
+      "softMax": 2.0,
+      "step": 0.01
+    },
+    "amount": {
+      "type": "double",
+      "default": 1.0,
+      "min": 0.0,
+      "max": 1.0,
+      "step": 0.01
+    },
+    "vRoll": {
+      "type": "double",
+      "default": 0.0,
+      "softMin": -2.0,
+      "softMax": 2.0,
+      "step": 0.01
+    },
+    "vRollJump": {
+      "type": "double",
+      "default": 0.0,
+      "min": 0.0,
+      "max": 1.0,
+      "step": 0.01,
+      "dimming": "vRoll == 0"
+    },
+    "hTear": {
+      "type": "double",
+      "default": 0.0,
+      "min": 0.0,
+      "softMax": 30.0,
+      "step": 0.5
+    },
+    "hTearDensity": {
+      "type": "double",
+      "default": 0.3,
+      "min": 0.0,
+      "max": 1.0,
+      "step": 0.01,
+      "dimming": "hTear <= 0"
+    },
+    "ghostAmount": {
+      "type": "double",
+      "default": 0.0,
+      "min": 0.0,
+      "max": 1.0,
+      "step": 0.01
+    },
+    "ghostDelay": {
+      "type": "double",
+      "default": 12.0,
+      "min": 0.0,
+      "softMax": 60.0,
+      "step": 0.5,
+      "dimming": "ghostAmount <= 0"
+    },
+    "snow": {
+      "type": "double",
+      "default": 0.0,
+      "min": 0.0,
+      "max": 1.0,
+      "step": 0.01
+    },
+    "snowBurst": {
+      "type": "double",
+      "default": 0.0,
+      "min": 0.0,
+      "max": 1.0,
+      "step": 0.01,
+      "dimming": "snow <= 0"
+    }
+  },
+  "triggers": {
+    "out": [
+      "system",
+      "time",
+      "speed",
+      "virtualRes",
+      "brightness",
+      "saturation",
+      "blur",
+      "bandwidth",
+      "peaking",
+      "blurSize",
+      "chromaBlur",
+      "chromaSize",
+      "qNarrow",
+      "subcarrier",
+      "phaseError",
+      "crosstalk",
+      "crossColour",
+      "hanover",
+      "scanlines",
+      "scanFlicker",
+      "interference1",
+      "interference2",
+      "fishEye",
+      "tubeOverscan",
+      "vignetteRounding",
+      "vignetteSmoothness",
+      "amount",
+      "vRoll",
+      "vRollJump",
+      "hTear",
+      "hTearDensity",
+      "ghostAmount",
+      "ghostDelay",
+      "snow",
+      "snowBurst"
+    ]
+  },
+  "UI": {
+    "icon": "compositeVideo.png",
+    "tabs": [
+      {
+        "id": "filter",
+        "attributeOrder": [
+          "speed",
+          "time",
+          "amount",
+          "---Signal",
+          "system",
+          "virtualRes",
+          "---Picture",
+          "brightness",
+          "saturation",
+          "---Filtering",
+          "blur",
+          "bandwidth",
+          "peaking",
+          "blurSize",
+          "chromaBlur",
+          "chromaSize",
+          "qNarrow",
+          "---Subcarrier",
+          "phaseError",
+          "subcarrier",
+          "crosstalk",
+          "crossColour",
+          "hanover",
+          "---Artefacts",
+          "scanlines",
+          "scanFlicker",
+          "interference1",
+          "interference2"
+        ]
+      },
+      {
+        "id": "tube",
+        "attributeOrder": [
+          "fishEye",
+          "tubeOverscan",
+          "vignetteRounding",
+          "vignetteSmoothness"
+        ]
+      },
+      {
+        "id": "sync",
+        "attributeOrder": [
+          "vRoll",
+          "vRollJump",
+          "---Sync Tear",
+          "hTear",
+          "hTearDensity",
+          "---Multipath",
+          "ghostAmount",
+          "ghostDelay",
+          "---Snow",
+          "snow",
+          "snowBurst",
+          "---Inspired by C64 NTSC filter, BitOfGold"
+        ]
+      }
+    ]
+  }
+}

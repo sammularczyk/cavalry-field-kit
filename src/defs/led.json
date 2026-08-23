@@ -1,0 +1,102 @@
+{
+  "author": "samMularczyk",
+  "type": "led",
+  "superType": "thirdPartyFilter",
+  "version": "1.0",
+  "skslFile": "led.sksl",
+  "attributes": {
+    "cellSize": {
+      "type": "double",
+      "default": 16.0,
+      "min": 2.0,
+      "softMax": 128.0,
+      "step": 0.5
+    },
+    "stagger": {
+      "type": "double",
+      "default": 0.0,
+      "min": 0.0,
+      "max": 1.0,
+      "step": 0.01
+    },
+    "dotSize": {
+      "type": "double",
+      "default": 0.8,
+      "min": 0.0,
+      "softMax": 2.0,
+      "step": 0.01
+    },
+    "roundness": {
+      "type": "double",
+      "default": 1.0,
+      "min": 0.0,
+      "max": 1.0,
+      "step": 0.01
+    },
+    "softness": {
+      "type": "double",
+      "default": 1.5,
+      "min": 0.01,
+      "softMax": 20.0,
+      "step": 0.1
+    },
+    "sizeFromBrightness": {
+      "type": "double",
+      "default": 0.0,
+      "min": 0.0,
+      "max": 1.0,
+      "step": 0.01
+    },
+    "perChannel": {
+      "type": "bool",
+      "default": false
+    },
+    "bgColor": {
+      "type": "color",
+      "default": {
+        "type": "Color",
+        "r": 0,
+        "g": 0,
+        "b": 0,
+        "a": 255
+      }
+    },
+    "amount": {
+      "type": "double",
+      "default": 1.0,
+      "min": 0.0,
+      "max": 1.0,
+      "step": 0.01
+    }
+  },
+  "triggers": {
+    "out": [
+      "cellSize",
+      "stagger",
+      "dotSize",
+      "roundness",
+      "softness",
+      "sizeFromBrightness",
+      "perChannel",
+      "bgColor",
+      "amount"
+    ]
+  },
+  "UI": {
+    "icon": "led.png",
+    "attributeOrder": [
+      "cellSize",
+      "stagger",
+      "---Dot",
+      "dotSize",
+      "roundness",
+      "softness",
+      "---Brightness",
+      "sizeFromBrightness",
+      "perChannel",
+      "bgColor",
+      "amount",
+      "---Inspired by lightbulb screen & Golfing Mosaic"
+    ]
+  }
+}

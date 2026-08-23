@@ -1,0 +1,225 @@
+// Hatching - Field Kit
+//
+// Seven ways to draw a repeating mark keyed off luminance, behind one Pattern
+// control. Replaces the separate Crosshatch, Engrave and Cross Stitch filters.
+//
+//   Crosshatch  - four diagonal line families at descending thresholds.
+//                 Inspired by the Geeks3D crosshatching filter (JeGX, 2011).
+//   Currency    - six sine-warped families, banknote style.
+//                 Inspired by "Money filter" by Giacomo Preciado (XlsXDN).
+//   Cross Stitch- both diagonals of each cell, coloured from that cell.
+//                 Inspired by the Geeks3D cross-stitching filter (JeGX).
+//   Lines /     - continuous-width line fields whose width tracks luminance.
+//   Concentric /
+//   Spiral /      Lines sit on integer contours of a coordinate
+//   Squares       function, and a triangle wave gives distance to the nearest.
+//
+// Uniform order matches the attribute order in definitions.json.
+
+uniform float  pattern;      // enum 0..6, see above
+
+uniform float  size;         // line period / cell size, in pixels
+uniform float  lineWidth;    // mark width in pixels
+uniform float  angle;        // degrees, used by Lines
+uniform float  softness;     // edge softness for the continuous patterns
+
+uniform float  threshold1;   // Crosshatch: four descending luminance gates
+uniform float  threshold2;
+uniform float  threshold3;
+uniform float  threshold4;
+uniform float  offset;       // Crosshatch: shifts families 3 and 4
+
+uniform float  warpAmount;   // Currency: sine warp, fraction of layer height
+uniform float  warpFrequency;
+uniform float  layers;       // Currency: how many of the six families
+
+uniform float  brightness;   // Cross Stitch: gain on the thread colour
+uniform float  invert;       // Cross Stitch: swap thread and background
+
+uniform half4  inkColor;     // straight (unpremultiplied) RGBA
+uniform half4  paperColor;   // straight
+uniform float  transparentPaper;   // bool: output ink and alpha only
+uniform float  amount;
+
+uniform float2 resolution;
+uniform float2 rectCentre;
+
+uniform shader image;        // input image - binds by position, must be last
+
+const float INV_SQRT2 = 0.70710678;
+const float TWO_PI    = 6.28318530718;
+
+// ---------------------------------------------------------------- Crosshatch
+
+// One diagonal family. The original tested mod(x + y, 10.0) == 0.0, which only
+// lands when fragment centres hit the lattice exactly. A symmetric
+// distance-to-nearest-line plus smoothstep gives a real anti-aliased line with
+// a soft edge on BOTH sides, and is where lineWidth comes from.
+float hatchLine(float d, float sp, float w) {
+    // d runs along a 45-degree diagonal, so the perpendicular spacing is
+    // d/sqrt(2). Scaling by that keeps size and lineWidth in true pixels.
+    float m = abs(mod(d * INV_SQRT2 + sp * 0.5, sp) - sp * 0.5);
+    return 1.0 - smoothstep(w * 0.5 - 0.5, w * 0.5 + 0.5, m);
+}
+
+// ------------------------------------------------------------------ Currency
+
+// One line family, returning the running `gris` (1 = paper, 0 = solid ink) to
+// match the original's `gris = min(fx, gris)` accumulation. The original
+// indexed a vec3[6] table in a loop; unrolled here because SkSL loop bounds
+// must be compile-time constants and dynamic array indexing is unreliable.
+float family(float2 xy, float cosA, float sinA, float k, float idx,
+             float brillo, float divisor, float grosorInicial,
+             float amp, float freq, float layerCount, float gris) {
+    if (idx >= layerCount) { return gris; }
+
+    float grosor = grosorInicial * (idx + 1.0);
+    float2 punto = float2(xy.x * cosA - xy.y * sinA,
+                          xy.x * sinA + xy.y * cosA);
+    float dist = mod(punto.y + grosor * 0.5 - sin(punto.x * freq) * amp, divisor);
+
+    if (dist < grosor && brillo < 0.75 - 0.12 * idx) {
+        float x  = (grosor - dist) / grosor;
+        float fx = abs((x - 0.5) / k) - (0.5 - k) / k;
+        gris = min(fx, gris);
+    }
+    return gris;
+}
+
+// ------------------------------------------------- Continuous line patterns
+
+// Distance to the nearest integer contour: 0 on a line, 1 midway between.
+float tri(float x) {
+    return abs(fract(x - 0.5) - 0.5) * 2.0;
+}
+
+// The coordinate whose integer contours form the pattern.
+float patternCoord(int pat, float2 p, float s, float ang) {
+    if (pat == 4) { return length(p) / s; }                      // Concentric
+    if (pat == 5) {
+        // The atan seam jumps by exactly 1, which is the triangle wave's
+        // period, so the discontinuity cancels and the spiral closes cleanly.
+        return atan(p.y, p.x) / TWO_PI + length(p) / s;          // Spiral
+    }
+    if (pat == 6) { return max(abs(p.x), abs(p.y)) / s; }        // Squares
+    float c = cos(ang), sn = sin(ang);                           // Lines
+    return (p.x * c + p.y * sn) / s;
+}
+
+// ---------------------------------------------------------------------- main
+
+half4 main(float2 fragCoord) {
+    half4 src = image.eval(fragCoord);
+
+    int   pat = int(pattern);
+    float s   = max(size, 1.0);
+    float w   = clamp(lineWidth, 0.5, s);
+
+    // Layer-local pixels, so the pattern does not swim when the layer moves and
+    // stays correct for every copy inside a Duplicator.
+    float2 p = fragCoord - rectCentre;
+
+    // `ink` is coverage: 0 = paper, 1 = solid mark. `tint` optionally carries
+    // an image-derived colour (Cross Stitch), otherwise the ink colour is used.
+    float  ink  = 0.0;
+    float3 tint = float3(inkColor.rgb);
+    float  matteA = float(src.a);
+
+    if (pat == 2) {
+        // ---- Cross Stitch -------------------------------------------------
+        float2 cell  = floor(p / max(s, 2.0)) * max(s, 2.0);
+        float2 local = p - cell;
+        float  cs    = max(s, 2.0);
+
+        // The original sampled the cell's top-left texel, which jitters by a
+        // pixel as the layer moves. Sample the cell centre instead.
+        half4 c = image.eval(cell + cs * 0.5 + rectCentre);
+        matteA  = float(c.a);
+
+        // Both diagonals. Perpendicular distance is |dx-dy|/sqrt(2), so
+        // lineWidth reads as true pixels.
+        float d1 = abs(local.x - local.y) * INV_SQRT2;
+        float d2 = abs(local.x + local.y - cs) * INV_SQRT2;
+        ink = 1.0 - smoothstep(w * 0.5 - 0.5, w * 0.5 + 0.5, min(d1, d2));
+
+        float3 lin = c.a > 0.0 ? float3(c.rgb / c.a) : float3(0.0);
+        float3 thread = clamp(lin * max(brightness, 0.0), 0.0, 1.0);
+
+        // Normal: the thread carries the image, gaps are paper.
+        // Invert: the thread is solid ink, gaps carry the image.
+        if (invert > 0.5) {
+            tint = float3(inkColor.rgb);
+        } else {
+            tint = thread;
+        }
+    } else if (pat == 1) {
+        // ---- Currency -----------------------------------------------------
+        half3 linH = src.a > 0.0 ? src.rgb / src.a : half3(0.0);
+
+        // The original normalised BOTH axes by render height, which is what
+        // keeps the pattern aspect-correct.
+        float h  = max(resolution.y, 1.0);
+        float2 xy = p / h;
+
+        float divisor       = max(s, 0.5) / h;
+        // lineWidth is in pixels here; the original's thickness was a fraction
+        // of the line period, so convert.
+        float grosorInicial = divisor * clamp(w / s, 0.01, 1.0);
+        float n             = clamp(layers, 1.0, 6.0);
+
+        float brillo = 0.3 * float(linH.r) + 0.4 * float(linH.g) + 0.3 * float(linH.b);
+
+        // x = cosine term, y = sine term, z = smoothing k. From the source.
+        float gris = 1.0;
+        gris = family(xy, -0.7071,  0.7071, 3.0, 0.0, brillo, divisor, grosorInicial, warpAmount, warpFrequency, n, gris);
+        gris = family(xy,  0.0,     1.0,    0.6, 1.0, brillo, divisor, grosorInicial, warpAmount, warpFrequency, n, gris);
+        gris = family(xy,  0.0,     1.0,    0.5, 2.0, brillo, divisor, grosorInicial, warpAmount, warpFrequency, n, gris);
+        gris = family(xy,  1.0,     0.0,    0.4, 3.0, brillo, divisor, grosorInicial, warpAmount, warpFrequency, n, gris);
+        gris = family(xy,  1.0,     0.0,    0.3, 4.0, brillo, divisor, grosorInicial, warpAmount, warpFrequency, n, gris);
+        gris = family(xy,  0.0,     1.0,    0.2, 5.0, brillo, divisor, grosorInicial, warpAmount, warpFrequency, n, gris);
+
+        ink = 1.0 - clamp(gris, 0.0, 1.0);
+    } else if (pat == 0) {
+        // ---- Crosshatch ---------------------------------------------------
+        half3 linH = src.a > 0.0 ? src.rgb / src.a : half3(0.0);
+
+        // The source uses length(rgb), range 0 .. 1.732 - not a luma
+        // weighting. The four thresholds are calibrated to that range.
+        float lum = length(float3(linH));
+
+        if (lum < threshold1) { ink = max(ink, hatchLine(p.x + p.y, s, w)); }
+        if (lum < threshold2) { ink = max(ink, hatchLine(p.x - p.y, s, w)); }
+        if (lum < threshold3) { ink = max(ink, hatchLine(p.x + p.y - offset, s, w)); }
+        if (lum < threshold4) { ink = max(ink, hatchLine(p.x - p.y - offset, s, w)); }
+    } else {
+        // ---- Lines / Concentric / Spiral / Squares ------------------------
+        half3 linH = src.a > 0.0 ? src.rgb / src.a : half3(0.0);
+        float lum = dot(float3(linH), float3(0.299, 0.587, 0.114));
+
+        float d = tri(patternCoord(pat, p, s, radians(angle)));
+
+        // Darker image means a wider line, up to solid coverage. Width is in
+        // period units here, hence the divide by size.
+        float halfWidth = clamp(1.0 - lum, 0.0, 1.0) * (w / s);
+        float aa = max(softness, 0.001);
+        ink = 1.0 - smoothstep(halfWidth - aa, halfWidth + aa, d);
+    }
+
+    ink = clamp(ink, 0.0, 1.0);
+
+    float3 rgb;
+    float  a;
+    if (transparentPaper > 0.5) {
+        // Ink and alpha only, so the result composites straight over whatever
+        // is behind it.
+        rgb = tint;
+        a   = matteA * float(inkColor.a) * ink;
+    } else {
+        rgb = mix(float3(paperColor.rgb), tint, ink);
+        a   = matteA * mix(float(paperColor.a), float(inkColor.a), ink);
+    }
+
+    half ha = half(clamp(a, 0.0, 1.0));
+    return mix(src, half4(half3(clamp(rgb, 0.0, 1.0)) * ha, ha),
+               half(clamp(amount, 0.0, 1.0)));
+}

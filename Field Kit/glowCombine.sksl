@@ -1,0 +1,95 @@
+// Glow, pass 13 of 13 - Field Kit
+// Normalises the accumulated ladder, optionally splits it chromatically, then
+// grades and composites over the untouched layer.
+//
+// Chromatic band weights ported from "Spectral_Aberration_Pro_V2" by Marten
+// Blumen (BSD-3): the seven tints are normalised so they sum to exactly white,
+// which is what makes the ratio below 1.0 at zero dispersion.
+
+uniform float  angle;
+uniform float  chromatic;
+uniform float  dispersion;
+uniform float  bloomAmount;
+uniform float  steps;
+uniform float  persistence;
+uniform float  intensity;
+uniform half4  tint;
+uniform float  blend;         // enum: 0 Add, 1 Screen, 2 Max, 3 Effect Only
+uniform float  amount;
+
+uniform float2 resolution;
+uniform float2 rectCentre;
+
+uniform shader childShader;   // the accumulated glow
+uniform shader original;      // untouched input - MUST be declared last
+
+float bandWave(int i) {
+    if (i == 0) { return  1.00; }
+    if (i == 1) { return  0.66; }
+    if (i == 2) { return  0.33; }
+    if (i == 3) { return  0.00; }
+    if (i == 4) { return -0.33; }
+    if (i == 5) { return -0.66; }
+    return -1.00;
+}
+float3 bandTint(int i) {
+    if (i == 0) { return float3(1.0, 0.0, 0.0); }
+    if (i == 1) { return float3(1.0, 0.5, 0.0); }
+    if (i == 2) { return float3(1.0, 1.0, 0.0); }
+    if (i == 3) { return float3(0.0, 1.0, 0.0); }
+    if (i == 4) { return float3(0.0, 0.5, 1.0); }
+    if (i == 5) { return float3(0.0, 0.0, 1.0); }
+    return float3(0.2, 0.0, 0.5);
+}
+const float3 BAND_NORM = float3(0.3125, 0.3333, 0.4);
+
+half4 main(float2 fragCoord) {
+    float3 glow = float3(childShader.eval(fragCoord).rgb);
+
+    // The BLOOM ladder summed `steps` widths, so divide by it - apGlow's
+    // MultiplyR. With bloom off the ladder passed the streak straight through
+    // without summing anything, so dividing there would just darken it.
+    float norm = clamp(bloomAmount, 0.0, 1.0) > 0.0 ? max(steps, 1.0) : 1.0;
+    glow /= norm;
+
+    // Chromatic split, as a per-channel ratio on the accumulated glow rather
+    // than replacing it, so turning it up does not shorten the streak.
+    float chro = clamp(chromatic, 0.0, 1.0);
+    if (chro > 0.0) {
+        float ang = radians(angle);
+        float2 dir = float2(cos(ang), sin(ang));
+        float3 base = float3(childShader.eval(fragCoord).rgb) / norm;
+        float3 acc = float3(0.0);
+        for (int b = 0; b < 7; b++) {
+            float3 v = float3(childShader.eval(
+                fragCoord + dir * (bandWave(b) * dispersion)).rgb) / norm;
+            acc += v * bandTint(b);
+        }
+        acc *= BAND_NORM;
+        float3 ratio = clamp(acc / max(base, float3(0.001)), 0.0, 4.0);
+        glow *= mix(float3(1.0), ratio, chro);
+    }
+
+    // apGlow's persistence gains the wide end of the ladder. The chain has
+    // already mixed the widths, so this acts on the result as a soft-knee gain
+    // rather than per-step - the same control, applied once.
+    glow = pow(max(glow, 0.0), float3(1.0 / max(persistence, 0.0001)));
+    glow = clamp(glow * max(intensity, 0.0) * float3(tint.rgb), 0.0, 1.0);
+
+    half4 src = original.eval(fragCoord);
+    float3 lin = src.a > 0.0 ? float3(src.rgb / src.a) : float3(0.0);
+
+    int bm = int(blend);
+    float3 outRgb =
+        bm == 1 ? 1.0 - (1.0 - lin) * (1.0 - glow) :
+        bm == 2 ? max(lin, glow) :
+        bm == 3 ? glow :
+        min(lin + glow, 1.0);
+
+    // Glow spreads past the source, so alpha has to follow it out.
+    float ga = clamp(dot(glow, float3(0.3333)), 0.0, 1.0);
+    half a = half(bm == 3 ? ga : clamp(max(float(src.a), ga), 0.0, 1.0));
+
+    return mix(src, half4(half3(clamp(outRgb, 0.0, 1.0)) * a, a),
+               half(clamp(amount, 0.0, 1.0)));
+}

@@ -1,0 +1,253 @@
+// Film Emulation, pass 2 of 2 - Field Kit
+//
+// The colour transform. This is NOT a port of the grain simulation in
+// "Film Emulation" by beans_please (Shadertoy lX3cD7) - see pass 1's header for
+// why that cannot be ported. What IS taken from it is the idea that gives the
+// look: convert into a deliberately over-wide "made-up" gamut, tone map there,
+// then convert back. Highlights desaturate as they roll off, the way film does,
+// instead of clipping to a hue. The gamut matrix and its constants are the
+// author's (their `flim` transform, github.com/bean-mhm/flim).
+//
+// The tone curve is Narkowicz's ACES approximation rather than the original's
+// film response, since that response was the grain simulation itself. It is
+// normalised so white stays white, which is what lets the roll-off be a plain
+// mix rather than needing an exposure control in front of it.
+//
+// Two deliberate omissions. This filter used to carry exposure, contrast,
+// saturation and black/white point as well. Cavalry ships Curves, Levels, HSV
+// and an ASC-CDL corrector, all of which do those jobs better, so they are gone
+// and this filter now only does the three things native tools cannot: halation,
+// the gamut-extension roll-off, and grain.
+//
+// It also used to hardcode a pow(2.2) round trip on the assumption that Cavalry
+// had no colour pipeline to hang a transfer function on. Cavalry does have
+// colour management, so applying one here can double up. It is now a control
+// that defaults to OFF; turn it on only if the layer really is display-referred
+// and needs linearising first.
+
+uniform float  linearise;     // enum: 0 off, 1 sRGB-ish 2.2
+uniform float  exposure;      // stops, drives the signal INTO the roll-off
+uniform float  rolloff;       // how much of the tone-mapped result to keep
+uniform float  gamutExtension;
+uniform float  grain;
+uniform float  grainSize;
+uniform float  grainBlur;     // 0 = organic value-noise blobs, 1 = fine hash texture
+uniform float  grainResponse; // signal-dependent amplification exponent (gamma)
+uniform float  grainDomain;   // enum: 0 gamma-then-grain (positive print), 1 grain-then-gamma (negative)
+uniform float  scannerNoise;  // separate white noise, models scanner sensor noise
+uniform float  time;
+
+uniform float2 resolution;
+uniform float2 rectCentre;
+
+uniform shader childShader;   // pass 1 result (halation applied)
+
+float wrap01(float x) { return fract(x); }
+
+float3 hsv2rgb(float3 hsv) {
+    float h = hsv.x, s = hsv.y, v = hsv.z;
+    if (s == 0.0) { return float3(v); }
+    if (h == 1.0) { h = 0.0; }
+    h *= 6.0;
+    int i = int(floor(h));
+    float f = h - float(i);
+    float p = v * (1.0 - s);
+    float q = v * (1.0 - s * f);
+    float t = v * (1.0 - s * (1.0 - f));
+    if (i == 0) { return float3(v, t, p); }
+    if (i == 1) { return float3(q, v, p); }
+    if (i == 2) { return float3(p, v, t); }
+    if (i == 3) { return float3(p, q, v); }
+    if (i == 4) { return float3(t, p, v); }
+    return float3(v, p, q);
+}
+
+// One basis vector of the extended gamut: take a primary hue, rotate and
+// desaturate it slightly, then normalise so it sums to `mul`.
+float3 gamutRow(float hue, float scale, float rot, float mul) {
+    float3 r = hsv2rgb(float3(wrap01(hue + rot / 360.0), 1.0 / scale, 1.0));
+    r /= max(r.r + r.g + r.b, 0.0001);
+    return r * mul;
+}
+
+float3x3 gamutMat(float strength) {
+    // The author's published constants.
+    float3 c0 = gamutRow(0.0,       1.05,  0.5, 1.0);
+    float3 c1 = gamutRow(1.0 / 3.0, 1.12,  2.0, 1.0);
+    float3 c2 = gamutRow(2.0 / 3.0, 1.045, 0.1, 1.0);
+    // Blend toward identity so the effect has a strength control.
+    c0 = mix(float3(1.0, 0.0, 0.0), c0, strength);
+    c1 = mix(float3(0.0, 1.0, 0.0), c1, strength);
+    c2 = mix(float3(0.0, 0.0, 1.0), c2, strength);
+
+    // Each basis vector sums to one, so using them as ROWS keeps a neutral
+    // neutral. Taken as columns (which is what the GLSL original's m[i] = ...
+    // does) white picks up a visible green cast. float3x3 builds from columns,
+    // hence the transpose.
+    return float3x3(float3(c0.x, c1.x, c2.x),
+                    float3(c0.y, c1.y, c2.y),
+                    float3(c0.z, c1.z, c2.z));
+}
+
+// SkSL has no inverse(), so this is the adjugate over the determinant.
+float3x3 inverse3(float3x3 m) {
+    float3 a = float3(m[0][0], m[0][1], m[0][2]);
+    float3 b = float3(m[1][0], m[1][1], m[1][2]);
+    float3 c = float3(m[2][0], m[2][1], m[2][2]);
+
+    float3 r0 = cross(b, c);
+    float3 r1 = cross(c, a);
+    float3 r2 = cross(a, b);
+
+    float det = dot(a, r0);
+    float invDet = 1.0 / (abs(det) < 1e-8 ? 1e-8 : det);
+
+    // rows of the adjugate become columns of the inverse
+    return float3x3(float3(r0.x, r1.x, r2.x) * invDet,
+                    float3(r0.y, r1.y, r2.y) * invDet,
+                    float3(r0.z, r1.z, r2.z) * invDet);
+}
+
+// Narkowicz's ACES filmic approximation.
+float3 acesFilmic(float3 x) {
+    return clamp((x * (2.51 * x + 0.03)) / (x * (2.43 * x + 0.59) + 0.14), 0.0, 1.0);
+}
+
+// acesFilmic(1.0), so the curve can be renormalised to preserve white.
+const float ACES_AT_WHITE = 0.80379747;
+
+// Non-trig hash - stable at any cell-coordinate magnitude. The previous
+// sin()-based hash lost precision once its dot-product argument reached the
+// thousands, which is exactly the range grain cell coordinates reach a little
+// way from the layer's centre (small grainSize -> many cells -> big indices).
+// Past that point sin() on real GPUs stops being random and starts banding,
+// which read as "the grain goes offscreen" - a visible discontinuity where the
+// noise field stopped being noise. This is the same hash filmDamage.sksl uses.
+float grainHash(float2 p, float seed) {
+    p = fract((p + seed * float2(13.7, 31.1)) * float2(0.1031, 0.11369));
+    p += dot(p, p.yx + 19.19);
+    return fract((p.x + p.y) * p.x);
+}
+
+// Bilinear value noise between per-cell hashes, in -1..1.
+float grainValueNoise(float2 p, float seed) {
+    float2 i = floor(p);
+    float2 f = fract(p);
+    f = f * f * f * (f * (f * 6.0 - 15.0) + 10.0);   // quintic smoothstep
+    float a = grainHash(i, seed);
+    float b = grainHash(i + float2(1.0, 0.0), seed);
+    float c = grainHash(i + float2(0.0, 1.0), seed);
+    float d = grainHash(i + float2(1.0, 1.0), seed);
+    return mix(mix(a, b, f.x), mix(c, d, f.x), f.y) * 2.0 - 1.0;
+}
+
+// Nearest-cell hash noise, in -1..1 - the old blocky look, kept as one end of
+// the Grain Blur dial rather than deleted outright.
+float grainPixelHash(float2 p, float seed) { return grainHash(floor(p), seed) * 2.0 - 1.0; }
+
+// Spatially correlated grain field: bilinear value noise (organic, rounded
+// clumps) blended toward a small neighbourhood average of the per-cell hash
+// (finer, but still cross-correlated rather than flat squares), the way
+// cinegrain (MIT, mr-berndt) builds its "fine" layer. This is what fixes the
+// blockiness at large Grain Size - large cells now read as soft clumps, not
+// flat tiles, at either end of the Grain Blur dial.
+float grainField(float2 pos, float seed) {
+    float vn = grainValueNoise(pos, seed);
+    float h = (grainPixelHash(pos, seed) * 2.0
+             + grainPixelHash(pos + float2(1.0, 0.0), seed)
+             + grainPixelHash(pos + float2(-1.0, 0.0), seed)
+             + grainPixelHash(pos + float2(0.0, 1.0), seed)
+             + grainPixelHash(pos + float2(0.0, -1.0), seed)) / 6.0;
+    return mix(vn, h, clamp(grainBlur, 0.0, 1.0));
+}
+
+// Box-Muller from two hashes: a real Gaussian sample, cheap enough for one
+// per pixel. Used for the log-normal scanner-noise term below.
+float grainGaussian(float2 p, float seed) {
+    float u1 = max(grainHash(p, seed), 1e-6);
+    float u2 = grainHash(p + float2(19.0, 7.0), seed);
+    return sqrt(-2.0 * log(u1)) * cos(6.28318530718 * u2);
+}
+
+// The grain/scanner-noise delta to add to a signal `x`, per the signal-
+// dependent model x' = x + k * x^gamma * u + w (k = grain, gamma =
+// grainResponse, u = a band-limited "blue-ish" noise field, w = scanner
+// noise). This SUPERSEDES an earlier midtone-triangle weighting (peaked at
+// lum 0.5, zero at both ends): that weighting was an invention, whereas a
+// plain power response is the physical one the paper describes - grain
+// amplification simply rises with signal, it does not fall away again in the
+// highlights. Real highlight grain does become less VISIBLE against a bright
+// field, but that is a property of human contrast perception viewing the
+// image, not of the grain-forming process itself, so it is left to the eye
+// rather than baked into the maths here.
+//
+// `u` approximates blue noise (paper's 2048^3x5 basis, which nothing this
+// small can ship) by high-pass filtering the correlated field above: a coarse
+// (low-frequency) copy of the same field is subtracted from the fine one,
+// which removes the shared low-frequency content and leaves a flatter,
+// higher-frequency residual - closer to blue noise's spectrum than either
+// layer alone, and still organic rather than square thanks to grainField.
+float3 grainDelta(float3 x, float2 fragCoord) {
+    float2 cell = (fragCoord - rectCentre) / max(grainSize, 0.25);
+    float  seed = floor(time * 24.0) * 17.31;   // reseed roughly every frame, not every second
+
+    float fine   = grainField(cell, seed);
+    float coarse = grainField(cell * 0.25, seed);          // 4x the feature size
+    float u = clamp(fine - coarse * 0.6, -1.0, 1.0);
+
+    float lum  = dot(x, float3(0.2126, 0.7152, 0.0722));
+    float resp = pow(clamp(lum, 0.0, 1.0), max(grainResponse, 0.05));
+
+    float w = grainGaussian(fragCoord, seed + 91.7) * scannerNoise;
+
+    return float3(grain * resp * u) + float3(w);
+}
+
+half4 main(float2 fragCoord) {
+    half4 src = childShader.eval(fragCoord);
+    float3 lin = src.a > 0.0 ? float3(src.rgb / src.a) : float3(0.0);
+
+    bool lz = linearise > 0.5;
+    if (lz) { lin = pow(max(lin, 0.0), float3(2.2)); }
+
+    // Exposure exists to DRIVE the roll-off, and is the one grade control worth
+    // keeping. A 0..1 signal has nothing above white to compress, so the tone
+    // curve on its own just lifts midtones; pushing exposure first is what puts
+    // highlights into the shoulder, where the wide gamut desaturates them
+    // instead of letting them clip to a hue. At 0 stops nothing changes.
+    lin *= exp2(exposure);
+
+    // Grain domain: which side of the tone curve grain is added on matters
+    // physically. Grain-then-gamma is printing from a NEGATIVE (the grain was
+    // exposed before the printing chemistry's gamma reshaped it); gamma-then-
+    // grain is a POSITIVE print (grain sits on the already-developed image).
+    // Injecting before the roll-off means the curve below reshapes the grain
+    // too, which is what gives the negative option its different character.
+    bool negDomain = grainDomain > 0.5;
+    if (grain > 0.0 && negDomain) {
+        lin = max(lin + grainDelta(lin, fragCoord), 0.0);
+    }
+
+    float s = clamp(gamutExtension, 0.0, 1.0);
+    float3x3 m = gamutMat(s);
+
+    // Into the wide gamut, tone map, and back out. Rolling off in there is
+    // what desaturates highlights instead of clipping them to a hue.
+    // ACES_AT_WHITE renormalises the curve so a white input stays white.
+    float3 wide = m * lin;
+    wide = acesFilmic(wide) / ACES_AT_WHITE;
+    float3 mapped = max(inverse3(m) * wide, 0.0);
+
+    float3 col = mix(lin, mapped, clamp(rolloff, 0.0, 1.0));
+
+    if (lz) { col = pow(max(col, 0.0), float3(1.0 / 2.2)); }
+    col = clamp(col, 0.0, 1.0);
+
+    // Positive-print grain: added after the tone curve, on the developed image.
+    if (grain > 0.0 && !negDomain) {
+        col = clamp(col + grainDelta(col, fragCoord), 0.0, 1.0);
+    }
+
+    half a = src.a;
+    return half4(half3(col) * a, a);
+}

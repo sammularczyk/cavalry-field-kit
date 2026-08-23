@@ -1,0 +1,133 @@
+// Lens, pass 7 of 8 - Field Kit
+// The last segment blur, then out of the gamma domain, optional tone map, and
+// composite over the untouched layer. Highlight extraction happened in
+// bokehPrepare.sksl - see that file for why it is not done here.
+
+uniform float  bokehGamma;
+uniform float  defocus;
+uniform float  blades;
+uniform float  rotation;
+uniform float  catsEye;       // optical vignetting: clips the aperture off-axis
+uniform float  catsEyeFalloff;
+uniform float  ringBias;      // weights taps toward the aperture edge
+uniform float  cocSource;
+uniform float  focus;
+uniform float  aperture;
+uniform float  exposure;      // 0 = no tone map
+uniform float  gain;
+uniform float  dither;
+
+uniform float  segIndex;
+
+uniform float2 resolution;
+uniform float2 rectCentre;
+
+uniform shader displaceMap;   // shaderData - binds BEFORE the image
+uniform shader defocusMap;    // shaderData - Focus From: Texture
+uniform shader childShader;   // result of the previous segment blurs
+uniform shader original;      // untouched input - MUST be declared last
+
+const int MAX_SAMPLES = 24;
+
+float hash12(float2 p) {
+    p = fract(p * float2(5.3987, 5.4421));
+    p += dot(p.yx, p.xy + float2(21.5351, 14.3137));
+    return fract(p.x * p.y * 95.4307);
+}
+
+float cocAt(float2 coord) {
+    int m = int(cocSource);
+    if (m == 0) { return 1.0; }
+    half4 c = original.eval(coord);
+    float2 res = max(resolution, float2(1.0));
+    float z;
+    if (m == 1) {
+        z = float(c.a);
+    } else if (m == 2) {
+        float3 lin = c.a > 0.0 ? float3(c.rgb / c.a) : float3(0.0);
+        z = dot(lin, float3(0.299, 0.587, 0.114));
+    } else if (m == 4) {
+        // Texture: a real defocus map, rather than inferring CoC from the image.
+        half4 dm = defocusMap.eval(coord);
+        float3 lin = dm.a > 0.0 ? float3(dm.rgb / dm.a) : float3(dm.rgb);
+        z = dot(lin, float3(0.299, 0.587, 0.114));
+    } else {
+        z = (coord.y - rectCentre.y) / res.y + 0.5;
+    }
+    return clamp(abs(z - focus) / (z + 0.3) * aperture, 0.0, 4.0);
+}
+
+// See lensSegment.sksl for the reasoning - identical shaping, kept in sync so
+// this last segment matches the ones before it.
+float apertureWeight(float2 fragCoord, float2 dir, float t) {
+    float apertureRadius = abs(t) * 2.0;
+    float ringW = mix(1.0, smoothstep(0.35, 1.0, apertureRadius), clamp(ringBias, 0.0, 1.0));
+
+    if (catsEye <= 0.0) { return ringW; }
+
+    float2 res = max(resolution, float2(1.0));
+    float2 fromCentre = (fragCoord - rectCentre) / (0.5 * min(res.x, res.y));
+    float  r = clamp(length(fromCentre), 0.0, 1.0);
+    float2 clipDir = r > 1e-4 ? fromCentre / r : float2(0.0);
+    float  shift = catsEye * pow(r, max(catsEyeFalloff, 0.1));
+
+    float2 o = dir * (t * 2.0);   // tap offset in aperture space, -1..1
+    float  aa = 2.0 / float(MAX_SAMPLES);   // soften by about one sample step
+
+    // The barrel's clip is a circle the same size as the aperture, slid
+    // radially. Its radius carries the +aa or the softened rim shaves the blob
+    // even on-axis where nothing should clip, and the slide is capped below
+    // 1.0 because at a full aperture radius the circles barely overlap and the
+    // highlight vanishes instead of turning into a lemon.
+    float  clipR = 1.0 + aa;
+    float  clipped = 1.0 - smoothstep(clipR - aa, clipR + aa,
+                                      length(o - clipDir * (shift * 0.7)));
+
+    return ringW * clipped;
+}
+
+half4 main(float2 fragCoord) {
+    float segCount = max(floor(blades * 0.5 + 0.5), 1.0);
+    float g = max(bokehGamma, 0.0001);
+
+    float3 acc;
+    float  accA;
+
+    if (segIndex >= segCount) {
+        // This segment is unused at the current blade count.
+        half4 c = childShader.eval(fragCoord);
+        acc  = c.a > 0.0 ? float3(c.rgb / c.a) : float3(c.rgb);
+        accA = float(c.a);
+    } else {
+        float r = max(defocus, 0.0) * cocAt(fragCoord);
+        float ang = radians(rotation) + 3.14159265 * segIndex / segCount;
+        float2 dir = float2(cos(ang), sin(ang));
+        float n = float(MAX_SAMPLES);
+        float jit = dither > 0.5 ? hash12(fragCoord + segIndex * 17.3) : 0.5;
+
+        float3 sum  = float3(0.0);
+        float  sumA = 0.0;
+        float  cnt  = 0.0;
+        for (int i = 0; i < MAX_SAMPLES; i++) {
+            float t = (float(i) + jit) / n - 0.5;
+            float w = apertureWeight(fragCoord, dir, t);
+            half4 c = childShader.eval(fragCoord + dir * (t * r));
+            sum  += w * (c.a > 0.0 ? float3(c.rgb / c.a) : float3(c.rgb));
+            sumA += w * float(c.a);
+            cnt  += w;
+        }
+        acc  = sum / max(cnt, 0.0001);
+        accA = sumA / max(cnt, 0.0001);
+    }
+
+    // Undo the gamma the first pass applied.
+    float3 col = pow(max(acc, 0.0), float3(1.0 / g)) * max(gain, 0.0);
+    if (exposure > 0.0) { col = float3(1.0) - exp(-col * exposure); }
+    col = clamp(col, 0.0, 1.0);
+
+    // A lens defocus REPLACES the picture rather than adding a bloom over it -
+    // the highlight threshold only shapes which highlights form discs. The
+    // final composite belongs to pass 8, so the chain continues from here.
+    half a = half(clamp(accA, 0.0, 1.0));
+    return half4(half3(clamp(col, 0.0, 1.0)) * a, a);
+}
