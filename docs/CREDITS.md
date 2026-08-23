@@ -5,7 +5,7 @@
 | Filter | Source | Author |
 |---|---|---|
 | ASCII | pixi.js filters · Tom Thumb font | Mathew Groves & Chad Engler · Robey Pointer |
-| Display | Cathode-Retro · REALISTIC SUB-PIXEL OLD CRT | DeadlyRedCube · ENDESGA |
+| Display | Cathode-Retro | DeadlyRedCube |
 | Film Emulation | flim · cinegrain | bean_mhm · mr-berndt |
 | Glow | Spectral_Aberration_Pro_V2 | Marten Blumen |
 | Godray | pixi.js filters | Mathew Groves & Chad Engler |
