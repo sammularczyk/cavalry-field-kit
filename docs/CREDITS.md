@@ -9,7 +9,7 @@
 | Film Emulation | flim · cinegrain | bean_mhm · mr-berndt |
 | Glow | Spectral_Aberration_Pro_V2 | Marten Blumen |
 | Godray | pixi.js filters | Mathew Groves & Chad Engler |
-| Lens | Barrel Blur Chroma · HAWK anamorphic profiles · Spectral_Aberration_Pro_V2 | hornet · Slava Sexton · Marten Blumen |
+| Lens | HAWK anamorphic profiles · Spectral_Aberration_Pro_V2 | Slava Sexton · Marten Blumen |
 | Lens Flare | flaresim_nuke lens prescriptions | Eamonn Nugent & Steve Watts Kennedy |
 | Light Leak | LightLeaksUnity | Daniel Zeller |
 | Print | Screen Print example, Cavalry plug-in SDK | Scene Group |
