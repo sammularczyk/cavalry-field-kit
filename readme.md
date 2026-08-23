@@ -2,7 +2,7 @@
 
 Pack of useful little filters for Cavalry, some ported from open source GLSL shaders.\
 
-## [Download now →](https://github.com/sammularczyk/cavalry-field-kit/releases/download/v1.0.0/Field.Kit.1.0.zip)
+### [Download now →](https://github.com/sammularczyk/cavalry-field-kit/releases/download/v1.0.0/Field.Kit.1.0.zip)
 _Drag and drop the ZIP on your Cavalry Viewport to install._
 
 ## List of filters
