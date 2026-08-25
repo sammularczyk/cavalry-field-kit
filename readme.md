@@ -22,7 +22,7 @@ _Drag and drop the ZIP on your Cavalry Viewport to install._
 | <img width="150" height="150" alt="Gif_part_09" src="https://github.com/user-attachments/assets/0948facf-c3eb-4807-886f-84cbcd7739fc" /> | LED | Pixelate in LED form |
 |  | Lens Flare | |
 | <img width="150" height="150" alt="Gif_part_08" src="https://github.com/user-attachments/assets/7fca036f-c938-45e7-a7f8-3ea8ae46c2aa" /> | Lens Distortion | distortion, aberration |
-|  | Light Leak | |
+| <img width="150" height="150" alt="GIF_LL" src="https://github.com/user-attachments/assets/41c8a624-3b67-4e09-9656-9611de83b922" /> | Light Leak | |
 |  | Lightwrap | |
 | <img width="150" height="150" alt="Gif_part_06" src="https://github.com/user-attachments/assets/39285b41-80fb-40ba-8c45-5dece2ba6982" /> | Paint | brush, oil and watercolour |
 | <img width="150" height="150" alt="Gif_part_05" src="https://github.com/user-attachments/assets/ea596ba1-27cd-42a2-bf86-d0549c8c7e24" /> | Photocopy | |
