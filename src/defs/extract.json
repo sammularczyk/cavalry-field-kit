@@ -1,0 +1,74 @@
+{
+  "author": "samMularczyk",
+  "type": "extract",
+  "superType": "thirdPartyFilter",
+  "version": "1.0",
+  "skslFile": "extract.sksl",
+  "attributes": {
+    "channel": {
+      "type": "enum",
+      "default": 0,
+      "enumValues": [
+        0,
+        1,
+        2,
+        3,
+        4
+      ]
+    },
+    "blackPoint": {
+      "type": "double",
+      "default": 0.0,
+      "min": 0.0,
+      "max": 255.0,
+      "step": 1.0
+    },
+    "whitePoint": {
+      "type": "double",
+      "default": 255.0,
+      "min": 0.0,
+      "max": 255.0,
+      "step": 1.0
+    },
+    "blackSoftness": {
+      "type": "double",
+      "default": 0.0,
+      "min": 0.0,
+      "max": 255.0,
+      "step": 1.0
+    },
+    "whiteSoftness": {
+      "type": "double",
+      "default": 0.0,
+      "min": 0.0,
+      "max": 255.0,
+      "step": 1.0
+    },
+    "invert": {
+      "type": "bool",
+      "default": false
+    }
+  },
+  "triggers": {
+    "out": [
+      "channel",
+      "blackPoint",
+      "whitePoint",
+      "blackSoftness",
+      "whiteSoftness",
+      "invert"
+    ]
+  },
+  "UI": {
+    "icon": "extract.png",
+    "attributeOrder": [
+      "channel",
+      "blackPoint",
+      "whitePoint",
+      "blackSoftness",
+      "whiteSoftness",
+      "invert",
+      "---After Effects' Extract"
+    ]
+  }
+}

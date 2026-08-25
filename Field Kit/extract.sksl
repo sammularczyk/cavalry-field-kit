@@ -1,0 +1,55 @@
+// Extract - Field Kit
+//
+// After Effects' Extract: a range key. Pixels whose channel value falls
+// between Black Point and White Point stay opaque; everything outside that
+// range is pushed toward transparent. Softness feathers each edge of the
+// range instead of a hard cutoff. Invert swaps kept for removed.
+//
+// Values are 0..255 to match AE's own Extract UI.
+//
+// Single pass (pass 0) - childShader is the only input.
+
+uniform float channel;        // enum: 0 Luminance, 1 Red, 2 Green, 3 Blue, 4 Alpha
+uniform float blackPoint;     // 0..255
+uniform float whitePoint;     // 0..255
+uniform float blackSoftness;  // 0..255
+uniform float whiteSoftness;  // 0..255
+uniform float invert;         // bool
+
+uniform float2 resolution;
+uniform float2 rectCentre;
+
+uniform shader childShader;   // pass 0 input = the layer being filtered
+
+half4 main(float2 fragCoord) {
+    half4 src = childShader.eval(fragCoord);
+    float3 lin = src.a > 0.0 ? float3(src.rgb / src.a) : float3(0.0);
+
+    int ch = int(channel);
+    float v = ch == 1 ? lin.r
+            : ch == 2 ? lin.g
+            : ch == 3 ? lin.b
+            : ch == 4 ? float(src.a)
+            : dot(lin, float3(0.2126, 0.7152, 0.0722));
+    v *= 255.0;
+
+    float bp = clamp(blackPoint, 0.0, 255.0);
+    float wp = clamp(whitePoint, 0.0, 255.0);
+    float bs = max(blackSoftness, 0.0001);
+    float ws = max(whiteSoftness, 0.0001);
+
+    // Feather OUTWARD from the range, so the range itself is inclusive: a pixel
+    // exactly at Black Point or White Point is fully kept, and softness spreads
+    // below and above rather than straddling each point. Centring the ramps ON
+    // the points made the default range of 0..255 - which should be a plain
+    // passthrough - key pure black and pure white to 50% alpha, because both
+    // sat exactly halfway up a transition.
+    float rising  = smoothstep(bp - bs * 2.0, bp, v);
+    float falling = 1.0 - smoothstep(wp, wp + ws * 2.0, v);
+    float key = clamp(rising * falling, 0.0, 1.0);
+
+    if (invert > 0.5) { key = 1.0 - key; }
+
+    half a = half(clamp(float(src.a) * key, 0.0, 1.0));
+    return half4(half3(lin) * a, a);
+}

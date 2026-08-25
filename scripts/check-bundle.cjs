@@ -61,6 +61,12 @@ for (const file of defs) {
     const sp = path.join(PLUGIN, p.skslFile);
     if (!fs.existsSync(sp)) { fail(type, `missing shader ${p.skslFile}`); continue; }
     const src = fs.readFileSync(sp, "utf8");
+    // Comment-stripped copy for the identifier checks. Without it a type name
+    // mentioned in a trailing comment reads as a declaration: `uniform float
+    // invert;  // bool` followed by the next `uniform` line matched the
+    // reserved-word pattern as "bool uniform" and failed a perfectly good
+    // shader.
+    const srcCode = src.replace(/\/\*[\s\S]*?\*\//g, " ").replace(/\/\/[^\n]*/g, "");
     const uni = [...src.matchAll(/^uniform\s+\S+\s+(\w+)\s*;/gm)].map(m => m[1]);
 
     // constants supplied per pass are legitimately declared but not attributes
@@ -99,7 +105,7 @@ for (const file of defs) {
       "unsigned", "input", "output", "filter", "sizeof", "cast", "namespace"];
     for (const word of SKSL_RESERVED) {
       const re = new RegExp(`\\b(?:float|half|int|bool|void)[0-9x]*\\s+${word}\\b`);
-      if (re.test(src)) {
+      if (re.test(srcCode)) {
         fail(type, `${p.skslFile} declares a variable named "${word}", which SkSL reserves - the pass will fail to build silently`);
       }
     }

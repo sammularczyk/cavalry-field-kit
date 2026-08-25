@@ -1,0 +1,135 @@
+{
+ "type": "layerStrings",
+ "value": {
+  "author": "samMularczyk",
+  "layerType": "filmDamage",
+  "niceName": "Film Damage",
+  "layerInfo": "The wear of a projector print: gate weave, stepped frame rate, dirt and splotches, scratches, a flickering vignette and a flickering exposure. Split out of Film Emulation because grain and halation are properties of the emulsion, while all of this happens to a finished print afterwards - so stack this after it and the order is physically right.",
+  "language": "en",
+  "attributes": {
+   "damage": [
+    "Damage",
+    "Strength of the Damage tab's projector wear. 0 is a pristine print."
+   ],
+   "damageDomain": [
+    "Damage Domain",
+    "Whether dirt, scratches, vignette and flicker are applied to the print or to the (inverted) negative, which changes how they land in highlights versus shadows."
+   ],
+   "time": [
+    "Time",
+    "Driven by the composition time. Disconnect it to freeze the film artefacts."
+   ],
+   "speed": [
+    "Speed",
+    "How fast the damage clock runs relative to real time. 1 is real time; lower slows the judder and weave, higher speeds them up."
+   ],
+   "frameRate": [
+    "Frame Rate",
+    "Steps time to this rate for a projected-film judder. Zero leaves motion smooth."
+   ],
+   "weave": [
+    "Gate Weave",
+    "How much the picture wanders in the gate, as a fraction of the layer. A mean-reverting wander rather than a steady drift."
+   ],
+   "dirt": [
+    "Dirt",
+    "Density of dirt and scratches."
+   ],
+   "dirtThreshold": [
+    "Dirt Density",
+    "How many specks land, as the chance of a particle per cell. Sizes follow a power law from there - mostly tiny, with the occasional large flake - so this changes how much dirt there is, not how big it is."
+   ],
+   "dirtScale": [
+    "Dirt Scale",
+    "Base size of the specks. Individual particles vary widely around this, since real dust does."
+   ],
+   "dirtPolarity": [
+    "Dirt Polarity",
+    "Which generation the dust landed on. Negative is dirt on the print or in the gate: it blocks light and reads black. Positive is dirt on the NEGATIVE, which blocks exposure so the print stays clear there and projects as bright white sparkle - the classic archive-print artefact. Zero gives both."
+   ],
+   "scratches": [
+    "Scratches",
+    "Density of vertical gate scratches - thin, flickering, drifting sideways over time."
+   ],
+   "scratchWidth": [
+    "Scratch Width",
+    "Base width of a scratch in pixels. Real scratches are thin - keep this small."
+   ],
+   "flicker": [
+    "Flicker",
+    "Frame-to-frame exposure wobble, log-normal like a real lamp/shutter flicker rather than symmetric."
+   ],
+   "vignetteAmount": [
+    "Vignette",
+    "Corner darkening."
+   ],
+   "gateRounding": [
+    "Gate Rounding",
+    "Shape of the projector gate the light falls off through. 1 is a true ellipse; lower values square the corners toward the rectangular aperture a real gate has. A superellipse, so there is no curvature break where the corners meet the sides."
+   ],
+   "gateSoftness": [
+    "Gate Softness",
+    "How far the gate edge feathers. Small is a hard-edged mask; large is the gentle falloff of an old projector lens."
+   ],
+   "vignetteFlicker": [
+    "Vignette Flicker",
+    "How much the vignette breathes over time."
+   ],
+   "desaturate": [
+    "Desaturate",
+    "One is full black and white, as in the original. Lower it to keep some colour."
+   ],
+   "dyeFade": [
+    "Dye Fade",
+    "Cyan is the least stable of the three print dyes and fades first, then magenta, with yellow the most durable. Losing cyan means less red gets absorbed, which is why old prints drift magenta-red rather than simply going grey."
+   ],
+   "hotSpot": [
+    "Lamp Hot Spot",
+    "Projector lamps are brighter on the optical axis. The opposite gradient to the gate vignette, and not cancelled by it."
+   ],
+   "scratchPolarity": [
+    "Scratch Polarity",
+    "Which side of the film is scratched. Negative is the base - the shiny side - where scratches read dark. Positive is the emulsion, where the gouge takes the dyes away and reads bright. Zero gives both."
+   ],
+   "shutterBlades": [
+    "Shutter Blades",
+    "Blade count of the projector shutter, 2 or 3 on a real machine. The blades chop the light faster than the frame rate, so they cannot show as flicker in a rendered frame - what you get here is the beat against the frame rate, which is what a camera pointed at a screen records. 0 switches it off."
+   ],
+   "splice": [
+    "Splice",
+    "Strength of the jolt as a physical join passes the gate: the print jumps vertically and the density pops for a frame or two."
+   ],
+   "spliceInterval": [
+    "Splice Interval",
+    "Seconds between joins. Prints are assembled from a few hundred feet at a time."
+   ],
+   "cueMarks": [
+    "Cue Marks",
+    "The reel-changeover cue punched into the top-right corner - the “cigarette burn” that tells the projectionist to start the second machine."
+   ],
+   "cueInterval": [
+    "Cue Interval",
+    "Seconds between cues. A real reel runs about 20 minutes. 0 pins the mark on permanently, for when you want the mark rather than the schedule."
+   ],
+   "hair": [
+    "Hair In Gate",
+    "A hair caught in the gate, trembling as the film drags past but otherwise fixed. Use Hair Seed to reposition it."
+   ],
+   "hairSeed": [
+    "Hair Seed",
+    "Which hair you get and where it sits. It stays put - a hair in the gate holds its position until someone cleans the machine - so change this to move it rather than expecting it to wander."
+   ],
+   "amount": [
+    "Amount",
+    "Mix between the original layer and the film result."
+   ]
+  },
+  "enums": {
+   "damageDomain": {
+    "0": "Positive Print",
+    "1": "Negative"
+   }
+  },
+  "tabs": {}
+ }
+}

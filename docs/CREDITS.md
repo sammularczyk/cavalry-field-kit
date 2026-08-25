@@ -24,7 +24,7 @@ No code used — recreated based on aesthetic and description. Still, felt it wa
 |---|---|---|
 | Composite Video | C64 screen with NTSC filter | BitOfGold |
 | Display Simulation | crt-beam-simulator | Mark Rejhon & Timothy Lottes |
-| Film Emulation | Fujifilm film simulations · Grain Generator | Fujifilm · Max van Leeuwen |
+| Film Damage | Cinematic Grain · film-damage synthesis paper | Max van Leeuwen |
 | Ultra Glow | apGlow | Adrian Pueyo |
 | Hatching | Geeks3D crosshatch and cross-stitch · Money filter | JeGX · Giacomo Preciado |
 | LED | lightbulb screen · Golfing Mosaic Filter | FabriceNeyret2 · GregRostami |
@@ -32,7 +32,6 @@ No code used — recreated based on aesthetic and description. Still, felt it wa
 | Lens Blur | Virtual_Lens · Focus From a matte | Florian Lorber · NLIBS |
 | Lens Flare | Ultimate Lens Flare · realflare · Physically-Based Real-Time Lens Flare Rendering | ektogamat · Beat Reichenbach · Hullin, Eisemann, Seidel & Lee |
 | Lightwrap | bm_Lightwrap | Ben McEwan |
-| Polar Coordinates | Polar Coordinates effect | Adobe After Effects |
 | Paint | Image abstraction by structure-adaptive filtering · Computer-Generated Watercolor · Oil Painting · Mt. Fuji Watercolor | Kyprianidis & Döllner · Curtis, Anderson, Seims, Fleischer & Salesin · Spi3lot · noztol |
 
 ## The Colour Recipe bases

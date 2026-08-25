@@ -17,11 +17,11 @@ FG = (0, 0, 0, 255)
 
 INITIALS = {
     "ascii": "AS", "compositeVideo": "CV", "display": "DS",
-    "film": "FM", "glow": "GL", "hatching": "HT", "led": "LE", "lens": "LN",
+    "film": "FE", "filmDamage": "FD", "glow": "UG", "hatching": "HT", "led": "LE", "lens": "LD", "lensBlur": "LB",
     "lightwrap": "LW", "paint": "PT", "photocopy": "PC",
-    "polarCoordinates": "PO", "vhs": "VH",
+    "polarCoordinates": "PL", "vhs": "V",
     "print": "PR", "lightLeak": "LL", "filmBurn": "FB",
-    "lensFlare": "LF", "godray": "GR",
+    "lensFlare": "LF", "godray": "GR", "extract": "EX",
 }
 
 FONT = {
@@ -41,8 +41,10 @@ FONT = {
  "R": "11110 10001 10001 11110 10100 10010 10001",
  "S": "01111 10000 10000 01110 00001 00001 11110",
  "T": "11111 00100 00100 00100 00100 00100 00100",
+ "U": "10001 10001 10001 10001 10001 10001 01110",
  "V": "10001 10001 10001 10001 10001 01010 00100",
  "W": "10001 10001 10001 10101 10101 11011 10001",
+ "X": "10001 10001 01010 00100 01010 10001 10001",
 }
 GW, GH = 5, 7
 

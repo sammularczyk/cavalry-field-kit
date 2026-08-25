@@ -36,11 +36,13 @@ uniform float  grainResponse; // signal-dependent amplification exponent (gamma)
 uniform float  grainDomain;   // enum: 0 gamma-then-grain (positive print), 1 grain-then-gamma (negative)
 uniform float  scannerNoise;  // separate white noise, models scanner sensor noise
 uniform float  time;
+uniform float  amount;        // overall mix, for the whole filter
 
 uniform float2 resolution;
 uniform float2 rectCentre;
 
 uniform shader childShader;   // pass 1 result (halation applied)
+uniform shader original;      // untouched input - MUST be declared last
 
 float wrap01(float x) { return fract(x); }
 
@@ -151,15 +153,38 @@ float grainPixelHash(float2 p, float seed) { return grainHash(floor(p), seed) * 
 // cinegrain (MIT, mr-berndt) builds its "fine" layer. This is what fixes the
 // blockiness at large Grain Size - large cells now read as soft clumps, not
 // flat tiles, at either end of the Grain Blur dial.
+// Grain as a BOOLEAN MODEL: silver halide crystals are discs at random
+// positions, not values on a lattice. The old field hashed per grid cell, so
+// the moment Grain Size made a cell bigger than a pixel you could see the grid
+// - square blocks, axis aligned, nothing like film.
+//
+// Scattering one jittered disc into each of the nine neighbouring cells and
+// accumulating coverage gives round grains at any size, with no preferred
+// direction, and is what Newson, Delon & Galerne actually describe. It is also
+// resolution independent by construction: the grains have a real size in the
+// film plane rather than being tied to the sampling grid.
+//
+// The radius is set so mean coverage lands at 0.5 - for a Poisson field of one
+// disc per unit cell, coverage is 1 - exp(-pi*r*r), which is 0.5 at r = 0.47.
+// That matters because the result is used as a SIGNED delta: a mean off 0.5
+// would shift the picture's exposure rather than just texturing it.
 float grainField(float2 pos, float seed) {
-    float vn = grainValueNoise(pos, seed);
-    float h = (grainPixelHash(pos, seed) * 2.0
-             + grainPixelHash(pos + float2(1.0, 0.0), seed)
-             + grainPixelHash(pos + float2(-1.0, 0.0), seed)
-             + grainPixelHash(pos + float2(0.0, 1.0), seed)
-             + grainPixelHash(pos + float2(0.0, -1.0), seed)) / 6.0;
-    return mix(vn, h, clamp(grainBlur, 0.0, 1.0));
+    float2 base = floor(pos);
+    float soft = mix(0.55, 0.06, clamp(grainBlur, 0.0, 1.0));
+    float acc = 0.0;
+    for (int j = -1; j <= 1; j++) {
+        for (int i = -1; i <= 1; i++) {
+            float2 cell = base + float2(float(i), float(j));
+            float2 c = cell + float2(grainPixelHash(cell, seed),
+                                     grainPixelHash(cell, seed + 37.1));
+            float r = 0.47 * (0.7 + 0.6 * grainPixelHash(cell, seed + 71.3));
+            float d = length(pos - c) / max(r, 0.05);
+            acc += 1.0 - smoothstep(1.0 - soft, 1.0, d);
+        }
+    }
+    return clamp(acc, 0.0, 1.0) * 2.0 - 1.0;
 }
+
 
 // Box-Muller from two hashes: a real Gaussian sample, cheap enough for one
 // per pixel. Used for the log-normal scanner-noise term below.
@@ -191,12 +216,35 @@ float3 grainDelta(float3 x, float2 fragCoord) {
     float2 cell = (fragCoord - rectCentre) / max(grainSize, 0.25);
     float  seed = floor(time * 24.0) * 17.31;   // reseed roughly every frame, not every second
 
-    float fine   = grainField(cell, seed);
-    float coarse = grainField(cell * 0.25, seed);          // 4x the feature size
-    float u = clamp(fine - coarse * 0.6, -1.0, 1.0);
+    float u = grainField(cell, seed);
 
-    float lum  = dot(x, float3(0.2126, 0.7152, 0.0722));
-    float resp = pow(clamp(lum, 0.0, 1.0), max(grainResponse, 0.05));
+    float lum = dot(x, float3(0.2126, 0.7152, 0.0722));
+
+    // Granularity is NOT monotonic in brightness, which is what the old
+    // pow(lum, response) assumed. Silver halide grains are a Boolean model -
+    // randomly placed opaque discs - so what varies from pixel to pixel is how
+    // many happen to fall under the sampling aperture. That count carries
+    // binomial variance u(1-u): largest where the emulsion is half covered,
+    // and zero at both ends, because bare film and fully developed film have
+    // nothing left to vary. So film is grainiest in the MIDTONES and cleans up
+    // in the highlights AND the deep shadows. A monotonic curve can only ramp
+    // one way and gets one of those two ends wrong whichever way it points.
+    //
+    // Newson, Delon & Galerne, "A Stochastic Film Grain Model for
+    // Resolution-Independent Rendering" (2017), using their local Gaussian
+    // approximation rather than the exact Monte Carlo one - same variance, a
+    // fraction of the cost. The mid-density peak itself is Bayer (1964).
+    //
+    // Scaled by 4 so the peak normalises to 1 and Grain keeps its old meaning.
+    // Grain Response is now a deviation FROM the physical curve: 1 is correct,
+    // below 1 spreads grain toward the extremes, above 1 confines it further.
+    float cov  = clamp(lum, 0.0, 1.0);
+    float resp = pow(clamp(4.0 * cov * (1.0 - cov), 0.0, 1.0), max(grainResponse, 0.05));
+
+    // Selwyn's law (1935): granularity goes as the grain size relative to the
+    // sampling aperture, so coarser grain is also STRONGER, not merely bigger.
+    // Normalised at Grain Size 1 so existing setups are unchanged there.
+    resp *= sqrt(max(grainSize, 0.25));
 
     float w = grainGaussian(fragCoord, seed + 91.7) * scannerNoise;
 
@@ -248,6 +296,9 @@ half4 main(float2 fragCoord) {
         col = clamp(col + grainDelta(col, fragCoord), 0.0, 1.0);
     }
 
+    // Amount used to live in the damage pass, which left when Film Damage was
+    // split out - so the mix moved here, to what is now the last pass.
     half a = src.a;
-    return half4(half3(col) * a, a);
+    return mix(original.eval(fragCoord), half4(half3(col) * a, a),
+               half(clamp(amount, 0.0, 1.0)));
 }

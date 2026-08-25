@@ -1,0 +1,45 @@
+{
+ "type": "layerStrings",
+ "value": {
+  "author": "samMularczyk",
+  "layerType": "extract",
+  "niceName": "Extract",
+  "layerInfo": "A range key, same as After Effects' Extract: pixels whose channel value falls between Black Point and White Point stay opaque, everything outside is pushed toward transparent. Softness feathers each edge instead of a hard cutoff.",
+  "language": "en",
+  "attributes": {
+   "channel": [
+    "Channel",
+    "Which value the key is based on. Luminance is the usual choice; Red, Green, Blue and Alpha key off a single channel of the layer instead."
+   ],
+   "blackPoint": [
+    "Black Point",
+    "Values below this become transparent."
+   ],
+   "whitePoint": [
+    "White Point",
+    "Values above this become transparent."
+   ],
+   "blackSoftness": [
+    "Black Softness",
+    "Feathers the transition at the Black Point instead of a hard cutoff."
+   ],
+   "whiteSoftness": [
+    "White Softness",
+    "Feathers the transition at the White Point instead of a hard cutoff."
+   ],
+   "invert": [
+    "Invert",
+    "Swaps kept for removed - the range between the two points becomes transparent instead of opaque."
+   ]
+  },
+  "enums": {
+   "channel": {
+    "0": "Luminance",
+    "1": "Red",
+    "2": "Green",
+    "3": "Blue",
+    "4": "Alpha"
+   }
+  }
+ }
+}

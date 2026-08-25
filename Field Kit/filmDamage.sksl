@@ -1,4 +1,9 @@
-// Film: damage pass - Field Kit
+// Film Damage - Field Kit
+// Split out of Film Emulation: grain, halation and tone are properties of the
+// EMULSION, while everything here happens to a finished print running through
+// a projector - a different object at a different point in the chain. Stack
+// this after Film Emulation and the order is physically right: grain sits in
+// the negative, damage sits on the print over it.
 // Gate weave, stepped frame rate, an exposure-responsive grain/dirt layer,
 // scratches, splotch-scale dirt, a flickering vignette and a flickering
 // exposure - the wear of a hand-cranked projector print.
@@ -65,20 +70,34 @@ uniform float  weave;           // gate weave / image wobble
 uniform float  dirt;            // grain + dirt/scratch density
 uniform float  dirtThreshold;
 uniform float  dirtScale;
+uniform float  dirtPolarity;    // -1 print dirt (black), +1 negative dirt (bright)
 uniform float  scratches;       // scratch density/amount
 uniform float  scratchWidth;    // base scratch width, pixels
 uniform float  flicker;         // exposure flicker
+uniform float  gateRounding;    // 1 = elliptical gate, 0 = square-cornered
+uniform float  gateSoftness;    // how far the gate edge feathers
 uniform float  vignetteAmount;
 uniform float  vignetteFlicker;
 
-uniform float  desaturate;      // 1 = full black and white
+uniform float  desaturate;
+uniform float  dyeFade;         // cyan dye dies first, so prints go magenta
+uniform float  hotSpot;         // lamp is brighter in the centre
+uniform float  scratchPolarity; // -1 base side (dark), +1 emulsion side (bright)
+uniform float  shutterBlades;   // 0 off, else 2 or 3 blades
+uniform float  splice;          // jolt at a physical join
+uniform float  spliceInterval;  // seconds between joins
+uniform float  cueMarks;        // reel-changeover cue in the top-right
+uniform float  cueInterval;     // seconds between cues; 0 pins them on
+uniform float  hair;            // hair caught in the gate
+uniform float  hairSeed;        // which hair, and where it sits      // 1 = full black and white
 uniform float  amount;
 
 uniform float2 resolution;
 uniform float2 rectCentre;
 
-uniform shader childShader;     // previous pass (graded image)
-uniform shader original;        // untouched input - MUST be declared last
+// Single pass, so childShader IS the layer. Pass 0 must NOT declare
+// `original` - there is no such input and the shader fails to BUILD.
+uniform shader childShader;     // pass 0 input = the layer being filtered
 
 const float PI = 3.14159265359;
 
@@ -113,18 +132,37 @@ float gauss1(float n) {
 // First-order OU approximation: bounded, temporally correlated low-frequency
 // wander. Bounded noise reverts to its mean by construction, which is the
 // property that matters - it does not need a literal recurrence relation.
-float ouHoriz(float t) {
-    return vnoise(float2(t, 11.7)) + vnoise(float2(t * 2.3 + 4.1, 5.2)) - 1.0;
+// Gate weave as an Ornstein-Uhlenbeck wander, approximated by fBm.
+//
+// A mean-reverting random walk has a 1/f^2 power spectrum, so amplitude has to
+// HALVE as frequency doubles. The previous version summed two octaves at full
+// amplitude - which is not a wander at all, it is two overlapping wobbles, and
+// at the default Speed the clock crosses only about two cells of noise across a
+// hundred frames. The result was a figure-of-eight repeating on a short cycle,
+// which is exactly what a real gate does not do.
+//
+// Five octaves at a NON-INTEGER lacunarity: 2.17 rather than 2.0, so the
+// octaves never line up on a common period and the motion has no beat. `sum`
+// accumulates real noise samples at runtime coordinates, so it cannot fold to
+// a constant the way a literal-only loop would.
+float ouWander(float t, float seedY) {
+    float sum = 0.0, amp = 1.0, f = 1.0, norm = 0.0;
+    for (int i = 0; i < 5; i++) {
+        sum  += amp * (vnoise(float2(t * f, seedY + float(i) * 13.7)) - 0.5);
+        norm += amp;
+        amp  *= 0.5;
+        f    *= 2.17;
+    }
+    return sum / max(norm, 1e-4) * 2.0;
 }
 
-// Second-order OU approximation for vertical weave: the SAME kind of wander,
-// but its amplitude breathes according to a much slower noise, standing in for
-// the paper's mean-reversion strength itself following an OU process. A floor
-// keeps it from ever going fully flat.
+float ouHoriz(float t) { return ouWander(t, 11.7); }
+
+// Vertical weave is second-order - the sprockets drive it, so its amplitude
+// itself drifts over a much longer period than the wander does.
 float ouVert(float t) {
     float amp = 0.4 + 1.2 * (0.5 + 0.5 * vnoise(float2(t * 0.07 + 91.3, 4.2)));
-    float wander = vnoise(float2(t + 8.3, 27.4)) + vnoise(float2(t * 2.3 + 1.7, 9.9)) - 1.0;
-    return wander * amp;
+    return ouWander(t + 8.3, 27.4) * amp;
 }
 
 float2 wanderNoise(float t) { return float2(ouHoriz(t), ouVert(t)); }
@@ -163,36 +201,83 @@ float filmDamageMul(float2 px, float t, float lum) {
     float2 cell = floor(px / scale);
     float g = hash21(cell + frameIdx * float2(17.31, 9.13)) - 0.5;
 
-    float jSeed = frameIdx;
-    float2 jitter = float2(hash1(jSeed * 12.9), hash1(jSeed * 78.2 + 3.0)) * 71.0;
-    // /12 rather than /44: a speck is a few pixels of opaque dust, not a
-    // 20-pixel cloud.
-    float2 q = px / (scale * 12.0) + jitter;
-    float n = (vnoise(q) + 0.5 * vnoise(q * 3.7) + 0.25 * vnoise(q * 9.1)) / 1.75;
+    // DIRT AS PARTICLES, not a thresholded cloud.
+    //
+    // Thresholding an fBm field gave every speck roughly the same size, because
+    // a band of a noise field only contains features at that band's scale. Real
+    // dust is nothing like that: its sizes follow a power law - overwhelmingly
+    // tiny specks with an occasional large one - and that distribution is the
+    // whole visual signature. r = rmin * u^-0.45 draws from it directly.
+    //
+    // Particles are Poisson-placed one per cell, the same construction the
+    // grain uses, so there is no lattice however coarse the scale gets. The
+    // outline is perturbed by angle because a dust flake or a fibre is not a
+    // disc, and a circular speck reads as a drawn dot.
+    float2 pos  = px / (scale * 40.0);
+    float2 base = floor(pos);
+    float dens  = clamp(dirtThreshold, 0.0, 1.0);
+    float speck = 0.0;
+    for (int j = -1; j <= 1; j++) {
+        for (int i = -1; i <= 1; i++) {
+            float2 cell = base + float2(float(i), float(j));
+            float2 fs = cell + frameIdx * float2(17.31, 9.13);
+            // Most cells are empty; skipping them early is what keeps this
+            // cheaper than the field it replaces.
+            if (hash21(fs) > dens) { continue; }
+            float u = clamp(hash1(dot(cell, float2(3.1, 7.7)) + frameIdx * 0.37), 1e-3, 1.0);
+            float r = min(0.02 * pow(u, -0.45), 0.42);
+            float2 c = cell + float2(hash1(dot(fs, float2(1.7, 9.2))),
+                                     hash1(dot(fs, float2(5.3, 2.1)) + 11.0));
+            float2 dv = pos - c;
+            // Low harmonics, small amplitude: a dust flake is a lumpy blob,
+            // not a star. Driving 5 and 11 lobes at +-55% made every speck a
+            // five-pointed star - high harmonics at high amplitude are spikes,
+            // and irregularity lives in the LOW ones.
+            float ang = atan(dv.y, dv.x);
+            float rr = r * (1.0 + 0.16 * sin(ang * 2.0 + u * 19.0)
+                                + 0.09 * sin(ang * 3.0 - u * 7.0));
+            speck = max(speck, 1.0 - smoothstep(rr * 0.7, rr, length(dv)));
+        }
+    }
 
-    float thresh = clamp(dirtThreshold, 0.0, 1.0);
-    // A hard edge, because a dust particle is opaque - a soft ramp reads as
-    // a stain rather than as dirt.
-    float speckMask = smoothstep(thresh - 0.012, thresh + 0.012, n);
-    float speckDarken = 1.0 - speckMask * 0.85;
+    // Polarity. Dust on the print or in the gate blocks light and reads BLACK.
+    // Dust on the NEGATIVE blocks exposure instead, so that spot stays clear on
+    // the print and projects BRIGHT - the white sparkle of an archive print,
+    // which a darken-only model cannot produce at all.
+    float dpol = clamp(dirtPolarity, -1.0, 1.0);
+    float bright = speck * clamp(0.5 + 0.5 * dpol, 0.0, 1.0);
+    float dark   = speck * clamp(0.5 - 0.5 * dpol, 0.0, 1.0);
+    float speckDarken = 1.0 - dark * 0.85;
 
     float mul = 1.0 + g * 0.5 * resp;
     mul *= mix(1.0, speckDarken, resp);
+    mul += bright * 0.9 * mix(1.0, resp, 0.5);
 
     return mix(1.0, mul, amt);
 }
 
 // Radial corner darkening, breathing gently with a frame-locked flicker.
 float vignetteAt(float2 uv, float t) {
-    float2 c = uv - 0.5;
-    float r = length(c) * 1.5;
-    float vig = 1.0 - smoothstep(0.55, 1.15, r);
+    // The GATE, as a superellipse. A projector aperture is a rectangle with
+    // rounded corners, and the light falls off through it - a plain circular
+    // vignette gets the corners wrong, and a rounded rectangle has a curvature
+    // break where its arcs meet its straight edges. |x|^n + |y|^n = 1 has no
+    // such joint, which is why Display Simulation uses the same shape for its
+    // faceplate. Rounding drives the exponent: 1 is a true ellipse, and small
+    // values approach a hard-cornered rectangle.
+    float2 p = (uv - 0.5) * 2.0;
+    float n = clamp(1.0 / max(gateRounding * 0.5, 0.015), 2.0, 64.0);
+    float rad = pow(pow(abs(p.x), n) + pow(abs(p.y), n), 1.0 / n);
+
+    float e = max(gateSoftness, 0.001);
+    float vig = 1.0 - smoothstep(1.0 - e, 1.0 + e, rad);
 
     float fl = hash1(floor(t * 10.0) * 5.37) - 0.5;
     vig = clamp(vig + fl * 0.08 * vignetteFlicker, 0.0, 1.0);
 
     return mix(1.0, vig, clamp(vignetteAmount, 0.0, 1.0));
 }
+
 
 // Normalised sinc, with the x=0 singularity handled.
 float sincN(float x) {
@@ -280,9 +365,59 @@ float2 scratchesAt(float2 px, float secs) {
     return float2(bright, dark) * amt;
 }
 
+// Reel-changeover cue - the "cigarette burn". Two 4-frame marks punched into
+// the top-right corner of the print so the projectionist knows to start the
+// second machine. Interval 0 pins it on permanently, for when you want the
+// mark rather than the schedule.
+float cueMarkAt(float2 uv, float t, float aspect) {
+    if (cueMarks <= 0.0) { return 0.0; }
+    // TWO cues, eight frames apart: the motor cue to start the incoming
+    // projector, then the changeover cue to swap. Four frames each.
+    if (cueInterval > 0.0) {
+        float ph = fract(t / cueInterval) * cueInterval;   // seconds into the cycle
+        bool first  = ph <= 0.1667;                        // ~4 frames at 24
+        bool second = ph >= 0.3333 && ph <= 0.5;           // 8 frames later
+        if (!first && !second) { return 0.0; }
+    }
+    float2 p = (uv - float2(0.90, 0.88)) * float2(aspect, 1.0);
+    // A CIRCLE. Cue marks were scribed against a template, not freehand, so
+    // they are clean - the previous attempt at a "ragged" edge used a 7-lobe
+    // harmonic that simply turned it into a seven-pointed star. The only
+    // irregularity worth having is a slightly soft edge, from the scribe not
+    // cutting to a uniform depth.
+    float rr = 0.023;
+    return (1.0 - smoothstep(rr * 0.82, rr * 1.04, length(p))) * clamp(cueMarks, 0.0, 1.0);
+}
+
+
+// A hair caught in the gate: rooted at the frame edge, twitching with the
+// film's movement. Its root drifts every few seconds so it reads as something
+// caught in the machine rather than a drawn line.
+float hairAt(float2 uv, float t, float aspect) {
+    if (hair <= 0.0 || uv.y > 0.32) { return 0.0; }
+    // A hair in the gate is STUCK there. It holds its position and its shape
+    // until someone cleans the machine - all it does is tremble as the film
+    // drags past. The first version swept it with sin(y*34 + t*6), which made
+    // it swim across the frame like a worm; that motion was invented, not
+    // observed. The shape is now fixed by a seed and only jitters by a
+    // fraction of a pixel per frame.
+    float root  = 0.15 + 0.7 * hash1(hairSeed * 7.7);
+    float curve = sin(uv.y * 9.0 + hairSeed * 2.3) * 0.03
+                + sin(uv.y * 21.0 + hairSeed * 5.1) * 0.012;
+    float tremble = (hash1(floor(t * 24.0) * 1.7 + hairSeed) - 0.5) * 0.0015;
+    float x = root + curve * (uv.y / 0.32) + tremble;
+    float dx = abs(uv.x - x) * aspect;
+    float taper = 1.0 - smoothstep(0.0, 0.32, uv.y);
+    return (1.0 - smoothstep(0.0015, 0.0035, dx)) * taper * clamp(hair, 0.0, 1.0);
+}
+
+
 half4 main(float2 fragCoord) {
-    half4 orig = original.eval(fragCoord);
+    half4 orig = childShader.eval(fragCoord);
     float dmg = clamp(damage, 0.0, 1.0);
+    // Every effect below is gated on dmg, so zero is an exact passthrough -
+    // worth taking early rather than running the whole projector for nothing.
+    if (dmg <= 0.0) { return orig; }
 
     float2 res = max(resolution, float2(1.0));
 
@@ -301,7 +436,16 @@ half4 main(float2 fragCoord) {
     float t = frameRate > 0.0 ? floor(secs * frameRate) / frameRate : secs;
 
     // Gate weave: an Ornstein-Uhlenbeck-style wander - see ouHoriz/ouVert.
+    // A physical join every few hundred feet: the print jolts vertically and
+    // the density pops for a frame or two as the splice passes the gate.
+    float spliceHit = 0.0;
+    if (splice > 0.0 && spliceInterval > 0.0) {
+        float ph = fract(t / spliceInterval);
+        if (ph <= 0.0833 / spliceInterval) { spliceHit = clamp(splice, 0.0, 1.0); }
+    }
+
     float2 off = dmg * weave * wanderNoise(t * 0.6);
+    off.y += dmg * spliceHit * 0.02;
 
     float2 uv = (fragCoord - rectCentre) / res + 0.5 + off;
     // The weave moves the whole frame, so without this a transparent band
@@ -320,7 +464,11 @@ half4 main(float2 fragCoord) {
     float2 px = fragCoord - rectCentre;
 
     float d = filmDamageMul(px, t, lum);
-    float v = vignetteAt(uv, t);
+    // Screen-space, NOT the weaved uv. The gate and the lens belong to the
+    // machine and do not move; the film wanders behind them. Feeding this the
+    // weaved coordinate dragged the whole vignette around with the frame, which
+    // read as black edges swinging in and out as Weave went up.
+    float v = vignetteAt((fragCoord - rectCentre) / res + 0.5, t);
     float2 scratch = scratchesAt(px, secs);   // x = bright mask, y = dark mask
 
     // Exposure flicker: log-normal (paper's exp(N(0, 0.125))) rather than a
@@ -333,7 +481,26 @@ half4 main(float2 fragCoord) {
     d = mix(1.0, d, dmg);
     v = mix(1.0, v, dmg);
     f = mix(1.0, f, dmg);
+    // Base-side scratches ride on the shiny side and read DARK; emulsion-side
+    // scratches gouge the dyes away and read bright. scratchesAt returns both,
+    // so polarity is a bias between them rather than a second scratch system.
+    float pol = clamp(scratchPolarity, -1.0, 1.0);
+    scratch *= float2(1.0 + pol, 1.0 - pol);
     scratch *= dmg;
+
+    // Shutter blades chop the light ABOVE frame rate, so they cannot show as
+    // flicker in a per-frame render. What is visible - and what a camera
+    // pointed at a screen actually records - is the BEAT between blade rate and
+    // capture rate, so that is what this models.
+    if (shutterBlades > 0.0) {
+        f *= 1.0 + 0.06 * dmg * cos(6.28318530718 * shutterBlades * max(frameRate, 1.0) * secs);
+    }
+    f *= 1.0 + spliceHit * dmg * 0.5;
+
+    // The lamp is brighter on the optical axis, which is the opposite gradient
+    // to the gate vignette and not cancelled by it.
+    float hr = clamp(length((fragCoord - rectCentre) / res) * 2.0, 0.0, 1.0);
+    v *= 1.0 + dmg * clamp(hotSpot, 0.0, 2.0) * (1.0 - hr * hr);
 
     // Negative-domain processing: capture-stage corruption happens on the
     // negative, not the print. Working in 1-x changes how dirt, scratches,
@@ -347,6 +514,21 @@ half4 main(float2 fragCoord) {
 
     float lum2 = dot(col, float3(0.299, 0.587, 0.114));
     col = mix(col, float3(lum2), clamp(desaturate, 0.0, 1.0) * dmg);
+    // Dye fade. Cyan is the least stable dye and goes first, magenta next,
+    // yellow last - losing cyan means less red is absorbed, which is exactly
+    // why old prints drift magenta-red rather than simply desaturating.
+    float fd = clamp(dyeFade, 0.0, 1.0) * dmg;
+    if (fd > 0.0) {
+        float3 dens = -log(max(col, float3(1e-4)));
+        dens *= float3(1.0 - 0.80 * fd, 1.0 - 0.45 * fd, 1.0 - 0.15 * fd);
+        col = exp(-dens);
+    }
+
+    float2 suv = (fragCoord - rectCentre) / res + 0.5;
+    float asp = res.x / max(res.y, 1.0);
+    col *= 1.0 - hairAt(suv, t, asp) * dmg;
+    col += cueMarkAt(suv, t, asp) * dmg * 0.9;
+
     col = clamp(col, 0.0, 1.0);
 
     half a = c.a;

@@ -1,0 +1,59 @@
+[
+  {
+    "presetType": "layer",
+    "id": "258a3672-8023-98de-9a99-4c3c1b6a9b95",
+    "author": "samMularczyk",
+    "name": "Projector",
+    "layerType": [
+      "filmDamage"
+    ],
+    "attrs": [
+      {
+        "attrId": "damage",
+        "value": 1.0
+      },
+      {
+        "attrId": "frameRate",
+        "value": 12.0
+      },
+      {
+        "attrId": "speed",
+        "value": 0.0333
+      },
+      {
+        "attrId": "weave",
+        "value": 0.002
+      },
+      {
+        "attrId": "flicker",
+        "value": 0.06
+      },
+      {
+        "attrId": "dirt",
+        "value": 1.0
+      },
+      {
+        "attrId": "dirtThreshold",
+        "value": 0.22
+      },
+      {
+        "attrId": "dirtScale",
+        "value": 0.5
+      },
+      {
+        "attrId": "vignetteAmount",
+        "value": 1.0
+      },
+      {
+        "attrId": "vignetteFlicker",
+        "value": 1.0
+      },
+      {
+        "attrId": "desaturate",
+        "value": 1.0
+      }
+    ],
+    "resetsTransforms": false,
+    "resetsLayer": true
+  }
+]
