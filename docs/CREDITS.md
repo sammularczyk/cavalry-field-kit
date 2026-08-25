@@ -5,11 +5,12 @@
 | Filter | Source | Author |
 |---|---|---|
 | ASCII | pixi.js filters · Tom Thumb font | Mathew Groves & Chad Engler · Robey Pointer |
-| Display | Cathode-Retro | DeadlyRedCube |
+| Display Simulation | Cathode-Retro · REALISTIC SUB-PIXEL OLD CRT | DeadlyRedCube · ENDESGA |
 | Film Emulation | flim · cinegrain | bean_mhm · mr-berndt |
-| Glow | Spectral_Aberration_Pro_V2 | Marten Blumen |
+| Ultra Glow | Spectral_Aberration_Pro_V2 | Marten Blumen |
 | Godray | pixi.js filters | Mathew Groves & Chad Engler |
-| Lens | HAWK anamorphic profiles · Spectral_Aberration_Pro_V2 | Slava Sexton · Marten Blumen |
+| Lens Distortion | HAWK anamorphic profiles · Spectral_Aberration_Pro_V2 | Slava Sexton · Marten Blumen |
+| Lens Blur | Barrel Blur Chroma · post: bokeh blur, hexagon 5pass | hornet |
 | Lens Flare | flaresim_nuke lens prescriptions | Eamonn Nugent & Steve Watts Kennedy |
 | Light Leak | LightLeaksUnity | Daniel Zeller |
 | Print | Screen Print example, Cavalry plug-in SDK | Scene Group |
@@ -22,14 +23,16 @@ No code used — recreated based on aesthetic and description. Still, felt it wa
 | Filter | Source | Author |
 |---|---|---|
 | Composite Video | C64 screen with NTSC filter | BitOfGold |
-| Display | crt-beam-simulator | Mark Rejhon & Timothy Lottes |
-| Film | Fujifilm film simulations · Grain Generator | Fujifilm · Max van Leeuwen |
-| Glow | apGlow | Adrian Pueyo |
+| Display Simulation | crt-beam-simulator | Mark Rejhon & Timothy Lottes |
+| Film Emulation | Fujifilm film simulations · Grain Generator | Fujifilm · Max van Leeuwen |
+| Ultra Glow | apGlow | Adrian Pueyo |
 | Hatching | Geeks3D crosshatch and cross-stitch · Money filter | JeGX · Giacomo Preciado |
 | LED | lightbulb screen · Golfing Mosaic Filter | FabriceNeyret2 · GregRostami |
-| Lens | Virtual_Lens · chroma_Smear | Florian Lorber · Luc Julien |
+| Lens Distortion | chroma_Smear | Luc Julien |
+| Lens Blur | Virtual_Lens · Focus From a matte | Florian Lorber · NLIBS |
 | Lens Flare | Ultimate Lens Flare · realflare · Physically-Based Real-Time Lens Flare Rendering | ektogamat · Beat Reichenbach · Hullin, Eisemann, Seidel & Lee |
 | Lightwrap | bm_Lightwrap | Ben McEwan |
+| Polar Coordinates | Polar Coordinates effect | Adobe After Effects |
 | Paint | Image abstraction by structure-adaptive filtering · Computer-Generated Watercolor · Oil Painting · Mt. Fuji Watercolor | Kyprianidis & Döllner · Curtis, Anderson, Seims, Fleischer & Salesin · Spi3lot · noztol |
 
 ## The Colour Recipe bases

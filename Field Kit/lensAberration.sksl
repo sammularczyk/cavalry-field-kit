@@ -1,4 +1,4 @@
-// Lens, pass 2 of 8 - Field Kit
+// Lens Distortion, pass 2 of 2 - Field Kit
 // Chromatic aberration: three ways to displace by wavelength and accumulate.
 //
 //   SPECTRAL - seven discrete bands, each stepped from identity to its own
@@ -34,16 +34,24 @@ uniform float  mapFromGradient; // bool: direction from the map, else from angle
 uniform float  abIntensity;
 
 uniform float  samples;
+uniform float  amount;         // overall mix, for the whole filter
 
 uniform float2 resolution;
 uniform float2 rectCentre;
 
 uniform shader displaceMap;    // shaderData - binds BEFORE the image
-uniform shader defocusMap;     // shaderData - unused here, but every pass must
-                                // declare it or the binding order breaks
 uniform shader childShader;    // pass 1 result
+uniform shader original;       // untouched input - MUST be declared last
 
 const int MAX_ITER = 16;
+
+// Amount used to live in lensScatter, which left with the blur half when Lens
+// Blur was split out - so the mix moved here, to what is now the last pass of
+// this filter. `original` is the UNDISTORTED layer, so Amount fades geometry
+// and aberration together, which is what it always did.
+half4 finish(float2 fragCoord, half4 result) {
+    return mix(original.eval(fragCoord), result, half(clamp(amount, 0.0, 1.0)));
+}
 
 // The seven bands and their tints, from the Spectral Aberration gizmo.
 float bandWave(int i) {
@@ -84,7 +92,12 @@ float chanAt(float2 fragCoord, float2 disp, int which, float nq) {
 
 float mapAt(float2 coord) {
     half4 m = displaceMap.eval(coord);
-    float3 lin = m.a > 0.0 ? float3(m.rgb / m.a) : float3(m.rgb);
+    // Guarded divide, NOT a ternary. An unconnected shaderData input is
+    // substituted as a constant half4(0), and SkSL constant-folds BOTH arms
+    // of a ternary at compile time - so `a > 0 ? rgb / a : rgb` becomes 0/0
+    // and the whole shader fails to compile with "division by zero". The
+    // guard never runs. max() cannot fold to zero, so it is always safe.
+    float3 lin = float3(m.rgb) / max(float(m.a), 1e-6);
     int c = int(mapChannel);
     if (c == 3) { return lin.r; }
     if (c == 4) { return lin.g; }
@@ -101,7 +114,7 @@ float mapAt(float2 coord) {
 half4 main(float2 fragCoord) {
     half4 src = childShader.eval(fragCoord);
     // None: this half of the lens is switched off.
-    if (int(abModel) == 3) { return src; }
+    if (int(abModel) == 3) { return finish(fragCoord, src); }
     float2 res = max(resolution, float2(1.0));
     int   md = int(abModel);
     float nq = clamp(samples, 2.0, float(MAX_ITER));
@@ -135,7 +148,7 @@ half4 main(float2 fragCoord) {
 
         half4 ga = childShader.eval(fragCoord + base * greenScale);
         half a = ga.a;
-        return half4(half3(half(r), half(g), half(b)) * a, a);
+        return finish(fragCoord, half4(half3(half(r), half(g), half(b)) * a, a));
     }
 
     // ---- Spectral and Prism: seven bands, accumulated ---------------------
@@ -215,5 +228,5 @@ half4 main(float2 fragCoord) {
     acc  = clamp(acc * max(abIntensity, 0.0), 0.0, 1.0);
 
     half a = half(clamp(accA / max(cnt, 1.0), 0.0, 1.0));
-    return half4(half3(acc) * a, a);
+    return finish(fragCoord, half4(half3(acc) * a, a));
 }

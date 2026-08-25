@@ -1,4 +1,4 @@
-// Lens, pass 3 of 8 - Field Kit
+// Lens Blur, pass 1 of 6 - Field Kit
 // Highlight extraction and into the gamma domain. No blur.
 //
 // This pass exists because pass 1 doing double duty did not work: when the
@@ -15,14 +15,79 @@
 
 uniform float  bokehThreshold;
 uniform float  bokehGamma;
+uniform float  gain;          // extra weight for highlights, NOT a global multiply
+
+// The focus source, duplicated from lensSegment.sksl. The highlight boost has
+// to know how defocused a pixel is: Gamma round-trips exactly, so a sharp area
+// comes back untouched, but Gain does not - applied flat it brightened the
+// in-focus picture as well as the bokeh. Scaling it by the circle of confusion
+// keeps it where the blur is.
+uniform float  cocSource;
+uniform float  mapMode;
+uniform float  focus;
+uniform float  aperture;
+uniform float  focusShape;
+uniform float2 focusPoint;
+uniform float  focusSize;
+uniform float  focusAspect;
+uniform float  focusSoftness;
+uniform float  focusAngle;
 
 uniform float2 resolution;
 uniform float2 rectCentre;
 
-uniform shader displaceMap;   // shaderData - binds BEFORE the image
 uniform shader defocusMap;    // shaderData - unused here, but every pass must
                                // declare it or the binding order breaks
-uniform shader childShader;   // pass 2 result
+// Pass 0 must NOT declare `original` - there is no such input on the first
+// pass and the shader fails to BUILD, silently contributing nothing.
+uniform shader childShader;   // pass 0 input = the layer being filtered
+
+// Same maths as lensSegment.sksl's cocAt, reading childShader because pass 0
+// has no `original`.
+float cocHere(float2 coord) {
+    int m = int(cocSource);
+    if (m == 0) { return 1.0; }
+
+    if (m == 3) {
+        float2 d = coord - rectCentre - focusPoint;
+        float fa = radians(focusAngle);
+        float cs = cos(fa), sn = sin(fa);
+        float2 dr = float2(d.x * cs + d.y * sn, -d.x * sn + d.y * cs);
+        float dist;
+        if (focusShape < 0.5) {
+            dr.x /= max(focusAspect, 0.01);
+            dist = length(dr);
+        } else {
+            dist = abs(dr.y);
+        }
+        float inner = max(focusSize, 0.0);
+        return smoothstep(inner, inner + max(focusSoftness, 1.0), dist);
+    }
+
+    float z;
+    if (m == 1) {
+        z = float(childShader.eval(coord).a);
+    } else if (m == 2) {
+        half4 s = childShader.eval(coord);
+        float3 l = s.a > 0.0 ? float3(s.rgb / s.a) : float3(0.0);
+        z = dot(l, float3(0.299, 0.587, 0.114));
+    } else {
+        half4 dm = defocusMap.eval(coord);
+        // Guarded divide, NOT a ternary. An unconnected shaderData input is
+        // substituted as a constant half4(0), and SkSL constant-folds BOTH arms
+        // of a ternary at compile time - so `a > 0 ? rgb / a : rgb` becomes 0/0
+        // and the whole shader fails to compile with "division by zero". The
+        // guard never runs. max() cannot fold to zero, so it is always safe.
+        float3 l = float3(dm.rgb) / max(float(dm.a), 1e-6);
+        z = dot(l, float3(0.299, 0.587, 0.114));
+    }
+    if (m == 4 && mapMode < 0.5) { return clamp(z * aperture, 0.0, 4.0); }
+    if (m == 4) {
+        float zf = max(z, 0.02);
+        return clamp(abs(focus / zf - 1.0) * aperture, 0.0, 4.0);
+    }
+    return clamp(abs(z - focus) / (z + 0.3) * aperture, 0.0, 4.0);
+}
 
 half4 main(float2 fragCoord) {
     half4 c = childShader.eval(fragCoord);
@@ -30,7 +95,30 @@ half4 main(float2 fragCoord) {
 
     float thr = clamp(bokehThreshold, 0.0, 0.999);
     float g   = max(bokehGamma, 0.0001);
-    lin = pow(max(lin - thr, 0.0) / (1.0 - thr), float3(g));
+
+    // GAMMA IS THE MECHANISM. Raising the whole picture to a power crushes the
+    // midtones toward zero, so one bright pixel dominates the average over the
+    // aperture; the final pass takes the same power back out and the highlight
+    // survives as a bright disc while a flat area returns to exactly its own
+    // level. That round trip is what makes bokeh read as discs rather than as
+    // a soft smear - and it only works if EVERY pixel takes the same power.
+    //
+    // A previous version subtracted the threshold here, which destroyed the
+    // picture below it; the version after that passed sub-threshold pixels
+    // through ungamma'd, which let the base image compete with the highlights
+    // in the average and dissolved the discs. Neither is needed: the lift is
+    // global, and the threshold does something else entirely.
+    float3 lifted = pow(max(lin, 0.0), float3(g));
+
+    // Highlight Threshold and Gain act ONLY on what is above the threshold,
+    // weighting those pixels further up before the blur. That is what makes a
+    // disc brighter or more defined without touching the rest of the frame.
+    float lum = dot(lin, float3(0.2126, 0.7152, 0.0722));
+    float hi  = smoothstep(thr, min(thr + 0.15, 1.0), lum);
+    // ...and only where the pixel is actually defocused. A sharp highlight has
+    // no disc to brighten, so boosting it just lifts the in-focus picture.
+    float blurred = clamp(cocHere(fragCoord), 0.0, 1.0);
+    lin = lifted * mix(1.0, max(gain, 0.0), hi * blurred);
 
     half a = c.a;
     return half4(half3(clamp(lin, 0.0, 16.0)) * a, a);

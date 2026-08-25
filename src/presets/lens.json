@@ -31,14 +31,6 @@
       {
         "attrId": "abModel",
         "value": 3
-      },
-      {
-        "attrId": "defocus",
-        "value": 0.0
-      },
-      {
-        "attrId": "size",
-        "value": 0.0
       }
     ],
     "resetsTransforms": false,
@@ -68,14 +60,6 @@
       {
         "attrId": "abModel",
         "value": 3
-      },
-      {
-        "attrId": "defocus",
-        "value": 0.0
-      },
-      {
-        "attrId": "size",
-        "value": 0.0
       }
     ],
     "resetsTransforms": false,
@@ -149,152 +133,6 @@
       {
         "attrId": "samples",
         "value": 7
-      },
-      {
-        "attrId": "defocus",
-        "value": 0.0
-      },
-      {
-        "attrId": "size",
-        "value": 0.0
-      }
-    ],
-    "resetsTransforms": false,
-    "resetsLayer": true
-  },
-  {
-    "presetType": "layer",
-    "id": "07306b30-b003-7710-8902-3d153a5d323b",
-    "author": "samMularczyk",
-    "name": "Bokeh",
-    "layerType": [
-      "lens"
-    ],
-    "attrs": [
-      {
-        "attrId": "distortion",
-        "value": 0.0
-      },
-      {
-        "attrId": "abModel",
-        "value": 3
-      },
-      {
-        "attrId": "defocus",
-        "value": 40.0
-      },
-      {
-        "attrId": "blades",
-        "value": 6
-      },
-      {
-        "attrId": "rotation",
-        "value": 0.0
-      },
-      {
-        "attrId": "cocSource",
-        "value": 0
-      },
-      {
-        "attrId": "focus",
-        "value": 0.5
-      },
-      {
-        "attrId": "aperture",
-        "value": 2.5
-      },
-      {
-        "attrId": "bokehThreshold",
-        "value": 0.0
-      },
-      {
-        "attrId": "bokehGamma",
-        "value": 2.2
-      },
-      {
-        "attrId": "exposure",
-        "value": 0.0
-      },
-      {
-        "attrId": "gain",
-        "value": 1.0
-      },
-      {
-        "attrId": "dither",
-        "value": true
-      },
-      {
-        "attrId": "size",
-        "value": 0.0
-      }
-    ],
-    "resetsTransforms": false,
-    "resetsLayer": true
-  },
-  {
-    "presetType": "layer",
-    "id": "85fa91fe-78a4-4b11-6912-a754212c5a2c",
-    "author": "samMularczyk",
-    "name": "Lens Artefacts",
-    "layerType": [
-      "lens"
-    ],
-    "attrs": [
-      {
-        "attrId": "distortion",
-        "value": 0.0
-      },
-      {
-        "attrId": "abModel",
-        "value": 3
-      },
-      {
-        "attrId": "defocus",
-        "value": 0.0
-      },
-      {
-        "attrId": "kernel",
-        "value": 0
-      },
-      {
-        "attrId": "size",
-        "value": 20.0
-      },
-      {
-        "attrId": "kernelRotation",
-        "value": 0.0
-      },
-      {
-        "attrId": "ringFrequency",
-        "value": 6.0
-      },
-      {
-        "attrId": "axialRed",
-        "value": 1.0
-      },
-      {
-        "attrId": "axialGreen",
-        "value": 1.0
-      },
-      {
-        "attrId": "axialBlue",
-        "value": 1.0
-      },
-      {
-        "attrId": "samples",
-        "value": 20
-      },
-      {
-        "attrId": "scatterThreshold",
-        "value": 0.5
-      },
-      {
-        "attrId": "scatterGain",
-        "value": 1.0
-      },
-      {
-        "attrId": "scatterBlend",
-        "value": 0
       }
     ],
     "resetsTransforms": false,

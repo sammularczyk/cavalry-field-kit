@@ -38,104 +38,6 @@
         "mapAmplitude",
         "mapFromGradient",
         "abIntensity",
-        "samples"
-      ]
-    },
-    {
-      "skslFile": "lensPrepare.sksl",
-      "uniforms": [
-        "bokehThreshold",
-        "bokehGamma"
-      ]
-    },
-    {
-      "skslFile": "lensSegment.sksl",
-      "uniforms": [
-        "defocus",
-        "blades",
-        "rotation",
-        "catsEye",
-        "catsEyeFalloff",
-        "ringBias",
-        "cocSource",
-        "focus",
-        "aperture",
-        "dither"
-      ],
-      "constants": {
-        "segIndex": 0.0
-      }
-    },
-    {
-      "skslFile": "lensSegment.sksl",
-      "uniforms": [
-        "defocus",
-        "blades",
-        "rotation",
-        "catsEye",
-        "catsEyeFalloff",
-        "ringBias",
-        "cocSource",
-        "focus",
-        "aperture",
-        "dither"
-      ],
-      "constants": {
-        "segIndex": 1.0
-      }
-    },
-    {
-      "skslFile": "lensSegment.sksl",
-      "uniforms": [
-        "defocus",
-        "blades",
-        "rotation",
-        "catsEye",
-        "catsEyeFalloff",
-        "ringBias",
-        "cocSource",
-        "focus",
-        "aperture",
-        "dither"
-      ],
-      "constants": {
-        "segIndex": 2.0
-      }
-    },
-    {
-      "skslFile": "lensDefocus.sksl",
-      "uniforms": [
-        "bokehGamma",
-        "defocus",
-        "blades",
-        "rotation",
-        "catsEye",
-        "catsEyeFalloff",
-        "ringBias",
-        "cocSource",
-        "focus",
-        "aperture",
-        "exposure",
-        "gain",
-        "dither"
-      ],
-      "constants": {
-        "segIndex": 3.0
-      }
-    },
-    {
-      "skslFile": "lensScatter.sksl",
-      "uniforms": [
-        "kernel",
-        "size",
-        "kernelRotation",
-        "ringFrequency",
-        "axialRed",
-        "axialGreen",
-        "axialBlue",
-        "scatterThreshold",
-        "scatterGain",
-        "scatterBlend",
         "samples",
         "amount"
       ]
@@ -366,204 +268,6 @@
       "step": 0.05,
       "dimming": "abModel == 1 || abModel == 3"
     },
-    "bokehThreshold": {
-      "type": "double",
-      "default": 0.0,
-      "min": 0.0,
-      "max": 0.999,
-      "step": 0.01,
-      "dimming": "defocus <= 0"
-    },
-    "bokehGamma": {
-      "type": "double",
-      "default": 1.0,
-      "min": 0.1,
-      "softMax": 8.0,
-      "step": 0.05,
-      "dimming": "defocus <= 0"
-    },
-    "defocus": {
-      "type": "double",
-      "default": 0.0,
-      "min": 0.0,
-      "softMax": 400.0,
-      "step": 0.5
-    },
-    "blades": {
-      "type": "enum",
-      "default": 6,
-      "enumValues": [
-        4,
-        6,
-        8
-      ],
-      "dimming": "defocus <= 0"
-    },
-    "rotation": {
-      "type": "double",
-      "default": 0.0,
-      "softMin": -180.0,
-      "softMax": 180.0,
-      "step": 0.5,
-      "dimming": "defocus <= 0"
-    },
-    "catsEye": {
-      "type": "double",
-      "default": 0.0,
-      "min": 0.0,
-      "max": 1.0,
-      "step": 0.01,
-      "dimming": "defocus <= 0"
-    },
-    "catsEyeFalloff": {
-      "type": "double",
-      "default": 1.0,
-      "min": 0.1,
-      "softMax": 4.0,
-      "step": 0.05,
-      "dimming": "catsEye <= 0"
-    },
-    "ringBias": {
-      "type": "double",
-      "default": 0.0,
-      "min": 0.0,
-      "max": 1.0,
-      "step": 0.01,
-      "dimming": "defocus <= 0"
-    },
-    "cocSource": {
-      "type": "enum",
-      "default": 0,
-      "enumValues": [
-        0,
-        1,
-        2,
-        3,
-        4
-      ],
-      "dimming": "defocus <= 0"
-    },
-    "focus": {
-      "type": "double",
-      "default": 0.5,
-      "min": 0.0,
-      "max": 1.0,
-      "step": 0.01,
-      "dimming": "defocus <= 0 || cocSource == 0"
-    },
-    "aperture": {
-      "type": "double",
-      "default": 2.5,
-      "min": 0.0,
-      "softMax": 8.0,
-      "step": 0.05,
-      "dimming": "defocus <= 0 || cocSource == 0"
-    },
-    "exposure": {
-      "type": "double",
-      "default": 0.0,
-      "min": 0.0,
-      "softMax": 8.0,
-      "step": 0.05,
-      "dimming": "defocus <= 0"
-    },
-    "gain": {
-      "type": "double",
-      "default": 1.0,
-      "min": 0.0,
-      "softMax": 8.0,
-      "step": 0.05,
-      "dimming": "defocus <= 0"
-    },
-    "dither": {
-      "type": "bool",
-      "default": true,
-      "dimming": "defocus <= 0"
-    },
-    "kernel": {
-      "type": "enum",
-      "default": 0,
-      "enumValues": [
-        0,
-        1,
-        2,
-        3
-      ],
-      "dimming": "size <= 0"
-    },
-    "size": {
-      "type": "double",
-      "default": 0.0,
-      "min": 0.0,
-      "softMax": 300.0,
-      "step": 0.5
-    },
-    "kernelRotation": {
-      "type": "double",
-      "default": 0.0,
-      "softMin": -180.0,
-      "softMax": 180.0,
-      "step": 0.5,
-      "dimming": "size <= 0 || kernel != 1"
-    },
-    "ringFrequency": {
-      "type": "double",
-      "default": 6.0,
-      "min": 0.1,
-      "softMax": 40.0,
-      "step": 0.1,
-      "dimming": "size <= 0 || kernel != 2"
-    },
-    "axialRed": {
-      "type": "double",
-      "default": 1.0,
-      "min": 0.0,
-      "softMax": 3.0,
-      "step": 0.05,
-      "dimming": "size <= 0"
-    },
-    "axialGreen": {
-      "type": "double",
-      "default": 1.0,
-      "min": 0.0,
-      "softMax": 3.0,
-      "step": 0.05,
-      "dimming": "size <= 0"
-    },
-    "axialBlue": {
-      "type": "double",
-      "default": 1.0,
-      "min": 0.0,
-      "softMax": 3.0,
-      "step": 0.05,
-      "dimming": "size <= 0"
-    },
-    "scatterThreshold": {
-      "type": "double",
-      "default": 0.7,
-      "min": 0.0,
-      "max": 0.999,
-      "step": 0.01,
-      "dimming": "size <= 0"
-    },
-    "scatterGain": {
-      "type": "double",
-      "default": 1.0,
-      "min": 0.0,
-      "softMax": 8.0,
-      "step": 0.05,
-      "dimming": "size <= 0"
-    },
-    "scatterBlend": {
-      "type": "enum",
-      "default": 0,
-      "enumValues": [
-        0,
-        1,
-        2
-      ],
-      "dimming": "size <= 0"
-    },
     "samples": {
       "type": "double",
       "default": 16.0,
@@ -587,16 +291,6 @@
       "subUI": true,
       "defaultSubnodeType": "noiseShader",
       "dimming": "abModel != 2"
-    },
-    "defocusMap": {
-      "type": "shaderData",
-      "supportedInputNodeTypes": [
-        "shader",
-        "shaderArray"
-      ],
-      "subUI": true,
-      "defaultSubnodeType": "noiseShader",
-      "dimming": "cocSource != 4"
     }
   },
   "triggers": {
@@ -626,34 +320,9 @@
       "mapAmplitude",
       "mapFromGradient",
       "abIntensity",
-      "bokehThreshold",
-      "bokehGamma",
-      "defocus",
-      "blades",
-      "rotation",
-      "catsEye",
-      "catsEyeFalloff",
-      "ringBias",
-      "cocSource",
-      "focus",
-      "aperture",
-      "exposure",
-      "gain",
-      "dither",
-      "kernel",
-      "size",
-      "kernelRotation",
-      "ringFrequency",
-      "axialRed",
-      "axialGreen",
-      "axialBlue",
-      "scatterThreshold",
-      "scatterGain",
-      "scatterBlend",
       "samples",
       "amount",
-      "displaceMap",
-      "defocusMap"
+      "displaceMap"
     ]
   },
   "UI": {
@@ -670,7 +339,7 @@
           "edgeTrim",
           "---Fringing",
           "fringing",
-          "---A",
+          "---Output",
           "samples",
           "amount"
         ]
@@ -698,54 +367,13 @@
           "displaceMap",
           "mapChannel",
           "mapAmplitude",
-          "mapFromGradient"
-        ]
-      },
-      {
-        "id": "defocus",
-        "attributeOrder": [
-          "defocus",
-          "blades",
-          "rotation",
-          "---Bokeh Shape",
-          "catsEye",
-          "catsEyeFalloff",
-          "ringBias",
-          "---Focus",
-          "cocSource",
-          "focus",
-          "aperture",
-          "defocusMap",
-          "---Highlights",
-          "bokehThreshold",
-          "bokehGamma",
-          "exposure",
-          "gain",
-          "dither"
-        ]
-      },
-      {
-        "id": "artefacts",
-        "attributeOrder": [
-          "size",
-          "kernel",
-          "kernelRotation",
-          "ringFrequency",
-          "---Axial Chromatic",
-          "axialRed",
-          "axialGreen",
-          "axialBlue",
-          "---Output",
-          "scatterThreshold",
-          "scatterGain",
-          "scatterBlend",
-          "---Inspired by Hawk-Anamorphic-Nuke (MIT), M. Blumen, hornet & F. Lorber"
+          "mapFromGradient",
+          "---Inspired by Hawk-Anamorphic-Nuke (MIT), Slava Sexton & M. Blumen"
         ]
       }
     ],
     "controls": {
-      "displaceMap": "nodeInput",
-      "defocusMap": "nodeInput"
+      "displaceMap": "nodeInput"
     },
     "icon": "lens.png"
   }

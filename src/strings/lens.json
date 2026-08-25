@@ -4,7 +4,7 @@
   "author": "samMularczyk",
   "layerType": "lens",
   "niceName": "Lens Distortion",
-  "layerInfo": "A whole lens in one filter, applied in the order light meets one: geometric distortion, chromatic aberration, blur, then scatter. Seven real HAWK anamorphic lens profiles, solved from an ARRI ALEXA distortion chart. Each half switches off at zero, so it is also just a distortion, or just a bokeh.",
+  "layerInfo": "Geometric distortion and chromatic aberration, in the order light meets them. Seven real HAWK anamorphic lens profiles, solved from an ARRI ALEXA distortion chart, plus three aberration models. Either half switches off at zero, so it is also just a distortion, or just an aberration. Defocus and lens scatter now live in Lens Blur.",
   "language": "en",
   "attributes": {
    "profile": [
@@ -107,105 +107,9 @@
     "Intensity",
     "Spectral and Prism. Overall brightness of the result."
    ],
-   "bokehThreshold": [
-    "Highlight Threshold",
-    "Only light above this forms distinct discs. It shapes the bokeh; the blur still replaces the picture either way."
-   ],
-   "bokehGamma": [
-    "Highlight Gamma",
-    "How hard highlights are pushed before blurring. High values make discs form rather than a smear."
-   ],
-   "defocus": [
-    "Blur",
-    "Blur radius in pixels. Zero switches the blur off."
-   ],
-   "blades": [
-    "Blades",
-    "Aperture shape: 4 gives a square, 6 a hexagon, 8 an octagon."
-   ],
-   "rotation": [
-    "Rotation",
-    "Turns the whole aperture, in degrees."
-   ],
-   "catsEye": [
-    "Cat's Eye",
-    "Optical vignetting. Clips the aperture toward the frame edge, so highlights out there turn into lemons pointing at the centre."
-   ],
-   "catsEyeFalloff": [
-    "Cat's Eye Falloff",
-    "How quickly the clipping grows away from the centre. Higher keeps the middle of frame round for longer."
-   ],
-   "ringBias": [
-    "Ring Bias",
-    "Weights samples toward the aperture's edge, so highlights render as bright-rimmed rings rather than flat discs."
-   ],
-   "cocSource": [
-    "Focus From",
-    "What drives how blurred each pixel is: uniform, the layer’s alpha, its luminance, a vertical ramp, or a texture."
-   ],
-   "focus": [
-    "Focus",
-    "The value that stays sharp; anything further from it blurs more. Ignored when Focus From is Uniform."
-   ],
-   "aperture": [
-    "Aperture",
-    "How fast the blur grows away from the focus value."
-   ],
-   "exposure": [
-    "Exposure",
-    "Filmic tone map strength on the way out. Zero switches it off, which keeps the blur brightness-preserving."
-   ],
-   "gain": [
-    "Gain",
-    "Brightness of the result before tone mapping."
-   ],
-   "dither": [
-    "Dither",
-    "Jitters tap positions to trade banding along the aperture edges for fine grain."
-   ],
-   "kernel": [
-    "Kernel",
-    "The shape light scatters into. Disc is spherical aberration, Line is astigmatism, Rings is diffraction, Halo is haze."
-   ],
-   "size": [
-    "Scatter Size",
-    "Radius of the artefact scatter, in pixels. Zero switches the artefacts off."
-   ],
-   "kernelRotation": [
-    "Rotation",
-    "Axis of the Line kernel."
-   ],
-   "ringFrequency": [
-    "Ring Frequency",
-    "How many diffraction rings fit inside the radius. Only used by the Rings kernel."
-   ],
-   "axialRed": [
-    "Axial Red",
-    "Kernel size multiplier for red. Setting the three channels apart gives axial chromatic aberration."
-   ],
-   "axialGreen": [
-    "Axial Green",
-    "Kernel size multiplier for green."
-   ],
-   "axialBlue": [
-    "Axial Blue",
-    "Kernel size multiplier for blue."
-   ],
-   "scatterThreshold": [
-    "Scatter Threshold",
-    "Only light above this level scatters. Lower it to let midtones haze as well."
-   ],
-   "scatterGain": [
-    "Scatter Gain",
-    "Brightness of the scattered light."
-   ],
-   "scatterBlend": [
-    "Scatter Blend",
-    "How the scatter combines with the layer. Replace shows the scatter alone."
-   ],
    "samples": [
     "Samples",
-    "Tap count, shared by fringing, aberration and the artefact scatter."
+    "Tap count, shared by fringing and the spectral aberration."
    ],
    "amount": [
     "Amount",
@@ -214,10 +118,6 @@
    "displaceMap": [
     "Displace Map",
     "Prism only. The shader whose luminance drives the displacement. Prism does nothing until something is connected here."
-   ],
-   "defocusMap": [
-    "Blur Map",
-    "Focus From Texture only. The shader whose luminance drives how blurred each pixel is."
    ]
   },
   "enums": {
@@ -249,29 +149,6 @@
     "4": "Green",
     "5": "Blue"
    },
-   "blades": {
-    "4": "4 - Square",
-    "6": "6 - Hexagon",
-    "8": "8 - Octagon"
-   },
-   "cocSource": {
-    "0": "Uniform",
-    "1": "Alpha",
-    "2": "Luminance",
-    "3": "Vertical Ramp",
-    "4": "Texture"
-   },
-   "kernel": [
-    "Disc (Spherical)",
-    "Line (Astigmatism)",
-    "Rings (Diffraction)",
-    "Halo (Haze)"
-   ],
-   "scatterBlend": [
-    "Screen",
-    "Plus",
-    "Replace"
-   ],
    "edges": {
     "0": "Transparent",
     "1": "Clamp",
@@ -280,9 +157,7 @@
   },
   "tabs": {
    "filter": "Distortion",
-   "aberration": "Aberration",
-   "defocus": "Blur",
-   "artefacts": "Artefacts"
+   "aberration": "Aberration"
   }
  }
 }

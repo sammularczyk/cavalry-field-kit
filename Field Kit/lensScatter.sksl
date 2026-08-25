@@ -1,4 +1,4 @@
-// Lens, pass 8 of 8 - Field Kit
+// Lens Blur, pass 6 of 6 - Field Kit
 // Inspired by "Virtual_Lens" v1.5 by Florian Lorber - five of its sections.
 //
 // In that gizmo, Haze, Spherical Aberration, Axial Chromatic Aberration,
@@ -16,6 +16,7 @@
 //
 // Uniform order matches the attribute order in definitions.json.
 
+uniform float  defocus;              // only used to match the filter's padding
 uniform float  kernel;        // enum: 0 disc, 1 line, 2 rings, 3 halo
 uniform float  size;
 uniform float  kernelRotation;      // degrees, for the line kernel
@@ -26,16 +27,17 @@ uniform float  axialBlue;
 uniform float  scatterThreshold;     // only light above this scatters
 uniform float  scatterGain;
 uniform float  scatterBlend;         // enum: 0 screen, 1 plus, 2 replace
+uniform float  edges;                // enum: 0 transparent, 1 clamp, 2 mirror
+uniform float2 edgeTrim;             // px inset the clamp/mirror rect folds against
 uniform float  samples;
 uniform float  amount;
 
 uniform float2 resolution;
 uniform float2 rectCentre;
 
-uniform shader displaceMap;   // shaderData - binds BEFORE the image
 uniform shader defocusMap;    // shaderData - unused here, but every pass must
                                // declare it or the binding order breaks
-uniform shader childShader;   // the distorted, aberrated, defocused chain
+uniform shader childShader;   // the defocused chain
 uniform shader original;      // untouched input - MUST be declared last
 
 const int MAX_SAMPLES = 32;
@@ -51,6 +53,37 @@ float hash21(float2 p) {
     p = fract(p * float2(0.1031, 0.11369));
     p += dot(p, p.yx + 19.19);
     return fract((p.x + p.y) * p.x);
+}
+
+// Edge handling for the scatter gather - see lensSegment.sksl. Without it a
+// wide scatter near the frame edge reaches outside the layer, where taps are
+// absent rather than black; the alpha guard below stops that dimming the
+// result, but Clamp and Mirror let it find picture instead of nothing.
+// Fold against the rect inset by the filter's own PADDING, not the raw
+// resolution. paddingExpression grows the working area so a wide blur is not
+// clipped, which means `resolution` describes the padded bounds - mostly empty
+// - and folding against those did nothing at all. printPaper.sksl:47 hit the
+// same trap. This recomputes the padding from the same two uniforms the
+// expression uses, so the two can never drift apart.
+float2 padInset() {
+    return float2(ceil(max(defocus, 0.0) * 1.5 + max(size, 0.0) * 3.0));
+}
+
+float2 applyEdges(float2 c) {
+    if (edges < 0.5) { return c; }
+    float2 res = max(resolution, float2(1.0));
+    float2 trim = clamp(max(edgeTrim, float2(0.0)) + padInset(), float2(0.0), res * 0.45);
+    float2 inner = res - trim * 2.0;
+    float2 lo = rectCentre - res * 0.5 + trim;
+    float2 t = (c - lo) / inner;
+    if (edges < 1.5) {
+        t = clamp(t, 0.0, 1.0);
+    } else {
+        float2 m = mod(t, 2.0);
+        t = 1.0 - abs(1.0 - m);
+    }
+    float2 half_px = 0.5 / inner;
+    return lo + clamp(t, half_px, 1.0 - half_px) * inner;
 }
 
 float kernelWeight(int k, float r, float a, float rot) {
@@ -77,6 +110,15 @@ half4 main(float2 fragCoord) {
     // layer so Amount fades the whole lens, not just this pass.
     half4 chain = childShader.eval(fragCoord);
     half4 src   = original.eval(fragCoord);
+
+    // Size 0 must be a passthrough, and was not. With size 0 the tap offset is
+    // zero, so all 32 taps read the SAME pixel; `scatter` collapses to the
+    // thresholded pixel itself and the default Screen blend lifts it - a pixel
+    // at 0.85 came back 0.925. Every instance of this filter was quietly
+    // brightening everything above Scatter Threshold at its default settings.
+    if (size <= 0.0) {
+        return mix(src, chain, half(clamp(amount, 0.0, 1.0)));
+    }
 
     int   k  = int(kernel);
     float nq = clamp(samples, 3.0, float(MAX_SAMPLES));
@@ -106,7 +148,7 @@ half4 main(float2 fragCoord) {
         // Per-channel kernel scale - this is what made the gizmo's axial
         // chromatic aberration: the same disc, sampled at three sizes.
         for (int c = 0; c < 3; c++) {
-            half4 s = childShader.eval(fragCoord + unit * (c == 0 ? chScale.r : c == 1 ? chScale.g : chScale.b));
+            half4 s = childShader.eval(applyEdges(fragCoord + unit * (c == 0 ? chScale.r : c == 1 ? chScale.g : chScale.b)));
             // A tap outside the layer is absent, not black. Counting it in the
             // weight sum while contributing nothing to the numerator dimmed the
             // scatter into a dark rim along the layer's edge.

@@ -1,4 +1,4 @@
-// Lens, pass 1 of 8 - Field Kit
+// Lens Distortion, pass 1 of 2 - Field Kit
 // Geometric distortion, with optional chromatic fringing through it.
 //
 // Lens profiles ported from Hawk_Anamorphic.gizmo, part of
@@ -57,8 +57,6 @@ uniform float2 resolution;
 uniform float2 rectCentre;
 
 uniform shader displaceMap;   // shaderData - binds BEFORE the image
-uniform shader defocusMap;    // shaderData - unused here, but every pass must
-                               // declare it or the binding order breaks
 uniform shader childShader;   // pass 1 input = the layer being filtered
 
 // The slider goes to 32, so the loop has to as well - it was capped at 16,

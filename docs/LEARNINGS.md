@@ -111,6 +111,13 @@ Edge options and when each is right:
 - Check the loop cap actually matches the slider max. `MAX_ITER = 16` with a slider to 32 meant every value above 16 rendered identically. THAT was the "stepping".
 - 3 box taps read as 3 discrete copies. Use 7 gaussian taps + jitter.
 
+### Unconnected shaderData folds to a constant
+An unconnected `shaderData` input is substituted as a literal `half4(0)`. SkSL then constant-folds BOTH arms of a ternary at compile time, so the standard un-premultiply `c.a > 0.0 ? c.rgb / c.a : c.rgb` becomes 0/0 and the WHOLE shader fails to compile — "division by zero". The guard never runs. Divide with `max()` instead, which cannot fold to zero:
+```glsl
+float3 lin = float3(c.rgb) / max(float(c.a), 1e-6);
+```
+Only shaderData is at risk; `childShader` and `original` are never constant. check-bundle enforces this now. Cost one silent Lightwrap failure and had spread to 8 places.
+
 ### Measure before replacing
 Reimplementing a filter? MEASURE the original's frequency response first, don't assume its shape from its name. Composite Video's "luma FIR" turned out to be a 2.9x peaking bandpass, not a lowpass — a plain windowed sinc lost the entire crunchy look. Fitting lowpass-plus-unsharp `(1+k)*lp(fc) - k*lp(0.4*fc)` cut the error from 78 to 0.68. Twenty lines of Python beat guessing.
 

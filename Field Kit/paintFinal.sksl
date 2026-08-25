@@ -83,7 +83,12 @@ float luma(float3 c) { return dot(c, float3(0.2126, 0.7152, 0.0722)); }
 // filter's sample modes so the two behave the same way on the same input.
 float fieldAt(float2 coord) {
     half4 s = field.eval(coord);
-    float3 c = s.a > 0.0 ? float3(s.rgb / s.a) : float3(s.rgb);
+    // Guarded divide, NOT a ternary. An unconnected shaderData input is
+    // substituted as a constant half4(0), and SkSL constant-folds BOTH arms
+    // of a ternary at compile time - so `a > 0 ? rgb / a : rgb` becomes 0/0
+    // and the whole shader fails to compile with "division by zero". The
+    // guard never runs. max() cannot fold to zero, so it is always safe.
+    float3 c = float3(s.rgb) / max(float(s.a), 1e-6);
     int m = int(mapChannel);
     if (m == 1) {
         float mx = max(max(c.r, c.g), c.b);
@@ -99,7 +104,9 @@ float fieldAt(float2 coord) {
 
 float lumaAt(float2 coord) {
     half4 s = original.eval(coord);
-    return luma(s.a > 0.0 ? float3(s.rgb / s.a) : float3(0.0));
+    // Guarded divide - see the note above; a ternary here folds to 0/0 when
+    // the field input is unconnected and the shader fails to compile.
+    return luma(float3(s.rgb) / max(float(s.a), 1e-6));
 }
 
 half4 main(float2 fragCoord) {

@@ -112,6 +112,24 @@ for (const file of defs) {
       fail(type, `${p.skslFile} declares no input shader - the pass will fail to build ("buildShader failed") even if it never samples the image`);
     }
 
+    // An UNCONNECTED shaderData input is substituted as a constant half4(0), and
+    // SkSL constant-folds both arms of a ternary at compile time - so the usual
+    // `c.a > 0.0 ? c.rgb / c.a : c.rgb` un-premultiply becomes a literal 0/0 and
+    // the whole shader fails to compile with "division by zero". The guard never
+    // runs. Divides of a shaderData sample must use max(), which cannot fold to
+    // zero. Cost one silent Lightwrap compile failure.
+    for (const sd of shaderAttrs) {
+      const assign = new RegExp(`half4\\s+(\\w+)\\s*=\\s*${sd}\\.eval`, 'g');
+      let m;
+      while ((m = assign.exec(src)) !== null) {
+        const v = m[1];
+        const bad = new RegExp(`${v}\\.(a|w)\\s*>[^?]*\\?[^:]*/\\s*${v}\\.(a|w)`);
+        if (bad.test(src)) {
+          fail(type, `${p.skslFile} divides by ${v}.a from shaderData "${sd}" behind a ternary - an unconnected input folds that to 0/0 at compile time and the shader will not build. Use / max(float(${v}.a), 1e-6) instead`);
+        }
+      }
+    }
+
     // shaderData inputs must be declared before the image/childShader
     for (const s of shaderAttrs) {
       const si = uni.indexOf(s);

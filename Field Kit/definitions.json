@@ -2682,104 +2682,6 @@
           "mapAmplitude",
           "mapFromGradient",
           "abIntensity",
-          "samples"
-        ]
-      },
-      {
-        "skslFile": "lensPrepare.sksl",
-        "uniforms": [
-          "bokehThreshold",
-          "bokehGamma"
-        ]
-      },
-      {
-        "skslFile": "lensSegment.sksl",
-        "uniforms": [
-          "defocus",
-          "blades",
-          "rotation",
-          "catsEye",
-          "catsEyeFalloff",
-          "ringBias",
-          "cocSource",
-          "focus",
-          "aperture",
-          "dither"
-        ],
-        "constants": {
-          "segIndex": 0
-        }
-      },
-      {
-        "skslFile": "lensSegment.sksl",
-        "uniforms": [
-          "defocus",
-          "blades",
-          "rotation",
-          "catsEye",
-          "catsEyeFalloff",
-          "ringBias",
-          "cocSource",
-          "focus",
-          "aperture",
-          "dither"
-        ],
-        "constants": {
-          "segIndex": 1
-        }
-      },
-      {
-        "skslFile": "lensSegment.sksl",
-        "uniforms": [
-          "defocus",
-          "blades",
-          "rotation",
-          "catsEye",
-          "catsEyeFalloff",
-          "ringBias",
-          "cocSource",
-          "focus",
-          "aperture",
-          "dither"
-        ],
-        "constants": {
-          "segIndex": 2
-        }
-      },
-      {
-        "skslFile": "lensDefocus.sksl",
-        "uniforms": [
-          "bokehGamma",
-          "defocus",
-          "blades",
-          "rotation",
-          "catsEye",
-          "catsEyeFalloff",
-          "ringBias",
-          "cocSource",
-          "focus",
-          "aperture",
-          "exposure",
-          "gain",
-          "dither"
-        ],
-        "constants": {
-          "segIndex": 3
-        }
-      },
-      {
-        "skslFile": "lensScatter.sksl",
-        "uniforms": [
-          "kernel",
-          "size",
-          "kernelRotation",
-          "ringFrequency",
-          "axialRed",
-          "axialGreen",
-          "axialBlue",
-          "scatterThreshold",
-          "scatterGain",
-          "scatterBlend",
           "samples",
           "amount"
         ]
@@ -3010,6 +2912,290 @@
         "step": 0.05,
         "dimming": "abModel == 1 || abModel == 3"
       },
+      "samples": {
+        "type": "double",
+        "default": 16,
+        "min": 2,
+        "max": 32,
+        "step": 1
+      },
+      "amount": {
+        "type": "double",
+        "default": 1,
+        "min": 0,
+        "max": 1,
+        "step": 0.01
+      },
+      "displaceMap": {
+        "type": "shaderData",
+        "supportedInputNodeTypes": [
+          "shader",
+          "shaderArray"
+        ],
+        "subUI": true,
+        "defaultSubnodeType": "noiseShader",
+        "dimming": "abModel != 2"
+      }
+    },
+    "triggers": {
+      "out": [
+        "profile",
+        "distortion",
+        "squeeze",
+        "centreOffset",
+        "expand",
+        "edges",
+        "edgeTrim",
+        "fringing",
+        "abModel",
+        "geometry",
+        "centre",
+        "angle",
+        "dispersion",
+        "focusWave",
+        "smoothing",
+        "aberration",
+        "redScale",
+        "greenScale",
+        "blueScale",
+        "smear",
+        "falloff",
+        "mapChannel",
+        "mapAmplitude",
+        "mapFromGradient",
+        "abIntensity",
+        "samples",
+        "amount",
+        "displaceMap"
+      ]
+    },
+    "UI": {
+      "tabs": [
+        {
+          "id": "filter",
+          "attributeOrder": [
+            "profile",
+            "distortion",
+            "squeeze",
+            "centreOffset",
+            "expand",
+            "edges",
+            "edgeTrim",
+            "---Fringing",
+            "fringing",
+            "---Output",
+            "samples",
+            "amount"
+          ]
+        },
+        {
+          "id": "aberration",
+          "attributeOrder": [
+            "abModel",
+            "geometry",
+            "centre",
+            "angle",
+            "---Spectral",
+            "dispersion",
+            "focusWave",
+            "smoothing",
+            "abIntensity",
+            "---Channel",
+            "aberration",
+            "redScale",
+            "greenScale",
+            "blueScale",
+            "smear",
+            "falloff",
+            "---Prism",
+            "displaceMap",
+            "mapChannel",
+            "mapAmplitude",
+            "mapFromGradient",
+            "---Inspired by Hawk-Anamorphic-Nuke (MIT), Slava Sexton & M. Blumen"
+          ]
+        }
+      ],
+      "controls": {
+        "displaceMap": "nodeInput"
+      },
+      "icon": "lens.png"
+    }
+  },
+  {
+    "author": "samMularczyk",
+    "type": "lensBlur",
+    "superType": "thirdPartyFilter",
+    "version": "1.0",
+    "paddingExpression": "ceil(defocus * 1.5 + size * 3)",
+    "passes": [
+      {
+        "skslFile": "lensPrepare.sksl",
+        "uniforms": [
+          "bokehThreshold",
+          "bokehGamma",
+          "gain",
+          "cocSource",
+          "mapMode",
+          "focus",
+          "aperture",
+          "focusShape",
+          "focusPoint",
+          "focusSize",
+          "focusAspect",
+          "focusSoftness",
+          "focusAngle"
+        ]
+      },
+      {
+        "skslFile": "lensSegment.sksl",
+        "uniforms": [
+          "defocus",
+          "size",
+          "blades",
+          "rotation",
+          "bokehSqueeze",
+          "bokehAngle",
+          "catsEye",
+          "catsEyeFalloff",
+          "ringBias",
+          "cocSource",
+          "mapMode",
+          "focus",
+          "aperture",
+          "focusShape",
+          "focusPoint",
+          "focusSize",
+          "focusAspect",
+          "focusSoftness",
+          "focusAngle",
+          "dither",
+          "occlusion",
+          "edges",
+          "edgeTrim"
+        ],
+        "constants": {
+          "segIndex": 0
+        }
+      },
+      {
+        "skslFile": "lensSegment.sksl",
+        "uniforms": [
+          "defocus",
+          "size",
+          "blades",
+          "rotation",
+          "bokehSqueeze",
+          "bokehAngle",
+          "catsEye",
+          "catsEyeFalloff",
+          "ringBias",
+          "cocSource",
+          "mapMode",
+          "focus",
+          "aperture",
+          "focusShape",
+          "focusPoint",
+          "focusSize",
+          "focusAspect",
+          "focusSoftness",
+          "focusAngle",
+          "dither",
+          "occlusion",
+          "edges",
+          "edgeTrim"
+        ],
+        "constants": {
+          "segIndex": 1
+        }
+      },
+      {
+        "skslFile": "lensSegment.sksl",
+        "uniforms": [
+          "defocus",
+          "size",
+          "blades",
+          "rotation",
+          "bokehSqueeze",
+          "bokehAngle",
+          "catsEye",
+          "catsEyeFalloff",
+          "ringBias",
+          "cocSource",
+          "mapMode",
+          "focus",
+          "aperture",
+          "focusShape",
+          "focusPoint",
+          "focusSize",
+          "focusAspect",
+          "focusSoftness",
+          "focusAngle",
+          "dither",
+          "occlusion",
+          "edges",
+          "edgeTrim"
+        ],
+        "constants": {
+          "segIndex": 2
+        }
+      },
+      {
+        "skslFile": "lensDefocus.sksl",
+        "uniforms": [
+          "bokehGamma",
+          "bokehThreshold",
+          "defocus",
+          "size",
+          "blades",
+          "rotation",
+          "bokehSqueeze",
+          "bokehAngle",
+          "catsEye",
+          "catsEyeFalloff",
+          "ringBias",
+          "cocSource",
+          "mapMode",
+          "focus",
+          "aperture",
+          "focusShape",
+          "focusPoint",
+          "focusSize",
+          "focusAspect",
+          "focusSoftness",
+          "focusAngle",
+          "exposure",
+          "dither",
+          "occlusion",
+          "edges",
+          "edgeTrim"
+        ],
+        "constants": {
+          "segIndex": 3
+        }
+      },
+      {
+        "skslFile": "lensScatter.sksl",
+        "uniforms": [
+          "defocus",
+          "kernel",
+          "size",
+          "kernelRotation",
+          "ringFrequency",
+          "axialRed",
+          "axialGreen",
+          "axialBlue",
+          "scatterThreshold",
+          "scatterGain",
+          "scatterBlend",
+          "edges",
+          "edgeTrim",
+          "samples",
+          "amount"
+        ]
+      }
+    ],
+    "attributes": {
       "bokehThreshold": {
         "type": "double",
         "default": 0,
@@ -3037,6 +3223,7 @@
         "type": "enum",
         "default": 6,
         "enumValues": [
+          0,
           4,
           6,
           8
@@ -3050,6 +3237,22 @@
         "softMax": 180,
         "step": 0.5,
         "dimming": "defocus <= 0"
+      },
+      "bokehSqueeze": {
+        "type": "double",
+        "default": 1,
+        "min": 0.05,
+        "softMax": 3,
+        "step": 0.01,
+        "dimming": "defocus <= 0"
+      },
+      "bokehAngle": {
+        "type": "double",
+        "default": 0,
+        "softMin": -180,
+        "softMax": 180,
+        "step": 0.5,
+        "dimming": "defocus <= 0 || bokehSqueeze == 1"
       },
       "catsEye": {
         "type": "double",
@@ -3070,7 +3273,7 @@
       "ringBias": {
         "type": "double",
         "default": 0,
-        "min": 0,
+        "min": -1,
         "max": 1,
         "step": 0.01,
         "dimming": "defocus <= 0"
@@ -3080,12 +3283,26 @@
         "default": 0,
         "enumValues": [
           0,
-          1,
-          2,
           3,
-          4
+          4,
+          2,
+          1
         ],
         "dimming": "defocus <= 0"
+      },
+      "mapMode": {
+        "type": "enum",
+        "default": 0,
+        "enumValues": [
+          0,
+          1
+        ],
+        "dimming": "defocus <= 0 || cocSource != 4"
+      },
+      "occlusion": {
+        "type": "bool",
+        "default": false,
+        "dimming": "defocus <= 0 || cocSource != 4 || mapMode == 0"
       },
       "focus": {
         "type": "double",
@@ -3093,7 +3310,7 @@
         "min": 0,
         "max": 1,
         "step": 0.01,
-        "dimming": "defocus <= 0 || cocSource == 0"
+        "dimming": "defocus <= 0 || cocSource == 0 || cocSource == 3"
       },
       "aperture": {
         "type": "double",
@@ -3101,7 +3318,61 @@
         "min": 0,
         "softMax": 8,
         "step": 0.05,
-        "dimming": "defocus <= 0 || cocSource == 0"
+        "dimming": "defocus <= 0 || cocSource == 0 || cocSource == 3"
+      },
+      "focusShape": {
+        "type": "enum",
+        "default": 0,
+        "enumValues": [
+          0,
+          1
+        ],
+        "dimming": "defocus <= 0 || cocSource != 3"
+      },
+      "focusPoint": {
+        "type": "double2",
+        "default": {
+          "x": 0,
+          "y": 0
+        },
+        "children": {
+          "*": {
+            "step": 1
+          }
+        },
+        "dimming": "defocus <= 0 || cocSource != 3"
+      },
+      "focusSize": {
+        "type": "double",
+        "default": 200,
+        "min": 0,
+        "softMax": 2000,
+        "step": 1,
+        "dimming": "defocus <= 0 || cocSource != 3"
+      },
+      "focusAspect": {
+        "type": "double",
+        "default": 1,
+        "min": 0.05,
+        "softMax": 4,
+        "step": 0.01,
+        "dimming": "defocus <= 0 || cocSource != 3 || focusShape != 0"
+      },
+      "focusSoftness": {
+        "type": "double",
+        "default": 300,
+        "min": 1,
+        "softMax": 3000,
+        "step": 1,
+        "dimming": "defocus <= 0 || cocSource != 3"
+      },
+      "focusAngle": {
+        "type": "double",
+        "default": 0,
+        "softMin": -180,
+        "softMax": 180,
+        "step": 0.5,
+        "dimming": "defocus <= 0 || cocSource != 3"
       },
       "exposure": {
         "type": "double",
@@ -3123,6 +3394,28 @@
         "type": "bool",
         "default": true,
         "dimming": "defocus <= 0"
+      },
+      "edges": {
+        "type": "enum",
+        "default": 0,
+        "enumValues": [
+          0,
+          1,
+          2
+        ]
+      },
+      "edgeTrim": {
+        "type": "double2",
+        "default": {
+          "x": 1,
+          "y": 1
+        },
+        "children": {
+          "*": {
+            "step": 0.5
+          }
+        },
+        "dimming": "edges == 0"
       },
       "kernel": {
         "type": "enum",
@@ -3222,16 +3515,6 @@
         "max": 1,
         "step": 0.01
       },
-      "displaceMap": {
-        "type": "shaderData",
-        "supportedInputNodeTypes": [
-          "shader",
-          "shaderArray"
-        ],
-        "subUI": true,
-        "defaultSubnodeType": "noiseShader",
-        "dimming": "abModel != 2"
-      },
       "defocusMap": {
         "type": "shaderData",
         "supportedInputNodeTypes": [
@@ -3245,45 +3528,32 @@
     },
     "triggers": {
       "out": [
-        "profile",
-        "distortion",
-        "squeeze",
-        "centreOffset",
-        "expand",
-        "edges",
-        "edgeTrim",
-        "fringing",
-        "abModel",
-        "geometry",
-        "centre",
-        "angle",
-        "dispersion",
-        "focusWave",
-        "smoothing",
-        "aberration",
-        "redScale",
-        "greenScale",
-        "blueScale",
-        "smear",
-        "falloff",
-        "mapChannel",
-        "mapAmplitude",
-        "mapFromGradient",
-        "abIntensity",
         "bokehThreshold",
         "bokehGamma",
         "defocus",
         "blades",
         "rotation",
+        "bokehSqueeze",
+        "bokehAngle",
         "catsEye",
         "catsEyeFalloff",
         "ringBias",
         "cocSource",
+        "mapMode",
+        "occlusion",
         "focus",
         "aperture",
+        "focusShape",
+        "focusPoint",
+        "focusSize",
+        "focusAspect",
+        "focusSoftness",
+        "focusAngle",
         "exposure",
         "gain",
         "dither",
+        "edges",
+        "edgeTrim",
         "kernel",
         "size",
         "kernelRotation",
@@ -3296,62 +3566,21 @@
         "scatterBlend",
         "samples",
         "amount",
-        "displaceMap",
         "defocusMap"
       ]
     },
     "UI": {
+      "icon": "lensBlur.png",
       "tabs": [
         {
           "id": "filter",
           "attributeOrder": [
-            "profile",
-            "distortion",
-            "squeeze",
-            "centreOffset",
-            "expand",
-            "edges",
-            "edgeTrim",
-            "---Fringing",
-            "fringing",
-            "---A",
-            "samples",
-            "amount"
-          ]
-        },
-        {
-          "id": "aberration",
-          "attributeOrder": [
-            "abModel",
-            "geometry",
-            "centre",
-            "angle",
-            "---Spectral",
-            "dispersion",
-            "focusWave",
-            "smoothing",
-            "abIntensity",
-            "---Channel",
-            "aberration",
-            "redScale",
-            "greenScale",
-            "blueScale",
-            "smear",
-            "falloff",
-            "---Prism",
-            "displaceMap",
-            "mapChannel",
-            "mapAmplitude",
-            "mapFromGradient"
-          ]
-        },
-        {
-          "id": "defocus",
-          "attributeOrder": [
             "defocus",
+            "---Aperture",
             "blades",
             "rotation",
-            "---Bokeh Shape",
+            "bokehSqueeze",
+            "bokehAngle",
             "catsEye",
             "catsEyeFalloff",
             "ringBias",
@@ -3359,13 +3588,29 @@
             "cocSource",
             "focus",
             "aperture",
-            "defocusMap",
+            "focusShape",
+            "focusPoint",
+            "focusSize",
+            "focusAspect",
+            "focusSoftness",
+            "focusAngle",
             "---Highlights",
             "bokehThreshold",
             "bokehGamma",
-            "exposure",
             "gain",
-            "dither"
+            "exposure",
+            "dither",
+            "---Edges",
+            "edges",
+            "edgeTrim"
+          ]
+        },
+        {
+          "id": "map",
+          "attributeOrder": [
+            "mapMode",
+            "occlusion",
+            "defocusMap"
           ]
         },
         {
@@ -3383,15 +3628,15 @@
             "scatterThreshold",
             "scatterGain",
             "scatterBlend",
-            "---Inspired by Hawk-Anamorphic-Nuke (MIT), M. Blumen, hornet & F. Lorber"
+            "samples",
+            "amount",
+            "---Inspired by hornet, NLIBS & Florian Lorber"
           ]
         }
       ],
       "controls": {
-        "displaceMap": "nodeInput",
         "defocusMap": "nodeInput"
-      },
-      "icon": "lens.png"
+      }
     }
   },
   {

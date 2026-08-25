@@ -820,14 +820,6 @@
       {
         "attrId": "abModel",
         "value": 3
-      },
-      {
-        "attrId": "defocus",
-        "value": 0
-      },
-      {
-        "attrId": "size",
-        "value": 0
       }
     ],
     "resetsTransforms": false,
@@ -857,14 +849,6 @@
       {
         "attrId": "abModel",
         "value": 3
-      },
-      {
-        "attrId": "defocus",
-        "value": 0
-      },
-      {
-        "attrId": "size",
-        "value": 0
       }
     ],
     "resetsTransforms": false,
@@ -938,14 +922,6 @@
       {
         "attrId": "samples",
         "value": 7
-      },
-      {
-        "attrId": "defocus",
-        "value": 0
-      },
-      {
-        "attrId": "size",
-        "value": 0
       }
     ],
     "resetsTransforms": false,
@@ -957,17 +933,9 @@
     "author": "samMularczyk",
     "name": "Bokeh",
     "layerType": [
-      "lens"
+      "lensBlur"
     ],
     "attrs": [
-      {
-        "attrId": "distortion",
-        "value": 0
-      },
-      {
-        "attrId": "abModel",
-        "value": 3
-      },
       {
         "attrId": "defocus",
         "value": 40
@@ -1026,17 +994,9 @@
     "author": "samMularczyk",
     "name": "Lens Artefacts",
     "layerType": [
-      "lens"
+      "lensBlur"
     ],
     "attrs": [
-      {
-        "attrId": "distortion",
-        "value": 0
-      },
-      {
-        "attrId": "abModel",
-        "value": 3
-      },
       {
         "attrId": "defocus",
         "value": 0

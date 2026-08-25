@@ -58,7 +58,12 @@ float2 bgCoord(float2 fragCoord) {
 // foreground can wrap inward.
 float3 stencilled(float2 coord) {
     half4 bg = background.eval(bgCoord(coord));
-    float3 lin = bg.a > 0.0 ? float3(bg.rgb / bg.a) : float3(bg.rgb);
+    // Guarded divide, NOT a ternary. An unconnected shaderData input is
+    // substituted as a constant half4(0), and SkSL constant-folds BOTH arms
+    // of a ternary at compile time - so `a > 0 ? rgb / a : rgb` becomes 0/0
+    // and the whole shader fails to compile with "division by zero". The
+    // guard never runs. max() cannot fold to zero, so it is always safe.
+    float3 lin = float3(bg.rgb) / max(float(bg.a), 1e-6);
 
     half4 fg = childShader.eval(coord);
     lin *= 1.0 - clamp(float(fg.a), 0.0, 1.0);
