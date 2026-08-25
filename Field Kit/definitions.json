@@ -1671,6 +1671,8 @@
           "dirt",
           "dirtThreshold",
           "dirtScale",
+          "dirtBurst",
+          "dirtSoftness",
           "dirtPolarity",
           "scratches",
           "scratchWidth",
@@ -1735,7 +1737,7 @@
       },
       "weave": {
         "type": "double",
-        "default": 0.002,
+        "default": 0.01,
         "min": 0,
         "softMax": 0.05,
         "step": 0.0005,
@@ -1751,7 +1753,7 @@
       },
       "dirtThreshold": {
         "type": "double",
-        "default": 0.83,
+        "default": 0.09,
         "min": 0,
         "max": 1,
         "step": 0.01,
@@ -1759,15 +1761,31 @@
       },
       "dirtScale": {
         "type": "double",
-        "default": 0.22,
+        "default": 0.07,
         "min": 0.001,
         "softMax": 8,
         "step": 0.01,
         "dimming": "damage <= 0 || dirt <= 0"
       },
+      "dirtBurst": {
+        "type": "double",
+        "default": 1,
+        "min": 0,
+        "max": 1,
+        "step": 0.01,
+        "dimming": "damage <= 0 || dirt <= 0"
+      },
+      "dirtSoftness": {
+        "type": "double",
+        "default": 1,
+        "min": 0,
+        "max": 1,
+        "step": 0.01,
+        "dimming": "damage <= 0 || dirt <= 0"
+      },
       "dirtPolarity": {
         "type": "double",
-        "default": -1,
+        "default": -0.8,
         "min": -1,
         "max": 1,
         "step": 0.01,
@@ -1783,7 +1801,7 @@
       },
       "scratchWidth": {
         "type": "double",
-        "default": 1.4,
+        "default": 0.5,
         "min": 0.5,
         "softMax": 6,
         "step": 0.1,
@@ -1831,7 +1849,7 @@
       },
       "desaturate": {
         "type": "double",
-        "default": 1,
+        "default": 0.2,
         "min": 0,
         "max": 1,
         "step": 0.01,
@@ -1839,7 +1857,7 @@
       },
       "dyeFade": {
         "type": "double",
-        "default": 0,
+        "default": 0.7,
         "min": 0,
         "max": 1,
         "step": 0.01,
@@ -1847,7 +1865,7 @@
       },
       "hotSpot": {
         "type": "double",
-        "default": 0,
+        "default": 0.3,
         "min": 0,
         "softMax": 1,
         "step": 0.01,
@@ -1863,7 +1881,7 @@
       },
       "shutterBlades": {
         "type": "double",
-        "default": 0,
+        "default": 3,
         "min": 0,
         "max": 4,
         "step": 1,
@@ -1871,7 +1889,7 @@
       },
       "splice": {
         "type": "double",
-        "default": 0,
+        "default": 1,
         "min": 0,
         "max": 1,
         "step": 0.01,
@@ -1887,7 +1905,7 @@
       },
       "cueMarks": {
         "type": "double",
-        "default": 0,
+        "default": 1,
         "min": 0,
         "max": 1,
         "step": 0.01,
@@ -1895,7 +1913,7 @@
       },
       "cueInterval": {
         "type": "double",
-        "default": 0,
+        "default": 1200,
         "min": 0,
         "softMax": 1200,
         "step": 1,
@@ -1936,6 +1954,8 @@
         "dirt",
         "dirtThreshold",
         "dirtScale",
+        "dirtBurst",
+        "dirtSoftness",
         "dirtPolarity",
         "scratches",
         "scratchWidth",
@@ -1972,6 +1992,8 @@
         "dirt",
         "dirtThreshold",
         "dirtScale",
+        "dirtBurst",
+        "dirtSoftness",
         "dirtPolarity",
         "---Scratches",
         "scratches",

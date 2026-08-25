@@ -722,6 +722,14 @@
           "Dirt Scale",
           "Base size of the specks. Individual particles vary widely around this, since real dust does."
         ],
+        "dirtBurst": [
+          "Dirt Burst",
+          "How much the amount of dirt varies from frame to frame. At 0 every frame carries the same density, which is the giveaway that it is generated - real prints have clean stretches and filthy ones, because dust arrives in clumps and a dirty section stays dirty for a while. Bursts last about three frames, and clean frames are the norm."
+        ],
+        "dirtSoftness": [
+          "Dirt Softness",
+          "How far off the focal plane the dust sits. Zero is dust at the film plane, as sharp as the picture itself; higher is dust on the gate glass or on the negative a generation back, which prints soft. Particles keep their size either way - only the edge loses its bite."
+        ],
         "dirtPolarity": [
           "Dirt Polarity",
           "Which generation the dust landed on. Negative is dirt on the print or in the gate: it blocks light and reads black. Positive is dirt on the NEGATIVE, which blocks exposure so the print stays clear there and projects as bright white sparkle - the classic archive-print artefact. Zero gives both."
