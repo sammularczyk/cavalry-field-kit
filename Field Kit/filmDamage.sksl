@@ -82,6 +82,7 @@ uniform float  vignetteAmount;
 uniform float  vignetteFlicker;
 
 uniform float  desaturate;
+uniform float  surroundGamma;   // dark-surround system gamma of projection
 uniform float  dyeFade;         // cyan dye dies first, so prints go magenta
 uniform float  hotSpot;         // lamp is brighter in the centre
 uniform float  scratchPolarity; // -1 base side (dark), +1 emulsion side (bright)
@@ -468,9 +469,19 @@ float hairAt(float2 uv, float t, float aspect) {
 half4 main(float2 fragCoord) {
     half4 orig = childShader.eval(fragCoord);
     float dmg = clamp(damage, 0.0, 1.0);
-    // Every effect below is gated on dmg, so zero is an exact passthrough -
-    // worth taking early rather than running the whole projector for nothing.
-    if (dmg <= 0.0) { return orig; }
+    // Every wear effect below is gated on dmg, so zero is a passthrough - worth
+    // taking early rather than running the whole projector for nothing. But
+    // Surround Gamma is NOT wear: it is a property of projecting at all, and a
+    // pristine print still carries it. Short-circuiting past it would have made
+    // that control silently dead at Damage 0.
+    if (dmg <= 0.0) {
+        float sg0 = max(surroundGamma, 0.2);
+        if (abs(sg0 - 1.0) < 1e-4) { return orig; }
+        float3 l0 = orig.a > 0.0 ? float3(orig.rgb / orig.a) : float3(0.0);
+        l0 = clamp(pow(max(l0, 0.0), float3(sg0)), 0.0, 1.0);
+        return mix(orig, half4(half3(l0) * orig.a, orig.a),
+                   half(clamp(amount, 0.0, 1.0)));
+    }
 
     float2 res = max(resolution, float2(1.0));
 
@@ -576,6 +587,19 @@ half4 main(float2 fragCoord) {
         dens *= float3(1.0 - 0.80 * fd, 1.0 - 0.45 * fd, 1.0 - 0.15 * fd);
         col = exp(-dens);
     }
+
+    // DARK-SURROUND SYSTEM GAMMA.
+    //
+    // A print is not made to be colorimetrically accurate - it is made to look
+    // right in a BLACKED-OUT ROOM, and a dark surround makes the eye perceive
+    // less contrast than the same image viewed in a lit one. Prints compensate
+    // with a system gamma around 1.2, which is why projected film looks
+    // punchier than the same footage on a monitor and why a scan of a print
+    // often looks flat until it is graded back. Hunt, "The Reproduction of
+    // Colour". This is the difference between film EMULATED and film PROJECTED,
+    // so it belongs here rather than in Film Emulation.
+    float sg = max(surroundGamma, 0.2);
+    if (abs(sg - 1.0) > 1e-4) { col = pow(max(col, 0.0), float3(sg)); }
 
     float2 suv = (fragCoord - rectCentre) / res + 0.5;
     float asp = res.x / max(res.y, 1.0);

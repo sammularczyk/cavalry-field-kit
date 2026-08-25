@@ -27,9 +27,13 @@
     "Corner Radius",
     "Radius of the rounded tube corners, in pixels. Clamped to half the short side."
    ],
+   "borderSoftness": [
+    "Border Softness",
+    "How many pixels the faceplate edge feathers over. Zero is the pixel-sharp edge; a real faceplate is not sharp, since the glass has thickness and the mask behind it is not perfectly registered to it."
+   ],
    "vignette": [
     "Vignette",
-    "Brightness falloff toward the edges. The tube SHAPE comes from Corner Radius."
+    "Brightness falloff toward the corners, following the cos⁴ law - the real reason a lens darkens off-axis, rather than a drawn curve."
    ],
    "mask": [
     "Mask",

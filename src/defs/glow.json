@@ -3,7 +3,7 @@
   "type": "glow",
   "superType": "thirdPartyFilter",
   "version": "1.0",
-  "paddingExpression": "ceil(max(size, reach * 2))",
+  "paddingExpression": "ceil(max(max(size, reach * 2), haloRadius * 1.2))",
   "passes": [
     {
       "skslFile": "glowHighlights.sksl",
@@ -201,6 +201,11 @@
         "chromatic",
         "dispersion",
         "bloomAmount",
+        "haloAmount",
+        "haloRadius",
+        "srcBlack",
+        "srcWhite",
+        "response",
         "steps",
         "persistence",
         "intensity",
@@ -307,6 +312,21 @@
       "max": 1.0,
       "step": 0.01
     },
+    "haloAmount": {
+      "type": "double",
+      "default": 0.0,
+      "min": 0.0,
+      "softMax": 2.0,
+      "step": 0.01
+    },
+    "haloRadius": {
+      "type": "double",
+      "default": 120.0,
+      "min": 0.0,
+      "softMax": 800.0,
+      "step": 1.0,
+      "dimming": "haloAmount <= 0"
+    },
     "size": {
       "type": "double",
       "default": 300.0,
@@ -390,6 +410,8 @@
       "chromatic",
       "dispersion",
       "bloomAmount",
+      "haloAmount",
+      "haloRadius",
       "size",
       "falloff",
       "steps",
@@ -419,6 +441,9 @@
         "id": "bloom",
         "attributeOrder": [
           "bloomAmount",
+          "---Lenticular Halo",
+          "haloAmount",
+          "haloRadius",
           "size",
           "falloff",
           "steps",

@@ -118,6 +118,86 @@ for (const file of defs) {
       fail(type, `${p.skslFile} declares no input shader - the pass will fail to build ("buildShader failed") even if it never samples the image`);
     }
 
+    // Unbalanced braces. Trivial, but scripted edits to these files break it
+    // easily and the compiler's report ("function 'main' can exit without
+    // returning a value", pointing at a line hundreds away) buries the cause.
+    {
+      const code = src.replace(/\/\*[\s\S]*?\*\//g, "").replace(/\/\/[^\n]*/g, "");
+      const open = (code.match(/{/g) || []).length;
+      const close = (code.match(/}/g) || []).length;
+      if (open !== close) {
+        fail(type, `${p.skslFile} has unbalanced braces (${open} "{" vs ${close} "}") - the compiler will report this somewhere far from the real cause`);
+      }
+    }
+
+    // SkSL has NO dynamic array indexing: "index expression must be constant".
+    // A local array written in one loop and read in another looks perfectly
+    // ordinary and fails outright, so flag any locally-declared array indexed
+    // by anything that is not a literal.
+    {
+      const code = src.replace(/\/\*[\s\S]*?\*\//g, "").replace(/\/\/[^\n]*/g, "");
+      const arrays = new Set();
+      for (const m of code.matchAll(/\b(?:float|half|int|bool)[0-9]?\s+(\w+)\s*\[\s*\d+\s*\]\s*;/g)) arrays.add(m[1]);
+      if (arrays.size) {
+        const lines = code.split("\n");
+        lines.forEach((line, i) => {
+          for (const a of arrays) {
+            const use = new RegExp(`\\b${a}\\s*\\[([^\\]]+)\\]`, "g");
+            for (const m of line.matchAll(use)) {
+              if (!/^\s*\d+\s*$/.test(m[1])) {
+                fail(type, `${p.skslFile}:${i + 1} indexes array "${a}" with a non-constant expression ("${m[1].trim()}") - SkSL rejects this ("index expression must be constant")`);
+              }
+            }
+          }
+        });
+      }
+    }
+
+    // Sampling a shader input the file never declared is a guaranteed compile
+    // failure ("unknown identifier 'childShader'"), and easy to hit because the
+    // input is named `image` in single-pass filters and `childShader` in
+    // multi-pass ones - so code moved between them looks right and is not.
+    {
+      const code = src.replace(/\/\*[\s\S]*?\*\//g, "").replace(/\/\/[^\n]*/g, "");
+      const declared = new Set();
+      for (const m of code.matchAll(/^uniform\s+shader\s+(\w+)\s*;/gm)) declared.add(m[1]);
+      const seen = new Set();
+      for (const m of code.matchAll(/(\w+)\.eval\s*\(/g)) {
+        if (!declared.has(m[1]) && !seen.has(m[1])) {
+          seen.add(m[1]);
+          fail(type, `${p.skslFile} calls ${m[1]}.eval() but never declares "uniform shader ${m[1]}" - single-pass filters name the input "image", multi-pass ones "childShader"`);
+        }
+      }
+    }
+
+    // Redeclaring a name in the SAME scope is a hard compile error ("symbol 'n'
+    // was already defined") that nothing else here catches - it needs brace
+    // tracking rather than a line-level regex. Shadowing an OUTER scope is
+    // legal, as in C, so only same-scope collisions are reported. Braces must be
+    // walked in source order: handling every '{' before every '}' makes
+    // "} else if (x) {" reuse the parent scope instead of opening a sibling,
+    // which produces a flood of false positives.
+    {
+      const code = src.replace(/\/\*[\s\S]*?\*\//g, "").replace(/\/\/[^\n]*/g, "");
+      const DECL = /^\s*(?:const\s+)?(?:float|half|int|bool|void)[0-9]?(?:x[0-9])?\s+(\w+)\s*(?:=|;|\[)/;
+      let scopes = [new Map()];
+      code.split("\n").forEach((line, i) => {
+        const m = line.match(DECL);
+        if (m && scopes.length > 1) {
+          const top = scopes[scopes.length - 1];
+          if (top.has(m[1])) {
+            fail(type, `${p.skslFile}:${i + 1} redeclares "${m[1]}" in the same scope (first at line ${top.get(m[1])}) - SkSL rejects this outright`);
+          } else {
+            top.set(m[1], i + 1);
+          }
+        }
+        for (const ch of line) {
+          if (ch === "{") scopes.push(new Map());
+          else if (ch === "}" && scopes.length > 1) scopes.pop();
+        }
+      });
+    }
+
     // An UNCONNECTED shaderData input is substituted as a constant half4(0), and
     // SkSL constant-folds both arms of a ternary at compile time - so the usual
     // `c.a > 0.0 ? c.rgb / c.a : c.rgb` un-premultiply becomes a literal 0/0 and

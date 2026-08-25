@@ -31,6 +31,10 @@
     "Density",
     "How tightly packed the shafts are."
    ],
+   "scatterG": [
+    "Scatter Direction",
+    "How strongly the haze throws light FORWARD. Scattering off dust and droplets is forward-peaked, so shafts blaze when you look near the light and fade as you turn away - which is most of what makes crepuscular rays read as light rather than as texture. 0 scatters equally in all directions; 0.7 to 0.9 is real atmospheric haze."
+   ],
    "speed": [
     "Speed",
     "How fast the shafts drift. 0 holds them still."

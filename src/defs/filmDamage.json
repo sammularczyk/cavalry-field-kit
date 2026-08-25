@@ -27,6 +27,7 @@
         "vignetteAmount",
         "vignetteFlicker",
         "desaturate",
+        "surroundGamma",
         "dyeFade",
         "hotSpot",
         "scratchPolarity",
@@ -200,6 +201,13 @@
       "step": 0.01,
       "dimming": "damage <= 0"
     },
+    "surroundGamma": {
+      "type": "double",
+      "default": 1.2,
+      "min": 0.5,
+      "softMax": 2.0,
+      "step": 0.01
+    },
     "dyeFade": {
       "type": "double",
       "default": 0.7,
@@ -310,6 +318,7 @@
       "vignetteAmount",
       "vignetteFlicker",
       "desaturate",
+      "surroundGamma",
       "dyeFade",
       "hotSpot",
       "scratchPolarity",
@@ -353,6 +362,7 @@
       "hotSpot",
       "shutterBlades",
       "---Print Age",
+      "surroundGamma",
       "dyeFade",
       "---Gate",
       "hair",

@@ -30,6 +30,7 @@
         "screenType",
         "frequency",
         "dotGain",
+        "yuleNielsen",
         "ink1Color",
         "ink1Angle",
         "ink1Coverage",
@@ -68,6 +69,7 @@
         "screenType",
         "frequency",
         "dotGain",
+        "yuleNielsen",
         "ink1Color",
         "ink1Angle",
         "ink1Coverage",
@@ -106,6 +108,7 @@
         "screenType",
         "frequency",
         "dotGain",
+        "yuleNielsen",
         "ink1Color",
         "ink1Angle",
         "ink1Coverage",
@@ -144,6 +147,7 @@
         "screenType",
         "frequency",
         "dotGain",
+        "yuleNielsen",
         "ink1Color",
         "ink1Angle",
         "ink1Coverage",
@@ -248,8 +252,8 @@
     "frequency": {
       "type": "double",
       "default": 8.0,
-      "min": 2.0,
-      "max": 64.0,
+      "softMin": 1.0,
+      "softMax": 64.0,
       "step": 0.1,
       "dimming": "screenType <= 1"
     },
@@ -260,6 +264,13 @@
       "max": 1.0,
       "step": 0.01,
       "dimming": "screenType <= 1"
+    },
+    "yuleNielsen": {
+      "type": "double",
+      "default": 1.7,
+      "min": 1.0,
+      "max": 4.0,
+      "step": 0.05
     },
     "ink1Color": {
       "type": "color",
@@ -470,6 +481,7 @@
       "screenType",
       "frequency",
       "dotGain",
+      "yuleNielsen",
       "ink1Color",
       "ink1Angle",
       "ink1Coverage",
@@ -518,7 +530,8 @@
         "attributeOrder": [
           "screenType",
           "frequency",
-          "dotGain"
+          "dotGain",
+          "yuleNielsen"
         ]
       },
       {

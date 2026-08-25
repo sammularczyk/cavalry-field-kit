@@ -44,6 +44,7 @@
         "edges",
         "edgeTrim",
         "cornerRadius",
+        "borderSoftness",
         "bloom",
         "bloomRadius",
         "diffusion",
@@ -96,6 +97,14 @@
       "min": 0.0,
       "softMax": 400.0,
       "step": 1.0
+    },
+    "borderSoftness": {
+      "type": "double",
+      "default": 0.0,
+      "min": 0.0,
+      "softMax": 40.0,
+      "step": 0.5,
+      "dimming": "cornerRadius <= 0"
     },
     "vignette": {
       "type": "double",
@@ -295,6 +304,7 @@
       "edges",
       "edgeTrim",
       "cornerRadius",
+      "borderSoftness",
       "vignette",
       "mask",
       "pixelSize",
@@ -340,6 +350,7 @@
           "edges",
           "edgeTrim",
           "cornerRadius",
+          "borderSoftness",
           "vignette",
           "---Inspired by ENDESGA & Cathode-Retro"
         ]

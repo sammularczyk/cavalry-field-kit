@@ -27,6 +27,10 @@
     "Halation Density",
     "How much denser the core of the glow is than its falloff. Higher makes only the brightest highlights bloom."
    ],
+   "halationRing": [
+    "Halation Ring",
+    "Hollows the core so the halation stands off the highlight as a fringe rather than glowing from its centre. This is what halation physically is - light that crosses the emulsion, bounces off the base and re-exposes it a fixed distance away, set by the thickness of the base. At 0 you get a plain glow."
+   ],
    "halationTint": [
     "Halation Tint",
     "Which channels the scatter shows up in. The original used a deep orange, so it lands mostly in red."

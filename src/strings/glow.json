@@ -37,7 +37,7 @@
    ],
    "streakFalloff": [
     "Streak Falloff",
-    "How quickly the streak fades along its length."
+    "How quickly the streak fades along its length. The profile is the envelope of a diffraction spike - it falls off as one over distance squared, so the streak keeps a faint tail right across the frame the way a real one does, rather than stopping abruptly."
    ],
    "blur": [
     "Streak Blur",
@@ -58,6 +58,14 @@
    "bloomAmount": [
     "Bloom",
     "Strength of the isotropic glow. Zero leaves a pure streak."
+   ],
+   "haloAmount": [
+    "Halo",
+    "A coloured ring standing at a fixed distance from each highlight - the halo you see around a streetlight at night. Not a falloff like Bloom: diffraction off the radial fibres in the eye's lens throws light out to one particular radius, and because the angle scales with wavelength the ring is chromatic on its own, red outside and blue in."
+   ],
+   "haloRadius": [
+    "Halo Radius",
+    "How far out the ring sits, in pixels. Red lands about 13% further than green and blue about 18% closer, which is what colours it."
    ],
    "size": [
     "Size",

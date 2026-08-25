@@ -46,6 +46,21 @@
         "softMax": 4,
         "step": 0.05
       },
+      "rampContrast": {
+        "type": "double",
+        "default": 0,
+        "min": -1,
+        "max": 1,
+        "step": 0.01
+      },
+      "structure": {
+        "type": "double",
+        "default": 0,
+        "min": 0,
+        "max": 1,
+        "step": 0.01,
+        "dimming": "charset <= 3"
+      },
       "edgeThreshold": {
         "type": "double",
         "default": 0,
@@ -126,6 +141,8 @@
         "margin",
         "charset",
         "rampGamma",
+        "rampContrast",
+        "structure",
         "edgeThreshold",
         "colorMode",
         "inkColor",
@@ -146,6 +163,8 @@
         "charset",
         "rampGamma",
         "---Edges",
+        "rampContrast",
+        "structure",
         "edgeThreshold",
         "---Colour",
         "colorMode",
@@ -634,6 +653,7 @@
           "edges",
           "edgeTrim",
           "cornerRadius",
+          "borderSoftness",
           "bloom",
           "bloomRadius",
           "diffusion",
@@ -686,6 +706,14 @@
         "min": 0,
         "softMax": 400,
         "step": 1
+      },
+      "borderSoftness": {
+        "type": "double",
+        "default": 0,
+        "min": 0,
+        "softMax": 40,
+        "step": 0.5,
+        "dimming": "cornerRadius <= 0"
       },
       "vignette": {
         "type": "double",
@@ -885,6 +913,7 @@
         "edges",
         "edgeTrim",
         "cornerRadius",
+        "borderSoftness",
         "vignette",
         "mask",
         "pixelSize",
@@ -930,6 +959,7 @@
             "edges",
             "edgeTrim",
             "cornerRadius",
+            "borderSoftness",
             "vignette",
             "---Inspired by ENDESGA & Cathode-Retro"
           ]
@@ -1092,6 +1122,7 @@
           "halationRadius",
           "halationThreshold",
           "halationDensity",
+          "halationRing",
           "halationTint"
         ],
         "constants": {
@@ -1107,6 +1138,7 @@
           "halationRadius",
           "halationThreshold",
           "halationDensity",
+          "halationRing",
           "halationTint"
         ],
         "constants": {
@@ -1163,6 +1195,14 @@
         "min": 1,
         "softMax": 4,
         "step": 0.1,
+        "dimming": "halation <= 0"
+      },
+      "halationRing": {
+        "type": "double",
+        "default": 0.35,
+        "min": 0,
+        "max": 1,
+        "step": 0.01,
         "dimming": "halation <= 0"
       },
       "halationTint": {
@@ -1388,6 +1428,7 @@
         "halationRadius",
         "halationThreshold",
         "halationDensity",
+        "halationRing",
         "halationTint",
         "linearise",
         "exposure",
@@ -1457,6 +1498,7 @@
             "halationRadius",
             "halationThreshold",
             "halationDensity",
+            "halationRing",
             "halationTint",
             "---Tone",
             "linearise",
@@ -1682,6 +1724,7 @@
           "vignetteAmount",
           "vignetteFlicker",
           "desaturate",
+          "surroundGamma",
           "dyeFade",
           "hotSpot",
           "scratchPolarity",
@@ -1855,6 +1898,13 @@
         "step": 0.01,
         "dimming": "damage <= 0"
       },
+      "surroundGamma": {
+        "type": "double",
+        "default": 1.2,
+        "min": 0.5,
+        "softMax": 2,
+        "step": 0.01
+      },
       "dyeFade": {
         "type": "double",
         "default": 0.7,
@@ -1965,6 +2015,7 @@
         "vignetteAmount",
         "vignetteFlicker",
         "desaturate",
+        "surroundGamma",
         "dyeFade",
         "hotSpot",
         "scratchPolarity",
@@ -2008,6 +2059,7 @@
         "hotSpot",
         "shutterBlades",
         "---Print Age",
+        "surroundGamma",
         "dyeFade",
         "---Gate",
         "hair",
@@ -2031,7 +2083,7 @@
     "type": "glow",
     "superType": "thirdPartyFilter",
     "version": "1.0",
-    "paddingExpression": "ceil(max(size, reach * 2))",
+    "paddingExpression": "ceil(max(max(size, reach * 2), haloRadius * 1.2))",
     "passes": [
       {
         "skslFile": "glowHighlights.sksl",
@@ -2229,6 +2281,11 @@
           "chromatic",
           "dispersion",
           "bloomAmount",
+          "haloAmount",
+          "haloRadius",
+          "srcBlack",
+          "srcWhite",
+          "response",
           "steps",
           "persistence",
           "intensity",
@@ -2335,6 +2392,21 @@
         "max": 1,
         "step": 0.01
       },
+      "haloAmount": {
+        "type": "double",
+        "default": 0,
+        "min": 0,
+        "softMax": 2,
+        "step": 0.01
+      },
+      "haloRadius": {
+        "type": "double",
+        "default": 120,
+        "min": 0,
+        "softMax": 800,
+        "step": 1,
+        "dimming": "haloAmount <= 0"
+      },
       "size": {
         "type": "double",
         "default": 300,
@@ -2418,6 +2490,8 @@
         "chromatic",
         "dispersion",
         "bloomAmount",
+        "haloAmount",
+        "haloRadius",
         "size",
         "falloff",
         "steps",
@@ -2447,6 +2521,9 @@
           "id": "bloom",
           "attributeOrder": [
             "bloomAmount",
+            "---Lenticular Halo",
+            "haloAmount",
+            "haloRadius",
             "size",
             "falloff",
             "steps",
@@ -2535,6 +2612,13 @@
         "softMax": 1,
         "step": 0.005
       },
+      "scatterG": {
+        "type": "double",
+        "default": 0.45,
+        "min": 0,
+        "max": 0.95,
+        "step": 0.01
+      },
       "blur": {
         "type": "double",
         "default": 0,
@@ -2565,6 +2649,7 @@
         "lacunarity",
         "density",
         "speed",
+        "scatterG",
         "blur",
         "time",
         "amount"
@@ -2580,6 +2665,7 @@
         "gain",
         "lacunarity",
         "density",
+        "scatterG",
         "speed",
         "blur",
         "time",
@@ -5648,6 +5734,7 @@
           "screenType",
           "frequency",
           "dotGain",
+          "yuleNielsen",
           "ink1Color",
           "ink1Angle",
           "ink1Coverage",
@@ -5686,6 +5773,7 @@
           "screenType",
           "frequency",
           "dotGain",
+          "yuleNielsen",
           "ink1Color",
           "ink1Angle",
           "ink1Coverage",
@@ -5724,6 +5812,7 @@
           "screenType",
           "frequency",
           "dotGain",
+          "yuleNielsen",
           "ink1Color",
           "ink1Angle",
           "ink1Coverage",
@@ -5762,6 +5851,7 @@
           "screenType",
           "frequency",
           "dotGain",
+          "yuleNielsen",
           "ink1Color",
           "ink1Angle",
           "ink1Coverage",
@@ -5866,8 +5956,8 @@
       "frequency": {
         "type": "double",
         "default": 8,
-        "min": 2,
-        "max": 64,
+        "softMin": 1,
+        "softMax": 64,
         "step": 0.1,
         "dimming": "screenType <= 1"
       },
@@ -5878,6 +5968,13 @@
         "max": 1,
         "step": 0.01,
         "dimming": "screenType <= 1"
+      },
+      "yuleNielsen": {
+        "type": "double",
+        "default": 1.7,
+        "min": 1,
+        "max": 4,
+        "step": 0.05
       },
       "ink1Color": {
         "type": "color",
@@ -6088,6 +6185,7 @@
         "screenType",
         "frequency",
         "dotGain",
+        "yuleNielsen",
         "ink1Color",
         "ink1Angle",
         "ink1Coverage",
@@ -6136,7 +6234,8 @@
           "attributeOrder": [
             "screenType",
             "frequency",
-            "dotGain"
+            "dotGain",
+            "yuleNielsen"
           ]
         },
         {

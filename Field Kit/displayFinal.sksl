@@ -38,6 +38,7 @@ uniform float  overscan;       // 1 = raster exactly fills the tube
 uniform float  edges;          // enum: 0 transparent, 1 clamp, 2 mirror
 uniform float2 edgeTrim;       // px inset on the rect that clamp/mirror fold against
 uniform float  cornerRadius;   // px
+uniform float  borderSoftness; // px the faceplate edge feathers over
 uniform float  bloom;
 uniform float  bloomRadius;
 uniform float  diffusion;
@@ -186,8 +187,21 @@ half4 main(float2 fragCoord) {
     float v  = tubeSdf(F, res, n);
     float vx = tubeSdf(F + float2(1.0, 0.0), res, n);
     float vy = tubeSdf(F + float2(0.0, 1.0), res, n);
-    float aa = max(2.0 * length(float2(vx - v, vy - v)), 1e-5);
-    col *= smoothstep(aa, -aa, v);      // 1 inside, 0 outside
+    // The gradient converts field units to pixels, so widening the band by
+    // borderSoftness feathers the edge by that many pixels whatever the corner
+    // radius or the layer size. Zero leaves the previous one-pixel antialiased
+    // edge exactly as it was. A real faceplate edge is not pixel-sharp - the
+    // glass has thickness and the mask behind it is not perfectly registered to
+    // it - which is the same reason Film Damage's gate carries a Softness.
+    float grad = max(length(float2(vx - v, vy - v)), 1e-6);
+    // INWARD ONLY. A band centred on the boundary - smoothstep(aa, -aa, v) -
+    // puts half the feather OUTSIDE the faceplate, where the layer clips it, so
+    // raising Softness ate into the picture and threw the other half away. The
+    // outer limit now stays pinned on the superellipse and the feather grows
+    // only into the tube, which is also what the real thing looks like: the
+    // glass edge is where it is, and the picture fades up to meet it.
+    float band = max(grad * 2.0 * (1.0 + max(borderSoftness, 0.0)), 1e-5);
+    col *= smoothstep(0.0, -band, v);   // 1 inside, 0 at the boundary and out
 
     half4 outCol = half4(clamp(col, 0.0, 1.0));
     half4 src = original.eval(fragCoord);

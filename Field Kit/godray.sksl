@@ -37,6 +37,7 @@ uniform float  gain;         // 0 = passthrough; turbulence octave gain
 uniform float  lacunarity;   // frequency multiplier per octave
 uniform float  density;      // shaft frequency/spacing
 uniform float  speed;        // drift rate of the turbulence
+uniform float  scatterG;     // Henyey-Greenstein asymmetry, 0 isotropic
 uniform float  blur;         // softens the shafts across their width
 uniform float  time;         // auto-connected to comp time
 uniform float  amount;       // 0..1 overall opacity
@@ -194,7 +195,44 @@ half4 main(float2 fragCoord) {
 
     // Fades out toward the far edge from the light, same vertical falloff
     // pixi's own filter uses.
-    float mist = noise * (1.0 - uv.y);
+    // HENYEY-GREENSTEIN PHASE FUNCTION.
+    //
+    // Until now this was turbulence times a vertical falloff, with nothing to
+    // say how much light scatters in which DIRECTION - so a shaft was as bright
+    // looking away from the sun as toward it, which is the opposite of what
+    // makes crepuscular rays look like light. Real scattering off droplets and
+    // dust is strongly FORWARD-PEAKED: most of the light carries on roughly the
+    // way it was already going, so rays blaze when you look near the source and
+    // fade quickly as you turn away.
+    //
+    //   p(t) = (1 - g^2) / (4*pi * (1 + g^2 - 2*g*t)^1.5)
+    //
+    // with t the cosine of the angle between the view direction and the light,
+    // and g the asymmetry: 0 is isotropic, and 0.7-0.9 is the forward peak of
+    // real atmospheric haze. Normalised by its own value at t = 1 so the
+    // brightest point stays where it was and g only changes the falloff.
+    float cosT;
+    if (isParallel) {
+        cosT = clamp(d, -1.0, 1.0);
+    } else {
+        float2 lightUV = float2(0.5 + light.x / res.x, 0.5 - light.y / res.y);
+        float2 toL = lightUV - uv;
+        float dl = length(toL);
+        // Screen distance to a real scattering ANGLE. Mapping the frame onto
+        // the full 0-180 degrees was wrong by roughly a factor of five: a
+        // normal lens sees perhaps 40 degrees corner to corner, so the far
+        // corner is about 0.35 radians off the light, not pi. Getting this
+        // wrong made the phase function collapse the rays to nothing a short
+        // way from the source.
+        cosT = cos(clamp(dl * 0.7, 0.0, 3.14159265));
+    }
+    float g = clamp(scatterG, 0.0, 0.95);
+    float gg = g * g;
+    float denom = pow(max(1.0 + gg - 2.0 * g * cosT, 1e-4), 1.5);
+    float peak  = pow(max(1.0 + gg - 2.0 * g, 1e-4), 1.5);
+    float phase = peak / denom;    // 1 straight at the light, falling away
+
+    float mist = noise * (1.0 - uv.y) * phase;
 
     float3 lin = src.a > 0.0 ? float3(src.rgb / src.a) : float3(0.0);
     float3 rayColour  = float3(mist) * clamp(amount, 0.0, 1.0);

@@ -47,6 +47,7 @@ uniform float  halation;
 uniform float  halationRadius;
 uniform float  halationThreshold;
 uniform float  halationDensity;
+uniform float  halationRing;    // hollows the core into a standing fringe
 uniform half4  halationTint;
 
 uniform float  dirX;
@@ -107,9 +108,40 @@ half4 main(float2 fragCoord) {
 
     float3 lin = float3(centre.rgb);   // pass 1's passthrough, already unpremultiplied
 
-    // Screen the tinted glow back on - light accumulates, it does not blend.
+    // THE RING. Halation is light that crosses the emulsion, reflects off the
+    // base, and re-exposes the emulsion A FIXED DISTANCE AWAY - that distance
+    // set by the base thickness and the angle of total internal reflection. So
+    // the point spread function has a characteristic RADIUS: a fringe standing
+    // off the highlight, not a monotonic falloff from zero. A plain Gaussian
+    // has its maximum at the source, which is a glow, and glow is what it
+    // looked like.
+    //
+    // Subtracting a narrow gather from the wide one is a difference of
+    // Gaussians, which is the standard separable stand-in for an annulus. The
+    // narrow term has to be a real 2D gather rather than another separable
+    // pass, because only ONE scalar crosses the pass boundary (see the channel
+    // budget above) - but pass 1 carried the Recipe colour through in RGB, so
+    // the raw matte can simply be recomputed here. It is cheap: the inner
+    // radius is small by definition, so a handful of taps covers it.
+    float ring = clamp(halationRing, 0.0, 1.0);
+    if (ring > 0.0) {
+        float inner = 0.0, iden = 0.0;
+        for (int j = -2; j <= 2; j++) {
+            for (int i = -2; i <= 2; i++) {
+                float2 o = float2(float(i), float(j)) * (halationRadius * 0.22);
+                float wq = exp(-dot(o, o) / max(halationRadius * halationRadius * 0.15, 1e-4));
+                inner += matteAt(childShader.eval(fragCoord + o)) * wq;
+                iden  += wq;
+            }
+        }
+        weight = clamp(weight - ring * 0.85 * (inner / max(iden, 1e-4)), 0.0, 1.0);
+    }
+
+    // Light ADDS. Screen is a saturating approximation to addition that quietly
+    // compresses the fringe just where it is brightest, which is the part worth
+    // seeing; halation is real light landing on the emulsion, so it accumulates.
     float3 glow = float3(halationTint.rgb) * weight;
-    float3 outCol = clamp(1.0 - (1.0 - lin) * (1.0 - glow), 0.0, 1.0);
+    float3 outCol = clamp(lin + glow, 0.0, 1.0);
 
     half4 orig = original.eval(fragCoord);
     half a = orig.a;

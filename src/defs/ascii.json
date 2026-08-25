@@ -45,6 +45,21 @@
       "softMax": 4.0,
       "step": 0.05
     },
+    "rampContrast": {
+      "type": "double",
+      "default": 0.0,
+      "min": -1.0,
+      "max": 1.0,
+      "step": 0.01
+    },
+    "structure": {
+      "type": "double",
+      "default": 0.0,
+      "min": 0.0,
+      "max": 1.0,
+      "step": 0.01,
+      "dimming": "charset <= 3"
+    },
     "edgeThreshold": {
       "type": "double",
       "default": 0.0,
@@ -125,6 +140,8 @@
       "margin",
       "charset",
       "rampGamma",
+      "rampContrast",
+      "structure",
       "edgeThreshold",
       "colorMode",
       "inkColor",
@@ -145,6 +162,8 @@
       "charset",
       "rampGamma",
       "---Edges",
+      "rampContrast",
+      "structure",
       "edgeThreshold",
       "---Colour",
       "colorMode",

@@ -198,7 +198,21 @@ float apertureWeight(float2 fragCoord, float2 dir, float t) {
     float2 fromCentre = (fragCoord - rectCentre) / (0.5 * min(res.x, res.y));
     float  r = clamp(length(fromCentre), 0.0, 1.0);
     float2 clipDir = r > 1e-4 ? fromCentre / r : float2(0.0);
-    float  shift = catsEye * pow(r, max(catsEyeFalloff, 0.1));
+    // The shift is a GEOMETRIC quantity, not a curve. Mechanical vignetting is
+    // the barrel's front and rear openings, which sit a distance apart along
+    // the axis, sliding out of line as seen from an off-axis point. That
+    // displacement goes as the TANGENT of the field angle - so it is nearly
+    // linear across the middle of the frame and accelerates hard into the
+    // corners, which is exactly why cat's eye appears suddenly at the edges
+    // rather than creeping in evenly. pow(r, falloff) could be tuned to look
+    // similar but had no reason to be that shape. (Nasse, "Depth of Field and
+    // Bokeh", Zeiss 2010.)
+    //
+    // Normalised on the frame corner so Cat's Eye keeps its 0-1 meaning, with
+    // Falloff left as a deliberate deviation from the physical curve.
+    float  fieldA = r * 0.62;                       // ~35 degrees at the corner
+    float  geom = tan(fieldA) / max(tan(0.62), 1e-4);
+    float  shift = catsEye * pow(geom, max(catsEyeFalloff, 0.1));
 
     float2 o = dir * (t * 2.0);   // tap offset in aperture space, -1..1
     float  aa = 2.0 / float(MAX_SAMPLES);   // soften by about one sample step

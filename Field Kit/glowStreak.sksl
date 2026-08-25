@@ -65,7 +65,20 @@ half4 main(float2 fragCoord) {
         if (float(i) >= n) { continue; }
         float t = clamp((float(i) + jitter) / max(n - 1.0, 1.0), 0.0, 1.0);
         float u = both ? (t * 2.0 - 1.0) : t;
-        float w = exp(-abs(u) * max(streakFalloff, 0.0) * 4.0);
+        // A diffraction spike falls off as the ENVELOPE of sinc squared, i.e.
+        // as 1/u^2 - a long tail. The exponential here died far faster than
+        // that, which is why the streak read as a drawn gradient rather than as
+        // light: real spikes from a camera stay faintly visible right across
+        // the frame. Lens Flare's starburst already uses sincSq for the same
+        // physics; the two filters disagreed about it.
+        //
+        // The envelope rather than literal sinc squared, because sinc squared
+        // rings - and with `samples` taps spread over the whole streak there is
+        // nowhere near the density to resolve those lobes. Sampling them would
+        // produce noise, not banding. The envelope is the part this tap budget
+        // can actually carry.
+        float ud = abs(u) * max(streakFalloff, 0.0) * 3.0;
+        float w = 1.0 / (1.0 + ud * ud);
 
         // Perpendicular offset spread across the taps: this is what Blur does,
         // and it costs no extra samples. Chaining the passes smooths the

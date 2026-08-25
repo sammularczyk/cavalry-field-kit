@@ -41,6 +41,7 @@ uniform float  bandDither;
 uniform float  screenType;         // enum: 0 Flat, 1 Grain, 2 Dots, 3 Lines, 4 Stipple, 5 Bayer, 6 Voronoi
 uniform float  frequency;
 uniform float  dotGain;
+uniform float  yuleNielsen;   // optical dot gain: light scattering in the paper
 uniform float4 ink1Color;
 uniform float  ink1Angle;
 uniform float  ink1Coverage;
@@ -294,7 +295,13 @@ half4 main(float2 coord) {
     float rad = radians(angle);
     float c = cos(rad);
     float s = sin(rad);
-    float freq = max(frequency, 2.0);
+    // Screen pitch, in pixels per cell. The floor used to be a hard 2, which
+    // also capped the UI - but a fine screen is exactly what a real press does,
+    // and 2px cells are coarse next to a 175 lpi litho screen. Floored at 0.6
+    // now: below about one pixel per cell the grid is finer than the sampling
+    // and there is nothing left to resolve, so it degenerates to flat tone
+    // rather than aliasing into a moire.
+    float freq = max(frequency, 0.6);
     float aa = 1.4 / freq;
     float d;
 
@@ -366,8 +373,27 @@ half4 main(float2 coord) {
         // Ink only: build up on transparency (premultiplied over).
         return half4(ink * a, a) + base * (1.0 - a);
     }
-    // Overprint: translucent ink filters light off the base, so overlaps
-    // build density and make a third hue.
-    half3 transmit = mix(half3(1.0), ink, a);
-    return half4(base.rgb * transmit, base.a);
+    // Overprint: translucent ink filters light off the base, so overlaps build
+    // density and make a third hue.
+    //
+    // YULE-NIELSEN, replacing a plain linear mix of transmittance. A halftone
+    // always reflects LESS than its dot area predicts, because light enters the
+    // paper between the dots, scatters sideways, and emerges from under one -
+    // so it gets absorbed on the way out having never been counted as covered.
+    // Mixing reflectances linearly is Murray-Davies, which ignores that
+    // entirely and is why a proof always looks lighter than the press sheet.
+    //
+    //   R = [ a*R_ink^(1/n) + (1-a)*R_paper^(1/n) ]^n
+    //
+    // n is a real, published, measurable property of the substrate - about 1.7
+    // for coated stock, higher for uncoated where the fibres scatter further.
+    // n = 1 collapses the expression exactly back to Murray-Davies, so the old
+    // behaviour is still reachable and the control means something.
+    // Not `n` - that is already the ink count in this function.
+    float ynN = clamp(yuleNielsen, 1.0, 4.0);
+    float invn = 1.0 / ynN;
+    half3 lit  = pow(max(base.rgb * ink, half3(1e-4)), half3(invn));
+    half3 bare = pow(max(base.rgb,       half3(1e-4)), half3(invn));
+    half3 mixed = mix(bare, lit, a);
+    return half4(pow(mixed, half3(ynN)), base.a);
 }

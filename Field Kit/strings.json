@@ -28,6 +28,14 @@
           "Ramp Gamma",
           "Bias of brightness onto the glyph ramp. Below one favours dense glyphs, above one sparse."
         ],
+        "rampContrast": [
+          "Ramp Contrast",
+          "Pushes cells toward the sparsest and densest ends of the character set. A character set is a short ladder - Classic has eight rungs - so midtones crowd into the middle of it and the extreme glyphs hardly get used. This spends the whole set, which is the punchy posterised look that reads as ASCII art. Ramp Gamma cannot do it: gamma moves the midpoint but leaves both ends pinned."
+        ],
+        "structure": [
+          "Structure",
+          "Picks the glyph whose SHAPE matches the cell rather than just its brightness, so an edge becomes a slash or a bar running the same way. Only available for Letters and Full ASCII: the other sets are density ramps of symmetric marks - Classic's eight glyphs are all but one symmetric - so there is no directional glyph for this to find and it correctly does nothing. Candidates stay near the density the cell already has, so tone survives; higher widens that search."
+        ],
         "edgeThreshold": [
           "Edge Glyphs",
           "Above zero, cells on a boundary use a line glyph chosen by edge direction. This is the threshold the edge must clear."
@@ -276,9 +284,13 @@
           "Corner Radius",
           "Radius of the rounded tube corners, in pixels. Clamped to half the short side."
         ],
+        "borderSoftness": [
+          "Border Softness",
+          "How many pixels the faceplate edge feathers over. Zero is the pixel-sharp edge; a real faceplate is not sharp, since the glass has thickness and the mask behind it is not perfectly registered to it."
+        ],
         "vignette": [
           "Vignette",
-          "Brightness falloff toward the edges. The tube SHAPE comes from Corner Radius."
+          "Brightness falloff toward the corners, following the cos⁴ law - the real reason a lens darkens off-axis, rather than a drawn curve."
         ],
         "mask": [
           "Mask",
@@ -470,6 +482,10 @@
         "halationDensity": [
           "Halation Density",
           "How much denser the core of the glow is than its falloff. Higher makes only the brightest highlights bloom."
+        ],
+        "halationRing": [
+          "Halation Ring",
+          "Hollows the core so the halation stands off the highlight as a fringe rather than glowing from its centre. This is what halation physically is - light that crosses the emulsion, bounces off the base and re-exposes it a fixed distance away, set by the thickness of the base. At 0 you get a plain glow."
         ],
         "halationTint": [
           "Halation Tint",
@@ -766,6 +782,10 @@
           "Desaturate",
           "One is full black and white, as in the original. Lower it to keep some colour."
         ],
+        "surroundGamma": [
+          "Surround Gamma",
+          "The extra contrast a print carries because it is meant to be seen in a blacked-out room. A dark surround makes the eye perceive less contrast, so prints are made with a system gamma around 1.2 to compensate - which is why projected film looks punchier than the same footage on a monitor. 1 switches it off."
+        ],
         "dyeFade": [
           "Dye Fade",
           "Cyan is the least stable of the three print dyes and fades first, then magenta, with yellow the most durable. Losing cyan means less red gets absorbed, which is why old prints drift magenta-red rather than simply going grey."
@@ -859,7 +879,7 @@
         ],
         "streakFalloff": [
           "Streak Falloff",
-          "How quickly the streak fades along its length."
+          "How quickly the streak fades along its length. The profile is the envelope of a diffraction spike - it falls off as one over distance squared, so the streak keeps a faint tail right across the frame the way a real one does, rather than stopping abruptly."
         ],
         "blur": [
           "Streak Blur",
@@ -880,6 +900,14 @@
         "bloomAmount": [
           "Bloom",
           "Strength of the isotropic glow. Zero leaves a pure streak."
+        ],
+        "haloAmount": [
+          "Halo",
+          "A coloured ring standing at a fixed distance from each highlight - the halo you see around a streetlight at night. Not a falloff like Bloom: diffraction off the radial fibres in the eye's lens throws light out to one particular radius, and because the angle scales with wavelength the ring is chromatic on its own, red outside and blue in."
+        ],
+        "haloRadius": [
+          "Halo Radius",
+          "How far out the ring sits, in pixels. Red lands about 13% further than green and blue about 18% closer, which is what colours it."
         ],
         "size": [
           "Size",
@@ -961,6 +989,10 @@
         "density": [
           "Density",
           "How tightly packed the shafts are."
+        ],
+        "scatterG": [
+          "Scatter Direction",
+          "How strongly the haze throws light FORWARD. Scattering off dust and droplets is forward-peaked, so shafts blaze when you look near the light and fade as you turn away - which is most of what makes crepuscular rays read as light rather than as texture. 0 scatters equally in all directions; 0.7 to 0.9 is real atmospheric haze."
         ],
         "speed": [
           "Speed",
@@ -2198,12 +2230,16 @@
           "The halftone pattern used to build tone from ink. Flat prints solid density with no pattern at all - the default for Riso. Grain adds a random speckle instead of a regular screen."
         ],
         "frequency": [
-          "Frequency",
-          "Screen cell size in pixels. Smaller cells read as a finer, higher-line-count screen."
+          "Screen Frequency",
+          "Pitch of the halftone screen, in pixels per cell - so lower is a FINER screen. The slider range is a suggestion, not a limit: type past either end for a very fine litho screen or a very coarse newsprint one. Below about one pixel per cell the screen is finer than the image can sample and flattens to plain tone."
         ],
         "dotGain": [
           "Dot Gain",
-          "Grows or chokes the printed dots, as ink spread on press does."
+          "MECHANICAL dot gain - ink physically spreading on press, so the dots grow or choke. The optical half of dot gain is Paper Scatter below; they are different effects and were previously conflated in this one control."
+        ],
+        "yuleNielsen": [
+          "Paper Scatter (n)",
+          "Optical dot gain: light enters the paper between the dots, scatters sideways and comes back out from under one, so a halftone always prints darker than its dot area suggests. This is the Yule-Nielsen n factor, a real measurable property of the stock - about 1.7 for coated, higher for uncoated where the fibres scatter further. 1 turns it off, which is the naive Murray-Davies mix."
         ],
         "ink1Color": [
           "Ink 1 Colour",

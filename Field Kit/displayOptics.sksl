@@ -70,9 +70,26 @@ half4 main(float2 fragCoord) {
         col = mix(aber, mix(aber * g, aber + (g - 1.0), 0.5), grain);
     }
 
-    // Brightness falloff only. The tube SHAPE is pass 3's job.
-    float vig = 1.0 - clamp(smoothstep(0.25, 1.0,
-        length((uv - 0.5) * float2(1.0, res.y / res.x * 2.0))), 0.0, 1.0);
+    // Brightness falloff only - the tube SHAPE is pass 3's job.
+    //
+    // The COS^4 LAW. Irradiance off the optical axis falls as the fourth power
+    // of the cosine of the field angle: one cosine from the inverse-square
+    // distance to the corner of the frame, one from the tilt of the image
+    // plane, and two from the foreshortening of the exit pupil as seen from
+    // that angle. It is textbook optics and it costs the same as the
+    // smoothstep(0.25, 1.0) curve that was here, which obeyed nothing.
+    //
+    // FOCAL is the focal length in half-frame-heights. 1.2 is a wide lens,
+    // which is the regime where cos^4 is actually visible - a long lens sees so
+    // small a field angle that the falloff vanishes, and a CRT bezel shot on a
+    // long lens does not vignette.
+    const float FOCAL = 1.2;
+    float2 vp = (uv - 0.5) * float2(res.x / max(res.y, 1.0), 1.0) * 2.0;
+    float tanT = length(vp) / FOCAL;
+    float cosT = 1.0 / sqrt(1.0 + tanT * tanT);
+    // Not `c2` - that is already an aberration tap in this function.
+    float cosSq = cosT * cosT;
+    float vig = cosSq * cosSq;
     col *= mix(1.0, vig, vignette);
 
     half a = c0.a;

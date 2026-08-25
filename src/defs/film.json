@@ -52,6 +52,7 @@
         "halationRadius",
         "halationThreshold",
         "halationDensity",
+        "halationRing",
         "halationTint"
       ],
       "constants": {
@@ -67,6 +68,7 @@
         "halationRadius",
         "halationThreshold",
         "halationDensity",
+        "halationRing",
         "halationTint"
       ],
       "constants": {
@@ -123,6 +125,14 @@
       "min": 1.0,
       "softMax": 4.0,
       "step": 0.1,
+      "dimming": "halation <= 0"
+    },
+    "halationRing": {
+      "type": "double",
+      "default": 0.35,
+      "min": 0.0,
+      "max": 1.0,
+      "step": 0.01,
       "dimming": "halation <= 0"
     },
     "halationTint": {
@@ -348,6 +358,7 @@
       "halationRadius",
       "halationThreshold",
       "halationDensity",
+      "halationRing",
       "halationTint",
       "linearise",
       "exposure",
@@ -417,6 +428,7 @@
           "halationRadius",
           "halationThreshold",
           "halationDensity",
+          "halationRing",
           "halationTint",
           "---Tone",
           "linearise",

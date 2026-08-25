@@ -119,6 +119,7 @@ half4 main(float2 fragCoord) {
     // stays correct for every copy inside a Duplicator.
     float2 p = fragCoord - rectCentre;
 
+
     // `ink` is coverage: 0 = paper, 1 = solid mark. `tint` optionally carries
     // an image-derived colour (Cross Stitch), otherwise the ink colour is used.
     float  ink  = 0.0;

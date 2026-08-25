@@ -10,6 +10,11 @@ uniform float  angle;
 uniform float  chromatic;
 uniform float  dispersion;
 uniform float  bloomAmount;
+uniform float  haloAmount;    // lenticular halo - Spencer's f3 term
+uniform float  haloRadius;    // px; the ring sits at a fixed radius, not a falloff
+uniform float  srcBlack;      // the halo re-derives highlights, so it needs
+uniform float  srcWhite;      // the same three grade controls pass 0 used
+uniform float  response;
 uniform float  steps;
 uniform float  persistence;
 uniform float  intensity;
@@ -43,6 +48,51 @@ float3 bandTint(int i) {
 }
 const float3 BAND_NORM = float3(0.3125, 0.3333, 0.4);
 
+// THE LENTICULAR HALO - Spencer, Shirley, Zimmerman & Greenberg, "Physically-
+// Based Glare Effects for Digital Images" (SIGGRAPH 1995), their f3 term.
+//
+// Unlike bloom, this is not a falloff at all: it is a coloured RING standing at
+// a fixed angular radius from the source, produced by diffraction off the
+// radial fibre lattice of the eye's lens. Because diffraction angle scales with
+// wavelength, red lands furthest out and blue sits inside it - so the ring is
+// chromatic by construction rather than by being tinted. It is the thing you
+// see around a streetlight at night, and nothing else in this kit can make it.
+//
+// Gathered as a ring rather than convolved: sampling the highlights AT the ring
+// radius in a dozen directions is the same operation as convolving with an
+// annulus, and costs a dozen taps instead of a pass.
+float3 haloHighlights(float2 coord) {
+    half4 c = original.eval(coord);
+    float3 lin = c.a > 0.0 ? float3(c.rgb / c.a) : float3(0.0);
+    float bp = srcBlack;
+    float wp = max(srcWhite, bp + 0.0001);
+    return pow(clamp((lin - bp) / (wp - bp), 0.0, 1e4),
+               float3(max(response, 0.0001)));
+}
+
+float haloHash(float2 p) {
+    p = fract(p * float2(0.1031, 0.11369));
+    p += dot(p, p.yx + 19.19);
+    return fract((p.x + p.y) * p.x);
+}
+
+float3 lenticularHalo(float2 fragCoord) {
+    if (haloAmount <= 0.0 || haloRadius <= 0.0) { return float3(0.0); }
+    const int N = 12;
+    // 620/550/450nm, normalised on green. Red diffracts furthest.
+    const float3 LAMBDA = float3(1.13, 1.0, 0.82);
+    float jit = haloHash(fragCoord) * 6.28318530718;
+    float3 acc = float3(0.0);
+    for (int i = 0; i < N; i++) {
+        float a = float(i) / float(N) * 6.28318530718 + jit;
+        float2 d = float2(cos(a), sin(a));
+        acc.r += haloHighlights(fragCoord + d * (haloRadius * LAMBDA.r)).r;
+        acc.g += haloHighlights(fragCoord + d * (haloRadius * LAMBDA.g)).g;
+        acc.b += haloHighlights(fragCoord + d * (haloRadius * LAMBDA.b)).b;
+    }
+    return acc / float(N) * clamp(haloAmount, 0.0, 4.0);
+}
+
 half4 main(float2 fragCoord) {
     float3 glow = float3(childShader.eval(fragCoord).rgb);
 
@@ -69,6 +119,8 @@ half4 main(float2 fragCoord) {
         float3 ratio = clamp(acc / max(base, float3(0.001)), 0.0, 4.0);
         glow *= mix(float3(1.0), ratio, chro);
     }
+
+    glow += lenticularHalo(fragCoord);
 
     // apGlow's persistence gains the wide end of the ladder. The chain has
     // already mixed the widths, so this acts on the result as a soft-knee gain

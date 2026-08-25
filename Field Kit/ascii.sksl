@@ -50,6 +50,8 @@ uniform float  margin;        // padding inside each cell, 0..0.45
 uniform float  charset;       // enum: 0 classic (pixi), 1 block density,
                               //       2 dots, 3 numeric, 4 letters, 5 full ascii
 uniform float  rampGamma;     // bias of brightness onto the glyph ramp
+uniform float  rampContrast; // pushes cells toward the ends of the ramp
+uniform float  structure;    // shape matching vs plain tone
 uniform float  edgeThreshold; // 0 = no edge glyphs
 uniform float  colorMode;     // enum: 0 from layer, 1 single colour, 2 ink on paper
 uniform half4  inkColor;      // straight RGBA
@@ -375,6 +377,26 @@ float bitOfAny(float2 glyph, float bx, float by) {
     return bitOf(glyph, (4.0 - bx) + 5.0 * by);
 }
 
+// STRUCTURE MATCHING, after Xu, Zhang & Wong, "Structure-based ASCII Art"
+// (SIGGRAPH 2010).
+//
+// Choosing a glyph by brightness alone makes a grey-level mosaic that happens
+// to be made of letters: a diagonal edge and a flat patch of the same average
+// tone get the same character. Real ASCII art picks the glyph whose SHAPE
+// matches, so strokes in the picture become strokes in the type.
+//
+// Two departures from a literal implementation, both to fit a shader:
+//
+// TONE IS PRESERVED, not traded away. The paper balances shape against tone;
+// here the candidates are restricted to a window around the brightness the cell
+// actually has, and the best-matching shape is chosen from inside it. So the
+// picture keeps its tonal structure and only picks a better-shaped glyph at the
+// same density - and it bounds the search, which is what makes it affordable.
+//
+// SUM OF SQUARED DIFFERENCE over the glyph's own 5x5 bit grid, rather than the
+// paper's misalignment-tolerant metric. The glyphs here are 5x5 and the cell is
+// resampled onto exactly that grid, so there is no misalignment to tolerate.
+
 half4 main(float2 fragCoord) {
     half4 src = image.eval(fragCoord);
 
@@ -388,7 +410,71 @@ half4 main(float2 fragCoord) {
     float2 cidx = floor(p / cell);
     float2 centre = (cidx + 0.5) * cell + rectCentre;
 
-    // One sample per cell, taken at its centre.
+    // The cell resampled onto the glyph's own 5x5 bit grid. This used to be a
+    // single sample at the cell centre, which is not even a mean - whether it
+    // represented the cell at all depended on the layer's own filtering, and a
+    // cell straddling an edge could take its tone from either side.
+    // The cell resampled onto the glyph's own 5x5 bit grid, reduced to MOMENTS
+    // rather than stored as a patch: SkSL has no dynamic array indexing at all,
+    // so a 25-element patch cannot be written in a loop and read back in
+    // another. Moments need no storage, cost the same, and are a better metric
+    // anyway - they describe where the ink SITS rather than demanding an exact
+    // cell-for-cell match, which is the shift tolerance Xu et al. build into
+    // their comparison by other means.
+    //
+    // SECOND moments, i.e. the inertia tensor - not first moments. A first
+    // moment is the centroid, which is zero for ANY symmetric shape, so it
+    // cannot tell a dash from a pipe from an O: all three sit at the middle of
+    // their cell. The second moments say how the ink is SPREAD:
+    //
+    //   A = m20 - m02  - stretched horizontally (+) or vertically (-)
+    //   B = 2 * m11    - leaning one diagonal (+) or the other (-)
+    //
+    // which is the standard double-angle form of an orientation, and separates
+    // - | / \ cleanly while leaving symmetric glyphs at the origin.
+    //
+    // That is enough to tell a slash from a backslash from a dash, which is the
+    // distinction that makes ASCII read as drawing rather than as tone.
+    //
+    // A tap outside the layer is ABSENT, not black. Counting those as zero
+    // dimmed every cell along the frame edge in proportion to how many of its
+    // taps fell off. Same class as the gather fixes in Lens Blur and Display.
+    float acc = 0.0, m20 = 0.0, m02 = 0.0, m11 = 0.0;
+    for (int by = 0; by < 5; by++) {
+        for (int bx = 0; bx < 5; bx++) {
+            float2 o = (float2(float(bx), float(by)) + 0.5) / 5.0 - 0.5;
+            half4 sc = image.eval(centre + o * cell);
+            if (sc.a <= 0.001) { continue; }
+            float3 sl = float3(sc.rgb) / max(float(sc.a), 1e-6);
+            float g = dot(sl, float3(0.299, 0.587, 0.114));
+            float v = invert > 0.5 ? g : 1.0 - g;   // ink coverage, not brightness
+            float cx = float(bx) - 2.0, cy = float(by) - 2.0;
+            acc += v; m20 += v * cx * cx; m02 += v * cy * cy; m11 += v * cx * cy;
+        }
+    }
+    // Normalised to roughly -1..1. A and B reach +-4 on a full diagonal, so
+    // left raw their squared differences run to 60-odd while the tonal penalty
+    // sits at 0.15 - which meant tone was never actually protected and shape
+    // won every time. Putting both on the same scale is what makes the weight
+    // between them mean anything.
+    const float MOMENT_SCALE = 0.25;
+    float nrm = max(acc, 1e-4);
+    float cellA2 = (m20 - m02) / nrm * MOMENT_SCALE;
+    float cellB2 = 2.0 * m11 / nrm * MOMENT_SCALE;
+
+    // TONE AND COLOUR FROM THE CENTRE, not from the mean of the patch.
+    //
+    // Averaging the 25 taps is the "correct" downsample and it makes the
+    // picture visibly flatter: a cell straddling dark and light returns the
+    // middle instead of committing to either, so the extremes disappear and
+    // everything drifts toward mid-density glyphs. ASCII is a QUANTISER, and
+    // low-passing before you quantise throws away exactly the local contrast
+    // that gives it its punch - the brightest cells stop reaching the densest
+    // glyph in the ramp.
+    //
+    // So the patch is used only for the structural moments above, where the
+    // spatial detail is the whole point, and tone keeps the single centre
+    // sample it always had.
     half4 c = image.eval(centre);
     float3 lin = c.a > 0.0 ? float3(c.rgb / c.a) : float3(0.0);
 
@@ -397,9 +483,90 @@ half4 main(float2 fragCoord) {
     // Gamma on the brightness-to-glyph mapping, to bias sparse against dense.
     gray = pow(clamp(gray, 0.0, 1.0), max(rampGamma, 0.0001));
 
+    // Contrast on the RAMP, not on the picture. A character set is a short
+    // ladder - Classic has eight rungs - so mid-tones crowd into the middle of
+    // it and the sparsest and densest glyphs hardly ever get used. Pushing the
+    // mapping toward both ends spends the whole set and gives the punchy,
+    // posterised look that reads as ASCII art rather than as a grey mosaic.
+    //
+    // An S-curve about the midpoint: negative flattens toward mid-density,
+    // positive drives cells to the extremes. Gamma cannot do this - it moves
+    // the midpoint but keeps the ends pinned.
+    float ct = clamp(rampContrast, -1.0, 1.0);
+    if (ct != 0.0) {
+        float g2 = clamp(gray, 0.0, 1.0);
+        // Exponent ABOVE 1 steepens each half away from the midpoint, which is
+        // what spreads cells toward the ends; below 1 flattens them inward.
+        float e = 1.0 + ct * 1.5;
+        gray = g2 < 0.5 ? pow(g2 * 2.0, e) * 0.5
+                        : 1.0 - pow((1.0 - g2) * 2.0, e) * 0.5;
+    }
+
     // Glyph choice: by brightness, or picked at random per cell. The random
     // mode gives the scattered-letterform look rather than a tonal ramp.
     float2 gl = glyphByBrightness(charset, gray);
+
+    // Search a window of glyphs either side of the tonal pick and keep the one
+    // whose shape fits best. The window is what preserves tone: every candidate
+    // sits at nearly the density the cell already has.
+    float st = clamp(structure, 0.0, 1.0);
+
+    // How directional the cell actually is. THIS GATE IS THE WHOLE THING: on a
+    // flat cell all three moments are ~0, and the glyph that best matches "no
+    // preferred direction" is whichever is most centrally symmetric - O. Most
+    // of any picture is locally flat, so without this every cell matched O and
+    // the image collapsed to one character. A cell with no structure has no
+    // opinion about shape, and the tonal pick should stand.
+    // Anisotropy: how strongly the cell prefers a direction at all. A flat
+    // cell is isotropic - A and B both zero - and has no opinion about shape,
+    // so the tonal pick stands. Without this gate every flat cell matched the
+    // most symmetric glyph and the picture collapsed to a field of O.
+    float mag = sqrt(cellA2 * cellA2 + cellB2 * cellB2);
+    if (st > 0.0 && mag > 0.06) {
+        float total = setCount(int(charset));
+        float i0 = floor(clamp(gray, 0.0, 0.9999) * total);
+        // The window scales with the SET, not a fixed count. Six glyphs either
+        // side is the entire Classic set (8 glyphs) but under 7% of Full ASCII
+        // (95) - so the same control meant "ignore tone completely" on one and
+        // "barely look" on the other. A fraction of the set behaves the same
+        // way on both.
+        //
+        // 8%, not 15%: at 15% a Full ASCII cell could reach 14 glyphs either
+        // way, far enough to buy a slightly better shape with a large tonal
+        // error. The result reads busy and random rather than structured - tone
+        // is what carries the picture at a distance, and shape only pays off up
+        // close. Keep the search tight and let Structure widen it deliberately.
+        float span = max(1.0, floor(st * max(3.0, total * 0.08) + 0.5));
+        // Score each candidate on the same three moments. No patch to carry,
+        // so nothing needs an array.
+        float best = 1e9;
+        for (int k = -14; k <= 14; k++) {
+            if (abs(float(k)) > span) { continue; }
+            float idx = clamp(i0 + float(k), 0.0, total - 1.0);
+            float2 cand = glyphByIndex(charset, idx);
+            float ga = 0.0, g20 = 0.0, g02 = 0.0, g11 = 0.0;
+            for (int by = 0; by < 5; by++) {
+                for (int bx = 0; bx < 5; bx++) {
+                    float b = bitOfAny(cand, float(bx), float(by));
+                    float cx = float(bx) - 2.0, cy = float(by) - 2.0;
+                    ga += b; g20 += b * cx * cx; g02 += b * cy * cy; g11 += b * cx * cy;
+                }
+            }
+            float gn = max(ga, 1e-4);
+            float d10 = cellA2 - (g20 - g02) / gn * MOMENT_SCALE;
+            float d11 = cellB2 - 2.0 * g11 / gn * MOMENT_SCALE;
+            float d01 = 0.0;
+            // Straying from the tonal pick has to COST something, or a
+            // marginally better shape is taken at any tonal price and the
+            // picture loses its tone. This is the shape-versus-tone weight
+            // Xu et al. carry explicitly; here it is a penalty per step away
+            // from the brightness the cell actually has.
+            float tonal = float(k) / max(span, 1.0);
+            float e = d10 * d10 + d01 * d01 + d11 * d11 + 0.15 * tonal * tonal;
+            if (e < best) { best = e; gl = cand; }
+        }
+    }
+
     if (hash21(cidx + seed + 7.3) < clamp(randomChars, 0.0, 1.0)) {
         float pick = floor(hash21(cidx + seed) * setCount(int(charset)));
         gl = glyphByIndex(charset, pick);

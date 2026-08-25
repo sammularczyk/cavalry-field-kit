@@ -40,12 +40,16 @@
     "The halftone pattern used to build tone from ink. Flat prints solid density with no pattern at all - the default for Riso. Grain adds a random speckle instead of a regular screen."
    ],
    "frequency": [
-    "Frequency",
-    "Screen cell size in pixels. Smaller cells read as a finer, higher-line-count screen."
+    "Screen Frequency",
+    "Pitch of the halftone screen, in pixels per cell - so lower is a FINER screen. The slider range is a suggestion, not a limit: type past either end for a very fine litho screen or a very coarse newsprint one. Below about one pixel per cell the screen is finer than the image can sample and flattens to plain tone."
    ],
    "dotGain": [
     "Dot Gain",
-    "Grows or chokes the printed dots, as ink spread on press does."
+    "MECHANICAL dot gain - ink physically spreading on press, so the dots grow or choke. The optical half of dot gain is Paper Scatter below; they are different effects and were previously conflated in this one control."
+   ],
+   "yuleNielsen": [
+    "Paper Scatter (n)",
+    "Optical dot gain: light enters the paper between the dots, scatters sideways and comes back out from under one, so a halftone always prints darker than its dot area suggests. This is the Yule-Nielsen n factor, a real measurable property of the stock - about 1.7 for coated, higher for uncoated where the fibres scatter further. 1 turns it off, which is the naive Murray-Davies mix."
    ],
    "ink1Color": [
     "Ink 1 Colour",
@@ -53,7 +57,7 @@
    ],
    "ink1Angle": [
     "Ink 1 Angle",
-    "Screen angle for plate 1. Classic separations use differing angles to avoid moir\u00e9."
+    "Screen angle for plate 1. Classic separations use differing angles to avoid moiré."
    ],
    "ink1Coverage": [
     "Ink 1 Coverage",

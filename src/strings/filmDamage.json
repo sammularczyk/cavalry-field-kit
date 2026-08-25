@@ -87,6 +87,10 @@
     "Desaturate",
     "One is full black and white, as in the original. Lower it to keep some colour."
    ],
+   "surroundGamma": [
+    "Surround Gamma",
+    "The extra contrast a print carries because it is meant to be seen in a blacked-out room. A dark surround makes the eye perceive less contrast, so prints are made with a system gamma around 1.2 to compensate - which is why projected film looks punchier than the same footage on a monitor. 1 switches it off."
+   ],
    "dyeFade": [
     "Dye Fade",
     "Cyan is the least stable of the three print dyes and fades first, then magenta, with yellow the most durable. Losing cyan means less red gets absorbed, which is why old prints drift magenta-red rather than simply going grey."
