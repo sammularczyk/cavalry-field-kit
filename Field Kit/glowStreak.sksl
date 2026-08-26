@@ -17,12 +17,15 @@
 // several spike directions at once - blurring an already-starred image again
 // spreads it into a blob. Stack two Glows at different angles for a cross.
 
+uniform float  srcBlack;      // the streak re-derives highlights, so it
+uniform float  srcWhite;      // needs the same three grade controls pass 0 used
+uniform float  response;
 uniform float  streakAmount;
+uniform float  streakIntensity; // multiplier on the streak, over the global Intensity
 uniform float  reach;
 uniform float  angle;
 uniform float  samples;
 uniform float  streakFalloff;
-uniform float  blur;          // perpendicular softening, px
 uniform float  bidirectional;
 
 uniform float  stepScale;
@@ -30,7 +33,21 @@ uniform float  stepScale;
 uniform float2 resolution;
 uniform float2 rectCentre;
 
-uniform shader childShader;   // pass 1: the highlights. Later: previous smear.
+uniform shader childShader;   // the bloom so far - the streak ADDS onto this
+uniform shader original;      // untouched input - MUST be declared last
+
+// Re-derived rather than read from childShader. The streak now runs AFTER the
+// bloom, so childShader holds a wide soft veil; smearing that would just smear
+// the veil. The streak has to come from the sharp highlights, which means
+// grading them here exactly as pass 0 did.
+float3 streakHighlights(float2 coord) {
+    half4 c = original.eval(coord);
+    float3 lin = c.a > 0.0 ? float3(c.rgb / c.a) : float3(0.0);
+    float bp = srcBlack;
+    float wp = max(srcWhite, bp + 0.0001);
+    return pow(clamp((lin - bp) / (wp - bp), 0.0, 1e4),
+               float3(max(response, 0.0001)));
+}
 
 const int MAX_TAPS = 32;
 
@@ -46,15 +63,55 @@ float hash21(float2 p) {
 }
 
 half4 main(float2 fragCoord) {
-    // Nothing to do, and the bloom ladder should see the highlights untouched.
     if (streakAmount <= 0.0) { return childShader.eval(fragCoord); }
 
-    float span = max(reach, 0.0) * stepScale;
+    // CHAINED, and running after the bloom.
+    //
+    // A point of light needs CONTINUOUS coverage along the streak. Gathering N
+    // taps over L pixels leaves a dotted line unless the spacing is about a
+    // pixel - at reach 300 that would want 300 taps. Chaining solves it for
+    // free: the first pass turns each point into a short dotted streak, and
+    // every pass after smears what it finds, so the gaps close progressively
+    // and 16 taps are enough.
+    //
+    // The cost is that the later passes smear the BLOOM they are sitting on top
+    // of as well, elongating the veil along the streak axis. That is scaled by
+    // Streak Amount, so it only happens once a streak has been asked for - and
+    // a real anamorphic flare stretches its whole glow the same way.
+    // DOUBLING STRIDE, not a dense gather.
+    //
+    // A long directional blur does not need taps every pixel if each pass
+    // strides further than the last. Pass 1 lays down `n` contiguous samples at
+    // spacing d, so every point becomes a solid block d*n long. Pass 2 strides
+    // n*d - landing on the blocks pass 1 already filled, so nothing is missed -
+    // and pass 3 strides n*n*d. Reach grows as n^3 while cost grows as 3n.
+    //
+    // At n = 6 that is 18 taps for a 216d streak, where gathering the same
+    // length densely would want 216. The previous version spent 36 taps to
+    // cover it and still left gaps, which is what the speckle was.
+    bool first = stepScale <= 0.25;
+    float n = clamp(floor(samples), 2.0, float(MAX_TAPS));
+    float rank = first ? 0.0 : (stepScale <= 0.5 ? 1.0 : 2.0);
+
+    // SPAN RATIOS ARE FIXED; samples only sets density within them.
+    //
+    // Deriving the stride from n^3 made Samples a length control by accident:
+    // raising it shrank the base stride cubically while adding only n taps, so
+    // the taps bunched toward the origin and - since each pass normalises by
+    // its own weights - the far end was diluted away. More samples gave a
+    // SHORTER streak, which is the opposite of what the control says.
+    //
+    // The three passes now always cover 1:4:16 of the total, summing to Length
+    // whatever n is. Continuity still holds as long as pass k+1's stride is no
+    // longer than the block pass k filled, which needs n >= 4 - hence the
+    // minimum on Samples.
+    float spanFrac = pow(4.0, rank) / 21.0;
+    float span = max(reach, 0.0) * spanFrac;
+    float stride = span / max(n, 1.0);
+
     float ang  = radians(angle);
     float2 dir = float2(cos(ang), sin(ang));
-    float2 perp = float2(-dir.y, dir.x);
-    float  n    = clamp(floor(samples), 2.0, float(MAX_TAPS));
-    bool both   = bidirectional > 0.5;
+    bool both  = bidirectional > 0.5;
 
     float3 sum  = float3(0.0);
     float  wsum = 0.0;
@@ -63,39 +120,32 @@ half4 main(float2 fragCoord) {
 
     for (int i = 0; i < MAX_TAPS; i++) {
         if (float(i) >= n) { continue; }
-        float t = clamp((float(i) + jitter) / max(n - 1.0, 1.0), 0.0, 1.0);
-        float u = both ? (t * 2.0 - 1.0) : t;
-        // A diffraction spike falls off as the ENVELOPE of sinc squared, i.e.
-        // as 1/u^2 - a long tail. The exponential here died far faster than
-        // that, which is why the streak read as a drawn gradient rather than as
-        // light: real spikes from a camera stay faintly visible right across
-        // the frame. Lens Flare's starburst already uses sincSq for the same
-        // physics; the two filters disagreed about it.
-        //
-        // The envelope rather than literal sinc squared, because sinc squared
-        // rings - and with `samples` taps spread over the whole streak there is
-        // nowhere near the density to resolve those lobes. Sampling them would
-        // produce noise, not banding. The envelope is the part this tap budget
-        // can actually carry.
-        float ud = abs(u) * max(streakFalloff, 0.0) * 3.0;
+        float k = float(i) + jitter;
+        float dist = k * stride;
+
+        // Envelope over the WHOLE streak, so the three passes together carry
+        // one continuous 1/u^2 falloff rather than each restarting it.
+        float ud = dist / max(reach, 1.0) * max(streakFalloff, 0.0) * 3.0;
         float w = 1.0 / (1.0 + ud * ud);
 
-        // Perpendicular offset spread across the taps: this is what Blur does,
-        // and it costs no extra samples. Chaining the passes smooths the
-        // pattern into a soft ribbon rather than leaving it visible.
-        float pOff = (mod(float(i), 5.0) / 4.0 - 0.5) * max(blur, 0.0);
-
-        float3 v = float3(childShader.eval(fragCoord + dir * (u * span)
-                                                     + perp * pOff).rgb);
-        sum  += v * w;
+        sum  += (first ? streakHighlights(fragCoord + dir * dist)
+                       : float3(childShader.eval(fragCoord + dir * dist).rgb)) * w;
         wsum += w;
+        if (both) {
+            sum  += (first ? streakHighlights(fragCoord - dir * dist)
+                           : float3(childShader.eval(fragCoord - dir * dist).rgb)) * w;
+            wsum += w;
+        }
     }
 
     float3 streak = sum / max(wsum, 0.0001);
-
-    // Mix so Streak Amount at 0 is exactly the untouched highlights.
     float3 here = float3(childShader.eval(fragCoord).rgb);
-    float3 outRgb = mix(here, streak, clamp(streakAmount, 0.0, 1.0));
+    float amt = clamp(streakAmount, 0.0, 1.0);
+
+    // The first pass ADDS a fresh streak onto the bloom; the rest smear what is
+    // already there, so they blend rather than add or the streak compounds.
+    float3 outRgb = first ? here + streak * amt * max(streakIntensity, 0.0)
+                          : mix(here, streak, amt);
 
     return half4(half3(clamp(outRgb, 0.0, 64.0)), half(1.0));
 }

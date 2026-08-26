@@ -11,13 +11,17 @@ uniform float  chromatic;
 uniform float  dispersion;
 uniform float  bloomAmount;
 uniform float  haloAmount;    // lenticular halo - Spencer's f3 term
-uniform float  haloRadius;    // px; the ring sits at a fixed radius, not a falloff
+uniform float  haloRadius;
+uniform float  haloSoftness;
+uniform float  streakAmount;  // gates the fold-in below
+uniform float  blur;          // streak softness, folded in from its own pass  // width of the ring, as a fraction of its radius    // px; the ring sits at a fixed radius, not a falloff
 uniform float  srcBlack;      // the halo re-derives highlights, so it needs
 uniform float  srcWhite;      // the same three grade controls pass 0 used
 uniform float  response;
 uniform float  steps;
 uniform float  persistence;
 uniform float  intensity;
+uniform float  saturation;    // of the glow itself, not the picture
 uniform half4  tint;
 uniform float  blend;         // enum: 0 Add, 1 Screen, 2 Max, 3 Effect Only
 uniform float  amount;
@@ -78,29 +82,61 @@ float haloHash(float2 p) {
 
 float3 lenticularHalo(float2 fragCoord) {
     if (haloAmount <= 0.0 || haloRadius <= 0.0) { return float3(0.0); }
-    const int N = 12;
-    // 620/550/450nm, normalised on green. Red diffracts furthest.
-    const float3 LAMBDA = float3(1.13, 1.0, 0.82);
+    // 20 directions, and each tap's RADIUS jittered a few percent as well as
+    // its angle. Twelve taps on a razor-thin ring read as twelve copies, and
+    // angular jitter alone converts that banding into noise rather than
+    // smoothing it - which is what made the ring look grainy. Giving the ring
+    // real width also fills the gap between the per-channel radii, so red and
+    // blue blend into a graded fringe instead of separating into hard rainbow
+    // bands 20 pixels apart.
+    const int N = 20;
+    const float3 LAMBDA = float3(1.13, 1.0, 0.82);   // 620/550/450nm
     float jit = haloHash(fragCoord) * 6.28318530718;
     float3 acc = float3(0.0);
     for (int i = 0; i < N; i++) {
-        float a = float(i) / float(N) * 6.28318530718 + jit;
+        float fi = float(i);
+        float a = fi / float(N) * 6.28318530718 + jit;
         float2 d = float2(cos(a), sin(a));
-        acc.r += haloHighlights(fragCoord + d * (haloRadius * LAMBDA.r)).r;
-        acc.g += haloHighlights(fragCoord + d * (haloRadius * LAMBDA.g)).g;
-        acc.b += haloHighlights(fragCoord + d * (haloRadius * LAMBDA.b)).b;
+        // Spread across the ring's width, offset per pixel so the spread does
+        // not itself become a pattern.
+        // Ring width. A thin ring is a sharp chromatic band; a wide one is a
+        // soft halo whose colours blend through each other.
+        float hw = clamp(haloSoftness, 0.0, 1.0) * 0.6;
+        float rw = 1.0 - hw * 0.5 + hw * fract(fi * 0.618034 + haloHash(fragCoord + 3.7));
+        acc.r += haloHighlights(fragCoord + d * (haloRadius * LAMBDA.r * rw)).r;
+        acc.g += haloHighlights(fragCoord + d * (haloRadius * LAMBDA.g * rw)).g;
+        acc.b += haloHighlights(fragCoord + d * (haloRadius * LAMBDA.b * rw)).b;
     }
     return acc / float(N) * clamp(haloAmount, 0.0, 4.0);
 }
 
-half4 main(float2 fragCoord) {
-    float3 glow = float3(childShader.eval(fragCoord).rgb);
 
-    // The BLOOM ladder summed `steps` widths, so divide by it - apGlow's
-    // MultiplyR. With bloom off the ladder passed the streak straight through
-    // without summing anything, so dividing there would just darken it.
-    float norm = clamp(bloomAmount, 0.0, 1.0) > 0.0 ? max(steps, 1.0) : 1.0;
-    glow /= norm;
+half4 main(float2 fragCoord) {
+    // The streak's perpendicular gaussian, folded in here rather than run as
+    // its own pass. An early-out pass still writes a full-resolution buffer, so
+    // at 14 passes the count itself was the floor on cost, not the tap budget -
+    // and this pass already reads childShader, so the blur is free of any extra
+    // buffer.
+    float3 glow;
+    if (blur > 0.0 && streakAmount > 0.0) {
+        float sa = radians(angle);
+        float2 sperp = float2(-sin(sa), cos(sa));
+        float3 bsum = float3(0.0);
+        float  bden = 0.0;
+        for (int i = -8; i <= 8; i++) {
+            float f = float(i) / 8.0;
+            float w = exp(-2.0 * f * f);
+            bsum += float3(childShader.eval(fragCoord + sperp * (f * blur)).rgb) * w;
+            bden += w;
+        }
+        glow = bsum / max(bden, 0.0001);
+    } else {
+        glow = float3(childShader.eval(fragCoord).rgb);
+    }
+
+    // No global normalisation here any more - glowBloom divides each rung as
+    // it adds it, so the buffer arrives already scaled and the streak that was
+    // added after the bloom is not caught up in it.
 
     // Chromatic split, as a per-channel ratio on the accumulated glow rather
     // than replacing it, so turning it up does not shorten the streak.
@@ -108,17 +144,37 @@ half4 main(float2 fragCoord) {
     if (chro > 0.0) {
         float ang = radians(angle);
         float2 dir = float2(cos(ang), sin(ang));
-        float3 base = float3(childShader.eval(fragCoord).rgb) / norm;
+        float3 base = float3(childShader.eval(fragCoord).rgb);
         float3 acc = float3(0.0);
+        // Jittered band positions. Seven fixed offsets are seven discrete
+        // copies, and at any real Dispersion you see them as banding across the
+        // fringe - a spectrum is continuous, and sampling it on a fixed lattice
+        // is the same mistake as an unjittered blur ladder. Offsetting every
+        // band by up to half a step, differently per pixel, turns those steps
+        // into fine noise that the eye integrates back into a smooth ramp.
+        float bj = (haloHash(fragCoord + 11.3) - 0.5) / 6.0;
         for (int b = 0; b < 7; b++) {
+            float wpos = clamp(bandWave(b) + bj * 2.0, -1.0, 1.0);
             float3 v = float3(childShader.eval(
-                fragCoord + dir * (bandWave(b) * dispersion)).rgb) / norm;
+                fragCoord + dir * (wpos * dispersion)).rgb);
             acc += v * bandTint(b);
         }
         acc *= BAND_NORM;
         float3 ratio = clamp(acc / max(base, float3(0.001)), 0.0, 4.0);
         glow *= mix(float3(1.0), ratio, chro);
     }
+
+    // Saturation of the VEIL - applied before the halo joins it.
+    //
+    // Scattering off dust and lens imperfections is Mie scattering, which for
+    // particles larger than the wavelength is very nearly achromatic - so real
+    // veiling glare drifts toward neutral rather than carrying the source's
+    // colour. A bright red lamp throws a whitish veil, not a red one, and bloom
+    // that reproduces the source hue faithfully is what gives away that it is a
+    // blur rather than scattered light. Above 1 goes the other way, for when
+    // the colour is the point.
+    float glum = dot(glow, float3(0.2126, 0.7152, 0.0722));
+    glow = max(mix(float3(glum), glow, max(saturation, 0.0)), 0.0);
 
     glow += lenticularHalo(fragCoord);
 

@@ -63,6 +63,7 @@
 uniform float  damage;          // master: 0 = pristine print
 uniform float  damageDomain;    // enum: 0 positive print, 1 negative (inverted processing)
 uniform float  time;            // auto-connected to comp time, in SECONDS
+uniform float  timeOffset;      // frames to subtract before the clock starts
 uniform float  speed;           // playback-rate multiplier for the damage clock (1 = real time)
 uniform float  frameRate;       // steps the clock to this rate, 0 = smooth
 
@@ -496,7 +497,16 @@ half4 main(float2 fragCoord) {
     // clock advances every 2.5 frames, which on slow-moving damage is easy to
     // miss. If it still reads as doing nothing, the honest fix is to make the
     // artefacts it drives more obviously frame-locked, not to rescale time.
-    float secs = time * speed;
+    // Everything here is driven from ONE clock, so offsetting it delays the
+    // whole projector together - weave, flicker, dirt reshuffle, splices and
+    // cues all stay in step rather than drifting apart.
+    //
+    // A shader cannot see the layer's in point; it only receives comp time. So
+    // this is the hook: set Time Offset to the layer's in point (an expression
+    // works) and the damage starts when the layer does, instead of every layer
+    // in the comp sharing the same wear at the same instant - which is the
+    // giveaway that it is one filter applied many times.
+    float secs = (time - timeOffset) * speed;
     float t = frameRate > 0.0 ? floor(secs * frameRate) / frameRate : secs;
 
     // Gate weave: an Ornstein-Uhlenbeck-style wander - see ouHoriz/ouVert.

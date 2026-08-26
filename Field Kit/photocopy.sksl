@@ -89,12 +89,32 @@ float bayer4(float2 p) {
     return 5.0 / 16.0;
 }
 
+// The outermost pixel ring of a layer is antialiased - partial alpha, and a
+// premultiplied colour that is a blend with nothing. Whatever it decodes to, it
+// is not document content, and this filter turns a decision (ink or paper) on
+// it, so a wrong value there is not a soft error - it prints as a hard white
+// line hugging the frame. Reading the TONE from one pixel inside sidesteps the
+// question entirely: coverage still comes from the true pixel, so the edge
+// stays antialiased, but what it decides to print comes from real picture.
+float2 insetCoord(float2 c) {
+    float2 res = max(resolution, float2(1.0));
+    float2 lo = rectCentre - res * 0.5 + 1.0;
+    float2 hi = rectCentre + res * 0.5 - 1.0;
+    return clamp(c, lo, hi);
+}
+
 half4 main(float2 fragCoord) {
-    half4 src = original.eval(fragCoord);
-    float3 lin = src.a > 0.0 ? float3(src.rgb / src.a) : float3(0.0);
+    half4 src  = original.eval(fragCoord);
+    half4 tone = original.eval(insetCoord(fragCoord));
+    // Clamped un-premultiply. A layer's outermost pixels are antialiased, so
+    // dividing by a small alpha scales them far past their true value - which
+    // this filter then reads as a blown highlight and prints as bare paper,
+    // giving a bright fringe hugging the frame that no copier produces. The
+    // clamp costs nothing inside the layer, where alpha is 1.
+    float3 lin = clamp(float3(tone.rgb) / max(float(tone.a), 0.004), 0.0, 1.0);
     float  lum = dot(lin, float3(0.2126, 0.7152, 0.0722));
 
-    float blurLum = float(childShader.eval(fragCoord).r);
+    float blurLum = float(childShader.eval(insetCoord(fragCoord)).r);
     float detail  = lum - blurLum;
 
     // Local contrast, then the blowout on top of it.

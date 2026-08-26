@@ -10,6 +10,7 @@
         "damage",
         "damageDomain",
         "time",
+        "timeOffset",
         "speed",
         "frameRate",
         "weave",
@@ -64,6 +65,13 @@
       "default": 0.0,
       "compConnect": "time",
       "dimming": "damage <= 0"
+    },
+    "timeOffset": {
+      "type": "double",
+      "default": 0.0,
+      "softMin": -1000.0,
+      "softMax": 1000.0,
+      "step": 1.0
     },
     "speed": {
       "type": "double",
@@ -301,6 +309,7 @@
       "damage",
       "damageDomain",
       "time",
+      "timeOffset",
       "speed",
       "frameRate",
       "weave",
@@ -339,6 +348,7 @@
       "damageDomain",
       "---Projector",
       "frameRate",
+      "timeOffset",
       "speed",
       "weave",
       "flicker",

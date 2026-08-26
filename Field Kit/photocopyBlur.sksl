@@ -23,9 +23,12 @@ uniform shader childShader;    // pass 1: the layer. pass 2: pass 1's result.
 const int TAPS = 20;
 
 float2 srcAt(float2 coord) {
+    // Never sample the antialiased outer ring - see the note in photocopy.sksl.
+    float2 res = max(resolution, float2(1.0));
+    coord = clamp(coord, rectCentre - res * 0.5 + 1.0, rectCentre + res * 0.5 - 1.0);
     half4 c = childShader.eval(coord);
     if (firstPass > 0.5) {
-        float3 lin = c.a > 0.0 ? float3(c.rgb / c.a) : float3(0.0);
+        float3 lin = clamp(float3(c.rgb) / max(float(c.a), 0.004), 0.0, 1.0);
         return float2(dot(lin, float3(0.2126, 0.7152, 0.0722)), c.a > 0.0 ? 1.0 : 0.0);
     }
     return float2(float(c.r), c.a > 0.0 ? 1.0 : 0.0);

@@ -19,6 +19,10 @@
     "Time",
     "Driven by the composition time. Disconnect it to freeze the film artefacts."
    ],
+   "timeOffset": [
+    "Time Offset",
+    "Frames to subtract before the projector's clock starts. A filter cannot see its layer's in point - it only gets comp time - so set this to the in point (an expression works) and the wear begins when the layer does. Without it every layer in a comp shows the same weave, flicker and dirt at the same instant, which is the giveaway that one filter has been applied many times. Offsetting moves the whole projector together, so nothing drifts out of step."
+   ],
    "speed": [
     "Speed",
     "How fast the damage clock runs relative to real time. 1 is real time; lower slows the judder and weave, higher speeds them up."

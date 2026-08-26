@@ -47,7 +47,7 @@
     },
     "density": {
       "type": "double",
-      "default": 8.0,
+      "default": 0.1,
       "min": 0.1,
       "softMax": 64.0,
       "step": 0.5,
@@ -55,21 +55,21 @@
     },
     "speed": {
       "type": "double",
-      "default": 0.05,
+      "default": 0.001,
       "min": 0.0,
-      "softMax": 1.0,
-      "step": 0.005
+      "softMax": 0.05,
+      "step": 0.0005
     },
     "scatterG": {
       "type": "double",
-      "default": 0.45,
+      "default": 0.4,
       "min": 0.0,
       "max": 0.95,
       "step": 0.01
     },
     "blur": {
       "type": "double",
-      "default": 0.0,
+      "default": 0.78,
       "min": 0.0,
       "max": 1.0,
       "step": 0.01

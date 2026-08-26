@@ -199,12 +199,15 @@ half4 main(float2 fragCoord) {
             sumA += float(c.a);
         }
         // Dividing colour by the summed alpha un-premultiplies and averages in
-        // one step; alpha still averages over every tap so the edge feathers.
-        float oilCov = sumA;
-        sum  /= max(oilCov, 0.0001);
-        sumA /= float(OIL_TAPS);
+        // one step.
+        sum /= max(sumA, 0.0001);
 
-        half a = half(clamp(sumA, 0.0, 1.0));
+        // ALPHA COMES FROM THE PIXEL, not from tap coverage. Averaging coverage
+        // meant a stroke reaching past the layer edge made the layer itself
+        // semi-transparent there - which reads as a ragged dark border over
+        // whatever is behind, speckled by the bristle jitter. A brush stroke
+        // moves paint around; it does not erode the canvas.
+        half a = src.a;
         return mix(src, half4(half3(clamp(sum, 0.0, 1.0)) * a, a),
                    half(clamp(amount, 0.0, 1.0)));
     }

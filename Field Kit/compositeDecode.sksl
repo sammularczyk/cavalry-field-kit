@@ -321,14 +321,20 @@ half4 main(float2 fragCoord) {
     float tearMag = random(float2(scany, 47.3), floor(time)) * 2.0 - 1.0;
     uv.x += tearOn * tearMag * hTear / res.x;
 
-    // A scanline is a fixed-length signal, so shifting it sideways WRAPS - the
-    // picture pushed off one end arrives at the other. Leaving it unwrapped
-    // opened a transparent gap at the end of every torn or interfered line,
-    // which no television does. Guarded like vRoll above so the default stays
-    // bit-exact and an out-of-layer coordinate is never folded into picture.
-    if (ifx1 != 0.0 || ifx2 != 0.0 || tearOn > 0.0) {
-        uv.x = fract(uv.x);
-    }
+    // Shifted lines show BLANKING, not wrapped picture.
+    //
+    // A previous version wrapped this, on the reasoning that a scanline is a
+    // fixed-length signal so shifting it must circulate. That is wrong: what
+    // shifts is the sampling WINDOW against the signal, and content pushed off
+    // one end is simply not drawn - what appears at the other end is the
+    // blanking interval. A set with a sync tear shows the picture displaced
+    // with a dark bar at the edge, never the far side of the same line wrapped
+    // around. VHS models this correctly with its Edge Fill, and the two filters
+    // were contradicting each other.
+    //
+    // Left as an out-of-range coordinate: the layer has no picture there, so
+    // the tap comes back empty and reads as blanking, which is what it is.
+
 
     // Both kernels are DERIVED at runtime rather than being tables of literal
     // coefficients - see lowpassTap(). Two reasons, and the second is the one

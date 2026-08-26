@@ -3,7 +3,7 @@
   "type": "glow",
   "superType": "thirdPartyFilter",
   "version": "1.0",
-  "paddingExpression": "ceil(max(max(size, reach * 2), haloRadius * 1.2))",
+  "paddingExpression": "ceil(max(max(size * 0.6, reach * 2), haloRadius * 1.2))",
   "passes": [
     {
       "skslFile": "glowHighlights.sksl",
@@ -14,14 +14,125 @@
       ]
     },
     {
+      "skslFile": "glowBloom.sksl",
+      "uniforms": [
+        "srcBlack",
+        "srcWhite",
+        "response",
+        "bloomAmount",
+        "steps",
+        "size",
+        "falloff"
+      ],
+      "constants": {
+        "dirX": 1.0,
+        "dirY": 0.0,
+        "radiusMul": 0.125,
+        "addH": 0.0
+      }
+    },
+    {
+      "skslFile": "glowBloom.sksl",
+      "uniforms": [
+        "srcBlack",
+        "srcWhite",
+        "response",
+        "bloomAmount",
+        "steps",
+        "size",
+        "falloff"
+      ],
+      "constants": {
+        "dirX": 0.0,
+        "dirY": 1.0,
+        "radiusMul": 0.125,
+        "addH": 1.0
+      }
+    },
+    {
+      "skslFile": "glowBloom.sksl",
+      "uniforms": [
+        "srcBlack",
+        "srcWhite",
+        "response",
+        "bloomAmount",
+        "steps",
+        "size",
+        "falloff"
+      ],
+      "constants": {
+        "dirX": 1.0,
+        "dirY": 0.0,
+        "radiusMul": 0.25,
+        "addH": 0.0
+      }
+    },
+    {
+      "skslFile": "glowBloom.sksl",
+      "uniforms": [
+        "srcBlack",
+        "srcWhite",
+        "response",
+        "bloomAmount",
+        "steps",
+        "size",
+        "falloff"
+      ],
+      "constants": {
+        "dirX": 0.0,
+        "dirY": 1.0,
+        "radiusMul": 0.25,
+        "addH": 1.0
+      }
+    },
+    {
+      "skslFile": "glowBloom.sksl",
+      "uniforms": [
+        "srcBlack",
+        "srcWhite",
+        "response",
+        "bloomAmount",
+        "steps",
+        "size",
+        "falloff"
+      ],
+      "constants": {
+        "dirX": 1.0,
+        "dirY": 0.0,
+        "radiusMul": 0.5,
+        "addH": 0.0
+      }
+    },
+    {
+      "skslFile": "glowBloom.sksl",
+      "uniforms": [
+        "srcBlack",
+        "srcWhite",
+        "response",
+        "bloomAmount",
+        "steps",
+        "size",
+        "falloff"
+      ],
+      "constants": {
+        "dirX": 0.0,
+        "dirY": 1.0,
+        "radiusMul": 0.5,
+        "addH": 1.0
+      }
+    },
+    {
       "skslFile": "glowStreak.sksl",
       "uniforms": [
+        "srcBlack",
+        "srcWhite",
+        "response",
         "streakAmount",
+        "streakIntensity",
         "reach",
         "angle",
         "samples",
         "streakFalloff",
-        "blur",
         "bidirectional"
       ],
       "constants": {
@@ -31,12 +142,15 @@
     {
       "skslFile": "glowStreak.sksl",
       "uniforms": [
+        "srcBlack",
+        "srcWhite",
+        "response",
         "streakAmount",
+        "streakIntensity",
         "reach",
         "angle",
         "samples",
         "streakFalloff",
-        "blur",
         "bidirectional"
       ],
       "constants": {
@@ -46,152 +160,19 @@
     {
       "skslFile": "glowStreak.sksl",
       "uniforms": [
+        "srcBlack",
+        "srcWhite",
+        "response",
         "streakAmount",
+        "streakIntensity",
         "reach",
         "angle",
         "samples",
         "streakFalloff",
-        "blur",
         "bidirectional"
       ],
       "constants": {
         "stepScale": 1.0
-      }
-    },
-    {
-      "skslFile": "glowBloom.sksl",
-      "uniforms": [
-        "srcBlack",
-        "srcWhite",
-        "response",
-        "bloomAmount",
-        "size",
-        "falloff"
-      ],
-      "constants": {
-        "dirX": 1.0,
-        "dirY": 0.0,
-        "radiusMul": 0.125,
-        "addH": 0.0
-      }
-    },
-    {
-      "skslFile": "glowBloom.sksl",
-      "uniforms": [
-        "srcBlack",
-        "srcWhite",
-        "response",
-        "bloomAmount",
-        "size",
-        "falloff"
-      ],
-      "constants": {
-        "dirX": 0.0,
-        "dirY": 1.0,
-        "radiusMul": 0.125,
-        "addH": 1.0
-      }
-    },
-    {
-      "skslFile": "glowBloom.sksl",
-      "uniforms": [
-        "srcBlack",
-        "srcWhite",
-        "response",
-        "bloomAmount",
-        "size",
-        "falloff"
-      ],
-      "constants": {
-        "dirX": 1.0,
-        "dirY": 0.0,
-        "radiusMul": 0.25,
-        "addH": 0.0
-      }
-    },
-    {
-      "skslFile": "glowBloom.sksl",
-      "uniforms": [
-        "srcBlack",
-        "srcWhite",
-        "response",
-        "bloomAmount",
-        "size",
-        "falloff"
-      ],
-      "constants": {
-        "dirX": 0.0,
-        "dirY": 1.0,
-        "radiusMul": 0.25,
-        "addH": 1.0
-      }
-    },
-    {
-      "skslFile": "glowBloom.sksl",
-      "uniforms": [
-        "srcBlack",
-        "srcWhite",
-        "response",
-        "bloomAmount",
-        "size",
-        "falloff"
-      ],
-      "constants": {
-        "dirX": 1.0,
-        "dirY": 0.0,
-        "radiusMul": 0.5,
-        "addH": 0.0
-      }
-    },
-    {
-      "skslFile": "glowBloom.sksl",
-      "uniforms": [
-        "srcBlack",
-        "srcWhite",
-        "response",
-        "bloomAmount",
-        "size",
-        "falloff"
-      ],
-      "constants": {
-        "dirX": 0.0,
-        "dirY": 1.0,
-        "radiusMul": 0.5,
-        "addH": 1.0
-      }
-    },
-    {
-      "skslFile": "glowBloom.sksl",
-      "uniforms": [
-        "srcBlack",
-        "srcWhite",
-        "response",
-        "bloomAmount",
-        "size",
-        "falloff"
-      ],
-      "constants": {
-        "dirX": 1.0,
-        "dirY": 0.0,
-        "radiusMul": 1.0,
-        "addH": 0.0
-      }
-    },
-    {
-      "skslFile": "glowBloom.sksl",
-      "uniforms": [
-        "srcBlack",
-        "srcWhite",
-        "response",
-        "bloomAmount",
-        "size",
-        "falloff"
-      ],
-      "constants": {
-        "dirX": 0.0,
-        "dirY": 1.0,
-        "radiusMul": 1.0,
-        "addH": 1.0
       }
     },
     {
@@ -203,12 +184,16 @@
         "bloomAmount",
         "haloAmount",
         "haloRadius",
+        "haloSoftness",
+        "streakAmount",
+        "blur",
         "srcBlack",
         "srcWhite",
         "response",
         "steps",
         "persistence",
         "intensity",
+        "saturation",
         "tint",
         "blend",
         "amount"
@@ -244,6 +229,14 @@
       "max": 1.0,
       "step": 0.01
     },
+    "streakIntensity": {
+      "type": "double",
+      "default": 1.0,
+      "min": 0.0,
+      "softMax": 8.0,
+      "step": 0.05,
+      "dimming": "streakAmount <= 0"
+    },
     "reach": {
       "type": "double",
       "default": 300.0,
@@ -262,9 +255,9 @@
     },
     "samples": {
       "type": "double",
-      "default": 16.0,
-      "min": 2.0,
-      "max": 32.0,
+      "default": 6,
+      "min": 4,
+      "max": 12,
       "step": 1.0,
       "dimming": "streakAmount <= 0"
     },
@@ -327,6 +320,14 @@
       "step": 1.0,
       "dimming": "haloAmount <= 0"
     },
+    "haloSoftness": {
+      "type": "double",
+      "default": 0.35,
+      "min": 0.0,
+      "max": 1.0,
+      "step": 0.01,
+      "dimming": "haloAmount <= 0"
+    },
     "size": {
       "type": "double",
       "default": 300.0,
@@ -345,11 +346,11 @@
     },
     "steps": {
       "type": "double",
-      "default": 4.0,
+      "default": 1.0,
       "min": 1.0,
-      "softMax": 8.0,
       "step": 1.0,
-      "dimming": "bloomAmount <= 0"
+      "dimming": "bloomAmount <= 0",
+      "max": 3.0
     },
     "persistence": {
       "type": "double",
@@ -365,6 +366,13 @@
       "min": 0.0,
       "softMax": 20.0,
       "step": 0.05
+    },
+    "saturation": {
+      "type": "double",
+      "default": 0.72,
+      "min": 0.0,
+      "softMax": 2.0,
+      "step": 0.01
     },
     "tint": {
       "type": "color",
@@ -401,6 +409,7 @@
       "srcWhite",
       "response",
       "streakAmount",
+      "streakIntensity",
       "reach",
       "angle",
       "samples",
@@ -412,61 +421,53 @@
       "bloomAmount",
       "haloAmount",
       "haloRadius",
+      "haloSoftness",
       "size",
       "falloff",
       "steps",
       "persistence",
       "intensity",
+      "saturation",
       "tint",
       "blend",
       "amount"
     ]
   },
   "UI": {
-    "tabs": [
-      {
-        "id": "filter",
-        "attributeOrder": [
-          "srcBlack",
-          "srcWhite",
-          "response",
-          "---A",
-          "intensity",
-          "tint",
-          "blend",
-          "amount"
-        ]
-      },
-      {
-        "id": "bloom",
-        "attributeOrder": [
-          "bloomAmount",
-          "---Lenticular Halo",
-          "haloAmount",
-          "haloRadius",
-          "size",
-          "falloff",
-          "steps",
-          "persistence"
-        ]
-      },
-      {
-        "id": "streak",
-        "attributeOrder": [
-          "streakAmount",
-          "reach",
-          "angle",
-          "samples",
-          "streakFalloff",
-          "blur",
-          "bidirectional",
-          "---Chromatic",
-          "chromatic",
-          "dispersion",
-          "---Inspired by apGlow, Adrian Pueyo"
-        ]
-      }
-    ],
-    "icon": "glow.png"
+    "icon": "glow.png",
+    "attributeOrder": [
+      "srcBlack",
+      "srcWhite",
+      "response",
+      "---Output",
+      "intensity",
+      "saturation",
+      "tint",
+      "blend",
+      "amount",
+      "---Bloom",
+      "bloomAmount",
+      "size",
+      "falloff",
+      "steps",
+      "persistence",
+      "---Lenticular Halo",
+      "haloAmount",
+      "haloRadius",
+      "haloSoftness",
+      "---Streak",
+      "streakAmount",
+      "streakIntensity",
+      "reach",
+      "angle",
+      "streakFalloff",
+      "blur",
+      "bidirectional",
+      "samples",
+      "---Chromatic",
+      "chromatic",
+      "dispersion",
+      "---Inspired by apGlow, Adrian Pueyo & Spencer et al. glare model"
+    ]
   }
 }
