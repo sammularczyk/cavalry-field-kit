@@ -1076,26 +1076,16 @@
     "paddingExpression": "ceil(max(halationRadius, clarityRadius))",
     "passes": [
       {
-        "skslFile": "filmClarityBlur.sksl",
+        "skslFile": "filmClarityBlur__dirX1_dirY0_firstPass1.sksl",
         "uniforms": [
           "clarityRadius"
-        ],
-        "constants": {
-          "dirX": 1,
-          "dirY": 0,
-          "firstPass": 1
-        }
+        ]
       },
       {
-        "skslFile": "filmClarityBlur.sksl",
+        "skslFile": "filmClarityBlur__dirX0_dirY1_firstPass0_orig.sksl",
         "uniforms": [
           "clarityRadius"
-        ],
-        "constants": {
-          "dirX": 0,
-          "dirY": 1,
-          "firstPass": 0
-        }
+        ]
       },
       {
         "skslFile": "filmRecipe.sksl",
@@ -1116,7 +1106,7 @@
         ]
       },
       {
-        "skslFile": "filmHalationBlur.sksl",
+        "skslFile": "filmHalationBlur__dirX1_dirY0_lastPass0.sksl",
         "uniforms": [
           "halation",
           "halationRadius",
@@ -1124,15 +1114,10 @@
           "halationDensity",
           "halationRing",
           "halationTint"
-        ],
-        "constants": {
-          "dirX": 1,
-          "dirY": 0,
-          "lastPass": 0
-        }
+        ]
       },
       {
-        "skslFile": "filmHalationBlur.sksl",
+        "skslFile": "filmHalationBlur__dirX0_dirY1_lastPass1.sksl",
         "uniforms": [
           "halation",
           "halationRadius",
@@ -1140,12 +1125,7 @@
           "halationDensity",
           "halationRing",
           "halationTint"
-        ],
-        "constants": {
-          "dirX": 0,
-          "dirY": 1,
-          "lastPass": 1
-        }
+        ]
       },
       {
         "skslFile": "filmTone.sksl",
@@ -2104,7 +2084,7 @@
         ]
       },
       {
-        "skslFile": "glowBloom.sksl",
+        "skslFile": "glowBloom__dirX1_dirY0_radiusMul0_125_addH0.sksl",
         "uniforms": [
           "srcBlack",
           "srcWhite",
@@ -2113,16 +2093,10 @@
           "steps",
           "size",
           "falloff"
-        ],
-        "constants": {
-          "dirX": 1,
-          "dirY": 0,
-          "radiusMul": 0.125,
-          "addH": 0
-        }
+        ]
       },
       {
-        "skslFile": "glowBloom.sksl",
+        "skslFile": "glowBloom__dirX0_dirY1_radiusMul0_125_addH1.sksl",
         "uniforms": [
           "srcBlack",
           "srcWhite",
@@ -2131,16 +2105,10 @@
           "steps",
           "size",
           "falloff"
-        ],
-        "constants": {
-          "dirX": 0,
-          "dirY": 1,
-          "radiusMul": 0.125,
-          "addH": 1
-        }
+        ]
       },
       {
-        "skslFile": "glowBloom.sksl",
+        "skslFile": "glowBloom__dirX1_dirY0_radiusMul0_25_addH0.sksl",
         "uniforms": [
           "srcBlack",
           "srcWhite",
@@ -2149,16 +2117,10 @@
           "steps",
           "size",
           "falloff"
-        ],
-        "constants": {
-          "dirX": 1,
-          "dirY": 0,
-          "radiusMul": 0.25,
-          "addH": 0
-        }
+        ]
       },
       {
-        "skslFile": "glowBloom.sksl",
+        "skslFile": "glowBloom__dirX0_dirY1_radiusMul0_25_addH1.sksl",
         "uniforms": [
           "srcBlack",
           "srcWhite",
@@ -2167,16 +2129,10 @@
           "steps",
           "size",
           "falloff"
-        ],
-        "constants": {
-          "dirX": 0,
-          "dirY": 1,
-          "radiusMul": 0.25,
-          "addH": 1
-        }
+        ]
       },
       {
-        "skslFile": "glowBloom.sksl",
+        "skslFile": "glowBloom__dirX1_dirY0_radiusMul0_5_addH0.sksl",
         "uniforms": [
           "srcBlack",
           "srcWhite",
@@ -2185,16 +2141,10 @@
           "steps",
           "size",
           "falloff"
-        ],
-        "constants": {
-          "dirX": 1,
-          "dirY": 0,
-          "radiusMul": 0.5,
-          "addH": 0
-        }
+        ]
       },
       {
-        "skslFile": "glowBloom.sksl",
+        "skslFile": "glowBloom__dirX0_dirY1_radiusMul0_5_addH1.sksl",
         "uniforms": [
           "srcBlack",
           "srcWhite",
@@ -2203,16 +2153,10 @@
           "steps",
           "size",
           "falloff"
-        ],
-        "constants": {
-          "dirX": 0,
-          "dirY": 1,
-          "radiusMul": 0.5,
-          "addH": 1
-        }
+        ]
       },
       {
-        "skslFile": "glowStreak.sksl",
+        "skslFile": "glowStreak__stepScale0_25.sksl",
         "uniforms": [
           "srcBlack",
           "srcWhite",
@@ -2224,13 +2168,10 @@
           "samples",
           "streakFalloff",
           "bidirectional"
-        ],
-        "constants": {
-          "stepScale": 0.25
-        }
+        ]
       },
       {
-        "skslFile": "glowStreak.sksl",
+        "skslFile": "glowStreak__stepScale0_5.sksl",
         "uniforms": [
           "srcBlack",
           "srcWhite",
@@ -2242,13 +2183,10 @@
           "samples",
           "streakFalloff",
           "bidirectional"
-        ],
-        "constants": {
-          "stepScale": 0.5
-        }
+        ]
       },
       {
-        "skslFile": "glowStreak.sksl",
+        "skslFile": "glowStreak__stepScale1.sksl",
         "uniforms": [
           "srcBlack",
           "srcWhite",
@@ -2260,10 +2198,7 @@
           "samples",
           "streakFalloff",
           "bidirectional"
-        ],
-        "constants": {
-          "stepScale": 1
-        }
+        ]
       },
       {
         "skslFile": "glowCombine.sksl",
@@ -3421,7 +3356,7 @@
         ]
       },
       {
-        "skslFile": "lensSegment.sksl",
+        "skslFile": "lensSegment__segIndex0.sksl",
         "uniforms": [
           "defocus",
           "size",
@@ -3446,13 +3381,10 @@
           "occlusion",
           "edges",
           "edgeTrim"
-        ],
-        "constants": {
-          "segIndex": 0
-        }
+        ]
       },
       {
-        "skslFile": "lensSegment.sksl",
+        "skslFile": "lensSegment__segIndex1.sksl",
         "uniforms": [
           "defocus",
           "size",
@@ -3477,13 +3409,10 @@
           "occlusion",
           "edges",
           "edgeTrim"
-        ],
-        "constants": {
-          "segIndex": 1
-        }
+        ]
       },
       {
-        "skslFile": "lensSegment.sksl",
+        "skslFile": "lensSegment__segIndex2.sksl",
         "uniforms": [
           "defocus",
           "size",
@@ -3508,13 +3437,10 @@
           "occlusion",
           "edges",
           "edgeTrim"
-        ],
-        "constants": {
-          "segIndex": 2
-        }
+        ]
       },
       {
-        "skslFile": "lensDefocus.sksl",
+        "skslFile": "lensDefocus__segIndex3.sksl",
         "uniforms": [
           "bokehGamma",
           "bokehThreshold",
@@ -3542,10 +3468,7 @@
           "occlusion",
           "edges",
           "edgeTrim"
-        ],
-        "constants": {
-          "segIndex": 3
-        }
+        ]
       },
       {
         "skslFile": "lensScatter.sksl",
@@ -4631,7 +4554,7 @@
     "version": "1.0",
     "passes": [
       {
-        "skslFile": "lightwrapFirst.sksl",
+        "skslFile": "lightwrapFirst__dirX1_dirY0_radiusMul0_125.sksl",
         "uniforms": [
           "size",
           "falloff",
@@ -4640,15 +4563,10 @@
           "threshold",
           "bgSize",
           "bgScale"
-        ],
-        "constants": {
-          "dirX": 1,
-          "dirY": 0,
-          "radiusMul": 0.125
-        }
+        ]
       },
       {
-        "skslFile": "lightwrapBlur.sksl",
+        "skslFile": "lightwrapBlur__dirX0_dirY1_radiusMul0_125_addH1.sksl",
         "uniforms": [
           "size",
           "falloff",
@@ -4657,16 +4575,10 @@
           "threshold",
           "bgSize",
           "bgScale"
-        ],
-        "constants": {
-          "dirX": 0,
-          "dirY": 1,
-          "radiusMul": 0.125,
-          "addH": 1
-        }
+        ]
       },
       {
-        "skslFile": "lightwrapBlur.sksl",
+        "skslFile": "lightwrapBlur__dirX1_dirY0_radiusMul0_25_addH0.sksl",
         "uniforms": [
           "size",
           "falloff",
@@ -4675,16 +4587,10 @@
           "threshold",
           "bgSize",
           "bgScale"
-        ],
-        "constants": {
-          "dirX": 1,
-          "dirY": 0,
-          "radiusMul": 0.25,
-          "addH": 0
-        }
+        ]
       },
       {
-        "skslFile": "lightwrapBlur.sksl",
+        "skslFile": "lightwrapBlur__dirX0_dirY1_radiusMul0_25_addH1.sksl",
         "uniforms": [
           "size",
           "falloff",
@@ -4693,16 +4599,10 @@
           "threshold",
           "bgSize",
           "bgScale"
-        ],
-        "constants": {
-          "dirX": 0,
-          "dirY": 1,
-          "radiusMul": 0.25,
-          "addH": 1
-        }
+        ]
       },
       {
-        "skslFile": "lightwrapBlur.sksl",
+        "skslFile": "lightwrapBlur__dirX1_dirY0_radiusMul0_5_addH0.sksl",
         "uniforms": [
           "size",
           "falloff",
@@ -4711,16 +4611,10 @@
           "threshold",
           "bgSize",
           "bgScale"
-        ],
-        "constants": {
-          "dirX": 1,
-          "dirY": 0,
-          "radiusMul": 0.5,
-          "addH": 0
-        }
+        ]
       },
       {
-        "skslFile": "lightwrapBlur.sksl",
+        "skslFile": "lightwrapBlur__dirX0_dirY1_radiusMul0_5_addH1.sksl",
         "uniforms": [
           "size",
           "falloff",
@@ -4729,16 +4623,10 @@
           "threshold",
           "bgSize",
           "bgScale"
-        ],
-        "constants": {
-          "dirX": 0,
-          "dirY": 1,
-          "radiusMul": 0.5,
-          "addH": 1
-        }
+        ]
       },
       {
-        "skslFile": "lightwrapBlur.sksl",
+        "skslFile": "lightwrapBlur__dirX1_dirY0_radiusMul1_addH0.sksl",
         "uniforms": [
           "size",
           "falloff",
@@ -4747,16 +4635,10 @@
           "threshold",
           "bgSize",
           "bgScale"
-        ],
-        "constants": {
-          "dirX": 1,
-          "dirY": 0,
-          "radiusMul": 1,
-          "addH": 0
-        }
+        ]
       },
       {
-        "skslFile": "lightwrapBlur.sksl",
+        "skslFile": "lightwrapBlur__dirX0_dirY1_radiusMul1_addH1.sksl",
         "uniforms": [
           "size",
           "falloff",
@@ -4765,13 +4647,7 @@
           "threshold",
           "bgSize",
           "bgScale"
-        ],
-        "constants": {
-          "dirX": 0,
-          "dirY": 1,
-          "radiusMul": 1,
-          "addH": 1
-        }
+        ]
       },
       {
         "skslFile": "lightwrapCombine.sksl",
@@ -5387,26 +5263,16 @@
     "version": "1.0",
     "passes": [
       {
-        "skslFile": "photocopyBlur.sksl",
+        "skslFile": "photocopyBlur__dirX1_dirY0_firstPass1.sksl",
         "uniforms": [
           "blurRadius"
-        ],
-        "constants": {
-          "dirX": 1,
-          "dirY": 0,
-          "firstPass": 1
-        }
+        ]
       },
       {
-        "skslFile": "photocopyBlur.sksl",
+        "skslFile": "photocopyBlur__dirX0_dirY1_firstPass0_orig.sksl",
         "uniforms": [
           "blurRadius"
-        ],
-        "constants": {
-          "dirX": 0,
-          "dirY": 1,
-          "firstPass": 0
-        }
+        ]
       },
       {
         "skslFile": "photocopy.sksl",
@@ -5730,10 +5596,7 @@
         ]
       },
       {
-        "skslFile": "printPlate.sksl",
-        "constants": {
-          "plateIndex": 0
-        },
+        "skslFile": "printPlate__plateIndex0.sksl",
         "uniforms": [
           "process",
           "separation",
@@ -5769,10 +5632,7 @@
         ]
       },
       {
-        "skslFile": "printPlate.sksl",
-        "constants": {
-          "plateIndex": 1
-        },
+        "skslFile": "printPlate__plateIndex1.sksl",
         "uniforms": [
           "process",
           "separation",
@@ -5808,10 +5668,7 @@
         ]
       },
       {
-        "skslFile": "printPlate.sksl",
-        "constants": {
-          "plateIndex": 2
-        },
+        "skslFile": "printPlate__plateIndex2.sksl",
         "uniforms": [
           "process",
           "separation",
@@ -5847,10 +5704,7 @@
         ]
       },
       {
-        "skslFile": "printPlate.sksl",
-        "constants": {
-          "plateIndex": 3
-        },
+        "skslFile": "printPlate__plateIndex3.sksl",
         "uniforms": [
           "process",
           "separation",

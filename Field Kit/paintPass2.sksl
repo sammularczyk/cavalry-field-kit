@@ -14,6 +14,11 @@ uniform float2 rectCentre;
 
 uniform shader field;         // shaderData - binds BEFORE the image
 uniform shader childShader;   // previous pass
+uniform shader original;      // unused here, but Cavalry 2.7.2 binds shader
+                              // inputs BY POSITION and always supplies
+                              // `original` from pass 2 on - omitting it
+                              // leaves a slot mismatch and the pass fails
+                              // to construct. MUST be declared last.
 
 const int MAX_TAPS = 31;
 

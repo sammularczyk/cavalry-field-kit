@@ -73,6 +73,11 @@ uniform float2 resolution;
 uniform float2 rectCentre;
 
 uniform shader childShader;  // pass 1 result
+uniform shader original;      // unused here, but Cavalry 2.7.2 binds shader
+                              // inputs BY POSITION and always supplies
+                              // `original` from pass 2 on - omitting it
+                              // leaves a slot mismatch and the pass fails
+                              // to construct. MUST be declared last.
 
 // Antialiasing half-width shared by every mask's soft edge, in cell units.
 // Antialiasing band for the mask edges, in CELL units. It has to scale with

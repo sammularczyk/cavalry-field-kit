@@ -372,6 +372,39 @@ if (process.argv.includes("--defaults")) {
   for (const [t, a, e] of rows) console.log(`  ${t}.${a}  <-  ${e}`);
 }
 
+// CAVALRY 2.7.2 COMPATIBILITY, checked on the BUILT bundle rather than the
+// source - the build rewrites passes to make them portable, so only its output
+// can be judged. Two rules, both of which cost a silent "Pass N: buildShader
+// failed" with no SkSL error attached:
+//
+//   1. Per-pass `constants` are a 2.8 feature. 2.7.2's pass spec knows only
+//      skslFile, uniforms, blendMode and clearColor, so the block is ignored,
+//      the matching uniform is never bound, and the pass fails to construct.
+//   2. 2.7.2 binds shader inputs BY POSITION and always supplies `original`
+//      from pass 2 on, so every pass after the first must declare it - even
+//      when it never samples it - or the slots shift and the pass fails.
+{
+  const built = path.join(PLUGIN, "definitions.json");
+  if (fs.existsSync(built)) {
+    for (const t of JSON.parse(fs.readFileSync(built, "utf8"))) {
+      (t.passes || []).forEach((p, i) => {
+        if (p.constants && Object.keys(p.constants).length) {
+          fail(t.type, `built pass ${i} still carries "constants" - Cavalry 2.7.2 ignores them and the pass will fail to build`);
+        }
+        const sp = path.join(PLUGIN, p.skslFile);
+        if (!fs.existsSync(sp)) { return; }
+        const has = /^uniform\s+shader\s+original\s*;/m.test(fs.readFileSync(sp, "utf8"));
+        if (i >= 1 && !has) {
+          fail(t.type, `built pass ${i} (${p.skslFile}) does not declare "uniform shader original" - Cavalry 2.7.2 binds by position and will fail to build it`);
+        }
+        if (i === 0 && has) {
+          fail(t.type, `built pass 0 (${p.skslFile}) declares "uniform shader original" - there is no such input on the first pass`);
+        }
+      });
+    }
+  }
+}
+
 // 7 - presets. A preset naming an attribute that does not exist is dropped in
 // silence, so the look it promises just never arrives.
 {

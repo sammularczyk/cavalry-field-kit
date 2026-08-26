@@ -71,6 +71,16 @@ Log: `~/Library/Application Support/Cavalry/logs/<newest>.log`
 - `.sksl` edits do NOT hot-reload — restart Cavalry. Definitions DO reload. Brand-new types register live (loophole for probing without restart).
 - `build.cjs` copies icon PNGs but never regenerates them. Editing `make-icons.py` does nothing until you re-run it.
 
+### Cavalry 2.7.2 vs 2.8
+Two multi-pass features exist only in 2.8. Both fail as a bare `Pass N: buildShader failed` with no SkSL error, because the pass fails to CONSTRUCT rather than compile.
+
+- **Per-pass `constants`.** 2.7.2's pass spec is `skslFile`, `uniforms`, `blendMode`, `clearColor` only. A `constants` block is ignored, so the matching `uniform float` is never bound.
+- **`original` on every pass after the first.** 2.7.2 binds shader inputs BY POSITION and always supplies `original` from pass 2 on. A later pass that does not declare it leaves the slots misaligned. 2.8 tolerates the omission; 2.7.2 does not.
+
+`src/build.cjs` makes one bundle work on both: it bakes each pass's constants into a generated per-pass shader as `const float`, and appends `original` where a later pass lacks it. Author with `constants` as normal - the source is unchanged, only the built output differs. check-bundle enforces both rules against the BUILT bundle, since the source legitimately differs from it.
+
+Side effect worth knowing: a baked `const` can be folded by the compiler where a bound uniform cannot, so branches on it resolve at compile time. The 2.7.2 output may be marginally faster than the 2.8 path it replaces.
+
 ### Tab discipline
 - Tab with only ~4 properties = merge it into a neighbour.
 - Group by what the user is DOING, not by which pass owns it.
