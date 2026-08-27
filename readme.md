@@ -1,4 +1,4 @@
-<img width="392" height="141" alt="FieldKit Logo" src="https://github.com/user-attachments/assets/83888226-e8fe-40a8-8335-7eefc2d7ceb1" />
+<img width="640" height="320" alt="Fieldkit" src="https://github.com/user-attachments/assets/0c2a0974-2404-4e40-a6cd-141e904fbdad" />
 
 #### A pack of useful little filters for Cavalry, some ported from open source GLSL shaders.
 
