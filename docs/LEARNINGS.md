@@ -29,6 +29,11 @@ Log: `~/Library/Application Support/Cavalry/logs/<newest>.log`
 - **Compile-time-constant expressions can fold to ZERO.** Killed Display's kernel normaliser → divide floored at 1e-4 → picture blew to white. Derive normalisers from a RUNTIME value, never from literals in a loop.
 - Loop bounds must be compile-time constant. Uniform-driven count = `if (i >= n) continue;` inside a fixed loop.
 - No `tanh`. No bitwise ops. No array constructor syntax.
+- **No INTEGER overloads of `max`/`min`.** `max(n - 1, 1)` on ints fails with
+  "no match for max(int, int)". Use `n > 1 ? float(n - 1) : 1.0`. Worth knowing
+  how this REPORTS: the failed statement means every identifier it declared is
+  then unknown, so one bad call came back as eight errors pointing at eight
+  innocent lines. Read the FIRST error and ignore the cascade.
 - Int division truncates toward zero. `x - 3*(x/3)` still negative for negative x. Fold manually.
 - No variable named after an SkSL type.
 - Uniform declaration order MUST match pass's attribute order. `shaderData` binds BEFORE image. `original` LAST. A `shaderData` must be declared in EVERY pass of that filter or binding order breaks everywhere.
@@ -81,6 +86,50 @@ Two multi-pass features exist only in 2.8. Both fail as a bare `Pass N: buildSha
 
 Side effect worth knowing: a baked `const` can be folded by the compiler where a bound uniform cannot, so branches on it resolve at compile time. The 2.7.2 output may be marginally faster than the 2.8 path it replaces.
 
+**A THIRD 2.8-only key, and the nastiest because it does NOT fail:**
+`paddingExpression`. 2.7.2's definition parser has no such key, ignores it, and
+falls back to the `padding` / `autoPadding` attributes. So a big blur or glow
+silently CLIPS at the layer bounds instead of erroring. `paddingExpression`
+overrides `padding` on 2.8 (verified: setting padding to 200 changed nothing),
+so a static `padding` default costs nothing there and fixes 2.7.2. check-bundle
+now enforces the pairing.
+
+**How to settle "is this key in 2.7.2?" yourself.** The definition parser's key
+table is one contiguous string block in `libCore.dylib`. Diff it:
+
+```
+grep -aob "Pass missing required" "/Applications/Cavalry.app/Contents/Frameworks/libCore.dylib"
+```
+
+then `dd` a window around that offset through `strings`, and compare against
+`/Applications/Cavalry Beta.app`. Authoritative where the bundled SDK docs are
+NOT: the docs list `clearColor` and `blendMode` for 2.7.2 and neither appears in
+its parser block.
+
+**Two keys that DO work in 2.7.2 and the kit was not using:**
+- `cavalryVersion` — a real per-layer minimum-version gate, with a user-facing
+  message. If something genuinely cannot work on the older build, gate it rather
+  than shipping a broken layer.
+- per-pass `downsampleFactor` (0.1–1.0) — free performance on blur passes.
+
+### thirdPartyShader — generator layers
+
+`superType: "thirdPartyShader"` works in BOTH 2.7.2 and 2.8, single- or
+multi-pass, same JSON shape as a filter. Differences, the whole list:
+
+- **Pass 0 declares NO input shader at all.** The "a pass with no shader input
+  fails to construct" rule in §1 is a FILTER rule.
+- **`original` does not exist for a shader in any pass.** So the 2.7.2
+  positional-binding rule does not apply, and `build.cjs` must not inject it.
+- **`paddingExpression` is filters-only.**
+- **`coord` is CENTRED and Y-up** — world space, like a filter's `fragCoord`,
+  except there is no `rectCentre` to subtract because 0,0 already IS the centre.
+  Writing `(coord - resolution*0.5)`, the habit from 0..1 UV shaders, puts the
+  origin in a corner. Cost an hour across four shaders.
+- A shader Layer can drive any `shaderData` input, which is the real reason to
+  build one: `paperTexture` into Lens's Displace Map embosses arbitrary footage
+  with no new code.
+
 ### Tab discipline
 - Tab with only ~4 properties = merge it into a neighbour.
 - Group by what the user is DOING, not by which pass owns it.
@@ -120,6 +169,184 @@ Edge options and when each is right:
 - **More taps never removes stepping.** A fixed ladder is a ladder at any length. Add per-pixel sub-step **jitter** — turns residual steps into fine noise. Needed in bloom ladder, halo blur, lens scatter, spectral fringing. 16 jittered taps beat 32 unjittered.
 - Check the loop cap actually matches the slider max. `MAX_ITER = 16` with a slider to 32 meant every value above 16 rendered identically. THAT was the "stepping".
 - 3 box taps read as 3 discrete copies. Use 7 gaussian taps + jitter.
+
+### An empty `uniforms` array binds EVERYTHING
+
+`"uniforms": []` is not "bind nothing" - it is treated exactly like omitting the
+key, so Cavalry binds every attribute and logs "Could not bind uniform" for each
+one the shader does not declare. At two dozen attributes that is megabytes of
+log per minute and an app that stops responding. It looks like a crash, not a
+config error. List at least one real uniform; check-bundle enforces this now. A
+uniform listed but never used may still be stripped by the compiler and fail to
+bind, so reference it - `step(-1.0, x)` is 1 for every legal value.
+
+### Physical accuracy is not the goal - the LOOK plus the right colours is
+
+Print's separation reproduces artwork through real inks, which is correct and
+also frequently useless. Flat vector colours generally sit outside what
+translucent inks reach on white paper: the artwork's green was DARKER than Riso
+Green itself, so it saturated at full density - and so did the lighter green
+beside it, so both printed identically and a whole shape vanished. No solver
+change fixes that; a sweep of the log floor and an in-gamut clamp both failed,
+because the difference between the two greens lived in the green channel while
+the unreachable red channel dominated the fit for both.
+
+The answer was to stop trying. Colour Fidelity blends the printed result back
+toward the artwork's own colours, giving up the separation exactly where it
+cannot deliver. Texture reduces in proportion, so wind the grain up to
+compensate. That is a better bargain than a physically exact print of the wrong
+colour, and it is what the user actually wanted from the start.
+
+Two earlier attempts at this control were both too clever: scaling the source by
+printY/srcY clipped saturated channels into acid hues, and blending chroma alone
+preserved the print's luminance - so it could not correct a colour that came out
+too pale, which was the whole complaint. The straight blend works.
+
+Related trap: a preset that does not set ink colours INHERITS whatever the
+defaults are. Screen Print set none, so every screen print came out riso blue
+regardless of the artwork.
+
+### A separation solve must invert the model the RENDERER uses
+
+Print's Ink Density solve was handed the raw ink colours, as if a full-density
+plate transmitted exactly `ink`. The renderer lays ink at `inkOpacity` coverage
+(and Riso scales that by a further hidden 0.85), so a solid plate really
+transmits `mix(1, ink, opacity)` - about 0.11 per channel lighter. The solver
+was aiming at a target it could not reach with the inks it thought it had.
+
+The second-order effect was worse than the first. An ink with a ZERO channel -
+Riso Blue 0078BF has R=0 - has an unbounded logarithm there, so a whisker of
+density annihilates that channel and the only stable answer is to use none of
+it. The solve returned zero densities and printed BARE PAPER. Feeding it the
+effective transmittance bounds every channel away from zero, so it fixes the
+CONDITIONING as well as the target.
+
+Residual after the fix is real gamut: bright green from blue plus yellow tops out
+around G 0.53 against a target of 0.77. That part is why Riso sells a Green drum.
+
+### REMOVING an attribute is worse than adding one - it mis-binds every uniform after it
+
+Adding an attribute mid-session just leaves it unavailable until restart.
+REMOVING one leaves the running app's pass `uniforms` lists still containing it
+while the deployed shader no longer declares it. Binding is POSITIONAL, so every
+uniform after the removed one shifts by a slot and the shader runs on scrambled
+values - a render that looks like a broken algorithm rather than a stale build.
+
+The tell is the same either way: `api.getAttributes(id)` still lists an
+attribute you deleted. Check that before debugging the maths. Restart, then
+re-render, then judge.
+
+### ANY schema change needs a Cavalry restart - installPlugin is not enough
+
+Adding an attribute, or a value to an `enumValues` array, does not reach a node
+after `installPlugin` - not even a freshly created one. `.sksl` does not reload
+either. Only definitions ALREADY KNOWN to the running app update.
+
+Practical consequence for the authoring loop: after any schema or shader edit,
+every render you take before restarting is of the OLD build. This invalidated
+several rounds of "verified" results in one session before it was spotted. If a
+brand-new attribute reads back `undefined`, or a new enum value behaves like an
+existing one, stop and restart before debugging anything else.
+
+### GROWING an enum needs a Cavalry restart - and the extra value is SILENTLY CLAMPED
+
+Adding a value to an `enumValues` array does not hot-reload, even after
+`installPlugin`, and even on a freshly created node. Worse, the new value is
+accepted by `api.set` and READS BACK correctly - `api.get` returned 3 - while
+the uniform is bound CLAMPED to the old range. So the shader quietly ran a
+different mode, and the render looked like a bug in brand-new code that was in
+fact never executed.
+
+Two renders were debugged against the wrong hypothesis before
+`api.getAttributeDefinition(id, "separation").enumValues` showed `[0,1,2]`.
+Check that FIRST whenever a new enum value behaves like an existing one.
+
+Note the asymmetry: SHRINKING an enum did reload in the same session. Do not
+infer from one that the other works.
+
+### Check EVERY procedural texture's cell size against the pixel grid
+
+Five separate textures in Print were authored below Nyquist and none of it was
+obvious: ink grain at 0.77px, ink loss at 1.1px, mottle at 0.59px, paper tooth
+at 0.9px and 0.43px. Below about two pixels a value-noise lattice is not texture
+at all - it is aliased hash, which has a FIXED visual frequency no matter what
+you multiply it by.
+
+That is why "add more octaves" did nothing for ink loss: every octave was
+already below the grid, so they all rendered as the same fine speckle and the
+result read as repetitive however it was tuned. Scale controls felt inert for
+the same reason.
+
+Rule: for any `noise(coord * k)`, compute 1/k and sanity-check it in pixels
+against what the texture is meant to BE - a paper fibre is a few pixels, a
+mottled patch is tens. Do it when authoring, because the symptom downstream
+("feels repetitive", "the scale slider does nothing") points nowhere near it.
+
+### Flat artwork wants SPOT inks, not a process build
+
+Print's default inks are a process set (blue/red/yellow/black) that builds every
+colour by overprinting. On a photograph that is right. On FLAT artwork it is
+what makes the result look pale and washed: a saturated green rebuilt from blue
+plus yellow lands lighter and pulled toward cyan.
+
+Be precise about WHY, because it is easy to blame the press. A Riso reaches
+bright saturated colours perfectly well - it is a spot process with a real ink
+catalogue (Green 00A95C, Fluorescent Pink FF48B0, Orange FF6C2F) and a drum of
+that ink lays the colour down directly. The limit is on BUILDING a bright colour
+from two process inks, which needs a little of each, and that means paper showing
+through.
+
+A real spot-colour riso picks inks that ARE the artwork's colours, and each area
+then prints at full density in its own ink. Setting the four inks to the
+artwork's palette fixed a green that had been printing as pale teal, in one
+change, with every other setting untouched. Verified by A/B in the app.
+
+If a print looks washed out, check the INKS before touching density, opacity or
+the artefact controls.
+
+### Do not luminance-match a smoothed quantity against a sharp one
+
+True Colour compared the print's luminance to the source's to re-expose the
+source colour. But the print's luminance has been through the flatten wash and
+the screen, so it is spatially SMOOTHED, while the source is sharp. Comparing
+them is an unsharp mask, and every boundary got a halo - a thin outline in the
+artwork printed brighter than the field it sat on.
+
+Blending CHROMA instead has no such mismatch: a thin green line and a wide green
+area have the same chroma. Both chroma terms are zero-luma by construction, so
+adding them cannot move luminance at all.
+
+### A screen type and a grain are orthogonal
+
+Ink grain was one of the `screenType` values, which is a category error: the
+screen is the GEOMETRY the ink is broken into, grain is the unevenness of the
+transfer itself. A dotted press is grainy too, and making them mutually
+exclusive meant Flat - the setting a riso actually wants - could never have any.
+
+Also: the grain lattice was `coord * 1.3`, a cell of 0.77 PIXELS. Below Nyquist,
+so it was aliased white noise that crawled rather than ink texture. Any
+procedural texture needs its cell size checked against the pixel grid.
+
+### Cell-based marks need PER-CELL tone, not per-pixel
+
+A halftone reads as printed because the ink/paper decision is made once per
+CELL, from the tone at the cell's centre. Sampling per pixel lets tone vary
+inside a cell, so the boundary between light and dark regions is a smooth curve
+with marks scattered over it - dots laid on a picture rather than a screen.
+Sampling once per cell quantises that boundary to the grid, so regions are built
+from whole cells with hard axis-aligned edges. That blockiness IS the look; it
+is not an artefact to smooth away. Cost is one extra tap.
+
+Related: a polarity SWITCH at mid grey (ink is a disc below, cell-minus-disc
+above) cannot be reached by any continuous mapping of coverage, and is what
+produces solid blocks against a field of small marks.
+
+### Dimming names the case you do NOT want
+
+It greys when the expression is TRUE. A control used by materials 1 and 2 dims
+on `material == 0`, NOT `material != 0`. Backwards greys the control on exactly
+the modes that use it, and the symptom is "none of the controls in this tab are
+editable". Verify by stepping the enum, never by reading the expression back.
 
 ### Unconnected shaderData folds to a constant
 An unconnected `shaderData` input is substituted as a literal `half4(0)`. SkSL then constant-folds BOTH arms of a ternary at compile time, so the standard un-premultiply `c.a > 0.0 ? c.rgb / c.a : c.rgb` becomes 0/0 and the WHOLE shader fails to compile — "division by zero". The guard never runs. Divide with `max()` instead, which cannot fold to zero:
@@ -201,6 +428,41 @@ Kit is **AGPL-3.0**. Floor set by `flim`.
 - Credits live in `docs/CREDITS.md`, split `## Code used` / `## Inspiration`. Don't invent citations for papers — ask for title and authors.
 
 ---
+
+## 7b. Performance — techniques worth reaching for
+
+From reading paper-design/shaders. Several apply to filters already shipped.
+
+- **SkSL has no `dFdx`/`dFdy`/`fwidth`, and that is usually fine.** In nearly
+  every case the derivative is of a KNOWN AFFINE function of the coordinate, so
+  it is a constant you can compute: `patternPeriod / resolution.y`. That is more
+  accurate than the GPU's 2x2-quad estimate, not less.
+- **Derivative-width strokes are free supersampling for a periodic feature.**
+  Draw the mark's antialiasing band two PIXELS wide expressed in CELL units.
+  When the cells go sub-pixel the band swallows the cell and the pattern greys
+  out to flat tone instead of moireing. Verified on Linear Refraction at 2px flutes.
+  Every periodic filter wants this — hatching, print's screen, led, display's
+  mask, ascii.
+- **Non-power-of-two lacunarity** (2.1, 1.99, 1.1). Octaves never align, so
+  three read as many more. Godray still runs 6 octaves x 3 angles = 18 Perlin
+  evaluations per pixel; 3-4 at 2.1 would be indistinguishable.
+- **`pow(noise, 1..4)` instead of extra octaves** to thin a field — a quarter
+  the cost.
+- **A product of two sparse fields is far sparser than either.** Crisp shafts,
+  cheaper than fbm. This is what Godray's Light Field mode is.
+- **Cubic in place of `pow`**: `clamp(8*f*f*f, 0, 1)`, `n = n*n` for contrast.
+- **Value noise + cubic smoothstep, not simplex** unless gradient noise is
+  actually needed. Value noise's axis-aligned blockiness is sometimes the POINT
+  (in polar space it becomes radial banding, which reads as light shafts).
+- **One field, many outputs.** Water evaluates each of its two noise fields
+  exactly once and reuses them for distortion, tint, glint and alpha.
+- **Uniform-driven branch skipping as doctrine.** Every layer skipped when its
+  own uniform is 0. All fragments take the same path, so there is no divergence
+  — this is what makes a five-layer paper model affordable at defaults.
+- **Compute both and `mix`** rather than branching on a blend mode.
+- Do NOT copy their tap counts: gooey halftone is 36-72 taps/px, and gem-smoke
+  reads its texture with a 90-tap kernel, 81 of which are a 9x9 that is
+  separable into 18 and simply was not separated. Copy the maths, not the loop.
 
 ## 8. Working with this repo
 

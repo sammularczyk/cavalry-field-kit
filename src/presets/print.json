@@ -4,21 +4,78 @@
     "id": "5ddd387f-d738-4c21-8e91-975f17583d47",
     "author": "samMularczyk",
     "name": "Riso",
-    "layerType": ["print"],
+    "layerType": [
+      "print"
+    ],
     "attrs": [
-      { "attrId": "process", "value": 0 },
-      { "attrId": "separation", "value": 0 },
-      { "attrId": "inkCount", "value": 2 },
-      { "attrId": "ink1Color", "value": "#0078BF" },
-      { "attrId": "ink2Color", "value": "#FFE800" },
-      { "attrId": "screenType", "value": 0 },
-      { "attrId": "levels", "value": 3 },
-      { "attrId": "levelBias", "value": 1.2 },
-      { "attrId": "flatten", "value": 2.0 },
-      { "attrId": "mottle", "value": 0.4 },
-      { "attrId": "registrationError", "value": 2.0 },
-      { "attrId": "inkLoss", "value": 0.2 },
-      { "attrId": "inkOpacity", "value": 0.8 }
+      {
+        "attrId": "process",
+        "value": 0
+      },
+      {
+        "attrId": "separation",
+        "value": 0
+      },
+      {
+        "attrId": "inkCount",
+        "value": 2
+      },
+      {
+        "attrId": "ink1Color",
+        "value": "#0078BF"
+      },
+      {
+        "attrId": "ink2Color",
+        "value": "#FFE800"
+      },
+      {
+        "attrId": "screenType",
+        "value": 0
+      },
+      {
+        "attrId": "levels",
+        "value": 3
+      },
+      {
+        "attrId": "levelBias",
+        "value": 1.2
+      },
+      {
+        "attrId": "flatten",
+        "value": 2.0
+      },
+      {
+        "attrId": "mottle",
+        "value": 0.4
+      },
+      {
+        "attrId": "registrationError",
+        "value": 2.0
+      },
+      {
+        "attrId": "inkLoss",
+        "value": 0.2
+      },
+      {
+        "attrId": "inkOpacity",
+        "value": 0.8
+      },
+      {
+        "attrId": "trueColour",
+        "value": 0.0
+      },
+      {
+        "attrId": "inkGrain",
+        "value": 0.6
+      },
+      {
+        "attrId": "toneFloor",
+        "value": 0.28
+      },
+      {
+        "attrId": "inkLossScale",
+        "value": 0.05
+      }
     ],
     "resetsTransforms": false,
     "resetsLayer": true
@@ -28,19 +85,82 @@
     "id": "3503ef46-bb73-490d-8344-38a31aaa3e01",
     "author": "samMularczyk",
     "name": "Screen Print",
-    "layerType": ["print"],
+    "layerType": [
+      "print"
+    ],
     "attrs": [
-      { "attrId": "process", "value": 1 },
-      { "attrId": "separation", "value": 0 },
-      { "attrId": "inkCount", "value": 3 },
-      { "attrId": "screenType", "value": 2 },
-      { "attrId": "frequency", "value": 8 },
-      { "attrId": "levels", "value": 0 },
-      { "attrId": "flatten", "value": 0.0 },
-      { "attrId": "registrationError", "value": 1.5 },
-      { "attrId": "inkLoss", "value": 0.15 },
-      { "attrId": "mottle", "value": 0.1 },
-      { "attrId": "inkOpacity", "value": 0.9 }
+      {
+        "attrId": "process",
+        "value": 1
+      },
+      {
+        "attrId": "separation",
+        "value": 0
+      },
+      {
+        "attrId": "inkCount",
+        "value": 3
+      },
+      {
+        "attrId": "screenType",
+        "value": 1
+      },
+      {
+        "attrId": "frequency",
+        "value": 8
+      },
+      {
+        "attrId": "levels",
+        "value": 0
+      },
+      {
+        "attrId": "flatten",
+        "value": 0.0
+      },
+      {
+        "attrId": "registrationError",
+        "value": 1.5
+      },
+      {
+        "attrId": "inkLoss",
+        "value": 0.15
+      },
+      {
+        "attrId": "mottle",
+        "value": 0.1
+      },
+      {
+        "attrId": "inkOpacity",
+        "value": 0.9
+      },
+      {
+        "attrId": "trueColour",
+        "value": 0.0
+      },
+      {
+        "attrId": "inkGrain",
+        "value": 0.6
+      },
+      {
+        "attrId": "ink1Color",
+        "value": "#1B7F5A"
+      },
+      {
+        "attrId": "ink2Color",
+        "value": "#E8547C"
+      },
+      {
+        "attrId": "ink3Color",
+        "value": "#F2C230"
+      },
+      {
+        "attrId": "toneFloor",
+        "value": 0.28
+      },
+      {
+        "attrId": "inkLossScale",
+        "value": 0.05
+      }
     ],
     "resetsTransforms": false,
     "resetsLayer": true
@@ -50,23 +170,542 @@
     "id": "e132319e-8e2a-4215-8397-6fc5e8356228",
     "author": "samMularczyk",
     "name": "Newsprint",
-    "layerType": ["print"],
+    "layerType": [
+      "print"
+    ],
     "attrs": [
-      { "attrId": "process", "value": 2 },
-      { "attrId": "separation", "value": 1 },
-      { "attrId": "inkCount", "value": 1 },
-      { "attrId": "ink1Color", "value": "#1A1A1A" },
-      { "attrId": "ink1Coverage", "value": 1.3 },
-      { "attrId": "screenType", "value": 2 },
-      { "attrId": "frequency", "value": 5 },
-      { "attrId": "dotGain", "value": 0.35 },
-      { "attrId": "levels", "value": 0 },
-      { "attrId": "flatten", "value": 1.0 },
-      { "attrId": "paperColor", "value": "#E8E4D8" },
-      { "attrId": "paperGrain", "value": 0.4 },
-      { "attrId": "registrationError", "value": 0.5 },
-      { "attrId": "mottle", "value": 0.15 },
-      { "attrId": "inkOpacity", "value": 1.0 }
+      {
+        "attrId": "process",
+        "value": 2
+      },
+      {
+        "attrId": "separation",
+        "value": 1
+      },
+      {
+        "attrId": "inkCount",
+        "value": 1
+      },
+      {
+        "attrId": "ink1Color",
+        "value": "#1A1A1A"
+      },
+      {
+        "attrId": "ink1Coverage",
+        "value": 1.0
+      },
+      {
+        "attrId": "screenType",
+        "value": 1
+      },
+      {
+        "attrId": "frequency",
+        "value": 5
+      },
+      {
+        "attrId": "dotGain",
+        "value": 0.35
+      },
+      {
+        "attrId": "levels",
+        "value": 0
+      },
+      {
+        "attrId": "flatten",
+        "value": 1.0
+      },
+      {
+        "attrId": "paperColor",
+        "value": "#E8E4D8"
+      },
+      {
+        "attrId": "paperGrain",
+        "value": 0.4
+      },
+      {
+        "attrId": "registrationError",
+        "value": 0.5
+      },
+      {
+        "attrId": "mottle",
+        "value": 0.15
+      },
+      {
+        "attrId": "inkOpacity",
+        "value": 1.0
+      }
+    ],
+    "resetsTransforms": false,
+    "resetsLayer": true
+  },
+  {
+    "presetType": "layer",
+    "id": "3f4c1a92-7d6e-4b58-9a21-c0e8f5b47d13",
+    "author": "samMularczyk",
+    "name": "CMYK",
+    "layerType": [
+      "print"
+    ],
+    "attrs": [
+      {
+        "attrId": "process",
+        "value": 1
+      },
+      {
+        "attrId": "separation",
+        "value": 0
+      },
+      {
+        "attrId": "inkCount",
+        "value": 4
+      },
+      {
+        "attrId": "ink1Color",
+        "value": "#00AEEF"
+      },
+      {
+        "attrId": "ink1Angle",
+        "value": 15.0
+      },
+      {
+        "attrId": "ink2Color",
+        "value": "#EC008C"
+      },
+      {
+        "attrId": "ink2Angle",
+        "value": 75.0
+      },
+      {
+        "attrId": "ink3Color",
+        "value": "#FFF200"
+      },
+      {
+        "attrId": "ink3Angle",
+        "value": 0.0
+      },
+      {
+        "attrId": "ink4Color",
+        "value": "#231F20"
+      },
+      {
+        "attrId": "ink4Angle",
+        "value": 45.0
+      },
+      {
+        "attrId": "screenType",
+        "value": 1
+      },
+      {
+        "attrId": "dotShape",
+        "value": 1
+      },
+      {
+        "attrId": "frequency",
+        "value": 4.0
+      },
+      {
+        "attrId": "dotGain",
+        "value": 0.15
+      },
+      {
+        "attrId": "yuleNielsen",
+        "value": 1.7
+      },
+      {
+        "attrId": "levels",
+        "value": 0
+      },
+      {
+        "attrId": "flatten",
+        "value": 0.0
+      },
+      {
+        "attrId": "paperColor",
+        "value": "#FFFFFF"
+      },
+      {
+        "attrId": "paperGrain",
+        "value": 0.1
+      },
+      {
+        "attrId": "registrationError",
+        "value": 0.4
+      },
+      {
+        "attrId": "inkLoss",
+        "value": 0.05
+      },
+      {
+        "attrId": "mottle",
+        "value": 0.05
+      },
+      {
+        "attrId": "inkOpacity",
+        "value": 1.0
+      },
+      {
+        "attrId": "trueColour",
+        "value": 1.0
+      },
+      {
+        "attrId": "inkGrain",
+        "value": 0.6
+      },
+      {
+        "attrId": "inkLossScale",
+        "value": 0.05
+      }
+    ],
+    "resetsTransforms": false,
+    "resetsLayer": true
+  },
+  {
+    "presetType": "layer",
+    "id": "c7d81e94-2f60-4b3a-9d15-8e60a2f4b7c3",
+    "author": "samMularczyk",
+    "name": "Cut Paper",
+    "layerType": [
+      "print"
+    ],
+    "attrs": [
+      {
+        "attrId": "process",
+        "value": 0
+      },
+      {
+        "attrId": "separation",
+        "value": 0
+      },
+      {
+        "attrId": "inkCount",
+        "value": 4
+      },
+      {
+        "attrId": "flatten",
+        "value": 1.5
+      },
+      {
+        "attrId": "levels",
+        "value": 0.0
+      },
+      {
+        "attrId": "screenType",
+        "value": 0
+      },
+      {
+        "attrId": "dotShape",
+        "value": 0
+      },
+      {
+        "attrId": "ink1Color",
+        "value": "#3E7FD4"
+      },
+      {
+        "attrId": "ink2Color",
+        "value": "#17722E"
+      },
+      {
+        "attrId": "ink3Color",
+        "value": "#E8542B"
+      },
+      {
+        "attrId": "ink4Color",
+        "value": "#F2A2A6"
+      },
+      {
+        "attrId": "inkOpacity",
+        "value": 0.92
+      },
+      {
+        "attrId": "keyline",
+        "value": 2.5
+      },
+      {
+        "attrId": "keylineThreshold",
+        "value": 0.12
+      },
+      {
+        "attrId": "registrationError",
+        "value": 0.5
+      },
+      {
+        "attrId": "inkLoss",
+        "value": 0.1
+      },
+      {
+        "attrId": "mottle",
+        "value": 0.25
+      },
+      {
+        "attrId": "paperColor",
+        "value": "#FAF8F2"
+      },
+      {
+        "attrId": "paperGrain",
+        "value": 0.6
+      },
+      {
+        "attrId": "paperTooth",
+        "value": 0.3
+      },
+      {
+        "attrId": "paperFibre",
+        "value": 0.25
+      },
+      {
+        "attrId": "yuleNielsen",
+        "value": 1.7
+      },
+      {
+        "attrId": "amount",
+        "value": 1.0
+      },
+      {
+        "attrId": "trueColour",
+        "value": 0.0
+      },
+      {
+        "attrId": "inkGrain",
+        "value": 0.6
+      },
+      {
+        "attrId": "toneFloor",
+        "value": 0.28
+      },
+      {
+        "attrId": "inkLossScale",
+        "value": 0.05
+      }
+    ],
+    "resetsTransforms": false,
+    "resetsLayer": true
+  },
+  {
+    "presetType": "layer",
+    "id": "3f9a52d7-8c14-4e6b-b0a9-52d7e1c48f36",
+    "author": "samMularczyk",
+    "name": "Riso Spot Inks",
+    "layerType": [
+      "print"
+    ],
+    "attrs": [
+      {
+        "attrId": "process",
+        "value": 0
+      },
+      {
+        "attrId": "separation",
+        "value": 0
+      },
+      {
+        "attrId": "inkCount",
+        "value": 4
+      },
+      {
+        "attrId": "ink1Color",
+        "value": "#00A95C"
+      },
+      {
+        "attrId": "ink1Angle",
+        "value": 15.0
+      },
+      {
+        "attrId": "ink2Color",
+        "value": "#FF48B0"
+      },
+      {
+        "attrId": "ink2Angle",
+        "value": 45.0
+      },
+      {
+        "attrId": "ink3Color",
+        "value": "#FFE800"
+      },
+      {
+        "attrId": "ink3Angle",
+        "value": 75.0
+      },
+      {
+        "attrId": "ink4Color",
+        "value": "#3D5588"
+      },
+      {
+        "attrId": "ink4Angle",
+        "value": 105.0
+      },
+      {
+        "attrId": "screenType",
+        "value": 0
+      },
+      {
+        "attrId": "inkGrain",
+        "value": 0.6
+      },
+      {
+        "attrId": "inkGrainScale",
+        "value": 0.35
+      },
+      {
+        "attrId": "levels",
+        "value": 0.0
+      },
+      {
+        "attrId": "flatten",
+        "value": 2.5
+      },
+      {
+        "attrId": "trueColour",
+        "value": 0.0
+      },
+      {
+        "attrId": "inkOpacity",
+        "value": 0.95
+      },
+      {
+        "attrId": "yuleNielsen",
+        "value": 2.0
+      },
+      {
+        "attrId": "registrationError",
+        "value": 1.2
+      },
+      {
+        "attrId": "inkLoss",
+        "value": 0.3
+      },
+      {
+        "attrId": "mottle",
+        "value": 0.18
+      },
+      {
+        "attrId": "keyline",
+        "value": 0.0
+      },
+      {
+        "attrId": "paperColor",
+        "value": "#F7F3E9"
+      },
+      {
+        "attrId": "paperGrain",
+        "value": 0.4
+      },
+      {
+        "attrId": "paperTooth",
+        "value": 0.2
+      },
+      {
+        "attrId": "amount",
+        "value": 1.0
+      },
+      {
+        "attrId": "edgeBreakup",
+        "value": 1.0
+      },
+      {
+        "attrId": "edgeBreakupScale",
+        "value": 0.35
+      },
+      {
+        "attrId": "inkLossScale",
+        "value": 0.05
+      },
+      {
+        "attrId": "toneFloor",
+        "value": 0.28
+      }
+    ],
+    "resetsTransforms": false,
+    "resetsLayer": true
+  },
+  {
+    "presetType": "layer",
+    "id": "5b2e91c4-6a37-4d18-8f92-71c3a5e0d846",
+    "author": "samMularczyk",
+    "name": "Riso Spot",
+    "layerType": [
+      "print"
+    ],
+    "attrs": [
+      {
+        "attrId": "process",
+        "value": 0
+      },
+      {
+        "attrId": "separation",
+        "value": 3
+      },
+      {
+        "attrId": "screenType",
+        "value": 0
+      },
+      {
+        "attrId": "inkGrain",
+        "value": 0.45
+      },
+      {
+        "attrId": "inkGrainScale",
+        "value": 0.35
+      },
+      {
+        "attrId": "levels",
+        "value": 0.0
+      },
+      {
+        "attrId": "flatten",
+        "value": 2.5
+      },
+      {
+        "attrId": "trueColour",
+        "value": 0.0
+      },
+      {
+        "attrId": "inkOpacity",
+        "value": 0.95
+      },
+      {
+        "attrId": "inkLoss",
+        "value": 0.08
+      },
+      {
+        "attrId": "mottle",
+        "value": 0.18
+      },
+      {
+        "attrId": "keyline",
+        "value": 0.0
+      },
+      {
+        "attrId": "paperColor",
+        "value": "#F7F3E9"
+      },
+      {
+        "attrId": "paperGrain",
+        "value": 0.4
+      },
+      {
+        "attrId": "paperTooth",
+        "value": 0.2
+      },
+      {
+        "attrId": "amount",
+        "value": 1.0
+      },
+      {
+        "attrId": "registrationError",
+        "value": 1.2
+      },
+      {
+        "attrId": "edgeBreakup",
+        "value": 1.2
+      },
+      {
+        "attrId": "edgeBreakupScale",
+        "value": 1.0
+      },
+      {
+        "attrId": "inkLossScale",
+        "value": 0.05
+      }
     ],
     "resetsTransforms": false,
     "resetsLayer": true

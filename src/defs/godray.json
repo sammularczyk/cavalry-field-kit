@@ -30,12 +30,21 @@
       },
       "dimming": "parallel == true"
     },
+    "rayMode": {
+      "type": "enum",
+      "default": 0,
+      "enumValues": [
+        0,
+        1
+      ]
+    },
     "gain": {
       "type": "double",
       "default": 0.5,
       "min": 0.0,
       "max": 1.0,
-      "step": 0.01
+      "step": 0.01,
+      "dimming": "rayMode == 1"
     },
     "lacunarity": {
       "type": "double",
@@ -43,7 +52,7 @@
       "min": 0.1,
       "softMax": 6.0,
       "step": 0.05,
-      "dimming": "gain <= 0"
+      "dimming": "gain <= 0 || rayMode == 1"
     },
     "density": {
       "type": "double",
@@ -51,7 +60,7 @@
       "min": 0.1,
       "softMax": 64.0,
       "step": 0.5,
-      "dimming": "gain <= 0"
+      "dimming": "gain <= 0 || rayMode == 1"
     },
     "speed": {
       "type": "double",
@@ -65,14 +74,84 @@
       "default": 0.4,
       "min": 0.0,
       "max": 0.95,
-      "step": 0.01
+      "step": 0.01,
+      "dimming": "rayMode == 1"
     },
     "blur": {
       "type": "double",
       "default": 0.78,
       "min": 0.0,
       "max": 1.0,
-      "step": 0.01
+      "step": 0.01,
+      "dimming": "rayMode == 1"
+    },
+    "spotty": {
+      "type": "double",
+      "default": 0.3,
+      "min": 0.0,
+      "max": 1.0,
+      "step": 0.01,
+      "dimming": "rayMode == 0"
+    },
+    "rayIntensity": {
+      "type": "double",
+      "default": 0.8,
+      "min": 0.0,
+      "max": 1.0,
+      "step": 0.01,
+      "dimming": "rayMode == 0"
+    },
+    "rayCount": {
+      "type": "double",
+      "default": 10.0,
+      "min": 0.5,
+      "softMax": 60.0,
+      "step": 0.25,
+      "dimming": "rayMode == 0"
+    },
+    "spread": {
+      "type": "double",
+      "default": 1.0,
+      "min": 0.0,
+      "max": 1.0,
+      "step": 0.01,
+      "dimming": "rayMode == 0 || parallel == true"
+    },
+    "coreSize": {
+      "type": "double",
+      "default": 0.2,
+      "min": 0.0,
+      "max": 1.0,
+      "step": 0.01,
+      "dimming": "rayMode == 0"
+    },
+    "coreGlow": {
+      "type": "double",
+      "default": 0.4,
+      "min": 0.0,
+      "max": 1.0,
+      "step": 0.01,
+      "dimming": "rayMode == 0"
+    },
+    "rayColor": {
+      "type": "color",
+      "default": {
+        "type": "Color",
+        "r": 255,
+        "g": 255,
+        "b": 255,
+        "a": 255
+      }
+    },
+    "rayColor2": {
+      "type": "color",
+      "default": {
+        "type": "Color",
+        "r": 255,
+        "g": 255,
+        "b": 255,
+        "a": 255
+      }
     },
     "time": {
       "type": "double",
@@ -93,33 +172,68 @@
       "angle",
       "parallel",
       "light",
+      "rayMode",
       "gain",
       "lacunarity",
       "density",
       "speed",
       "scatterG",
       "blur",
+      "spotty",
+      "rayIntensity",
+      "rayCount",
+      "spread",
+      "coreSize",
+      "coreGlow",
+      "rayColor",
+      "rayColor2",
       "time",
       "amount"
     ]
   },
   "UI": {
     "icon": "godray.png",
-    "attributeOrder": [
-      "parallel",
-      "angle",
-      "light",
-      "---Turbulence",
-      "gain",
-      "lacunarity",
-      "density",
-      "scatterG",
-      "speed",
-      "blur",
-      "time",
-      "---Output",
-      "amount",
-      "---Ported from pixi.js filters (MIT)"
+    "tabs": [
+      {
+        "id": "filter",
+        "attributeOrder": [
+          "rayMode",
+          "parallel",
+          "angle",
+          "light",
+          "---Shape",
+          "spread",
+          "speed",
+          "time"
+        ]
+      },
+      {
+        "id": "rays",
+        "attributeOrder": [
+          "---Volumetric",
+          "density",
+          "gain",
+          "lacunarity",
+          "scatterG",
+          "blur",
+          "---Light Field",
+          "rayCount",
+          "rayIntensity",
+          "spotty",
+          "coreSize",
+          "coreGlow"
+        ]
+      },
+      {
+        "id": "output",
+        "attributeOrder": [
+          "rayColor",
+          "rayColor2",
+          "---A",
+          "amount",
+          "---Ported from pixi.js filters (MIT) \u00b7 Light Field model after Paper Shaders (Apache-2.0)"
+        ]
+      }
     ]
   }
 }

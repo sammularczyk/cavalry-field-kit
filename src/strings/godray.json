@@ -1,56 +1,103 @@
 {
- "type": "layerStrings",
- "value": {
-  "author": "samMularczyk",
-  "layerType": "godray",
-  "niceName": "Godray",
-  "layerInfo": "Volumetric light shafts - the crepuscular rays you get through cloud or a window - radiating from a point or travelling in parallel from a direction.",
-  "language": "en",
-  "attributes": {
-   "parallel": [
-    "Parallel Rays",
-    "On for rays travelling in one direction (Angle). Off for rays radiating from a point (Light)."
-   ],
-   "angle": [
-    "Angle",
-    "Direction the rays travel in, in degrees. Zero is vertical."
-   ],
-   "light": [
-    "Light",
-    "Offset of the ray source from the layer centre, in pixels. Radiating rays only."
-   ],
-   "gain": [
-    "Gain",
-    "Strength of the turbulence that shapes the shafts. Zero is a passthrough."
-   ],
-   "lacunarity": [
-    "Lacunarity",
-    "Frequency step between turbulence octaves. Higher breaks the shafts into finer, busier detail."
-   ],
-   "density": [
-    "Density",
-    "How tightly packed the shafts are."
-   ],
-   "scatterG": [
-    "Scatter Direction",
-    "How strongly the haze throws light FORWARD. Scattering off dust and droplets is forward-peaked, so shafts blaze when you look near the light and fade as you turn away - which is most of what makes crepuscular rays read as light rather than as texture. 0 scatters equally in all directions; 0.7 to 0.9 is real atmospheric haze."
-   ],
-   "speed": [
-    "Speed",
-    "How fast the shafts drift. 0 holds them still."
-   ],
-   "blur": [
-    "Blur",
-    "Softens the shafts across their width. It works on the ray pattern, not the picture."
-   ],
-   "time": [
-    "Time",
-    "Driven by the composition time. Disconnect it to freeze the shafts."
-   ],
-   "amount": [
-    "Amount",
-    "Overall opacity of the ray effect over the original layer."
-   ]
+  "type": "layerStrings",
+  "value": {
+    "author": "samMularczyk",
+    "layerType": "godray",
+    "niceName": "Godray",
+    "layerInfo": "Volumetric light shafts from turbulence in ray-space.",
+    "language": "en",
+    "attributes": {
+      "angle": [
+        "Angle",
+        "Direction the rays travel in, in degrees. Zero is vertical."
+      ],
+      "parallel": [
+        "Parallel Rays",
+        "On for rays travelling in one direction (Angle). Off for rays radiating from a point (Light)."
+      ],
+      "light": [
+        "Light",
+        "Offset of the ray source from the layer centre, in pixels. Radiating rays only."
+      ],
+      "rayMode": [
+        "Model",
+        "Which model builds the shafts. Volumetric samples Perlin turbulence along the ray direction - soft, cloudy, atmospheric, and the more physical of the two. Light Field samples value noise in polar space and multiplies two sparse fields together, which gives crisper, separated shafts with hard edges. Light Field is also several times cheaper: two noise evaluations against eighteen."
+      ],
+      "gain": [
+        "Gain",
+        "Strength of the turbulence that shapes the shafts. Zero is a passthrough."
+      ],
+      "lacunarity": [
+        "Lacunarity",
+        "Frequency step between turbulence octaves. Higher breaks the shafts into finer, busier detail."
+      ],
+      "density": [
+        "Density",
+        "How tightly packed the shafts are."
+      ],
+      "speed": [
+        "Speed",
+        "How fast the shafts drift. 0 holds them still."
+      ],
+      "scatterG": [
+        "Scatter Direction",
+        "How strongly the haze throws light FORWARD. Scattering off dust and droplets is forward-peaked, so shafts blaze when you look near the light and fade as you turn away - which is most of what makes crepuscular rays read as light rather than as texture. 0 scatters equally in all directions; 0.7 to 0.9 is real atmospheric haze."
+      ],
+      "blur": [
+        "Blur",
+        "Softens the shafts across their width. It works on the ray pattern, not the picture."
+      ],
+      "spotty": [
+        "Break Up",
+        "How quickly a shaft loses coherence along its length. Low keeps rays long and continuous; high breaks them into short spots, because the second noise field advances faster with distance and decorrelates from the first."
+      ],
+      "rayIntensity": [
+        "Thinning",
+        "Crushes everything but the peaks of the noise, so the shafts narrow and separate. This is the one control doing the work that extra noise octaves would otherwise do."
+      ],
+      "rayCount": [
+        "Shafts",
+        "Roughly how many shafts fan out around the light. This is the Light Field model's angular frequency; Density is the Volumetric model's noise scale and means something different, which is why they are two controls rather than one."
+      ],
+      "spread": [
+        "Spread",
+        "Angular extent of the cone, centred on Angle. At 1 the rays go all the way round the light; lower confines them to a wedge. Radiating rays only - parallel rays have no origin to fan out from."
+      ],
+      "coreSize": [
+        "Core Size",
+        "Radius of the glow sitting at the light itself."
+      ],
+      "coreGlow": [
+        "Core Glow",
+        "Brightness of that glow. It is not only additive: it also multiplies the rays near it, up to five times, so shafts blaze where they leave the source instead of merely crossing a bright blob."
+      ],
+      "rayColor": [
+        "Ray Colour",
+        "Colour of the shafts. White leaves them uncoloured, which is what earlier versions did unconditionally."
+      ],
+      "rayColor2": [
+        "Ray Colour 2",
+        "A second colour, interleaved shaft by shaft along the angular coordinate rather than by brightness - so neighbouring shafts differ and the fan reads as dispersed light. Set it to match Ray Colour for a single tint."
+      ],
+      "time": [
+        "Time",
+        "Driven by the composition time. Disconnect it to freeze the shafts."
+      ],
+      "amount": [
+        "Amount",
+        "Overall opacity of the ray effect over the original layer."
+      ]
+    },
+    "enums": {
+      "rayMode": {
+        "0": "Volumetric",
+        "1": "Light Field"
+      }
+    },
+    "tabs": {
+      "filter": "Rays",
+      "rays": "Model",
+      "output": "Output"
+    }
   }
- }
 }

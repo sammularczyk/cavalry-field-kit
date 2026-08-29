@@ -27,7 +27,7 @@ const RESERVED = new Set(["blendMode", "padding", "autoPadding", "mattes",
 // Attributes inherited from the base filter that a definition may re-declare
 // only to change their default. They are not ours: no uniform, no tooltip, no
 // UI slot of our own.
-const INHERITED = new Set(["allowViewportClipping"]);
+const INHERITED = new Set(["allowViewportClipping", "padding", "autoPadding"]);
 
 const AUTO_UNIFORMS = new Set(["resolution", "rectCentre", "childShader",
   "original", "image"]);
@@ -40,8 +40,29 @@ const defs = fs.readdirSync(path.join(SRC, "defs")).filter(f => f.endsWith(".jso
 for (const file of defs) {
   const d = JSON.parse(fs.readFileSync(path.join(SRC, "defs", file), "utf8"));
   const type = d.type;
+  // thirdPartyShader is a GENERATOR, not a filter, and three rules below do not
+  // apply to it: its first pass has no input shader at all, `original` does not
+  // exist for it in any pass, and paddingExpression is filters-only.
+  const SUPERTYPES = ["thirdPartyFilter", "thirdPartyShader", "thirdPartyJavaScript",
+    "thirdPartyJavaScriptShape", "thirdPartyJavaScriptDeformer"];
+  if (!SUPERTYPES.includes(d.superType)) {
+    fail(type, `superType "${d.superType}" is not one Cavalry registers - expected one of ${SUPERTYPES.join(", ")}`);
+  }
+  const isShaderLayer = d.superType === "thirdPartyShader";
   const attrs = d.attributes || {};
   const attrNames = Object.keys(attrs).filter(a => !INHERITED.has(a));
+
+  // 0 - paddingExpression is a 2.8-only key. On 2.7.2 the definition parser
+  // has no such key, ignores it, and falls back to the padding/autoPadding
+  // attributes - so a large blur silently CLIPS at the layer bounds instead of
+  // erroring. paddingExpression overrides padding on 2.8 (verified), so a
+  // static default costs nothing there and fixes the older version.
+  if (d.paddingExpression && isShaderLayer) {
+    fail(type, "paddingExpression is a filters-only key and is ignored on a thirdPartyShader");
+  }
+  if (d.paddingExpression && !isShaderLayer && !(attrs.padding && attrs.padding.default)) {
+    fail(type, "has paddingExpression but no static padding default - will clip on Cavalry 2.7.2, which ignores paddingExpression");
+  }
 
   // 1 - reserved names
   const clash = attrNames.filter(a => RESERVED.has(a));
@@ -110,11 +131,21 @@ for (const file of defs) {
       }
     }
 
+    // An EMPTY `uniforms` array is not "bind nothing" - it is treated exactly
+    // like omitting the key, so Cavalry binds EVERY attribute and then logs a
+    // "Could not bind uniform" error for each one this shader does not declare.
+    // At a couple of dozen attributes that is megabytes of log per minute and
+    // an app that stops responding. List at least one real uniform.
+    if (Array.isArray(p.uniforms) && p.uniforms.length === 0) {
+      fail(type, `${p.skslFile} has an EMPTY "uniforms" array - that binds ALL attributes, not none, and floods the log with bind errors. List the uniforms the shader actually declares.`);
+    }
+
     // A pass with no shader input at all fails to CONSTRUCT - Cavalry binds the
     // image by position, and reports only "Pass N: buildShader failed" with no
     // SkSL error, because nothing failed to compile. Even a purely procedural
     // pass has to declare the input.
-    if (!/^uniform\s+shader\s+\w+\s*;/m.test(src)) {
+    if (!/^uniform\s+shader\s+\w+\s*;/m.test(src)
+        && !(isShaderLayer && passes.indexOf(p) === 0)) {
       fail(type, `${p.skslFile} declares no input shader - the pass will fail to build ("buildShader failed") even if it never samples the image`);
     }
 
@@ -243,6 +274,9 @@ for (const file of defs) {
     // Lightwrap lost their tightest ladder step) and a long hunt, because
     // preflight_shader compiles the file standalone and reports OK.
     // Fix: give pass 0 its own file that reads the layer via childShader.
+    if (isShaderLayer && uni.indexOf("original") !== -1) {
+      fail(type, `${p.skslFile} declares "original", which does not exist for a thirdPartyShader in any pass`);
+    }
     if (passes.indexOf(p) === 0 && uni.indexOf("original") !== -1) {
       fail(type, `${p.skslFile} is pass 0 and declares "original" - pass 0 has no `
         + `original input, so it will fail to build and silently do nothing. `
@@ -394,10 +428,14 @@ if (process.argv.includes("--defaults")) {
         const sp = path.join(PLUGIN, p.skslFile);
         if (!fs.existsSync(sp)) { return; }
         const has = /^uniform\s+shader\s+original\s*;/m.test(fs.readFileSync(sp, "utf8"));
-        if (i >= 1 && !has) {
+        if (t.superType === "thirdPartyShader") {
+          if (has) {
+            fail(t.type, `built pass ${i} (${p.skslFile}) declares "original", which thirdPartyShader never receives`);
+          }
+        } else if (i >= 1 && !has) {
           fail(t.type, `built pass ${i} (${p.skslFile}) does not declare "uniform shader original" - Cavalry 2.7.2 binds by position and will fail to build it`);
         }
-        if (i === 0 && has) {
+        if (t.superType !== "thirdPartyShader" && i === 0 && has) {
           fail(t.type, `built pass 0 (${p.skslFile}) declares "uniform shader original" - there is no such input on the first pass`);
         }
       });

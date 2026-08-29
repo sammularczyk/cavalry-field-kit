@@ -1,166 +1,166 @@
 {
- "type": "layerStrings",
- "value": {
-  "author": "samMularczyk",
-  "layerType": "film",
-  "niceName": "Film Emulation",
-  "layerInfo": "Film in one node: halation, tone roll-off, grain, a Fujifilm-style colour recipe and projector wear.",
-  "language": "en",
-  "tabs": {
-   "filter": "Recipe",
-   "grade": "Halation"
-  },
-  "attributes": {
-   "halation": [
-    "Halation",
-    "Warm bloom from light scattering back through the film base, spreading around highlights."
-   ],
-   "halationRadius": [
-    "Halation Radius",
-    "How far the halation spreads, in pixels. The layer bounds expand to match."
-   ],
-   "halationThreshold": [
-    "Halation Threshold",
-    "Luminance above which highlights start to glow. Softly thresholded, so the matte has no hard edge."
-   ],
-   "halationDensity": [
-    "Halation Density",
-    "How much denser the core of the glow is than its falloff. Higher makes only the brightest highlights bloom."
-   ],
-   "halationRing": [
-    "Halation Ring",
-    "Hollows the core so the halation stands off the highlight as a fringe rather than glowing from its centre. This is what halation physically is - light that crosses the emulsion, bounces off the base and re-exposes it a fixed distance away, set by the thickness of the base. At 0 you get a plain glow."
-   ],
-   "halationTint": [
-    "Halation Tint",
-    "Which channels the scatter shows up in. The original used a deep orange, so it lands mostly in red."
-   ],
-   "linearise": [
-    "Linearise",
-    "Applies a 2.2 transfer before the tone curve and undoes it after. Off by default - Cavalry has its own colour management."
-   ],
-   "exposure": [
-    "Exposure",
-    "Stops of gain before the tone curve. This is what drives highlights into the roll-off."
-   ],
-   "rolloff": [
-    "Roll-Off",
-    "Compresses highlights through a filmic shoulder. It needs something above white to compress, so raise Exposure or Halation first - on a plain 0-1 image it has nothing to work on and only lifts the midtones."
-   ],
-   "gamutExtension": [
-    "Gamut Extension",
-    "Width of the gamut the roll-off happens inside. Wider desaturates highlights further before they clip."
-   ],
-   "recipe": [
-    "Recipe Strength",
-    "Strength of the Recipe tab's Fujifilm-style grade. 0 leaves colour untouched."
-   ],
-   "base": [
-    "Base",
-    "Starting colour character, built from published descriptions of a film simulation. Mono and Mono Flat are black and white."
-   ],
-   "colour": [
-    "Colour",
-    "Overall saturation trim, on Fujifilm's -4 to +4 scale."
-   ],
-   "highlightTone": [
-    "Highlight Tone",
-    "Density of the highlights, -2 to +4. Positive is harder, negative softer."
-   ],
-   "shadowTone": [
-    "Shadow Tone",
-    "Density of the shadows, -2 to +4. Positive crushes them, negative opens them up."
-   ],
-   "highlightProtect": [
-    "Dynamic Range",
-    "Highlight protection, as the camera's DR100 / DR200 / DR400. Higher holds the top end back."
-   ],
-   "colourChrome": [
-    "Colour Chrome",
-    "Deepens colours that are already saturated, leaving pale ones alone. Off, Weak (0.5) or Strong (1.0)."
-   ],
-   "colourChromeBlue": [
-    "Colour Chrome Blue",
-    "The same, restricted to blues and cyans - for skies and deep blues specifically."
-   ],
-   "wbShiftR": [
-    "WB Shift R",
-    "Red trim on Fujifilm's white balance shift grid, -9 to +9."
-   ],
-   "wbShiftB": [
-    "WB Shift B",
-    "Blue trim on the same grid. Positive is cooler, negative warmer."
-   ],
-   "monoToning": [
-    "Mono Toning",
-    "Warm or cool cast for the black and white bases, matching MonochromaticColor. No effect on the colour bases."
-   ],
-   "clarity": [
-    "Clarity",
-    "Local contrast, -5 to +5: micro-contrast without touching overall tone. Negative softens the way a diffusion filter does."
-   ],
-   "clarityRadius": [
-    "Clarity Radius",
-    "Size of the detail Clarity acts on, in pixels. Small values sharpen fine texture, large values shape broad areas."
-   ],
-   "grain": [
-    "Grain",
-    "Film grain strength (k in the signal-dependent model x + k*x^gamma*u)."
-   ],
-   "grainSize": [
-    "Grain Size",
-    "Feature size of the grain in pixels. Coarser grain is also stronger, as it is on real stock - a bigger crystal is a bigger fluctuation under the same sampling aperture."
-   ],
-   "grainBlur": [
-    "Grain Softness",
-    "How sharply each grain is defined. Low gives soft, diffuse crystals; high gives hard-edged ones you can pick out individually. Grains are round discs at random positions, so this never introduces a grid however large Grain Size goes."
-   ],
-   "grainResponse": [
-    "Grain Response",
-    "How tightly grain concentrates in the midtones. Real film is grainiest where the emulsion is half developed and cleans up in both the highlights and the deep shadows - 1 is that physical curve. Below 1 spreads grain toward the extremes, above 1 confines it further to the midtones."
-   ],
-   "grainDomain": [
-    "Grain Domain",
-    "Whether grain is added before or after the tone curve. Positive Print grains the developed image; Negative grains before it, so the curve reshapes the grain too."
-   ],
-   "scannerNoise": [
-    "Scanner Noise",
-    "Separate white noise modelling a telecine/scanner's own sensor noise, independent of film grain."
-   ],
-   "time": [
-    "Time",
-    "Driven by the composition time. Disconnect it to freeze the film artefacts."
-   ],
-   "amount": [
-    "Amount",
-    "Mix between the original layer and the film result."
-   ]
-  },
-  "enums": {
-   "linearise": {
-    "0": "Off",
-    "1": "sRGB 2.2"
-   },
-   "base": {
-    "0": "Standard",
-    "1": "Soft",
-    "2": "Vivid",
-    "3": "Muted Chrome",
-    "4": "Faded Neg",
-    "5": "Cine",
-    "6": "Neg Std",
-    "7": "Mono",
-    "8": "Mono Flat"
-   },
-   "grainDomain": {
-    "0": "Positive Print",
-    "1": "Negative"
-   },
-   "highlightProtect": {
-    "0": "DR100",
-    "1": "DR200",
-    "2": "DR400"
-   }
+  "type": "layerStrings",
+  "value": {
+    "author": "samMularczyk",
+    "layerType": "film",
+    "niceName": "Film Emulation",
+    "layerInfo": "Film stock: halation, tone roll-off, grain and a colour recipe.",
+    "language": "en",
+    "tabs": {
+      "filter": "Recipe",
+      "grade": "Halation"
+    },
+    "attributes": {
+      "halation": [
+        "Halation",
+        "Warm bloom from light scattering back through the film base, spreading around highlights."
+      ],
+      "halationRadius": [
+        "Halation Radius",
+        "How far the halation spreads, in pixels. The layer bounds expand to match."
+      ],
+      "halationThreshold": [
+        "Halation Threshold",
+        "Luminance above which highlights start to glow. Softly thresholded, so the matte has no hard edge."
+      ],
+      "halationDensity": [
+        "Halation Density",
+        "How much denser the core of the glow is than its falloff. Higher makes only the brightest highlights bloom."
+      ],
+      "halationRing": [
+        "Halation Ring",
+        "Hollows the core so the halation stands off the highlight as a fringe rather than glowing from its centre. This is what halation physically is - light that crosses the emulsion, bounces off the base and re-exposes it a fixed distance away, set by the thickness of the base. At 0 you get a plain glow."
+      ],
+      "halationTint": [
+        "Halation Tint",
+        "Which channels the scatter shows up in. The original used a deep orange, so it lands mostly in red."
+      ],
+      "linearise": [
+        "Linearise",
+        "Applies a 2.2 transfer before the tone curve and undoes it after. Off by default - Cavalry has its own colour management."
+      ],
+      "exposure": [
+        "Exposure",
+        "Stops of gain before the tone curve. This is what drives highlights into the roll-off."
+      ],
+      "rolloff": [
+        "Roll-Off",
+        "Compresses highlights through a filmic shoulder. It needs something above white to compress, so raise Exposure or Halation first - on a plain 0-1 image it has nothing to work on and only lifts the midtones."
+      ],
+      "gamutExtension": [
+        "Gamut Extension",
+        "Width of the gamut the roll-off happens inside. Wider desaturates highlights further before they clip."
+      ],
+      "recipe": [
+        "Recipe Strength",
+        "Strength of the Recipe tab's Fujifilm-style grade. 0 leaves colour untouched."
+      ],
+      "base": [
+        "Base",
+        "Starting colour character, built from published descriptions of a film simulation. Mono and Mono Flat are black and white."
+      ],
+      "colour": [
+        "Colour",
+        "Overall saturation trim, on Fujifilm's -4 to +4 scale."
+      ],
+      "highlightTone": [
+        "Highlight Tone",
+        "Density of the highlights, -2 to +4. Positive is harder, negative softer."
+      ],
+      "shadowTone": [
+        "Shadow Tone",
+        "Density of the shadows, -2 to +4. Positive crushes them, negative opens them up."
+      ],
+      "highlightProtect": [
+        "Dynamic Range",
+        "Highlight protection, as the camera's DR100 / DR200 / DR400. Higher holds the top end back."
+      ],
+      "colourChrome": [
+        "Colour Chrome",
+        "Deepens colours that are already saturated, leaving pale ones alone. Off, Weak (0.5) or Strong (1.0)."
+      ],
+      "colourChromeBlue": [
+        "Colour Chrome Blue",
+        "The same, restricted to blues and cyans - for skies and deep blues specifically."
+      ],
+      "wbShiftR": [
+        "WB Shift R",
+        "Red trim on Fujifilm's white balance shift grid, -9 to +9."
+      ],
+      "wbShiftB": [
+        "WB Shift B",
+        "Blue trim on the same grid. Positive is cooler, negative warmer."
+      ],
+      "monoToning": [
+        "Mono Toning",
+        "Warm or cool cast for the black and white bases, matching MonochromaticColor. No effect on the colour bases."
+      ],
+      "clarity": [
+        "Clarity",
+        "Local contrast, -5 to +5: micro-contrast without touching overall tone. Negative softens the way a diffusion filter does."
+      ],
+      "clarityRadius": [
+        "Clarity Radius",
+        "Size of the detail Clarity acts on, in pixels. Small values sharpen fine texture, large values shape broad areas."
+      ],
+      "grain": [
+        "Grain",
+        "Film grain strength (k in the signal-dependent model x + k*x^gamma*u)."
+      ],
+      "grainSize": [
+        "Grain Size",
+        "Feature size of the grain in pixels. Coarser grain is also stronger, as it is on real stock - a bigger crystal is a bigger fluctuation under the same sampling aperture."
+      ],
+      "grainBlur": [
+        "Grain Softness",
+        "How sharply each grain is defined. Low gives soft, diffuse crystals; high gives hard-edged ones you can pick out individually. Grains are round discs at random positions, so this never introduces a grid however large Grain Size goes."
+      ],
+      "grainResponse": [
+        "Grain Response",
+        "How tightly grain concentrates in the midtones. Real film is grainiest where the emulsion is half developed and cleans up in both the highlights and the deep shadows - 1 is that physical curve. Below 1 spreads grain toward the extremes, above 1 confines it further to the midtones."
+      ],
+      "grainDomain": [
+        "Grain Domain",
+        "Whether grain is added before or after the tone curve. Positive Print grains the developed image; Negative grains before it, so the curve reshapes the grain too."
+      ],
+      "scannerNoise": [
+        "Scanner Noise",
+        "Separate white noise modelling a telecine/scanner's own sensor noise, independent of film grain."
+      ],
+      "time": [
+        "Time",
+        "Driven by the composition time. Disconnect it to freeze the film artefacts."
+      ],
+      "amount": [
+        "Amount",
+        "Mix between the original layer and the film result."
+      ]
+    },
+    "enums": {
+      "linearise": {
+        "0": "Off",
+        "1": "sRGB 2.2"
+      },
+      "base": {
+        "0": "Standard",
+        "1": "Soft",
+        "2": "Vivid",
+        "3": "Muted Chrome",
+        "4": "Faded Neg",
+        "5": "Cine",
+        "6": "Neg Std",
+        "7": "Mono",
+        "8": "Mono Flat"
+      },
+      "grainDomain": {
+        "0": "Positive Print",
+        "1": "Negative"
+      },
+      "highlightProtect": {
+        "0": "DR100",
+        "1": "DR200",
+        "2": "DR400"
+      }
+    }
   }
- }
 }

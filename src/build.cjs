@@ -49,7 +49,12 @@ for (const t of defs) {
         // note in displayMask.sksl. A shader shared between pass 0 and a later
         // pass cannot declare it in source, since pass 0 must not have it, so
         // the variant gets it here.
-        const needsOriginal = passIndex >= 1 && !/^uniform\s+shader\s+original\s*;/m.test(src0);
+        // `original` does not exist for thirdPartyShader at all - the SDK says
+        // so explicitly. Injecting it there would add an input the host never
+        // binds, so a generator's later passes must be left alone.
+        const isShader = t.superType === "thirdPartyShader";
+        const needsOriginal = !isShader && passIndex >= 1
+            && !/^uniform\s+shader\s+original\s*;/m.test(src0);
         if (!Object.keys(consts).length && !needsOriginal) { return; }
         const src = src0;
         const tag = Object.entries(consts)

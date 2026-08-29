@@ -4,7 +4,7 @@
     "author": "samMularczyk",
     "layerType": "lightwrap",
     "niceName": "Lightwrap",
-    "layerInfo": "Bleeds light from a background layer inward from this layer's edges. Needs Background Input connected AND Background Size set.",
+    "layerInfo": "Bleed a background layer's light in around this layer's edges.",
     "language": "en",
     "attributes": {
       "size": [

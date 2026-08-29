@@ -766,6 +766,202 @@
   },
   {
     "presetType": "layer",
+    "id": "7c1e4a90-2b53-4d16-8f27-9a0c5e3b1d48",
+    "author": "samMularczyk",
+    "name": "Round and Square",
+    "layerType": [
+      "hatching"
+    ],
+    "attrs": [
+      {
+        "attrId": "pattern",
+        "value": 8
+      },
+      {
+        "attrId": "size",
+        "value": 36
+      },
+      {
+        "attrId": "lineWidth",
+        "value": 18
+      },
+      {
+        "attrId": "softness",
+        "value": 0.02
+      },
+      {
+        "attrId": "angle",
+        "value": 0
+      },
+      {
+        "attrId": "inkColor",
+        "value": "#FF8000"
+      },
+      {
+        "attrId": "paperColor",
+        "value": "#141414"
+      },
+      {
+        "attrId": "transparentPaper",
+        "value": false
+      },
+      {
+        "attrId": "amount",
+        "value": 1
+      }
+    ],
+    "resetsTransforms": false,
+    "resetsLayer": true
+  },
+  {
+    "presetType": "layer",
+    "id": "8d2f5ba1-3c64-4e27-9038-ab1d6f4c2e59",
+    "author": "samMularczyk",
+    "name": "Halftone",
+    "layerType": [
+      "hatching"
+    ],
+    "attrs": [
+      {
+        "attrId": "pattern",
+        "value": 7
+      },
+      {
+        "attrId": "size",
+        "value": 10
+      },
+      {
+        "attrId": "lineWidth",
+        "value": 6
+      },
+      {
+        "attrId": "softness",
+        "value": 0.01
+      },
+      {
+        "attrId": "angle",
+        "value": 15
+      },
+      {
+        "attrId": "inkColor",
+        "value": "#141414"
+      },
+      {
+        "attrId": "paperColor",
+        "value": "#F2F1E8"
+      },
+      {
+        "attrId": "transparentPaper",
+        "value": false
+      },
+      {
+        "attrId": "amount",
+        "value": 1
+      }
+    ],
+    "resetsTransforms": false,
+    "resetsLayer": true
+  },
+  {
+    "presetType": "layer",
+    "id": "9e3061b2-4d75-4f38-a149-bc2e705d3f6a",
+    "author": "samMularczyk",
+    "name": "Gooey Dots",
+    "layerType": [
+      "hatching"
+    ],
+    "attrs": [
+      {
+        "attrId": "pattern",
+        "value": 7
+      },
+      {
+        "attrId": "size",
+        "value": 22
+      },
+      {
+        "attrId": "lineWidth",
+        "value": 16
+      },
+      {
+        "attrId": "softness",
+        "value": 0.22
+      },
+      {
+        "attrId": "angle",
+        "value": 0
+      },
+      {
+        "attrId": "inkColor",
+        "value": "#29FF7B"
+      },
+      {
+        "attrId": "paperColor",
+        "value": "#000000"
+      },
+      {
+        "attrId": "transparentPaper",
+        "value": false
+      },
+      {
+        "attrId": "amount",
+        "value": 1
+      }
+    ],
+    "resetsTransforms": false,
+    "resetsLayer": true
+  },
+  {
+    "presetType": "layer",
+    "id": "af4172c3-5e86-4049-b25a-cd3f816e4a7b",
+    "author": "samMularczyk",
+    "name": "Engraving",
+    "layerType": [
+      "hatching"
+    ],
+    "attrs": [
+      {
+        "attrId": "pattern",
+        "value": 1
+      },
+      {
+        "attrId": "size",
+        "value": 9
+      },
+      {
+        "attrId": "lineWidth",
+        "value": 5
+      },
+      {
+        "attrId": "warpAmount",
+        "value": 0.25
+      },
+      {
+        "attrId": "warpFrequency",
+        "value": 8
+      },
+      {
+        "attrId": "layers",
+        "value": 6
+      },
+      {
+        "attrId": "inkColor",
+        "value": "#1A1A1A"
+      },
+      {
+        "attrId": "paperColor",
+        "value": "#EFE7D5"
+      },
+      {
+        "attrId": "amount",
+        "value": 1
+      }
+    ],
+    "resetsTransforms": false,
+    "resetsLayer": true
+  },
+  {
+    "presetType": "layer",
     "id": "030ebb33-7115-3378-d233-45617a03c9f5",
     "author": "samMularczyk",
     "name": "Anamorphic",
@@ -1198,6 +1394,954 @@
   },
   {
     "presetType": "layer",
+    "id": "b1a7c93e-4d52-4a18-9f60-2c7e5a1d8b04",
+    "author": "samMularczyk",
+    "name": "Reeded",
+    "layerType": [
+      "linearRefraction"
+    ],
+    "attrs": [
+      {
+        "attrId": "ribWidth",
+        "value": 40
+      },
+      {
+        "attrId": "shape",
+        "value": 0
+      },
+      {
+        "attrId": "profile",
+        "value": 0
+      },
+      {
+        "attrId": "distortion",
+        "value": 0.5
+      },
+      {
+        "attrId": "highlights",
+        "value": 0.1
+      },
+      {
+        "attrId": "shadows",
+        "value": 0.25
+      },
+      {
+        "attrId": "blur",
+        "value": 0
+      },
+      {
+        "attrId": "stretch",
+        "value": 0
+      }
+    ],
+    "resetsTransforms": false,
+    "resetsLayer": true
+  },
+  {
+    "presetType": "layer",
+    "id": "c2b8da4f-5e63-4b29-a071-3d8f6b2e9c15",
+    "author": "samMularczyk",
+    "name": "Abstract",
+    "layerType": [
+      "linearRefraction"
+    ],
+    "attrs": [
+      {
+        "attrId": "ribWidth",
+        "value": 120
+      },
+      {
+        "attrId": "angle",
+        "value": 30
+      },
+      {
+        "attrId": "shape",
+        "value": 1
+      },
+      {
+        "attrId": "profile",
+        "value": 4
+      },
+      {
+        "attrId": "distortion",
+        "value": 1
+      },
+      {
+        "attrId": "highlights",
+        "value": 0
+      },
+      {
+        "attrId": "shadows",
+        "value": 0
+      },
+      {
+        "attrId": "blur",
+        "value": 0.6
+      },
+      {
+        "attrId": "stretch",
+        "value": 1
+      }
+    ],
+    "resetsTransforms": false,
+    "resetsLayer": true
+  },
+  {
+    "presetType": "layer",
+    "id": "d3c9eb50-6f74-4c3a-b182-4e907c3fad26",
+    "author": "samMularczyk",
+    "name": "Waves",
+    "layerType": [
+      "linearRefraction"
+    ],
+    "attrs": [
+      {
+        "attrId": "ribWidth",
+        "value": 18
+      },
+      {
+        "attrId": "shape",
+        "value": 2
+      },
+      {
+        "attrId": "profile",
+        "value": 2
+      },
+      {
+        "attrId": "distortion",
+        "value": 0.5
+      },
+      {
+        "attrId": "highlights",
+        "value": 0
+      },
+      {
+        "attrId": "shadows",
+        "value": 0
+      },
+      {
+        "attrId": "blur",
+        "value": 0.1
+      },
+      {
+        "attrId": "stretch",
+        "value": 1
+      }
+    ],
+    "resetsTransforms": false,
+    "resetsLayer": true
+  },
+  {
+    "presetType": "layer",
+    "id": "e4daf061-7085-4d4b-c293-5fa18d4abe37",
+    "author": "samMularczyk",
+    "name": "Folds",
+    "layerType": [
+      "linearRefraction"
+    ],
+    "attrs": [
+      {
+        "attrId": "ribWidth",
+        "value": 70
+      },
+      {
+        "attrId": "shape",
+        "value": 0
+      },
+      {
+        "attrId": "profile",
+        "value": 3
+      },
+      {
+        "attrId": "distortion",
+        "value": 0.75
+      },
+      {
+        "attrId": "highlights",
+        "value": 0
+      },
+      {
+        "attrId": "shadows",
+        "value": 0.4
+      },
+      {
+        "attrId": "blur",
+        "value": 0.25
+      },
+      {
+        "attrId": "stretch",
+        "value": 0
+      }
+    ],
+    "resetsTransforms": false,
+    "resetsLayer": true
+  },
+  {
+    "presetType": "layer",
+    "id": "a5e1c7b2-3f46-4d90-8b71-6c2e9d05af18",
+    "author": "samMularczyk",
+    "name": "Chrome",
+    "layerType": [
+      "liquidMetal"
+    ],
+    "attrs": [
+      {
+        "attrId": "material",
+        "value": 0
+      },
+      {
+        "attrId": "spread",
+        "value": 70
+      },
+      {
+        "attrId": "repetition",
+        "value": 5
+      },
+      {
+        "attrId": "softness",
+        "value": 0.06
+      },
+      {
+        "attrId": "shiftRed",
+        "value": 0.3
+      },
+      {
+        "attrId": "shiftBlue",
+        "value": 0.3
+      },
+      {
+        "attrId": "contourAmount",
+        "value": 0.6
+      },
+      {
+        "attrId": "distortion",
+        "value": 0.05
+      },
+      {
+        "attrId": "metalAngle",
+        "value": 70
+      },
+      {
+        "attrId": "tintColor",
+        "value": "#FFFFFF"
+      }
+    ],
+    "resetsTransforms": false,
+    "resetsLayer": true
+  },
+  {
+    "presetType": "layer",
+    "id": "b6f2d8c3-4057-4ea1-9c82-7d3fae16b029",
+    "author": "samMularczyk",
+    "name": "Iridescent",
+    "layerType": [
+      "liquidMetal"
+    ],
+    "attrs": [
+      {
+        "attrId": "material",
+        "value": 0
+      },
+      {
+        "attrId": "spread",
+        "value": 60
+      },
+      {
+        "attrId": "repetition",
+        "value": 6
+      },
+      {
+        "attrId": "softness",
+        "value": 0.05
+      },
+      {
+        "attrId": "shiftRed",
+        "value": 1
+      },
+      {
+        "attrId": "shiftBlue",
+        "value": 1
+      },
+      {
+        "attrId": "contourAmount",
+        "value": 0.7
+      },
+      {
+        "attrId": "distortion",
+        "value": 0.12
+      },
+      {
+        "attrId": "metalAngle",
+        "value": 70
+      },
+      {
+        "attrId": "tintColor",
+        "value": "#FFFFFF"
+      }
+    ],
+    "resetsTransforms": false,
+    "resetsLayer": true
+  },
+  {
+    "presetType": "layer",
+    "id": "c7a3e9d4-5168-4fb2-ad93-8e4bf2270c3a",
+    "author": "samMularczyk",
+    "name": "Noir",
+    "layerType": [
+      "liquidMetal"
+    ],
+    "attrs": [
+      {
+        "attrId": "material",
+        "value": 0
+      },
+      {
+        "attrId": "spread",
+        "value": 80
+      },
+      {
+        "attrId": "repetition",
+        "value": 3
+      },
+      {
+        "attrId": "softness",
+        "value": 0.45
+      },
+      {
+        "attrId": "shiftRed",
+        "value": 0
+      },
+      {
+        "attrId": "shiftBlue",
+        "value": 0
+      },
+      {
+        "attrId": "contourAmount",
+        "value": 0
+      },
+      {
+        "attrId": "distortion",
+        "value": 0
+      },
+      {
+        "attrId": "metalAngle",
+        "value": 90
+      },
+      {
+        "attrId": "tintColor",
+        "value": "#606060"
+      }
+    ],
+    "resetsTransforms": false,
+    "resetsLayer": true
+  },
+  {
+    "presetType": "layer",
+    "id": "d8b4fae5-6279-40c3-be04-9f5c03381d4b",
+    "author": "samMularczyk",
+    "name": "Smoke",
+    "layerType": [
+      "liquidMetal"
+    ],
+    "attrs": [
+      {
+        "attrId": "material",
+        "value": 1
+      },
+      {
+        "attrId": "spread",
+        "value": 90
+      },
+      {
+        "attrId": "innerDistortion",
+        "value": 0.8
+      },
+      {
+        "attrId": "outerDistortion",
+        "value": 0.6
+      },
+      {
+        "attrId": "innerGlow",
+        "value": 1
+      },
+      {
+        "attrId": "outerGlow",
+        "value": 0.55
+      },
+      {
+        "attrId": "smokeScale",
+        "value": 0.8
+      },
+      {
+        "attrId": "smokeInner",
+        "value": "#FAFAF5"
+      },
+      {
+        "attrId": "heatCount",
+        "value": 2
+      },
+      {
+        "attrId": "heat1",
+        "value": "#333333"
+      },
+      {
+        "attrId": "heat2",
+        "value": "#E7E6DF"
+      },
+      {
+        "attrId": "backColor",
+        "value": "#F0EFEA"
+      },
+      {
+        "attrId": "smokeSpill",
+        "value": 0.25
+      }
+    ],
+    "resetsTransforms": false,
+    "resetsLayer": true
+  },
+  {
+    "presetType": "layer",
+    "id": "e9c50bf6-738a-41d4-cf15-a06d14492e5c",
+    "author": "samMularczyk",
+    "name": "Fire",
+    "layerType": [
+      "liquidMetal"
+    ],
+    "attrs": [
+      {
+        "attrId": "material",
+        "value": 1
+      },
+      {
+        "attrId": "spread",
+        "value": 90
+      },
+      {
+        "attrId": "innerDistortion",
+        "value": 0.6
+      },
+      {
+        "attrId": "outerDistortion",
+        "value": 0.8
+      },
+      {
+        "attrId": "innerGlow",
+        "value": 0.65
+      },
+      {
+        "attrId": "outerGlow",
+        "value": 1
+      },
+      {
+        "attrId": "smokeScale",
+        "value": 0.8
+      },
+      {
+        "attrId": "smokeInner",
+        "value": "#000000"
+      },
+      {
+        "attrId": "heatCount",
+        "value": 3
+      },
+      {
+        "attrId": "heat1",
+        "value": "#FE5B16"
+      },
+      {
+        "attrId": "heat2",
+        "value": "#F7FF61"
+      },
+      {
+        "attrId": "heat3",
+        "value": "#FFFFFF"
+      },
+      {
+        "attrId": "backColor",
+        "value": "#000000"
+      },
+      {
+        "attrId": "smokeSpill",
+        "value": 0.6
+      }
+    ],
+    "resetsTransforms": false,
+    "resetsLayer": true
+  },
+  {
+    "presetType": "layer",
+    "id": "fad61c07-849b-42e5-d026-b17e2550af6d",
+    "author": "samMularczyk",
+    "name": "Heatmap",
+    "layerType": [
+      "liquidMetal"
+    ],
+    "attrs": [
+      {
+        "attrId": "material",
+        "value": 2
+      },
+      {
+        "attrId": "spread",
+        "value": 120
+      },
+      {
+        "attrId": "innerGlow",
+        "value": 0.5
+      },
+      {
+        "attrId": "outerGlow",
+        "value": 0.5
+      },
+      {
+        "attrId": "contourAmount",
+        "value": 0.5
+      },
+      {
+        "attrId": "distortion",
+        "value": 0
+      },
+      {
+        "attrId": "heatCount",
+        "value": 4
+      },
+      {
+        "attrId": "heat1",
+        "value": "#11206A"
+      },
+      {
+        "attrId": "heat2",
+        "value": "#2F63E7"
+      },
+      {
+        "attrId": "heat3",
+        "value": "#FF991E"
+      },
+      {
+        "attrId": "heat4",
+        "value": "#FFE679"
+      },
+      {
+        "attrId": "backColor",
+        "value": "#000000"
+      }
+    ],
+    "resetsTransforms": false,
+    "resetsLayer": true
+  },
+  {
+    "presetType": "layer",
+    "id": "60112233-4455-4667-8899-aabbccddeeff",
+    "author": "samMularczyk",
+    "name": "Sea",
+    "layerType": [
+      "meshGradient"
+    ],
+    "attrs": [
+      {
+        "attrId": "colorCount",
+        "value": 4
+      },
+      {
+        "attrId": "color1",
+        "value": "#013B65"
+      },
+      {
+        "attrId": "color2",
+        "value": "#03738C"
+      },
+      {
+        "attrId": "color3",
+        "value": "#A3D3FF"
+      },
+      {
+        "attrId": "color4",
+        "value": "#F2FAEF"
+      },
+      {
+        "attrId": "positions",
+        "value": 0
+      },
+      {
+        "attrId": "waveX",
+        "value": 0.53
+      },
+      {
+        "attrId": "waveXShift",
+        "value": 0
+      },
+      {
+        "attrId": "waveY",
+        "value": 0.95
+      },
+      {
+        "attrId": "waveYShift",
+        "value": 0.64
+      },
+      {
+        "attrId": "mixing",
+        "value": 0.5
+      },
+      {
+        "attrId": "grainMixer",
+        "value": 0
+      },
+      {
+        "attrId": "grainOverlay",
+        "value": 0
+      },
+      {
+        "attrId": "rotation",
+        "value": 0
+      }
+    ],
+    "resetsTransforms": false,
+    "resetsLayer": true
+  },
+  {
+    "presetType": "layer",
+    "id": "71223344-5566-4778-99aa-bbccddeeff00",
+    "author": "samMularczyk",
+    "name": "1960s",
+    "layerType": [
+      "meshGradient"
+    ],
+    "attrs": [
+      {
+        "attrId": "colorCount",
+        "value": 4
+      },
+      {
+        "attrId": "color1",
+        "value": "#000000"
+      },
+      {
+        "attrId": "color2",
+        "value": "#082400"
+      },
+      {
+        "attrId": "color3",
+        "value": "#B1AA91"
+      },
+      {
+        "attrId": "color4",
+        "value": "#8E8C15"
+      },
+      {
+        "attrId": "positions",
+        "value": 42
+      },
+      {
+        "attrId": "waveX",
+        "value": 0.45
+      },
+      {
+        "attrId": "waveXShift",
+        "value": 0
+      },
+      {
+        "attrId": "waveY",
+        "value": 1
+      },
+      {
+        "attrId": "waveYShift",
+        "value": 0
+      },
+      {
+        "attrId": "mixing",
+        "value": 0
+      },
+      {
+        "attrId": "grainMixer",
+        "value": 0.37
+      },
+      {
+        "attrId": "grainOverlay",
+        "value": 0.78
+      },
+      {
+        "attrId": "rotation",
+        "value": 0
+      }
+    ],
+    "resetsTransforms": false,
+    "resetsLayer": true
+  },
+  {
+    "presetType": "layer",
+    "id": "82334455-6677-4889-aabb-ccddeeff0011",
+    "author": "samMularczyk",
+    "name": "Sunset",
+    "layerType": [
+      "meshGradient"
+    ],
+    "attrs": [
+      {
+        "attrId": "colorCount",
+        "value": 4
+      },
+      {
+        "attrId": "color1",
+        "value": "#264653"
+      },
+      {
+        "attrId": "color2",
+        "value": "#9C2B2B"
+      },
+      {
+        "attrId": "color3",
+        "value": "#F4A261"
+      },
+      {
+        "attrId": "color4",
+        "value": "#FFFFFF"
+      },
+      {
+        "attrId": "positions",
+        "value": 0
+      },
+      {
+        "attrId": "waveX",
+        "value": 0.6
+      },
+      {
+        "attrId": "waveXShift",
+        "value": 0.7
+      },
+      {
+        "attrId": "waveY",
+        "value": 0.7
+      },
+      {
+        "attrId": "waveYShift",
+        "value": 0.7
+      },
+      {
+        "attrId": "mixing",
+        "value": 0.5
+      },
+      {
+        "attrId": "grainMixer",
+        "value": 0
+      },
+      {
+        "attrId": "grainOverlay",
+        "value": 0
+      },
+      {
+        "attrId": "rotation",
+        "value": 0
+      }
+    ],
+    "resetsTransforms": false,
+    "resetsLayer": true
+  },
+  {
+    "presetType": "layer",
+    "id": "93445566-7788-499a-bbcc-ddeeff001122",
+    "author": "samMularczyk",
+    "name": "Ink",
+    "layerType": [
+      "meshGradient"
+    ],
+    "attrs": [
+      {
+        "attrId": "colorCount",
+        "value": 2
+      },
+      {
+        "attrId": "color1",
+        "value": "#FFFFFF"
+      },
+      {
+        "attrId": "color2",
+        "value": "#000000"
+      },
+      {
+        "attrId": "positions",
+        "value": 0
+      },
+      {
+        "attrId": "waveX",
+        "value": 1
+      },
+      {
+        "attrId": "waveXShift",
+        "value": 0
+      },
+      {
+        "attrId": "waveY",
+        "value": 1
+      },
+      {
+        "attrId": "waveYShift",
+        "value": 0
+      },
+      {
+        "attrId": "swirl",
+        "value": 0.2
+      },
+      {
+        "attrId": "mixing",
+        "value": 0.5
+      },
+      {
+        "attrId": "grainMixer",
+        "value": 0
+      },
+      {
+        "attrId": "grainOverlay",
+        "value": 0
+      },
+      {
+        "attrId": "rotation",
+        "value": 90
+      }
+    ],
+    "resetsTransforms": false,
+    "resetsLayer": true
+  },
+  {
+    "presetType": "layer",
+    "id": "a4556677-8899-4aab-ccdd-eeff00112233",
+    "author": "samMularczyk",
+    "name": "Purple",
+    "layerType": [
+      "meshGradient"
+    ],
+    "attrs": [
+      {
+        "attrId": "colorCount",
+        "value": 2
+      },
+      {
+        "attrId": "color1",
+        "value": "#AAA7D7"
+      },
+      {
+        "attrId": "color2",
+        "value": "#3C2B8E"
+      },
+      {
+        "attrId": "positions",
+        "value": 0
+      },
+      {
+        "attrId": "waveX",
+        "value": 1
+      },
+      {
+        "attrId": "waveXShift",
+        "value": 0
+      },
+      {
+        "attrId": "waveY",
+        "value": 1
+      },
+      {
+        "attrId": "waveYShift",
+        "value": 0
+      },
+      {
+        "attrId": "swirl",
+        "value": 1
+      },
+      {
+        "attrId": "mixing",
+        "value": 0.5
+      },
+      {
+        "attrId": "grainMixer",
+        "value": 0
+      },
+      {
+        "attrId": "grainOverlay",
+        "value": 0
+      },
+      {
+        "attrId": "rotation",
+        "value": 0
+      }
+    ],
+    "resetsTransforms": false,
+    "resetsLayer": true
+  },
+  {
+    "presetType": "layer",
+    "id": "b5667788-99aa-4bbc-ddee-ff0011223344",
+    "author": "samMularczyk",
+    "name": "Beach",
+    "layerType": [
+      "meshGradient"
+    ],
+    "attrs": [
+      {
+        "attrId": "colorCount",
+        "value": 4
+      },
+      {
+        "attrId": "color1",
+        "value": "#BCECF6"
+      },
+      {
+        "attrId": "color2",
+        "value": "#00AAFF"
+      },
+      {
+        "attrId": "color3",
+        "value": "#00F7FF"
+      },
+      {
+        "attrId": "color4",
+        "value": "#FFD447"
+      },
+      {
+        "attrId": "positions",
+        "value": 0
+      },
+      {
+        "attrId": "waveX",
+        "value": 0.8
+      },
+      {
+        "attrId": "waveXShift",
+        "value": 0
+      },
+      {
+        "attrId": "waveY",
+        "value": 0.8
+      },
+      {
+        "attrId": "waveYShift",
+        "value": 0
+      },
+      {
+        "attrId": "swirl",
+        "value": 0.35
+      },
+      {
+        "attrId": "mixing",
+        "value": 0.6
+      },
+      {
+        "attrId": "grainMixer",
+        "value": 0
+      },
+      {
+        "attrId": "grainOverlay",
+        "value": 0
+      },
+      {
+        "attrId": "rotation",
+        "value": 0
+      }
+    ],
+    "resetsTransforms": false,
+    "resetsLayer": true
+  },
+  {
+    "presetType": "layer",
     "id": "804d1f0d-0b2b-beec-d4d6-c158d3e12454",
     "author": "samMularczyk",
     "name": "Brushstroke",
@@ -1369,6 +2513,189 @@
   },
   {
     "presetType": "layer",
+    "id": "1a2b3c4d-5e6f-4a70-8b91-c2d3e4f50617",
+    "author": "samMularczyk",
+    "name": "Cartridge",
+    "layerType": [
+      "paperTexture"
+    ],
+    "attrs": [
+      {
+        "attrId": "paperColor",
+        "value": "#9FADBC"
+      },
+      {
+        "attrId": "shadowColor",
+        "value": "#FFFFFF"
+      },
+      {
+        "attrId": "paperContrast",
+        "value": 0.3
+      },
+      {
+        "attrId": "roughness",
+        "value": 0.4
+      },
+      {
+        "attrId": "fibre",
+        "value": 0.3
+      },
+      {
+        "attrId": "fibreSize",
+        "value": 0.2
+      },
+      {
+        "attrId": "crumples",
+        "value": 0.3
+      },
+      {
+        "attrId": "crumpleSize",
+        "value": 0.35
+      },
+      {
+        "attrId": "folds",
+        "value": 0.65
+      },
+      {
+        "attrId": "foldCount",
+        "value": 5
+      },
+      {
+        "attrId": "drops",
+        "value": 0.2
+      },
+      {
+        "attrId": "seed",
+        "value": 5.8
+      }
+    ],
+    "resetsTransforms": false,
+    "resetsLayer": true
+  },
+  {
+    "presetType": "layer",
+    "id": "2b3c4d5e-6f70-4b81-9ca2-d3e4f5061728",
+    "author": "samMularczyk",
+    "name": "Cardboard",
+    "layerType": [
+      "paperTexture"
+    ],
+    "attrs": [
+      {
+        "attrId": "paperColor",
+        "value": "#C7B89E"
+      },
+      {
+        "attrId": "shadowColor",
+        "value": "#999180"
+      },
+      {
+        "attrId": "paperContrast",
+        "value": 0.4
+      },
+      {
+        "attrId": "roughness",
+        "value": 0
+      },
+      {
+        "attrId": "fibre",
+        "value": 0.35
+      },
+      {
+        "attrId": "fibreSize",
+        "value": 0.14
+      },
+      {
+        "attrId": "crumples",
+        "value": 0.7
+      },
+      {
+        "attrId": "crumpleSize",
+        "value": 0.1
+      },
+      {
+        "attrId": "folds",
+        "value": 0
+      },
+      {
+        "attrId": "foldCount",
+        "value": 1
+      },
+      {
+        "attrId": "drops",
+        "value": 0.1
+      },
+      {
+        "attrId": "seed",
+        "value": 1.6
+      }
+    ],
+    "resetsTransforms": false,
+    "resetsLayer": true
+  },
+  {
+    "presetType": "layer",
+    "id": "3c4d5e6f-7081-4c92-adb3-e4f506172839",
+    "author": "samMularczyk",
+    "name": "Crumpled",
+    "layerType": [
+      "paperTexture"
+    ],
+    "attrs": [
+      {
+        "attrId": "paperColor",
+        "value": "#FFFFFF"
+      },
+      {
+        "attrId": "shadowColor",
+        "value": "#B9BCC4"
+      },
+      {
+        "attrId": "paperContrast",
+        "value": 0.85
+      },
+      {
+        "attrId": "roughness",
+        "value": 0
+      },
+      {
+        "attrId": "fibre",
+        "value": 0.1
+      },
+      {
+        "attrId": "fibreSize",
+        "value": 0.2
+      },
+      {
+        "attrId": "crumples",
+        "value": 1
+      },
+      {
+        "attrId": "crumpleSize",
+        "value": 0.3
+      },
+      {
+        "attrId": "folds",
+        "value": 1
+      },
+      {
+        "attrId": "foldCount",
+        "value": 15
+      },
+      {
+        "attrId": "drops",
+        "value": 0
+      },
+      {
+        "attrId": "seed",
+        "value": 2.2
+      }
+    ],
+    "resetsTransforms": false,
+    "resetsLayer": true
+  },
+  {
+    "presetType": "layer",
     "id": "5ddd387f-d738-4c21-8e91-975f17583d47",
     "author": "samMularczyk",
     "name": "Riso",
@@ -1427,6 +2754,22 @@
       {
         "attrId": "inkOpacity",
         "value": 0.8
+      },
+      {
+        "attrId": "trueColour",
+        "value": 0
+      },
+      {
+        "attrId": "inkGrain",
+        "value": 0.6
+      },
+      {
+        "attrId": "toneFloor",
+        "value": 0.28
+      },
+      {
+        "attrId": "inkLossScale",
+        "value": 0.05
       }
     ],
     "resetsTransforms": false,
@@ -1455,7 +2798,7 @@
       },
       {
         "attrId": "screenType",
-        "value": 2
+        "value": 1
       },
       {
         "attrId": "frequency",
@@ -1484,6 +2827,34 @@
       {
         "attrId": "inkOpacity",
         "value": 0.9
+      },
+      {
+        "attrId": "trueColour",
+        "value": 0
+      },
+      {
+        "attrId": "inkGrain",
+        "value": 0.6
+      },
+      {
+        "attrId": "ink1Color",
+        "value": "#1B7F5A"
+      },
+      {
+        "attrId": "ink2Color",
+        "value": "#E8547C"
+      },
+      {
+        "attrId": "ink3Color",
+        "value": "#F2C230"
+      },
+      {
+        "attrId": "toneFloor",
+        "value": 0.28
+      },
+      {
+        "attrId": "inkLossScale",
+        "value": 0.05
       }
     ],
     "resetsTransforms": false,
@@ -1516,11 +2887,11 @@
       },
       {
         "attrId": "ink1Coverage",
-        "value": 1.3
+        "value": 1
       },
       {
         "attrId": "screenType",
-        "value": 2
+        "value": 1
       },
       {
         "attrId": "frequency",
@@ -1557,6 +2928,478 @@
       {
         "attrId": "inkOpacity",
         "value": 1
+      }
+    ],
+    "resetsTransforms": false,
+    "resetsLayer": true
+  },
+  {
+    "presetType": "layer",
+    "id": "3f4c1a92-7d6e-4b58-9a21-c0e8f5b47d13",
+    "author": "samMularczyk",
+    "name": "CMYK",
+    "layerType": [
+      "print"
+    ],
+    "attrs": [
+      {
+        "attrId": "process",
+        "value": 1
+      },
+      {
+        "attrId": "separation",
+        "value": 0
+      },
+      {
+        "attrId": "inkCount",
+        "value": 4
+      },
+      {
+        "attrId": "ink1Color",
+        "value": "#00AEEF"
+      },
+      {
+        "attrId": "ink1Angle",
+        "value": 15
+      },
+      {
+        "attrId": "ink2Color",
+        "value": "#EC008C"
+      },
+      {
+        "attrId": "ink2Angle",
+        "value": 75
+      },
+      {
+        "attrId": "ink3Color",
+        "value": "#FFF200"
+      },
+      {
+        "attrId": "ink3Angle",
+        "value": 0
+      },
+      {
+        "attrId": "ink4Color",
+        "value": "#231F20"
+      },
+      {
+        "attrId": "ink4Angle",
+        "value": 45
+      },
+      {
+        "attrId": "screenType",
+        "value": 1
+      },
+      {
+        "attrId": "dotShape",
+        "value": 1
+      },
+      {
+        "attrId": "frequency",
+        "value": 4
+      },
+      {
+        "attrId": "dotGain",
+        "value": 0.15
+      },
+      {
+        "attrId": "yuleNielsen",
+        "value": 1.7
+      },
+      {
+        "attrId": "levels",
+        "value": 0
+      },
+      {
+        "attrId": "flatten",
+        "value": 0
+      },
+      {
+        "attrId": "paperColor",
+        "value": "#FFFFFF"
+      },
+      {
+        "attrId": "paperGrain",
+        "value": 0.1
+      },
+      {
+        "attrId": "registrationError",
+        "value": 0.4
+      },
+      {
+        "attrId": "inkLoss",
+        "value": 0.05
+      },
+      {
+        "attrId": "mottle",
+        "value": 0.05
+      },
+      {
+        "attrId": "inkOpacity",
+        "value": 1
+      },
+      {
+        "attrId": "trueColour",
+        "value": 1
+      },
+      {
+        "attrId": "inkGrain",
+        "value": 0.6
+      },
+      {
+        "attrId": "inkLossScale",
+        "value": 0.05
+      }
+    ],
+    "resetsTransforms": false,
+    "resetsLayer": true
+  },
+  {
+    "presetType": "layer",
+    "id": "c7d81e94-2f60-4b3a-9d15-8e60a2f4b7c3",
+    "author": "samMularczyk",
+    "name": "Cut Paper",
+    "layerType": [
+      "print"
+    ],
+    "attrs": [
+      {
+        "attrId": "process",
+        "value": 0
+      },
+      {
+        "attrId": "separation",
+        "value": 0
+      },
+      {
+        "attrId": "inkCount",
+        "value": 4
+      },
+      {
+        "attrId": "flatten",
+        "value": 1.5
+      },
+      {
+        "attrId": "levels",
+        "value": 0
+      },
+      {
+        "attrId": "screenType",
+        "value": 0
+      },
+      {
+        "attrId": "dotShape",
+        "value": 0
+      },
+      {
+        "attrId": "ink1Color",
+        "value": "#3E7FD4"
+      },
+      {
+        "attrId": "ink2Color",
+        "value": "#17722E"
+      },
+      {
+        "attrId": "ink3Color",
+        "value": "#E8542B"
+      },
+      {
+        "attrId": "ink4Color",
+        "value": "#F2A2A6"
+      },
+      {
+        "attrId": "inkOpacity",
+        "value": 0.92
+      },
+      {
+        "attrId": "keyline",
+        "value": 2.5
+      },
+      {
+        "attrId": "keylineThreshold",
+        "value": 0.12
+      },
+      {
+        "attrId": "registrationError",
+        "value": 0.5
+      },
+      {
+        "attrId": "inkLoss",
+        "value": 0.1
+      },
+      {
+        "attrId": "mottle",
+        "value": 0.25
+      },
+      {
+        "attrId": "paperColor",
+        "value": "#FAF8F2"
+      },
+      {
+        "attrId": "paperGrain",
+        "value": 0.6
+      },
+      {
+        "attrId": "paperTooth",
+        "value": 0.3
+      },
+      {
+        "attrId": "paperFibre",
+        "value": 0.25
+      },
+      {
+        "attrId": "yuleNielsen",
+        "value": 1.7
+      },
+      {
+        "attrId": "amount",
+        "value": 1
+      },
+      {
+        "attrId": "trueColour",
+        "value": 0
+      },
+      {
+        "attrId": "inkGrain",
+        "value": 0.6
+      },
+      {
+        "attrId": "toneFloor",
+        "value": 0.28
+      },
+      {
+        "attrId": "inkLossScale",
+        "value": 0.05
+      }
+    ],
+    "resetsTransforms": false,
+    "resetsLayer": true
+  },
+  {
+    "presetType": "layer",
+    "id": "3f9a52d7-8c14-4e6b-b0a9-52d7e1c48f36",
+    "author": "samMularczyk",
+    "name": "Riso Spot Inks",
+    "layerType": [
+      "print"
+    ],
+    "attrs": [
+      {
+        "attrId": "process",
+        "value": 0
+      },
+      {
+        "attrId": "separation",
+        "value": 0
+      },
+      {
+        "attrId": "inkCount",
+        "value": 4
+      },
+      {
+        "attrId": "ink1Color",
+        "value": "#00A95C"
+      },
+      {
+        "attrId": "ink1Angle",
+        "value": 15
+      },
+      {
+        "attrId": "ink2Color",
+        "value": "#FF48B0"
+      },
+      {
+        "attrId": "ink2Angle",
+        "value": 45
+      },
+      {
+        "attrId": "ink3Color",
+        "value": "#FFE800"
+      },
+      {
+        "attrId": "ink3Angle",
+        "value": 75
+      },
+      {
+        "attrId": "ink4Color",
+        "value": "#3D5588"
+      },
+      {
+        "attrId": "ink4Angle",
+        "value": 105
+      },
+      {
+        "attrId": "screenType",
+        "value": 0
+      },
+      {
+        "attrId": "inkGrain",
+        "value": 0.6
+      },
+      {
+        "attrId": "inkGrainScale",
+        "value": 0.35
+      },
+      {
+        "attrId": "levels",
+        "value": 0
+      },
+      {
+        "attrId": "flatten",
+        "value": 2.5
+      },
+      {
+        "attrId": "trueColour",
+        "value": 0
+      },
+      {
+        "attrId": "inkOpacity",
+        "value": 0.95
+      },
+      {
+        "attrId": "yuleNielsen",
+        "value": 2
+      },
+      {
+        "attrId": "registrationError",
+        "value": 1.2
+      },
+      {
+        "attrId": "inkLoss",
+        "value": 0.3
+      },
+      {
+        "attrId": "mottle",
+        "value": 0.18
+      },
+      {
+        "attrId": "keyline",
+        "value": 0
+      },
+      {
+        "attrId": "paperColor",
+        "value": "#F7F3E9"
+      },
+      {
+        "attrId": "paperGrain",
+        "value": 0.4
+      },
+      {
+        "attrId": "paperTooth",
+        "value": 0.2
+      },
+      {
+        "attrId": "amount",
+        "value": 1
+      },
+      {
+        "attrId": "edgeBreakup",
+        "value": 1
+      },
+      {
+        "attrId": "edgeBreakupScale",
+        "value": 0.35
+      },
+      {
+        "attrId": "inkLossScale",
+        "value": 0.05
+      },
+      {
+        "attrId": "toneFloor",
+        "value": 0.28
+      }
+    ],
+    "resetsTransforms": false,
+    "resetsLayer": true
+  },
+  {
+    "presetType": "layer",
+    "id": "5b2e91c4-6a37-4d18-8f92-71c3a5e0d846",
+    "author": "samMularczyk",
+    "name": "Riso Spot",
+    "layerType": [
+      "print"
+    ],
+    "attrs": [
+      {
+        "attrId": "process",
+        "value": 0
+      },
+      {
+        "attrId": "separation",
+        "value": 3
+      },
+      {
+        "attrId": "screenType",
+        "value": 0
+      },
+      {
+        "attrId": "inkGrain",
+        "value": 0.45
+      },
+      {
+        "attrId": "inkGrainScale",
+        "value": 0.35
+      },
+      {
+        "attrId": "levels",
+        "value": 0
+      },
+      {
+        "attrId": "flatten",
+        "value": 2.5
+      },
+      {
+        "attrId": "trueColour",
+        "value": 0
+      },
+      {
+        "attrId": "inkOpacity",
+        "value": 0.95
+      },
+      {
+        "attrId": "inkLoss",
+        "value": 0.08
+      },
+      {
+        "attrId": "mottle",
+        "value": 0.18
+      },
+      {
+        "attrId": "keyline",
+        "value": 0
+      },
+      {
+        "attrId": "paperColor",
+        "value": "#F7F3E9"
+      },
+      {
+        "attrId": "paperGrain",
+        "value": 0.4
+      },
+      {
+        "attrId": "paperTooth",
+        "value": 0.2
+      },
+      {
+        "attrId": "amount",
+        "value": 1
+      },
+      {
+        "attrId": "registrationError",
+        "value": 1.2
+      },
+      {
+        "attrId": "edgeBreakup",
+        "value": 1.2
+      },
+      {
+        "attrId": "edgeBreakupScale",
+        "value": 1
+      },
+      {
+        "attrId": "inkLossScale",
+        "value": 0.05
       }
     ],
     "resetsTransforms": false,
@@ -1785,6 +3628,335 @@
       {
         "attrId": "hiss",
         "value": 0.12
+      }
+    ],
+    "resetsTransforms": false,
+    "resetsLayer": true
+  },
+  {
+    "presetType": "layer",
+    "id": "11aa22bb-33cc-44dd-8e5f-6a7b8c9d0e1f",
+    "author": "samMularczyk",
+    "name": "Cauldron Pot",
+    "layerType": [
+      "warp"
+    ],
+    "attrs": [
+      {
+        "attrId": "colorCount",
+        "value": 3
+      },
+      {
+        "attrId": "color1",
+        "value": "#A7E58B"
+      },
+      {
+        "attrId": "color2",
+        "value": "#324472"
+      },
+      {
+        "attrId": "color3",
+        "value": "#0A180D"
+      },
+      {
+        "attrId": "scale",
+        "value": 0.9
+      },
+      {
+        "attrId": "rotation",
+        "value": 160
+      },
+      {
+        "attrId": "proportion",
+        "value": 0.64
+      },
+      {
+        "attrId": "softness",
+        "value": 1
+      },
+      {
+        "attrId": "distortion",
+        "value": 0.2
+      },
+      {
+        "attrId": "swirl",
+        "value": 0.86
+      },
+      {
+        "attrId": "swirlIterations",
+        "value": 7
+      },
+      {
+        "attrId": "shapeScale",
+        "value": 0.6
+      },
+      {
+        "attrId": "shape",
+        "value": 2
+      }
+    ],
+    "resetsTransforms": false,
+    "resetsLayer": true
+  },
+  {
+    "presetType": "layer",
+    "id": "22bb33cc-44dd-455e-9f60-7b8c9d0e1f20",
+    "author": "samMularczyk",
+    "name": "Live Ink",
+    "layerType": [
+      "warp"
+    ],
+    "attrs": [
+      {
+        "attrId": "colorCount",
+        "value": 4
+      },
+      {
+        "attrId": "color1",
+        "value": "#111314"
+      },
+      {
+        "attrId": "color2",
+        "value": "#9FAEAB"
+      },
+      {
+        "attrId": "color3",
+        "value": "#F3FEE7"
+      },
+      {
+        "attrId": "color4",
+        "value": "#F3FEE7"
+      },
+      {
+        "attrId": "scale",
+        "value": 1.2
+      },
+      {
+        "attrId": "rotation",
+        "value": 44
+      },
+      {
+        "attrId": "proportion",
+        "value": 0.05
+      },
+      {
+        "attrId": "softness",
+        "value": 0
+      },
+      {
+        "attrId": "distortion",
+        "value": 0.25
+      },
+      {
+        "attrId": "swirl",
+        "value": 0.8
+      },
+      {
+        "attrId": "swirlIterations",
+        "value": 10
+      },
+      {
+        "attrId": "shapeScale",
+        "value": 0.28
+      },
+      {
+        "attrId": "shape",
+        "value": 0
+      }
+    ],
+    "resetsTransforms": false,
+    "resetsLayer": true
+  },
+  {
+    "presetType": "layer",
+    "id": "33cc44dd-55ee-466f-a071-8c9d0e1f2031",
+    "author": "samMularczyk",
+    "name": "Kelp",
+    "layerType": [
+      "warp"
+    ],
+    "attrs": [
+      {
+        "attrId": "colorCount",
+        "value": 3
+      },
+      {
+        "attrId": "color1",
+        "value": "#DBFF8F"
+      },
+      {
+        "attrId": "color2",
+        "value": "#404F3E"
+      },
+      {
+        "attrId": "color3",
+        "value": "#091316"
+      },
+      {
+        "attrId": "scale",
+        "value": 0.8
+      },
+      {
+        "attrId": "rotation",
+        "value": 50
+      },
+      {
+        "attrId": "proportion",
+        "value": 0.67
+      },
+      {
+        "attrId": "softness",
+        "value": 0
+      },
+      {
+        "attrId": "distortion",
+        "value": 0
+      },
+      {
+        "attrId": "swirl",
+        "value": 0.2
+      },
+      {
+        "attrId": "swirlIterations",
+        "value": 3
+      },
+      {
+        "attrId": "shapeScale",
+        "value": 1
+      },
+      {
+        "attrId": "shape",
+        "value": 1
+      }
+    ],
+    "resetsTransforms": false,
+    "resetsLayer": true
+  },
+  {
+    "presetType": "layer",
+    "id": "44dd55ee-66ff-4770-b182-9d0e1f203142",
+    "author": "samMularczyk",
+    "name": "Nectar",
+    "layerType": [
+      "warp"
+    ],
+    "attrs": [
+      {
+        "attrId": "colorCount",
+        "value": 3
+      },
+      {
+        "attrId": "color1",
+        "value": "#151310"
+      },
+      {
+        "attrId": "color2",
+        "value": "#D3A86B"
+      },
+      {
+        "attrId": "color3",
+        "value": "#F0EDEA"
+      },
+      {
+        "attrId": "scale",
+        "value": 2
+      },
+      {
+        "attrId": "rotation",
+        "value": 0
+      },
+      {
+        "attrId": "proportion",
+        "value": 0.24
+      },
+      {
+        "attrId": "softness",
+        "value": 1
+      },
+      {
+        "attrId": "distortion",
+        "value": 0.21
+      },
+      {
+        "attrId": "swirl",
+        "value": 0.57
+      },
+      {
+        "attrId": "swirlIterations",
+        "value": 10
+      },
+      {
+        "attrId": "shapeScale",
+        "value": 0.75
+      },
+      {
+        "attrId": "shape",
+        "value": 2
+      }
+    ],
+    "resetsTransforms": false,
+    "resetsLayer": true
+  },
+  {
+    "presetType": "layer",
+    "id": "55ee66ff-7700-4881-c293-0e1f20314253",
+    "author": "samMularczyk",
+    "name": "Passion",
+    "layerType": [
+      "warp"
+    ],
+    "attrs": [
+      {
+        "attrId": "colorCount",
+        "value": 3
+      },
+      {
+        "attrId": "color1",
+        "value": "#3B1515"
+      },
+      {
+        "attrId": "color2",
+        "value": "#954751"
+      },
+      {
+        "attrId": "color3",
+        "value": "#FFC085"
+      },
+      {
+        "attrId": "scale",
+        "value": 2.5
+      },
+      {
+        "attrId": "rotation",
+        "value": 1.35
+      },
+      {
+        "attrId": "proportion",
+        "value": 0.5
+      },
+      {
+        "attrId": "softness",
+        "value": 1
+      },
+      {
+        "attrId": "distortion",
+        "value": 0.09
+      },
+      {
+        "attrId": "swirl",
+        "value": 0.9
+      },
+      {
+        "attrId": "swirlIterations",
+        "value": 6
+      },
+      {
+        "attrId": "shapeScale",
+        "value": 0.25
+      },
+      {
+        "attrId": "shape",
+        "value": 0
       }
     ],
     "resetsTransforms": false,

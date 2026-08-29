@@ -33,12 +33,21 @@
 uniform float  angle;        // degrees; ray direction when parallel
 uniform float  parallel;     // bool: true = parallel rays, false = radiating
 uniform float2 light;        // px offset from layer centre; radiating only
+uniform float  rayMode;      // enum: 0 Volumetric, 1 Light Field
 uniform float  gain;         // 0 = passthrough; turbulence octave gain
 uniform float  lacunarity;   // frequency multiplier per octave
 uniform float  density;      // shaft frequency/spacing
 uniform float  speed;        // drift rate of the turbulence
 uniform float  scatterG;     // Henyey-Greenstein asymmetry, 0 isotropic
 uniform float  blur;         // softens the shafts across their width
+uniform float  spotty;       // Light Field: how fast rays break up along their length
+uniform float  rayIntensity; // Light Field: thins the shafts
+uniform float  rayCount;     // Light Field: angular frequency, ~shafts around
+uniform float  spread;       // Light Field: angular extent of the cone, 1 = all round
+uniform float  coreSize;     // Light Field: radius of the glow at the source
+uniform float  coreGlow;     // Light Field: brightness of that glow
+uniform half4  rayColor;     // straight RGBA; white leaves the rays uncoloured
+uniform half4  rayColor2;    // second colour, interleaved shaft by shaft
 uniform float  time;         // auto-connected to comp time
 uniform float  amount;       // 0..1 overall opacity
 
@@ -136,6 +145,54 @@ float turbulence(float3 P, float3 rep, float lac, float g) {
     return abs(sum);
 }
 
+// ---------------------------------------------------- Light Field ray model
+//
+// A different mechanism from the turbulence above, not a variation on it. The
+// noise is sampled in POLAR space - (angle x frequency, radius) - so the
+// angular coordinate sets how many shafts there are and the radial coordinate
+// says where along a shaft you are. Nothing is integrated along the ray, so it
+// is O(1) where a marched godray is O(N).
+//
+// Four things make it look unlike the turbulence model, and the same four are
+// why it costs about two noise evaluations instead of eighteen:
+//
+//   - VALUE noise, not Perlin. Value noise has visible axis-aligned blockiness
+//     at one octave, and in polar space that blockiness becomes RADIAL banding,
+//     which is exactly what reads as shafts. Perlin's zero-at-lattice-points
+//     property would smooth away the very artefact we want.
+//   - Two sparse fields MULTIPLIED. A product of two sparse fields is far
+//     sparser than either, which is where the crisp separated shafts come from.
+//     An fbm sum gives soft cloudy shafts instead.
+//   - One octave raised to a power, instead of many octaves. pow(n, 1..4) does
+//     the thinning that turbulence would otherwise do, at a quarter the cost.
+//   - Two counter-scrolling radial rates, so the two fields slide past each
+//     other and shafts beat in and out of existence in place rather than simply
+//     streaming outward.
+const float TWO_PI = 6.28318530718;
+
+float grHash21(float2 p) {
+    return fract(sin(dot(p, float2(127.1, 311.7))) * 43758.5453123);
+}
+
+float grVnoise(float2 p) {
+    float2 i = floor(p);
+    float2 f = fract(p);
+    float2 u = f * f * (3.0 - 2.0 * f);        // cubic, not quintic - cheaper
+    return mix(mix(grHash21(i), grHash21(i + float2(1.0, 0.0)), u.x),
+               mix(grHash21(i + float2(0.0, 1.0)), grHash21(i + float2(1.0, 1.0)), u.x), u.y);
+}
+
+// The atan seam at +-pi is handled by evaluating TWO angular parameterisations
+// and cross-fading between them across the seam, which is cheaper and more
+// robust than any wrapping trick - and the cross-fade band is placed where the
+// seam actually is.
+float raysShape(float dxs, float a, float rr, float freq, float inten) {
+    float nL = pow(clamp(grVnoise(float2(a * freq, rr)), 0.0, 1.0), inten);
+    float aR = fract(a / TWO_PI) * TWO_PI;
+    float nR = pow(clamp(grVnoise(float2(aR * freq, rr)), 0.0, 1.0), inten);
+    return mix(nR, nL, smoothstep(-0.15, 0.15, dxs));
+}
+
 half4 main(float2 fragCoord) {
     half4 src = childShader.eval(fragCoord);
 
@@ -152,23 +209,36 @@ half4 main(float2 fragCoord) {
     uv.y = 1.0 - uv.y;
 
     bool isParallel = parallel > 0.5;
-    float d;
 
+    // `light` is a pixel offset from the layer centre, same convention as
+    // every other position control in this kit - converted into the same
+    // flipped, normalised space as uv above. Hoisted out of the branch because
+    // the Light Field model needs the polar coordinates in both cases.
+    float2 lightUV = float2(0.5 + light.x / res.x, 0.5 - light.y / res.y);
+    float dx = uv.x - lightUV.x;
+    float dy = (uv.y - lightUV.y) * aspect;
+    float dist = sqrt(dx * dx + dy * dy) + 0.00001;
+
+    float d;
     if (isParallel) {
         float rad  = radians(angle);
         float cosA = cos(rad);
         float sinA = sin(rad);
         d = cosA * uv.x + sinA * uv.y * aspect;
     } else {
-        // `light` is a pixel offset from the layer centre, same convention as
-        // every other position control in this kit - converted into the same
-        // flipped, normalised space as uv above.
-        float2 lightUV = float2(0.5 + light.x / res.x, 0.5 - light.y / res.y);
-        float dx = uv.x - lightUV.x;
-        float dy = (uv.y - lightUV.y) * aspect;
-        float dist = sqrt(dx * dx + dy * dy) + 0.00001;
         d = dy / dist;
     }
+
+    // Polar ray coordinates. Parallel rays have no origin to be angular about,
+    // so the frame's own axes stand in: across the frame is "angle", along it
+    // is "radius".
+    float rayAngle = isParallel ? (uv.x * TWO_PI) : atan(dy, dx);
+    // Radial rate matters more than it looks. The noise decorrelates as this
+    // coordinate advances, which is what gives a shaft a finite length - too
+    // fast and the rays break into blobs a short way out instead of reaching
+    // across the frame.
+    float rayRad   = isParallel ? (uv.y * 2.0)    : (dist * 2.0);
+    float raySeam  = isParallel ? (uv.x - 0.5)    : dx;
 
     float dens = max(density, 0.001);
     float3 dir = float3(d, d, 0.0) * dens;
@@ -179,6 +249,50 @@ half4 main(float2 fragCoord) {
     // comes from the turbulence sampled along the angular coordinate, so
     // averaging a few neighbouring angles softens shaft edges without
     // touching the image itself, and costs nothing at zero.
+    float mistField;
+    if (rayMode > 0.5) {
+        // ---- Light Field --------------------------------------------------
+        float inten = 4.0 - 3.0 * clamp(rayIntensity, 0.0, 1.0);
+        // Deliberately NOT Density. That control is the turbulence model's noise
+        // scale and runs 0.1 to 64; this one is an angular frequency where the
+        // useful range is single digits. One slider serving both would be
+        // wrong at one end or the other, so they are separate and each dims in
+        // the mode it does not belong to.
+        float lfFreq = max(rayCount, 0.5);
+        float r1 = rayRad - 3.0 * tt;
+        // The second field advances along the ray faster, so the two slide out
+        // of step with each other and the product breaks up with distance.
+        // Break Up is exactly that rate.
+        float r2 = rayRad * (0.6 + clamp(spotty, 0.0, 1.0) * 2.4) - 2.0 * tt;
+        float ray = raysShape(raySeam, rayAngle, r1, lfFreq,       inten)
+                  * raysShape(raySeam, rayAngle, r2, lfFreq * 0.8, inten);
+
+        // The core is both an ADDITIVE glow at the source and a multiplicative
+        // boost of the rays near it - a shaft is five times brighter where the
+        // glow is full. That coupling is most of why this reads as light
+        // pouring out of something rather than as a blob with lines over it.
+        float ms   = 10.0 * max(coreSize, 0.0);
+        float core = pow(clamp(coreGlow, 0.0, 1.0), 0.3)
+                   * (1.0 - smoothstep(0.02 * ms, max(ms, 1e-6), 3.0 * dist));
+        core = pow(core, 5.0);
+        ray += (1.0 + 4.0 * ray) * core;
+
+        // Below 1, the rays occupy a wedge centred on Angle instead of going
+        // all the way round. atan(sin, cos) of the difference wraps correctly
+        // across the seam without a branch.
+        float sp = clamp(spread, 0.0, 1.0);
+        if (sp < 0.999 && !isParallel) {
+            // rayAngle lives in the flipped, Y-down space this filter borrows
+            // from pixi, so subtracting the angle would make 270 degrees point
+            // UP. Adding it restores the convention every other control in the
+            // kit uses: 90 is up.
+            float rel = rayAngle + radians(angle);
+            float dA  = abs(atan(sin(rel), cos(rel)));
+            float coneHalf = sp * 3.14159265;
+            ray *= 1.0 - smoothstep(coneHalf, coneHalf + 0.35, dA);
+        }
+        mistField = clamp(ray, 0.0, 1.0);
+    } else {
     float2 lac = float2(max(lacunarity, 0.0001), clamp(gain, 0.0, 1.0));
     float noise = turbulence(dir + float3(tt, 0.0, 62.1 + tt), float3(480.0, 320.0, 480.0),
                               lac.x, lac.y);
@@ -192,6 +306,8 @@ half4 main(float2 fragCoord) {
         noise = mix(noise, (nA + noise * 2.0 + nB) * 0.25, clamp(bl, 0.0, 1.0));
     }
     noise = mix(noise, 0.0, 0.3);
+        mistField = noise;
+    }
 
     // Fades out toward the far edge from the light, same vertical falloff
     // pixi's own filter uses.
@@ -232,10 +348,25 @@ half4 main(float2 fragCoord) {
     float peak  = pow(max(1.0 + gg - 2.0 * g, 1e-4), 1.5);
     float phase = peak / denom;    // 1 straight at the light, falling away
 
-    float mist = noise * (1.0 - uv.y) * phase;
+    // The vertical falloff is pixi's, and belongs to the turbulence model: it
+    // is what stops parallel shafts filling the frame. The Light Field model
+    // has its own falloff - the noise simply decorrelates with radius - so
+    // imposing a top-to-bottom bias on it would only fight the cone.
+    float mist = mistField * (rayMode > 0.5 ? 1.0 : (1.0 - uv.y)) * phase;
 
     float3 lin = src.a > 0.0 ? float3(src.rgb / src.a) : float3(0.0);
-    float3 rayColour  = float3(mist) * clamp(amount, 0.0, 1.0);
+
+    // Two colours interleaved along the ANGULAR coordinate, so neighbouring
+    // shafts take different colours - that is what reads as dispersion. Keying
+    // the ramp off brightness instead would just tint the whole field at once.
+    // Both defaults are opaque white, which multiplies out to no change.
+    float3 tintA = float3(rayColor.rgb)  * float(rayColor.a);
+    float3 tintB = float3(rayColor2.rgb) * float(rayColor2.a);
+    float tintFreq = rayMode > 0.5 ? max(rayCount, 0.5) : max(density, 0.001);
+    float3 tint  = mix(tintA, tintB,
+        clamp(0.5 + 0.5 * sin(rayAngle * tintFreq * 1.7 + 1.3), 0.0, 1.0));
+
+    float3 rayColour  = float3(mist) * tint * clamp(amount, 0.0, 1.0);
     float3 outColour  = clamp(lin + rayColour, 0.0, 1.0);
 
     // The shafts spread past wherever the source layer had alpha, so alpha

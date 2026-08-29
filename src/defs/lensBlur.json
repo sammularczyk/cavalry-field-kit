@@ -500,6 +500,12 @@
       "subUI": true,
       "defaultSubnodeType": "noiseShader",
       "dimming": "cocSource != 4"
+    },
+    "padding": {
+      "default": {
+        "x": 256,
+        "y": 256
+      }
     }
   },
   "triggers": {

@@ -1,83 +1,83 @@
 {
- "type": "layerStrings",
- "value": {
-  "author": "samMularczyk",
-  "layerType": "lightLeak",
-  "niceName": "Light Leak",
-  "layerInfo": "Stray light fogging the film, the way it gets in around a loose camera back. Enters from an edge or corner and blooms with the picture's own brightness.",
-  "language": "en",
-  "attributes": {
-   "intensity": [
-    "Intensity",
-    "Overall strength of the leak. Zero is an exact passthrough."
-   ],
-   "source": [
-    "Source",
-    "Where the light gets in: an edge, a corner, or a manual point."
-   ],
-   "position": [
-    "Position",
-    "Offset from the layer centre in pixels, used only when Source is Manual."
-   ],
-   "spread": [
-    "Spread",
-    "How far the leak reaches in from its source before it fades away."
-   ],
-   "wander": [
-    "Wander",
-    "How much the leak drifts in and out of frame over time. Above zero it recedes past the edge for stretches and comes back, so a shot is not lit by the same leak end to end. Speed sets how quickly it moves."
-   ],
-   "red": [
-    "Red",
-    "Strength of the red colour band."
-   ],
-   "yellow": [
-    "Yellow",
-    "Strength of the yellow colour band."
-   ],
-   "blue": [
-    "Blue",
-    "Strength of the blue colour band."
-   ],
-   "interact": [
-    "Interact With Image",
-    "How much the leak is driven by the picture's own brightness, so it blooms in highlights and stays weak in shadow rather than sitting on top like a sticker."
-   ],
-   "speed": [
-    "Speed",
-    "How fast the bands wobble and drift."
-   ],
-   "time": [
-    "Time",
-    "Driven by the composition time. Disconnect it to freeze the leak."
-   ],
-   "blend": [
-    "Blend",
-    "How the leak combines with the picture: Screen and Lighten are the original's two modes, Add is a stronger third option."
-   ],
-   "amount": [
-    "Amount",
-    "Mix between the original layer and the result."
-   ]
-  },
-  "enums": {
-   "source": [
-    "Top",
-    "Bottom",
-    "Left",
-    "Right",
-    "Top Left",
-    "Top Right",
-    "Bottom Left",
-    "Bottom Right",
-    "Manual"
-   ],
-   "blend": [
-    "Screen",
-    "Lighten",
-    "Add"
-   ]
-  },
-  "tabs": {}
- }
+  "type": "layerStrings",
+  "value": {
+    "author": "samMularczyk",
+    "layerType": "lightLeak",
+    "niceName": "Light Leak",
+    "layerInfo": "Stray light fogging in from an edge or corner.",
+    "language": "en",
+    "attributes": {
+      "intensity": [
+        "Intensity",
+        "Overall strength of the leak. Zero is an exact passthrough."
+      ],
+      "source": [
+        "Source",
+        "Where the light gets in: an edge, a corner, or a manual point."
+      ],
+      "position": [
+        "Position",
+        "Offset from the layer centre in pixels, used only when Source is Manual."
+      ],
+      "spread": [
+        "Spread",
+        "How far the leak reaches in from its source before it fades away."
+      ],
+      "wander": [
+        "Wander",
+        "How much the leak drifts in and out of frame over time. Above zero it recedes past the edge for stretches and comes back, so a shot is not lit by the same leak end to end. Speed sets how quickly it moves."
+      ],
+      "red": [
+        "Red",
+        "Strength of the red colour band."
+      ],
+      "yellow": [
+        "Yellow",
+        "Strength of the yellow colour band."
+      ],
+      "blue": [
+        "Blue",
+        "Strength of the blue colour band."
+      ],
+      "interact": [
+        "Interact With Image",
+        "How much the leak is driven by the picture's own brightness, so it blooms in highlights and stays weak in shadow rather than sitting on top like a sticker."
+      ],
+      "speed": [
+        "Speed",
+        "How fast the bands wobble and drift."
+      ],
+      "time": [
+        "Time",
+        "Driven by the composition time. Disconnect it to freeze the leak."
+      ],
+      "blend": [
+        "Blend",
+        "How the leak combines with the picture: Screen and Lighten are the original's two modes, Add is a stronger third option."
+      ],
+      "amount": [
+        "Amount",
+        "Mix between the original layer and the result."
+      ]
+    },
+    "enums": {
+      "source": [
+        "Top",
+        "Bottom",
+        "Left",
+        "Right",
+        "Top Left",
+        "Top Right",
+        "Bottom Left",
+        "Bottom Right",
+        "Manual"
+      ],
+      "blend": [
+        "Screen",
+        "Lighten",
+        "Add"
+      ]
+    },
+    "tabs": {}
+  }
 }

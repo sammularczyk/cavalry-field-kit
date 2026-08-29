@@ -1,163 +1,163 @@
 {
- "type": "layerStrings",
- "value": {
-  "author": "samMularczyk",
-  "layerType": "lens",
-  "niceName": "Lens Distortion",
-  "layerInfo": "Geometric distortion and chromatic aberration, in the order light meets them. Seven real HAWK anamorphic lens profiles, solved from an ARRI ALEXA distortion chart, plus three aberration models. Either half switches off at zero, so it is also just a distortion, or just an aberration. Defocus and lens scatter now live in Lens Blur.",
-  "language": "en",
-  "attributes": {
-   "profile": [
-    "Lens",
-    "Which measured HAWK anamorphic focal length to apply, solved from a real distortion chart."
-   ],
-   "distortion": [
-    "Distortion",
-    "Scales the chosen profile's strength. 1.0 reproduces the solved lens; use this to match a plate rather than as a cosmetic dial."
-   ],
-   "squeeze": [
-    "Squeeze",
-    "Anamorphic squeeze ratio. Stretches the frame horizontally as a taking lens does."
-   ],
-   "centreOffset": [
-    "Centre Offset",
-    "Shifts the optical centre, as a fraction of half the layer height. The HAWK profiles carry no baked-in centre of their own."
-   ],
-   "expand": [
-    "Expand",
-    "Scales the sampled area. Raise it slightly to pull the distorted edges back inside the frame."
-   ],
-   "edges": [
-    "Edges",
-    "What to do where the distortion samples outside the layer. Transparent is honest - there is no picture there. Clamp smears the rim outward, Mirror reflects the picture back; both fill the wedges a barrel distortion opens at the corners."
-   ],
-   "edgeTrim": [
-    "Edge Trim",
-    "Pixels to inset the edge that Clamp and Mirror fold against. A layer's outermost pixels are antialiased, so reflecting them doubles the rim into a seam; a pixel or two of trim folds against real picture instead."
-   ],
-   "fringing": [
-    "Fringing",
-    "Chromatic spread across the distortion, so the fringe follows the glass. This replaces the old Barrel model, which was this pass with a spectrum."
-   ],
-   "abModel": [
-    "Model",
-    "Which aberration to apply. None switches this half of the lens off."
-   ],
-   "geometry": [
-    "Geometry",
-    "Direction the bands separate: radially from the centre, spun around it, or along a fixed angle."
-   ],
-   "centre": [
-    "Centre",
-    "Origin for radial and spin geometry, in pixels from the layer centre."
-   ],
-   "angle": [
-    "Angle",
-    "Direction for linear geometry, and for Prism when its direction is not taken from the map."
-   ],
-   "dispersion": [
-    "Dispersion",
-    "Spectral and Prism. Magnitude of the separation between wavelength bands."
-   ],
-   "focusWave": [
-    "Focus Wavelength",
-    "Spectral and Prism. Which wavelength stays sharp: -1 violet, 0 green, 1 red. Everything either side separates."
-   ],
-   "smoothing": [
-    "Gap Smoothing",
-    "Spectral only. Widens each band to bridge the gaps between the seven, melting them together."
-   ],
-   "aberration": [
-    "Aberration",
-    "Channel only. Displacement in pixels before the per-channel scales."
-   ],
-   "redScale": [
-    "Red",
-    "Channel only. Multiplier on red's displacement."
-   ],
-   "greenScale": [
-    "Green",
-    "Channel only. Multiplier on green's displacement."
-   ],
-   "blueScale": [
-    "Blue",
-    "Channel only. Multiplier on blue's displacement."
-   ],
-   "smear": [
-    "Smear",
-    "Smears each channel along its displacement instead of just offsetting it. Channel model only."
-   ],
-   "falloff": [
-    "Falloff",
-    "Channel only. How quickly radial displacement grows outward. Higher keeps the centre cleaner."
-   ],
-   "mapChannel": [
-    "Map Channel",
-    "Prism only. Which part of the displacement map drives the effect."
-   ],
-   "mapAmplitude": [
-    "Map Amplitude",
-    "Prism only. Displacement in pixels at the map's full value."
-   ],
-   "mapFromGradient": [
-    "Direction From Map",
-    "Take the displacement direction from the map's own slope rather than from the Angle control."
-   ],
-   "abIntensity": [
-    "Intensity",
-    "Spectral and Prism. Overall brightness of the result."
-   ],
-   "samples": [
-    "Samples",
-    "Tap count, shared by fringing and the spectral aberration."
-   ],
-   "amount": [
-    "Amount",
-    "Mix between the original layer and the full lens."
-   ],
-   "displaceMap": [
-    "Displace Map",
-    "Prism only. The shader whose luminance drives the displacement. Prism does nothing until something is connected here."
-   ]
-  },
-  "enums": {
-   "profile": [
-    "HAWK Anamorphic 28mm",
-    "HAWK Anamorphic 35mm",
-    "HAWK Anamorphic 45mm",
-    "HAWK Anamorphic 55mm",
-    "HAWK Anamorphic 65mm",
-    "HAWK Anamorphic 80mm",
-    "HAWK Anamorphic 110mm"
-   ],
-   "abModel": {
-    "0": "Spectral",
-    "1": "Channel",
-    "2": "Prism",
-    "3": "None"
-   },
-   "geometry": {
-    "0": "Radial",
-    "1": "Spin",
-    "2": "Linear"
-   },
-   "mapChannel": {
-    "0": "Luma",
-    "1": "Saturation",
-    "2": "Value",
-    "3": "Red",
-    "4": "Green",
-    "5": "Blue"
-   },
-   "edges": {
-    "0": "Transparent",
-    "1": "Clamp",
-    "2": "Mirror"
-   }
-  },
-  "tabs": {
-   "filter": "Distortion",
-   "aberration": "Aberration"
+  "type": "layerStrings",
+  "value": {
+    "author": "samMularczyk",
+    "layerType": "lens",
+    "niceName": "Lens Distortion",
+    "layerInfo": "Lens geometry: barrel distortion and chromatic aberration.",
+    "language": "en",
+    "attributes": {
+      "profile": [
+        "Lens",
+        "Which measured HAWK anamorphic focal length to apply, solved from a real distortion chart."
+      ],
+      "distortion": [
+        "Distortion",
+        "Scales the chosen profile's strength. 1.0 reproduces the solved lens; use this to match a plate rather than as a cosmetic dial."
+      ],
+      "squeeze": [
+        "Squeeze",
+        "Anamorphic squeeze ratio. Stretches the frame horizontally as a taking lens does."
+      ],
+      "centreOffset": [
+        "Centre Offset",
+        "Shifts the optical centre, as a fraction of half the layer height. The HAWK profiles carry no baked-in centre of their own."
+      ],
+      "expand": [
+        "Expand",
+        "Scales the sampled area. Raise it slightly to pull the distorted edges back inside the frame."
+      ],
+      "edges": [
+        "Edges",
+        "What to do where the distortion samples outside the layer. Transparent is honest - there is no picture there. Clamp smears the rim outward, Mirror reflects the picture back; both fill the wedges a barrel distortion opens at the corners."
+      ],
+      "edgeTrim": [
+        "Edge Trim",
+        "Pixels to inset the edge that Clamp and Mirror fold against. A layer's outermost pixels are antialiased, so reflecting them doubles the rim into a seam; a pixel or two of trim folds against real picture instead."
+      ],
+      "fringing": [
+        "Fringing",
+        "Chromatic spread across the distortion, so the fringe follows the glass. This replaces the old Barrel model, which was this pass with a spectrum."
+      ],
+      "abModel": [
+        "Model",
+        "Which aberration to apply. None switches this half of the lens off."
+      ],
+      "geometry": [
+        "Geometry",
+        "Direction the bands separate: radially from the centre, spun around it, or along a fixed angle."
+      ],
+      "centre": [
+        "Centre",
+        "Origin for radial and spin geometry, in pixels from the layer centre."
+      ],
+      "angle": [
+        "Angle",
+        "Direction for linear geometry, and for Prism when its direction is not taken from the map."
+      ],
+      "dispersion": [
+        "Dispersion",
+        "Spectral and Prism. Magnitude of the separation between wavelength bands."
+      ],
+      "focusWave": [
+        "Focus Wavelength",
+        "Spectral and Prism. Which wavelength stays sharp: -1 violet, 0 green, 1 red. Everything either side separates."
+      ],
+      "smoothing": [
+        "Gap Smoothing",
+        "Spectral only. Widens each band to bridge the gaps between the seven, melting them together."
+      ],
+      "aberration": [
+        "Aberration",
+        "Channel only. Displacement in pixels before the per-channel scales."
+      ],
+      "redScale": [
+        "Red",
+        "Channel only. Multiplier on red's displacement."
+      ],
+      "greenScale": [
+        "Green",
+        "Channel only. Multiplier on green's displacement."
+      ],
+      "blueScale": [
+        "Blue",
+        "Channel only. Multiplier on blue's displacement."
+      ],
+      "smear": [
+        "Smear",
+        "Smears each channel along its displacement instead of just offsetting it. Channel model only."
+      ],
+      "falloff": [
+        "Falloff",
+        "Channel only. How quickly radial displacement grows outward. Higher keeps the centre cleaner."
+      ],
+      "mapChannel": [
+        "Map Channel",
+        "Prism only. Which part of the displacement map drives the effect."
+      ],
+      "mapAmplitude": [
+        "Map Amplitude",
+        "Prism only. Displacement in pixels at the map's full value."
+      ],
+      "mapFromGradient": [
+        "Direction From Map",
+        "Take the displacement direction from the map's own slope rather than from the Angle control."
+      ],
+      "abIntensity": [
+        "Intensity",
+        "Spectral and Prism. Overall brightness of the result."
+      ],
+      "samples": [
+        "Samples",
+        "Tap count, shared by fringing and the spectral aberration."
+      ],
+      "amount": [
+        "Amount",
+        "Mix between the original layer and the full lens."
+      ],
+      "displaceMap": [
+        "Displace Map",
+        "Prism only. The shader whose luminance drives the displacement. Prism does nothing until something is connected here."
+      ]
+    },
+    "enums": {
+      "profile": [
+        "HAWK Anamorphic 28mm",
+        "HAWK Anamorphic 35mm",
+        "HAWK Anamorphic 45mm",
+        "HAWK Anamorphic 55mm",
+        "HAWK Anamorphic 65mm",
+        "HAWK Anamorphic 80mm",
+        "HAWK Anamorphic 110mm"
+      ],
+      "abModel": {
+        "0": "Spectral",
+        "1": "Channel",
+        "2": "Prism",
+        "3": "None"
+      },
+      "geometry": {
+        "0": "Radial",
+        "1": "Spin",
+        "2": "Linear"
+      },
+      "mapChannel": {
+        "0": "Luma",
+        "1": "Saturation",
+        "2": "Value",
+        "3": "Red",
+        "4": "Green",
+        "5": "Blue"
+      },
+      "edges": {
+        "0": "Transparent",
+        "1": "Clamp",
+        "2": "Mirror"
+      }
+    },
+    "tabs": {
+      "filter": "Distortion",
+      "aberration": "Aberration"
+    }
   }
- }
 }

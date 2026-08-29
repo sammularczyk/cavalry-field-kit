@@ -4,7 +4,7 @@
     "author": "samMularczyk",
     "layerType": "photocopy",
     "niceName": "Photocopy",
-    "layerInfo": "Copier artefacts: crushed midtones, toner blowout at edges, dithered threshold, blotchy toner and paper fibre.",
+    "layerInfo": "Photocopier toner: blown edges, dither, speckle and drum banding.",
     "language": "en",
     "attributes": {
       "exposure": [
@@ -62,6 +62,34 @@
       "paperScale": [
         "Texture Scale",
         "Size of the paper fibre. The grain is stretched, so it reads as fibre direction rather than plain noise."
+      ],
+      "paperFolds": [
+        "Folds",
+        "Creases radiating from a few seed points, lighting the sheet the toner sits on. The field gives the vector to the nearest crease rather than a distance, so each one perturbs the surface outward from its own origin - which is what makes it read as a fold and not a contour line."
+      ],
+      "paperFoldCount": [
+        "Fold Count",
+        "How many crease origins."
+      ],
+      "paperCrumples": [
+        "Crumple",
+        "Faceted buckling, from two jittered cell fields multiplied - one sharp, one soft."
+      ],
+      "paperCrumpleSize": [
+        "Crumple Size",
+        "Size of the facets."
+      ],
+      "paperFibre": [
+        "Fibre Relief",
+        "Directional tooth in the stock, lit rather than merely tinted."
+      ],
+      "paperRelief_": [
+        "Relief",
+        "How deep the sheet reads. Steepens the surface normal's own Z rather than remapping the result. Zero on Folds, Crumple and Fibre together switches the model off and costs nothing."
+      ],
+      "paperSeed": [
+        "Paper Seed",
+        "Changes the arrangement of folds and facets."
       ],
       "inkColor": [
         "Ink",

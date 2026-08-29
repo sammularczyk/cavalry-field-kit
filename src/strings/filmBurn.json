@@ -4,7 +4,7 @@
     "author": "samMularczyk",
     "layerType": "filmBurn",
     "niceName": "Film Burn",
-    "layerInfo": "Film stopping in the gate and burning through. Progress eats a hole in the layer's own alpha rather than cutting to a second layer, so whatever sits underneath in the comp shows through - drop this on a clip with something already behind it.",
+    "layerInfo": "Burn a hole through the layer, as film stalling in the gate.",
     "language": "en",
     "attributes": {
       "progress": [

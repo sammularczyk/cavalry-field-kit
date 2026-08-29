@@ -22,6 +22,8 @@ INITIALS = {
     "polarCoordinates": "PL", "vhs": "V",
     "print": "PR", "lightLeak": "LL", "filmBurn": "FB",
     "lensFlare": "LF", "godray": "GR", "extract": "EX",
+    "water": "WA", "linearRefraction": "LR", "liquidMetal": "LM", "paperTexture": "PA",
+    "meshGradient": "MG", "smokeRing": "SR", "warp": "WP",
 }
 
 FONT = {

@@ -11,7 +11,15 @@
         "outputMode",
         "paperColor",
         "paperGrain",
-        "seed"
+        "paperFolds",
+        "paperFoldCount",
+        "paperCrumples",
+        "paperCrumpleSize",
+        "paperFibre",
+        "paperRelief_",
+        "seed",
+        "boil",
+        "time"
       ]
     },
     {
@@ -28,8 +36,13 @@
         "levelBias",
         "bandDither",
         "screenType",
+        "dotShape",
+        "screenStrength",
+        "inkGrain",
+        "inkGrainScale",
         "frequency",
         "dotGain",
+        "toneFloor",
         "yuleNielsen",
         "ink1Color",
         "ink1Angle",
@@ -45,10 +58,17 @@
         "ink4Coverage",
         "inkOpacity",
         "registrationError",
+        "edgeBreakup",
+        "edgeBreakupScale",
+        "keyline",
+        "keylineThreshold",
         "inkLoss",
+        "inkLossScale",
         "mottle",
         "ghosting",
         "seed",
+        "boil",
+        "time",
         "paperColor",
         "outputMode"
       ]
@@ -67,8 +87,13 @@
         "levelBias",
         "bandDither",
         "screenType",
+        "dotShape",
+        "screenStrength",
+        "inkGrain",
+        "inkGrainScale",
         "frequency",
         "dotGain",
+        "toneFloor",
         "yuleNielsen",
         "ink1Color",
         "ink1Angle",
@@ -84,10 +109,17 @@
         "ink4Coverage",
         "inkOpacity",
         "registrationError",
+        "edgeBreakup",
+        "edgeBreakupScale",
+        "keyline",
+        "keylineThreshold",
         "inkLoss",
+        "inkLossScale",
         "mottle",
         "ghosting",
         "seed",
+        "boil",
+        "time",
         "paperColor",
         "outputMode"
       ]
@@ -106,8 +138,13 @@
         "levelBias",
         "bandDither",
         "screenType",
+        "dotShape",
+        "screenStrength",
+        "inkGrain",
+        "inkGrainScale",
         "frequency",
         "dotGain",
+        "toneFloor",
         "yuleNielsen",
         "ink1Color",
         "ink1Angle",
@@ -123,10 +160,17 @@
         "ink4Coverage",
         "inkOpacity",
         "registrationError",
+        "edgeBreakup",
+        "edgeBreakupScale",
+        "keyline",
+        "keylineThreshold",
         "inkLoss",
+        "inkLossScale",
         "mottle",
         "ghosting",
         "seed",
+        "boil",
+        "time",
         "paperColor",
         "outputMode"
       ]
@@ -145,8 +189,13 @@
         "levelBias",
         "bandDither",
         "screenType",
+        "dotShape",
+        "screenStrength",
+        "inkGrain",
+        "inkGrainScale",
         "frequency",
         "dotGain",
+        "toneFloor",
         "yuleNielsen",
         "ink1Color",
         "ink1Angle",
@@ -162,10 +211,17 @@
         "ink4Coverage",
         "inkOpacity",
         "registrationError",
+        "edgeBreakup",
+        "edgeBreakupScale",
+        "keyline",
+        "keylineThreshold",
         "inkLoss",
+        "inkLossScale",
         "mottle",
         "ghosting",
         "seed",
+        "boil",
+        "time",
         "paperColor",
         "outputMode"
       ]
@@ -175,7 +231,15 @@
       "uniforms": [
         "trueColour",
         "paperTooth",
+        "paperFolds",
+        "paperFoldCount",
+        "paperCrumples",
+        "paperCrumpleSize",
+        "paperFibre",
+        "paperRelief_",
         "seed",
+        "boil",
+        "time",
         "amount"
       ]
     }
@@ -196,7 +260,8 @@
       "enumValues": [
         0,
         1,
-        2
+        2,
+        3
       ]
     },
     "inkCount": {
@@ -204,7 +269,8 @@
       "default": 2,
       "min": 1,
       "max": 4,
-      "step": 1
+      "step": 1,
+      "dimming": "separation == 3"
     },
     "flatten": {
       "type": "double",
@@ -245,9 +311,41 @@
         2,
         3,
         4,
-        5,
-        6
+        5
       ]
+    },
+    "dotShape": {
+      "type": "enum",
+      "default": 0,
+      "enumValues": [
+        0,
+        1,
+        2,
+        3
+      ],
+      "dimming": "screenType != 1"
+    },
+    "screenStrength": {
+      "type": "double",
+      "default": 1.0,
+      "min": 0.0,
+      "max": 1.0,
+      "step": 0.01,
+      "dimming": "screenType == 0"
+    },
+    "inkGrain": {
+      "type": "double",
+      "default": 0.35,
+      "min": 0.0,
+      "max": 1.0,
+      "step": 0.01
+    },
+    "inkGrainScale": {
+      "type": "double",
+      "default": 0.35,
+      "min": 0.05,
+      "softMax": 6.0,
+      "step": 0.05
     },
     "frequency": {
       "type": "double",
@@ -255,7 +353,7 @@
       "softMin": 1.0,
       "softMax": 64.0,
       "step": 0.1,
-      "dimming": "screenType <= 1"
+      "dimming": "screenType == 0"
     },
     "dotGain": {
       "type": "double",
@@ -263,14 +361,23 @@
       "min": -1.0,
       "max": 1.0,
       "step": 0.01,
-      "dimming": "screenType <= 1"
+      "dimming": "screenType == 0"
+    },
+    "toneFloor": {
+      "type": "double",
+      "default": 0.02,
+      "min": 0.001,
+      "max": 0.5,
+      "step": 0.005,
+      "dimming": "separation != 0"
     },
     "yuleNielsen": {
       "type": "double",
       "default": 1.7,
       "min": 1.0,
       "max": 4.0,
-      "step": 0.05
+      "step": 0.05,
+      "dimming": "separation == 3"
     },
     "ink1Color": {
       "type": "color",
@@ -280,21 +387,24 @@
         "g": 90,
         "b": 181,
         "a": 255
-      }
+      },
+      "dimming": "separation == 3"
     },
     "ink1Angle": {
       "type": "double",
       "default": 15.0,
       "min": 0.0,
       "max": 180.0,
-      "step": 1.0
+      "step": 1.0,
+      "dimming": "separation == 3 || screenType == 0"
     },
     "ink1Coverage": {
       "type": "double",
       "default": 1.0,
       "min": 0.0,
       "max": 2.0,
-      "step": 0.01
+      "step": 0.01,
+      "dimming": "separation == 3"
     },
     "ink2Color": {
       "type": "color",
@@ -305,7 +415,7 @@
         "b": 0,
         "a": 255
       },
-      "dimming": "inkCount <= 1"
+      "dimming": "inkCount <= 1 || separation == 3"
     },
     "ink2Angle": {
       "type": "double",
@@ -313,7 +423,7 @@
       "min": 0.0,
       "max": 180.0,
       "step": 1.0,
-      "dimming": "inkCount <= 1"
+      "dimming": "inkCount <= 1 || separation == 3 || screenType == 0"
     },
     "ink2Coverage": {
       "type": "double",
@@ -321,7 +431,7 @@
       "min": 0.0,
       "max": 2.0,
       "step": 0.01,
-      "dimming": "inkCount <= 1"
+      "dimming": "inkCount <= 1 || separation == 3"
     },
     "ink3Color": {
       "type": "color",
@@ -332,7 +442,7 @@
         "b": 130,
         "a": 255
       },
-      "dimming": "inkCount <= 2"
+      "dimming": "inkCount <= 2 || separation == 3"
     },
     "ink3Angle": {
       "type": "double",
@@ -340,7 +450,7 @@
       "min": 0.0,
       "max": 180.0,
       "step": 1.0,
-      "dimming": "inkCount <= 2"
+      "dimming": "inkCount <= 2 || separation == 3 || screenType == 0"
     },
     "ink3Coverage": {
       "type": "double",
@@ -348,7 +458,7 @@
       "min": 0.0,
       "max": 2.0,
       "step": 0.01,
-      "dimming": "inkCount <= 2"
+      "dimming": "inkCount <= 2 || separation == 3"
     },
     "ink4Color": {
       "type": "color",
@@ -359,7 +469,7 @@
         "b": 22,
         "a": 255
       },
-      "dimming": "inkCount <= 3"
+      "dimming": "inkCount <= 3 || separation == 3"
     },
     "ink4Angle": {
       "type": "double",
@@ -367,7 +477,7 @@
       "min": 0.0,
       "max": 180.0,
       "step": 1.0,
-      "dimming": "inkCount <= 3"
+      "dimming": "inkCount <= 3 || separation == 3 || screenType == 0"
     },
     "ink4Coverage": {
       "type": "double",
@@ -375,7 +485,7 @@
       "min": 0.0,
       "max": 2.0,
       "step": 0.01,
-      "dimming": "inkCount <= 3"
+      "dimming": "inkCount <= 3 || separation == 3"
     },
     "inkOpacity": {
       "type": "double",
@@ -391,12 +501,50 @@
       "softMax": 20.0,
       "step": 0.1
     },
+    "edgeBreakup": {
+      "type": "double",
+      "default": 0.0,
+      "min": 0.0,
+      "softMax": 6.0,
+      "step": 0.1
+    },
+    "edgeBreakupScale": {
+      "type": "double",
+      "default": 1.0,
+      "min": 0.05,
+      "softMax": 6.0,
+      "step": 0.05,
+      "dimming": "edgeBreakup <= 0"
+    },
+    "keyline": {
+      "type": "double",
+      "default": 0.0,
+      "min": 0.0,
+      "softMax": 6.0,
+      "step": 0.1
+    },
+    "keylineThreshold": {
+      "type": "double",
+      "default": 0.12,
+      "min": 0.01,
+      "max": 1.0,
+      "step": 0.01,
+      "dimming": "keyline <= 0"
+    },
     "inkLoss": {
       "type": "double",
       "default": 0.15,
       "min": 0.0,
       "max": 1.0,
       "step": 0.01
+    },
+    "inkLossScale": {
+      "type": "double",
+      "default": 0.05,
+      "min": 0.02,
+      "softMax": 3.0,
+      "step": 0.01,
+      "dimming": "inkLoss <= 0"
     },
     "mottle": {
       "type": "double",
@@ -417,6 +565,20 @@
       "default": 1,
       "min": 0
     },
+    "boil": {
+      "type": "double",
+      "default": 0.0,
+      "min": 0.0,
+      "softMax": 12.0,
+      "step": 1.0
+    },
+    "time": {
+      "type": "double",
+      "default": 0.0,
+      "step": 1.0,
+      "compConnect": "time",
+      "dimming": "boil <= 0"
+    },
     "paperColor": {
       "type": "color",
       "default": {
@@ -428,6 +590,50 @@
       }
     },
     "paperGrain": {
+      "type": "double",
+      "default": 0.3,
+      "min": 0.0,
+      "max": 1.0,
+      "step": 0.01
+    },
+    "paperFolds": {
+      "type": "double",
+      "default": 0.0,
+      "min": 0.0,
+      "max": 1.0,
+      "step": 0.01
+    },
+    "paperFoldCount": {
+      "type": "double",
+      "default": 5.0,
+      "min": 1.0,
+      "max": 15.0,
+      "step": 1.0,
+      "dimming": "paperFolds <= 0"
+    },
+    "paperCrumples": {
+      "type": "double",
+      "default": 0.0,
+      "min": 0.0,
+      "max": 1.0,
+      "step": 0.01
+    },
+    "paperCrumpleSize": {
+      "type": "double",
+      "default": 0.35,
+      "min": 0.01,
+      "max": 1.0,
+      "step": 0.01,
+      "dimming": "paperCrumples <= 0"
+    },
+    "paperFibre": {
+      "type": "double",
+      "default": 0.0,
+      "min": 0.0,
+      "max": 1.0,
+      "step": 0.01
+    },
+    "paperRelief_": {
       "type": "double",
       "default": 0.3,
       "min": 0.0,
@@ -467,6 +673,12 @@
       "min": 0.0,
       "max": 1.0,
       "step": 0.01
+    },
+    "padding": {
+      "default": {
+        "x": 16,
+        "y": 16
+      }
     }
   },
   "triggers": {
@@ -479,8 +691,13 @@
       "levelBias",
       "bandDither",
       "screenType",
+      "dotShape",
+      "screenStrength",
+      "inkGrain",
+      "inkGrainScale",
       "frequency",
       "dotGain",
+      "toneFloor",
       "yuleNielsen",
       "ink1Color",
       "ink1Angle",
@@ -496,12 +713,25 @@
       "ink4Coverage",
       "inkOpacity",
       "registrationError",
+      "edgeBreakup",
+      "edgeBreakupScale",
+      "keyline",
+      "keylineThreshold",
       "inkLoss",
+      "inkLossScale",
       "mottle",
       "ghosting",
       "seed",
+      "boil",
+      "time",
       "paperColor",
       "paperGrain",
+      "paperFolds",
+      "paperFoldCount",
+      "paperCrumples",
+      "paperCrumpleSize",
+      "paperFibre",
+      "paperRelief_",
       "trueColour",
       "paperTooth",
       "outputMode",
@@ -529,8 +759,13 @@
         "id": "screen",
         "attributeOrder": [
           "screenType",
+          "dotShape",
+          "screenStrength",
+          "inkGrain",
+          "inkGrainScale",
           "frequency",
           "dotGain",
+          "toneFloor",
           "yuleNielsen"
         ]
       },
@@ -560,10 +795,17 @@
         "id": "press",
         "attributeOrder": [
           "registrationError",
+          "edgeBreakup",
+          "edgeBreakupScale",
+          "keyline",
+          "keylineThreshold",
           "inkLoss",
+          "inkLossScale",
           "mottle",
           "ghosting",
-          "seed"
+          "seed",
+          "boil",
+          "time"
         ]
       },
       {
@@ -571,6 +813,13 @@
         "attributeOrder": [
           "paperColor",
           "paperGrain",
+          "---Relief",
+          "paperFolds",
+          "paperFoldCount",
+          "paperCrumples",
+          "paperCrumpleSize",
+          "paperFibre",
+          "paperRelief_",
           "trueColour",
           "paperTooth",
           "outputMode",

@@ -5,7 +5,7 @@
       "author": "samMularczyk",
       "layerType": "ascii",
       "niceName": "ASCII",
-      "layerInfo": "Draws the layer as a grid of 5x5 bitmap characters. Edge Glyphs traces outlines with line characters instead of tone.",
+      "layerInfo": "Redraw the image as a grid of text characters.",
       "language": "en",
       "attributes": {
         "textSize": [
@@ -97,7 +97,7 @@
       "author": "samMularczyk",
       "layerType": "compositeVideo",
       "niceName": "Composite Video",
-      "layerInfo": "Encodes to a real composite signal and decodes it back, so NTSC and PAL artefacts arise rather than being drawn on.",
+      "layerInfo": "Encode and decode the image as an analogue TV signal.",
       "language": "en",
       "attributes": {
         "system": [
@@ -261,7 +261,7 @@
       "author": "samMularczyk",
       "layerType": "display",
       "niceName": "Display Simulation",
-      "layerInfo": "Screen emulation: sub-pixel structure, curvature, rounded tube corners, bloom and grain. Shadow Mask, Aperture Grille and Slot Mask are three real CRT dot geometries; LCD Stripe is an aligned RGB stripe with a grid line. The Beam tab adds a scanning electron beam with a trailing phosphor-decay glow.",
+      "layerInfo": "Screen emulation: CRT shadow masks, LCD stripe, curvature and beam.",
       "language": "en",
       "attributes": {
         "distortion": [
@@ -415,7 +415,7 @@
       "author": "samMularczyk",
       "layerType": "extract",
       "niceName": "Extract",
-      "layerInfo": "A range key, same as After Effects' Extract: pixels whose channel value falls between Black Point and White Point stay opaque, everything outside is pushed toward transparent. Softness feathers each edge instead of a hard cutoff.",
+      "layerInfo": "Key out a range of a channel, with feathered edges.",
       "language": "en",
       "attributes": {
         "channel": [
@@ -460,7 +460,7 @@
       "author": "samMularczyk",
       "layerType": "film",
       "niceName": "Film Emulation",
-      "layerInfo": "Film in one node: halation, tone roll-off, grain, a Fujifilm-style colour recipe and projector wear.",
+      "layerInfo": "Film stock: halation, tone roll-off, grain and a colour recipe.",
       "language": "en",
       "tabs": {
         "filter": "Recipe",
@@ -626,7 +626,7 @@
       "author": "samMularczyk",
       "layerType": "filmBurn",
       "niceName": "Film Burn",
-      "layerInfo": "Film stopping in the gate and burning through. Progress eats a hole in the layer's own alpha rather than cutting to a second layer, so whatever sits underneath in the comp shows through - drop this on a clip with something already behind it.",
+      "layerInfo": "Burn a hole through the layer, as film stalling in the gate.",
       "language": "en",
       "attributes": {
         "progress": [
@@ -699,7 +699,7 @@
       "author": "samMularczyk",
       "layerType": "filmDamage",
       "niceName": "Film Damage",
-      "layerInfo": "The wear of a projector print: gate weave, stepped frame rate, dirt and splotches, scratches, a flickering vignette and a flickering exposure. Split out of Film Emulation because grain and halation are properties of the emulsion, while all of this happens to a finished print afterwards - so stack this after it and the order is physically right.",
+      "layerInfo": "Print wear: gate weave, dirt, scratches, flicker and vignette.",
       "language": "en",
       "attributes": {
         "damage": [
@@ -850,7 +850,7 @@
       "author": "samMularczyk",
       "layerType": "glow",
       "niceName": "Ultra Glow",
-      "layerInfo": "Bloom and anamorphic streak from the same highlights, and both can run at once - which is what a lens flare is. Built as chained separable blurs, so it never rings or ghosts at any size. The streak is built first and the bloom ladder runs over it, so the streak blooms too.",
+      "layerInfo": "Bloom and anamorphic streaks from the image's own highlights.",
       "language": "en",
       "attributes": {
         "srcBlack": [
@@ -975,20 +975,24 @@
       "author": "samMularczyk",
       "layerType": "godray",
       "niceName": "Godray",
-      "layerInfo": "Volumetric light shafts - the crepuscular rays you get through cloud or a window - radiating from a point or travelling in parallel from a direction.",
+      "layerInfo": "Volumetric light shafts from turbulence in ray-space.",
       "language": "en",
       "attributes": {
-        "parallel": [
-          "Parallel Rays",
-          "On for rays travelling in one direction (Angle). Off for rays radiating from a point (Light)."
-        ],
         "angle": [
           "Angle",
           "Direction the rays travel in, in degrees. Zero is vertical."
         ],
+        "parallel": [
+          "Parallel Rays",
+          "On for rays travelling in one direction (Angle). Off for rays radiating from a point (Light)."
+        ],
         "light": [
           "Light",
           "Offset of the ray source from the layer centre, in pixels. Radiating rays only."
+        ],
+        "rayMode": [
+          "Model",
+          "Which model builds the shafts. Volumetric samples Perlin turbulence along the ray direction - soft, cloudy, atmospheric, and the more physical of the two. Light Field samples value noise in polar space and multiplies two sparse fields together, which gives crisper, separated shafts with hard edges. Light Field is also several times cheaper: two noise evaluations against eighteen."
         ],
         "gain": [
           "Gain",
@@ -1002,17 +1006,49 @@
           "Density",
           "How tightly packed the shafts are."
         ],
-        "scatterG": [
-          "Scatter Direction",
-          "How strongly the haze throws light FORWARD. Scattering off dust and droplets is forward-peaked, so shafts blaze when you look near the light and fade as you turn away - which is most of what makes crepuscular rays read as light rather than as texture. 0 scatters equally in all directions; 0.7 to 0.9 is real atmospheric haze."
-        ],
         "speed": [
           "Speed",
           "How fast the shafts drift. 0 holds them still."
         ],
+        "scatterG": [
+          "Scatter Direction",
+          "How strongly the haze throws light FORWARD. Scattering off dust and droplets is forward-peaked, so shafts blaze when you look near the light and fade as you turn away - which is most of what makes crepuscular rays read as light rather than as texture. 0 scatters equally in all directions; 0.7 to 0.9 is real atmospheric haze."
+        ],
         "blur": [
           "Blur",
           "Softens the shafts across their width. It works on the ray pattern, not the picture."
+        ],
+        "spotty": [
+          "Break Up",
+          "How quickly a shaft loses coherence along its length. Low keeps rays long and continuous; high breaks them into short spots, because the second noise field advances faster with distance and decorrelates from the first."
+        ],
+        "rayIntensity": [
+          "Thinning",
+          "Crushes everything but the peaks of the noise, so the shafts narrow and separate. This is the one control doing the work that extra noise octaves would otherwise do."
+        ],
+        "rayCount": [
+          "Shafts",
+          "Roughly how many shafts fan out around the light. This is the Light Field model's angular frequency; Density is the Volumetric model's noise scale and means something different, which is why they are two controls rather than one."
+        ],
+        "spread": [
+          "Spread",
+          "Angular extent of the cone, centred on Angle. At 1 the rays go all the way round the light; lower confines them to a wedge. Radiating rays only - parallel rays have no origin to fan out from."
+        ],
+        "coreSize": [
+          "Core Size",
+          "Radius of the glow sitting at the light itself."
+        ],
+        "coreGlow": [
+          "Core Glow",
+          "Brightness of that glow. It is not only additive: it also multiplies the rays near it, up to five times, so shafts blaze where they leave the source instead of merely crossing a bright blob."
+        ],
+        "rayColor": [
+          "Ray Colour",
+          "Colour of the shafts. White leaves them uncoloured, which is what earlier versions did unconditionally."
+        ],
+        "rayColor2": [
+          "Ray Colour 2",
+          "A second colour, interleaved shaft by shaft along the angular coordinate rather than by brightness - so neighbouring shafts differ and the fan reads as dispersed light. Set it to match Ray Colour for a single tint."
         ],
         "time": [
           "Time",
@@ -1022,6 +1058,17 @@
           "Amount",
           "Overall opacity of the ray effect over the original layer."
         ]
+      },
+      "enums": {
+        "rayMode": {
+          "0": "Volumetric",
+          "1": "Light Field"
+        }
+      },
+      "tabs": {
+        "filter": "Rays",
+        "rays": "Model",
+        "output": "Output"
       }
     }
   },
@@ -1031,7 +1078,7 @@
       "author": "samMularczyk",
       "layerType": "hatching",
       "niceName": "Hatching",
-      "layerInfo": "Repeating marks keyed off luminance: hatching, engraving, cross stitch, lines, rings, spiral or squares.",
+      "layerInfo": "Redraw the image as pen strokes, dots or halftone cells.",
       "language": "en",
       "attributes": {
         "pattern": [
@@ -1048,11 +1095,11 @@
         ],
         "angle": [
           "Angle",
-          "Direction of the Lines pattern, in degrees. Unused by the other patterns."
+          "Direction of the marks, in degrees. Used by Lines and by the two dot screens, where it sets the screen angle; the other patterns have no single direction to rotate."
         ],
         "softness": [
           "Softness",
-          "Edge softness of the continuous line patterns, in period units. Small values give crisp lines."
+          "Edge softness of the mark. On the dot screens this is also what makes neighbouring dots run together into blobs as the image darkens, rather than staying separate discs."
         ],
         "threshold1": [
           "Threshold 1",
@@ -1119,7 +1166,9 @@
           "3": "Lines",
           "4": "Concentric",
           "5": "Spiral",
-          "6": "Squares"
+          "6": "Squares",
+          "7": "Dots",
+          "8": "Holes"
         }
       },
       "tabs": {
@@ -1135,7 +1184,7 @@
       "author": "samMularczyk",
       "layerType": "led",
       "niceName": "LED",
-      "layerInfo": "LED matrix. Each cell becomes one lamp, with control over spacing, roundness, size and gap.",
+      "layerInfo": "Redraw the image as a matrix of LED lamps.",
       "language": "en",
       "attributes": {
         "cellSize": [
@@ -1184,7 +1233,7 @@
       "author": "samMularczyk",
       "layerType": "lens",
       "niceName": "Lens Distortion",
-      "layerInfo": "Geometric distortion and chromatic aberration, in the order light meets them. Seven real HAWK anamorphic lens profiles, solved from an ARRI ALEXA distortion chart, plus three aberration models. Either half switches off at zero, so it is also just a distortion, or just an aberration. Defocus and lens scatter now live in Lens Blur.",
+      "layerInfo": "Lens geometry: barrel distortion and chromatic aberration.",
       "language": "en",
       "attributes": {
         "profile": [
@@ -1347,7 +1396,7 @@
       "author": "samMularczyk",
       "layerType": "lensBlur",
       "niceName": "Lens Blur",
-      "layerInfo": "Defocus and lens scatter, split out of Lens Distortion so a frame can be bent without paying for four blur passes. The blur builds its aperture from rotated 1D segments, so bokeh takes the shape of a real diaphragm; the scatter adds the haze, astigmatism, diffraction rings and spherical aberration a lens throws around a highlight. Either half switches off at zero.",
+      "layerInfo": "Defocus with a real diaphragm shape, plus lens scatter.",
       "language": "en",
       "attributes": {
         "bokehThreshold": [
@@ -1559,7 +1608,7 @@
       "author": "samMularczyk",
       "layerType": "lensFlare",
       "niceName": "Lens Flare",
-      "layerInfo": "The ghosts, halo and starburst a bright source makes inside a lens. Ghosts and the starburst are built from a real lens's own surfaces and aperture rather than drawn, and every element is built from the layer's own thresholded highlights, so it always tracks real image content - including a Manual emitter placed off screen, which is where a flare's source usually is.",
+      "layerInfo": "Ghosts, halo and starburst from the image's highlights.",
       "language": "en",
       "attributes": {
         "placement": [
@@ -1740,7 +1789,7 @@
       "author": "samMularczyk",
       "layerType": "lightLeak",
       "niceName": "Light Leak",
-      "layerInfo": "Stray light fogging the film, the way it gets in around a loose camera back. Enters from an edge or corner and blooms with the picture's own brightness.",
+      "layerInfo": "Stray light fogging in from an edge or corner.",
       "language": "en",
       "attributes": {
         "intensity": [
@@ -1823,7 +1872,7 @@
       "author": "samMularczyk",
       "layerType": "lightwrap",
       "niceName": "Lightwrap",
-      "layerInfo": "Bleeds light from a background layer inward from this layer's edges. Needs Background Input connected AND Background Size set.",
+      "layerInfo": "Bleed a background layer's light in around this layer's edges.",
       "language": "en",
       "attributes": {
         "size": [
@@ -1894,9 +1943,322 @@
     "type": "layerStrings",
     "value": {
       "author": "samMularczyk",
+      "layerType": "linearRefraction",
+      "niceName": "Linear Refraction",
+      "layerInfo": "Refraction through parallel ribs, as reeded or fluted glass.",
+      "language": "en",
+      "attributes": {
+        "ribWidth": [
+          "Rib Width",
+          "Period of the ribs, in pixels."
+        ],
+        "angle": [
+          "Angle",
+          "Direction of the ribs, in degrees."
+        ],
+        "shape": [
+          "Grid",
+          "How the ribs run. The bend is added to the coordinate BEFORE it is wrapped, so a wave stays one continuous rib rather than breaking into steps."
+        ],
+        "profile": [
+          "Profile",
+          "Cross-section of each rib, which is what sets the character of the refraction. Prism is a cubic sawtooth - hard, faceted. Lens is a parabola. Contour has a flat centre and steep shoulders. Cascade is a true arc. Flat is nearly linear with soft ends."
+        ],
+        "distortion": [
+          "Refraction",
+          "How far each rib bends the picture behind it."
+        ],
+        "shift": [
+          "Shift",
+          "Biases the whole profile one way, so the ribs refract off-centre."
+        ],
+        "blur": [
+          "Frost",
+          "Softens across the ribs, for etched rather than polished glass. Twelve jittered taps - a fixed ladder of taps stays a visible ladder however long it gets, so the jitter matters more than the count."
+        ],
+        "stretch": [
+          "Stretch",
+          "Pulls the sample toward each rib's centre line near its shoulders, smearing the picture there."
+        ],
+        "highlights": [
+          "Rib Highlight",
+          "A thin stroke along each rib boundary. It is also the antialiasing: the stroke is two pixels wide, so when the ribs go sub-pixel it swallows them and the pattern greys out cleanly."
+        ],
+        "highlightColor": [
+          "Highlight Colour",
+          "Colour of that stroke."
+        ],
+        "shadows": [
+          "Shading",
+          "Darkening across each rib, from the profile's own curve."
+        ],
+        "shadowColor": [
+          "Shading Colour",
+          "Colour of that darkening."
+        ],
+        "edges": [
+          "Edges",
+          "What a tap finds outside the layer. Transparent is the honest answer; Clamp and Mirror fill the wedge the refraction opens at the border."
+        ],
+        "edgeTrim": [
+          "Edge Trim",
+          "Fold against a rect inset by this much, so the antialiased outer pixels are not reflected into a seam."
+        ],
+        "amount": [
+          "Amount",
+          "Mix between the original layer and the result."
+        ]
+      },
+      "enums": {
+        "shape": {
+          "0": "Lines",
+          "1": "Irregular",
+          "2": "Wave"
+        },
+        "profile": {
+          "0": "Prism",
+          "1": "Lens",
+          "2": "Contour",
+          "3": "Cascade",
+          "4": "Flat"
+        },
+        "edges": {
+          "0": "Transparent",
+          "1": "Clamp",
+          "2": "Mirror"
+        }
+      },
+      "tabs": {
+        "filter": "Glass",
+        "surface": "Surface",
+        "output": "Output"
+      }
+    }
+  },
+  {
+    "type": "layerStrings",
+    "value": {
+      "author": "samMularczyk",
+      "layerType": "liquidMetal",
+      "niceName": "Liquid Metal",
+      "layerInfo": "Chrome, smoke or heat, shaped by the layer's own alpha.",
+      "language": "en",
+      "attributes": {
+        "material": [
+          "Material",
+          "Which shading head runs over the shape field. The field itself is built the same way for all three."
+        ],
+        "spread": [
+          "Spread",
+          "How far the shape field reaches, in pixels. This is the falloff distance that upstream gets by normalising against the whole image - as a control it is better, because a thick stroke and a thin one on the same layer both read correctly instead of being scaled against each other."
+        ],
+        "contourAmount": [
+          "Contour",
+          "How hard the field bends the material at the silhouette. Low leaves the pattern flat across the shape; high crowds it against the edges, which is what makes the surface look like it wraps the form."
+        ],
+        "repetition": [
+          "Bands",
+          "How many light/dark bands the stripe field repeats. Think of it as how tightly banded the environment being reflected is."
+        ],
+        "softness": [
+          "Softness",
+          "Edge softness of each band. Zero gives hard chrome; higher gives a brushed or satin surface."
+        ],
+        "shiftRed": [
+          "Red Shift",
+          "Phase offset of the red channel against green. Together with Blue Shift this is the entire chromatic aberration - three samples of one field at three offsets, which is why the fringing follows the strokes and not the frame."
+        ],
+        "shiftBlue": [
+          "Blue Shift",
+          "Phase offset of the blue channel. Negative swaps which side of an edge goes warm."
+        ],
+        "distortion": [
+          "Turbulence",
+          "Noise added into the field before it warps the bands, so the reflection ripples rather than sitting still. On Heat this doubles as the dither amount."
+        ],
+        "metalAngle": [
+          "Angle",
+          "Direction of the band ramp, in degrees. Also rotates Smoke's warp and Heat's scrolling band."
+        ],
+        "tintColor": [
+          "Tint",
+          "Colour applied with a colour burn rather than a multiply, so the highlights stay near white while the darks take the colour - which is what separates tinted metal from a merely coloured object. Alpha is the amount."
+        ],
+        "innerDistortion": [
+          "Inner Swirl",
+          "Warp strength inside the shape. This one is multiplied by the field, so it is calm at the rim and strongest through the thick of the form - that contrast is the whole gem impression."
+        ],
+        "outerDistortion": [
+          "Outer Swirl",
+          "Warp strength of the smoke outside the shape, which is not tied to the field."
+        ],
+        "innerGlow": [
+          "Inner Glow",
+          "Brightness of the material inside the shape. On Heat this is the heat of the body; on Smoke it is how strongly the plume shows through the silhouette."
+        ],
+        "outerGlow": [
+          "Outer Glow",
+          "Brightness of the halo outside the shape. Needs Spread to have room - the layer bounds expand to match, so a big halo costs padding."
+        ],
+        "smokeScale": [
+          "Smoke Scale",
+          "Size of the smoke plume. Lower zooms out and, because the warp is damped where it would alias, also calms it."
+        ],
+        "smokeSpill": [
+          "Spill",
+          "How far the plume is allowed from the shape. At zero it is confined to the falloff measured from the layer's own alpha, so the smoke pours off the form; at one it fills the layer's bounds, which is what the reference does because there the shader IS the whole frame. It always fades out before the padded edge either way."
+        ],
+        "smokeInner": [
+          "Fill",
+          "Colour filling the shape behind the smoke."
+        ],
+        "heat1": [
+          "Colour 1",
+          "First stop of the ramp. Low values of the field land here."
+        ],
+        "heat2": [
+          "Colour 2",
+          "Second stop."
+        ],
+        "heat3": [
+          "Colour 3",
+          "Third stop."
+        ],
+        "heat4": [
+          "Colour 4",
+          "Fourth stop."
+        ],
+        "heatCount": [
+          "Colours",
+          "How many stops of the ramp are used."
+        ],
+        "speed": [
+          "Speed",
+          "Rate the pattern moves. Zero freezes it."
+        ],
+        "time": [
+          "Time",
+          "Connected to the composition time."
+        ],
+        "backColor": [
+          "Background",
+          "Colour behind the result. Transparent by default so it composites over whatever is beneath."
+        ],
+        "amount": [
+          "Amount",
+          "Mix between the original layer and the result."
+        ]
+      },
+      "enums": {
+        "material": {
+          "0": "Metal",
+          "1": "Smoke",
+          "2": "Heat"
+        }
+      },
+      "tabs": {
+        "filter": "Output",
+        "shape": "Shape",
+        "metal": "Metal",
+        "body": "Smoke & Heat"
+      }
+    }
+  },
+  {
+    "type": "layerStrings",
+    "value": {
+      "author": "samMularczyk",
+      "layerType": "meshGradient",
+      "niceName": "Mesh Gradient",
+      "layerInfo": "A gradient blended from colour spots, warped by waves.",
+      "language": "en",
+      "attributes": {
+        "colorCount": [
+          "Colours",
+          "How many stops are used. This is also the SPOT COUNT - each colour is one spot in the field."
+        ],
+        "color1": [
+          "Colour 1",
+          "First spot."
+        ],
+        "color2": [
+          "Colour 2",
+          "Second spot."
+        ],
+        "color3": [
+          "Colour 3",
+          "Third spot."
+        ],
+        "color4": [
+          "Colour 4",
+          "Fourth spot."
+        ],
+        "positions": [
+          "Position",
+          "Slides every spot along its own path. A seed, not a count - changing it rearranges the composition without changing how many spots there are."
+        ],
+        "swirl": [
+          "Swirl",
+          "Twists the field about its centre, strongest there and falling away with distance. It breathes slowly rather than holding a fixed angle, so it never settles."
+        ],
+        "mixing": [
+          "Mixing",
+          "Does two things at once, which is why one slider covers the whole range: it sets the distance falloff exponent and how sharply the nearest spot wins. Low gives hard stripes, high a gradual blend."
+        ],
+        "waveX": [
+          "Wave X",
+          "Sine distortion across the field, strongest through the middle and calm at the border."
+        ],
+        "waveXShift": [
+          "Wave X Phase",
+          "Phase offset of that wave."
+        ],
+        "waveY": [
+          "Wave Y",
+          "The same on the other axis."
+        ],
+        "waveYShift": [
+          "Wave Y Phase",
+          "Phase offset of the vertical wave."
+        ],
+        "grainMixer": [
+          "Grain",
+          "Eats into each spot's reach, so the boundaries between colours break up rather than staying clean."
+        ],
+        "grainOverlay": [
+          "Grain Overlay",
+          "Noise laid over the finished gradient."
+        ],
+        "rotation": [
+          "Rotation",
+          "Rotates the whole field, in degrees."
+        ],
+        "evolution": [
+          "Evolution",
+          "Drives everything that moves, in degrees. Keyframe it, or drive it with a Frame behaviour - the rate is yours rather than tied to the comp clock."
+        ],
+        "loop": [
+          "Loop",
+          "Makes the field return exactly to its start, so it can be cycled with no visible seam."
+        ],
+        "cycles": [
+          "Cycles",
+          "How many full revolutions of Evolution before it repeats. At 2 the field comes home at Evolution 720, not 360 - so a higher count travels further through the noise and gives more variation before the repeat."
+        ]
+      },
+      "enums": {},
+      "tabs": {
+        "filter": "Mesh"
+      }
+    }
+  },
+  {
+    "type": "layerStrings",
+    "value": {
+      "author": "samMularczyk",
       "layerType": "paint",
       "niceName": "Paint",
-      "layerInfo": "Re-renders the layer as paint, three ways. Brush smears along the image's own structure; Oil displaces every pixel the same distance along a field's steepest slope, which is what reads as brushwork; Watercolour flattens into washes then transports pigment along them.",
+      "layerInfo": "Repaint the image with brush, oil or watercolour marks.",
       "language": "en",
       "attributes": {
         "style": [
@@ -2064,9 +2426,74 @@
     "type": "layerStrings",
     "value": {
       "author": "samMularczyk",
+      "layerType": "paperTexture",
+      "niceName": "Paper Texture",
+      "layerInfo": "Procedural paper: fibres, folds, crumple and blotches.",
+      "language": "en",
+      "attributes": {
+        "paperContrast": [
+          "Relief",
+          "How deep the surface reads. This steepens the normal's own Z rather than remapping the output, so the shading stays physical at both ends instead of just gaining contrast."
+        ],
+        "roughness": [
+          "Grain",
+          "Fine tooth. Indexed off screen pixels, not the pattern, so it stays a constant size however the layer is scaled - film grain rather than surface texture."
+        ],
+        "fibre": [
+          "Fibre",
+          "Curling strands in the stock. This is the ridge structure of a noise gradient, so it costs sixteen noise evaluations - by far the most expensive layer here. Leave it low unless the strands are the point."
+        ],
+        "fibreSize": [
+          "Fibre Size",
+          "Length scale of the strands."
+        ],
+        "crumples": [
+          "Crumple",
+          "Faceted foil-like buckling. Two cell fields multiplied, one sharp and one soft."
+        ],
+        "crumpleSize": [
+          "Crumple Size",
+          "Size of the facets."
+        ],
+        "folds": [
+          "Folds",
+          "Creases radiating from a few seed points. The field returns the vector to the nearest seed rather than a distance, so each crease perturbs the surface outward from its own origin - which is what makes them read as folds rather than as contour lines."
+        ],
+        "foldCount": [
+          "Fold Count",
+          "How many crease origins."
+        ],
+        "drops": [
+          "Speckle",
+          "Sparse flecks and inclusions in the stock."
+        ],
+        "seed": [
+          "Seed",
+          "Changes the arrangement without changing the character."
+        ],
+        "paperColor": [
+          "Paper",
+          "Colour of the lit surface."
+        ],
+        "shadowColor": [
+          "Shadow",
+          "Colour the surface falls to where it turns away from the light."
+        ]
+      },
+      "enums": {},
+      "tabs": {
+        "filter": "Paper",
+        "surface": "Surface"
+      }
+    }
+  },
+  {
+    "type": "layerStrings",
+    "value": {
+      "author": "samMularczyk",
       "layerType": "photocopy",
       "niceName": "Photocopy",
-      "layerInfo": "Copier artefacts: crushed midtones, toner blowout at edges, dithered threshold, blotchy toner and paper fibre.",
+      "layerInfo": "Photocopier toner: blown edges, dither, speckle and drum banding.",
       "language": "en",
       "attributes": {
         "exposure": [
@@ -2125,6 +2552,34 @@
           "Texture Scale",
           "Size of the paper fibre. The grain is stretched, so it reads as fibre direction rather than plain noise."
         ],
+        "paperFolds": [
+          "Folds",
+          "Creases radiating from a few seed points, lighting the sheet the toner sits on. The field gives the vector to the nearest crease rather than a distance, so each one perturbs the surface outward from its own origin - which is what makes it read as a fold and not a contour line."
+        ],
+        "paperFoldCount": [
+          "Fold Count",
+          "How many crease origins."
+        ],
+        "paperCrumples": [
+          "Crumple",
+          "Faceted buckling, from two jittered cell fields multiplied - one sharp, one soft."
+        ],
+        "paperCrumpleSize": [
+          "Crumple Size",
+          "Size of the facets."
+        ],
+        "paperFibre": [
+          "Fibre Relief",
+          "Directional tooth in the stock, lit rather than merely tinted."
+        ],
+        "paperRelief_": [
+          "Relief",
+          "How deep the sheet reads. Steepens the surface normal's own Z rather than remapping the result. Zero on Folds, Crumple and Fibre together switches the model off and costs nothing."
+        ],
+        "paperSeed": [
+          "Paper Seed",
+          "Changes the arrangement of folds and facets."
+        ],
         "inkColor": [
           "Ink",
           "Toner colour. Cyan for blueprint, a flat spot colour for riso."
@@ -2159,7 +2614,7 @@
       "author": "samMularczyk",
       "layerType": "polarCoordinates",
       "niceName": "Polar Coordinates",
-      "layerInfo": "Remaps the frame between rectangular and polar space, like After Effects' Polar Coordinates.",
+      "layerInfo": "Convert between rectangular and polar coordinates.",
       "language": "en",
       "attributes": {
         "mapping": [
@@ -2206,7 +2661,7 @@
       "author": "samMularczyk",
       "layerType": "print",
       "niceName": "Print",
-      "layerInfo": "Riso, screen print and newsprint are the same mechanism: separate the image into spot-ink plates, screen each plate, offset it slightly out of register, then overprint translucent ink onto paper. Ink Density separation solves for the actual inks by density rather than tonal band, so a blue-plus-yellow riso genuinely reproduces greens.",
+      "layerInfo": "Separate into spot inks, screen them, and overprint on paper.",
       "language": "en",
       "attributes": {
         "process": [
@@ -2215,15 +2670,15 @@
         ],
         "separation": [
           "Separation",
-          "How the image is split across plates. Ink Density solves each plate's density from the chosen inks' own colours, so overprints mix like real ink. Tonal Bands splits by shadow/mid/highlight, ignoring hue. Channel gives plate n the image's colour channel n."
+          "How the image is split into plates. Ink Density solves how much of each ink reproduces the target and overprints them - right for photographs. Source Colour skips separation entirely: one plate, inked with whatever the artwork already is, so flat spot colours print exactly. Reach for it when a build comes out washed - a Riso reaches bright colours fine with a drum of that ink, but BUILDING one from blue plus yellow needs a little of each, and that means paper showing through."
         ],
         "inkCount": [
-          "Ink Count",
-          "How many plates print, from one to four."
+          "Inks",
+          "How many plates print, from one to four. Riso is a spot process - pick inks from its catalogue that match your artwork rather than treating these as CMYK. Green 00A95C, Fluorescent Pink FF48B0, Federal Blue 3D5588, Bright Red F15060, Yellow FFE800, Orange FF6C2F, Purple 765BA7, Teal 00838A."
         ],
         "flatten": [
           "Flatten",
-          "Edge-preserving smooth of the source before separation. The single biggest quality win: without it, source noise scatters band edges pixel to pixel and contours crawl. 0 is off."
+          "Edge-preserving smooth of the source before separation, over this radius in pixels. On photographic sources it collapses noise so band edges land on real edges instead of scattering pixel to pixel. On FLAT artwork there is nothing to smooth, so it does one thing instead: an antialiased edge pixel is a blend of the two shapes either side and resembles neither, which separates to an ink mix matching nothing and prints as a hairline - this snaps it to the side it is closer to. Raise it until hairlines go."
         ],
         "levels": [
           "Levels",
@@ -2239,7 +2694,23 @@
         ],
         "screenType": [
           "Screen",
-          "The halftone pattern used to build tone from ink. Flat prints solid density with no pattern at all - the default for Riso. Grain adds a random speckle instead of a regular screen."
+          "The geometry the ink is broken into. Flat prints solid density with no pattern at all, which is what a Riso does. Ink Grain is separate and applies to all of them - a dotted press is grainy too."
+        ],
+        "dotShape": [
+          "Dot Shape",
+          "The level sets of the dot. Elliptical is the one that matters on press: a round dot meets all four of its neighbours at once around seventy percent coverage, and the tone jumps there. An ellipse joins along its long axis first and the short axis later, so the same join is spread over two smaller steps."
+        ],
+        "screenStrength": [
+          "Screen Strength",
+          "How hard the screen bites. At 1 a dot is either fully there or fully absent, which is maximum contrast against the bare paper beside it - that is what makes dark dots read as heavy. Easing it back keeps the pattern's shape and position but closes the gap between dot and gap. Average density is untouched, so the tone does not shift; only the pattern's contrast does. At 0 it dissolves into flat tone."
+        ],
+        "inkGrain": [
+          "Ink Grain",
+          "Depth of riso's uneven ink transfer. Weighted by coverage, so blank paper stays clean and solids stay grainy - unlike film grain, which peaks at mid density and disappears at both ends because it models developed silver rather than ink laid on paper."
+        ],
+        "inkGrainScale": [
+          "Ink Grain Scale",
+          "Size of that speckle. Larger values coarsen it."
         ],
         "frequency": [
           "Screen Frequency",
@@ -2249,17 +2720,21 @@
           "Dot Gain",
           "MECHANICAL dot gain - ink physically spreading on press, so the dots grow or choke. The optical half of dot gain is Paper Scatter below; they are different effects and were previously conflated in this one control."
         ],
+        "toneFloor": [
+          "Tone Floor",
+          "How dark the separation is allowed to read the artwork. Flat vector work is full of pure-zero channels, which read as needing infinite ink - so the solve spends all its density chasing a black no ink can reach, and every colour sharing that zero saturates at a full plate and prints IDENTICALLY. Raising this says nothing is darker than that, so distinct tones stay distinct. It costs absolute depth: blacks lighten. Raise it when shapes are crushing together, lower it when you need real blacks."
+        ],
         "yuleNielsen": [
           "Paper Scatter (n)",
           "Optical dot gain: light enters the paper between the dots, scatters sideways and comes back out from under one, so a halftone always prints darker than its dot area suggests. This is the Yule-Nielsen n factor, a real measurable property of the stock - about 1.7 for coated, higher for uncoated where the fibres scatter further. 1 turns it off, which is the naive Murray-Davies mix."
         ],
         "ink1Color": [
-          "Ink 1 Colour",
-          "First plate's ink."
+          "Ink 1",
+          "Colour of the first plate. Match it to a colour in the artwork for spot printing, or use a process ink to build colours by overprinting."
         ],
         "ink1Angle": [
           "Ink 1 Angle",
-          "Screen angle for plate 1. Classic separations use differing angles to avoid moiré."
+          "Screen angle for this plate, in degrees. Traditional presses use 15/45/75/105 so the four dot grids never line up and moire. It only does anything when a screen is in use - with Flat there is no grid to rotate."
         ],
         "ink1Coverage": [
           "Ink 1 Coverage",
@@ -2271,7 +2746,7 @@
         ],
         "ink2Angle": [
           "Ink 2 Angle",
-          "Screen angle for plate 2."
+          "Screen angle for this plate, in degrees. Traditional presses use 15/45/75/105 so the four dot grids never line up and moire. It only does anything when a screen is in use - with Flat there is no grid to rotate."
         ],
         "ink2Coverage": [
           "Ink 2 Coverage",
@@ -2283,7 +2758,7 @@
         ],
         "ink3Angle": [
           "Ink 3 Angle",
-          "Screen angle for plate 3."
+          "Screen angle for this plate, in degrees. Traditional presses use 15/45/75/105 so the four dot grids never line up and moire. It only does anything when a screen is in use - with Flat there is no grid to rotate."
         ],
         "ink3Coverage": [
           "Ink 3 Coverage",
@@ -2295,7 +2770,7 @@
         ],
         "ink4Angle": [
           "Ink 4 Angle",
-          "Screen angle for plate 4."
+          "Screen angle for this plate, in degrees. Traditional presses use 15/45/75/105 so the four dot grids never line up and moire. It only does anything when a screen is in use - with Flat there is no grid to rotate."
         ],
         "ink4Coverage": [
           "Ink 4 Coverage",
@@ -2306,12 +2781,32 @@
           "Translucency of all inks. Lower values build density more gradually where plates overlap - soy-based riso ink is quite translucent."
         ],
         "registrationError": [
-          "Registration Error",
-          "How far the plates drift out of alignment, in pixels. Real presses commonly drift a few millimetres between passes."
+          "Registration",
+          "How far each plate drifts out of register, in pixels. In Source Colour there is only one plate and nothing to misregister against, so it instead samples the ink colour offset from the coverage - a boundary picks up the colour from just across it, which is the fringe you actually see on a misregistered print."
+        ],
+        "edgeBreakup": [
+          "Edge Breakup",
+          "How far the ink boundary wanders, in pixels. It works by wobbling the coordinate the coverage is read at, so solid areas are untouched - a flat lookup does not care where you sample it - and only the boundaries move. Each plate breaks up independently."
+        ],
+        "edgeBreakupScale": [
+          "Breakup Scale",
+          "Size of that wander. Small values chew the edge finely; large ones make it undulate."
+        ],
+        "keyline": [
+          "Keyline",
+          "Paper left open along every edge in the artwork, in pixels, so shapes are separated by a fine white gap. Not the same as registration error: that drifts a plate one way, opening a gap on one side and an overlap on the other. This pulls every ink back from every edge evenly. It follows the artwork's boundaries rather than each ink's, so two shapes sharing a colour still get a line between them."
+        ],
+        "keylineThreshold": [
+          "Keyline Threshold",
+          "How much colour has to change before it counts as an edge. Flat artwork needs very little; raise it on photographic sources, where texture would otherwise draw keylines everywhere."
         ],
         "inkLoss": [
           "Ink Loss",
           "Patchy ink transfer - areas where the ink fails to take."
+        ],
+        "inkLossScale": [
+          "Ink Loss Scale",
+          "Size of the patches where transfer fails, as a fraction of about 45 pixels. 0.05 is fine speckle; 1 drops patches tens of pixels across. Floored at a 6-pixel cell so the detail octave stays above the pixel grid - below that a noise lattice is aliased hash with a fixed visual frequency, and no amount of scaling or extra octaves changes how it looks."
         ],
         "mottle": [
           "Mottle",
@@ -2325,6 +2820,14 @@
           "Seed",
           "Re-rolls the registration drift, speckle, and mottle."
         ],
+        "boil": [
+          "Boil",
+          "Re-prints the sheet every this many frames, so grain, ink loss, mottle, edge breakup and each plate's drift are all different on every new impression and perfectly still in between. That hold is what makes it read as hand-printed rather than as animated noise - 2 gives the classic on-twos chatter. Zero holds one impression forever."
+        ],
+        "time": [
+          "Time",
+          "Connected to the composition time. Only used to advance the boil."
+        ],
         "paperColor": [
           "Paper Colour",
           "The stock the plates print onto."
@@ -2333,9 +2836,33 @@
           "Paper Grain",
           "Paper fibre structure. Textures the blank stock."
         ],
+        "paperFolds": [
+          "Folds",
+          "Creases radiating from a few seed points, lighting the sheet the ink sits on. The field gives the vector to the nearest crease rather than a distance, so each one perturbs the surface outward from its own origin - which is what makes it read as a fold and not a contour line."
+        ],
+        "paperFoldCount": [
+          "Fold Count",
+          "How many crease origins."
+        ],
+        "paperCrumples": [
+          "Crumple",
+          "Faceted buckling, from two jittered cell fields multiplied - one sharp, one soft."
+        ],
+        "paperCrumpleSize": [
+          "Crumple Size",
+          "Size of the facets."
+        ],
+        "paperFibre": [
+          "Fibre Relief",
+          "Directional tooth in the stock, lit rather than merely tinted."
+        ],
+        "paperRelief_": [
+          "Relief",
+          "How deep the sheet reads. This steepens the surface normal's own Z rather than remapping the result, so the shading stays physical at both ends. Zero on Folds, Crumple and Fibre together switches the whole model off and costs nothing."
+        ],
         "trueColour": [
-          "True Colour",
-          "Brings the original colours back through the print. The screen, grain and paper texture all stay - only the hue returns. Unlike Amount, which fades the whole effect out."
+          "Colour Fidelity",
+          "Corrects the print's colour toward the artwork's, as a GAIN rather than a blend. The regional colour lands on the artwork's while every local deviation from it survives - so the multiply where inks overlap, the misregistration band and the grain all stay at full strength, even at 1. A separation reproduces colour through real inks, and flat artwork usually sits outside what those inks reach; this closes that gap without giving up the press."
         ],
         "paperTooth": [
           "Paper Tooth",
@@ -2359,16 +2886,16 @@
         "separation": {
           "0": "Ink Density",
           "1": "Tonal Bands",
-          "2": "Channel"
+          "2": "Channel",
+          "3": "Source Colour"
         },
         "screenType": {
           "0": "Flat",
-          "1": "Grain",
-          "2": "Dots",
-          "3": "Lines",
-          "4": "Stipple",
-          "5": "Bayer",
-          "6": "Voronoi"
+          "1": "Dots",
+          "2": "Lines",
+          "3": "Stipple",
+          "4": "Bayer",
+          "5": "Voronoi"
         },
         "outputMode": {
           "0": "Paper",
@@ -2378,6 +2905,12 @@
           "4": "Plate 2 Proof",
           "5": "Plate 3 Proof",
           "6": "Plate 4 Proof"
+        },
+        "dotShape": {
+          "0": "Round",
+          "1": "Elliptical",
+          "2": "Square",
+          "3": "Diamond"
         }
       },
       "tabs": {
@@ -2393,9 +2926,70 @@
     "type": "layerStrings",
     "value": {
       "author": "samMularczyk",
+      "layerType": "smokeRing",
+      "niceName": "Smoke Ring",
+      "layerInfo": "A soft noisy ring of smoke.",
+      "language": "en",
+      "attributes": {
+        "radius": [
+          "Radius",
+          "Where the ring sits, as a fraction of the short edge."
+        ],
+        "thickness": [
+          "Thickness",
+          "How wide the band is."
+        ],
+        "innerFade": [
+          "Inner Fade",
+          "Eats the ring from the inside, so the middle opens out instead of filling in."
+        ],
+        "detail": [
+          "Detail",
+          "Angular frequency of the wisps - how many of them go round."
+        ],
+        "turbulence": [
+          "Turbulence",
+          "A second, finer polar octave scrolling the other way, so the smoke churns rather than rotating as one piece."
+        ],
+        "color1": [
+          "Colour 1",
+          "Colour where the noise is thin."
+        ],
+        "color2": [
+          "Colour 2",
+          "Colour where it is dense."
+        ],
+        "backColor": [
+          "Background",
+          "Colour behind the ring. Transparent by default."
+        ],
+        "evolution": [
+          "Evolution",
+          "Drives everything that moves, in degrees. Keyframe it, or drive it with a Frame behaviour - the rate is yours rather than tied to the comp clock."
+        ],
+        "loop": [
+          "Loop",
+          "Makes the field return exactly to its start, so it can be cycled with no visible seam."
+        ],
+        "cycles": [
+          "Cycles",
+          "How many full revolutions of Evolution before it repeats. At 2 the field comes home at Evolution 720, not 360 - so a higher count travels further through the noise and gives more variation before the repeat."
+        ]
+      },
+      "enums": {},
+      "tabs": {
+        "filter": "Output",
+        "ring": "Ring"
+      }
+    }
+  },
+  {
+    "type": "layerStrings",
+    "value": {
+      "author": "samMularczyk",
       "layerType": "vhs",
       "niceName": "VHS",
-      "layerInfo": "Tape simulation: horizontal wander, tape crease, head-switching noise, RGB bloom smear and an AC hum beat.",
+      "layerInfo": "Tape wander, creases, head-switching noise and chroma smear.",
       "language": "en",
       "attributes": {
         "time": [
@@ -2526,6 +3120,168 @@
       "tabs": {
         "filter": "Tape",
         "picture": "Picture"
+      }
+    }
+  },
+  {
+    "type": "layerStrings",
+    "value": {
+      "author": "samMularczyk",
+      "layerType": "warp",
+      "niceName": "Warp",
+      "layerInfo": "Colour fields marbled by layered swirls.",
+      "language": "en",
+      "attributes": {
+        "shape": [
+          "Pattern",
+          "The base field the swirl acts on. It is nearly constant across the frame at this scale, so almost everything visible is generated BY the swirl rather than being this pattern bent - Checks and Stripes differ more in character than in shape."
+        ],
+        "shapeScale": [
+          "Pattern Scale",
+          "Frequency of the base field. On Edge it inverts: 1 is a tight edge, 0 a very wide gradient."
+        ],
+        "proportion": [
+          "Balance",
+          "Shifts the field toward one end of the colour ramp, so one colour takes more of the frame."
+        ],
+        "softness": [
+          "Softness",
+          "0 gives hard banded edges between colours, 1 a raw linear ramp. Anything between quantises the ramp and then softens each step."
+        ],
+        "distortion": [
+          "Distortion",
+          "A noise warp applied BEFORE the swirl - it seeds it. Direction comes from one noise field and magnitude from a second."
+        ],
+        "swirl": [
+          "Swirl",
+          "Strength of each swirl pass. Amplitude falls as one over the iteration number, a harmonic series."
+        ],
+        "swirlIterations": [
+          "Iterations",
+          "How many swirl passes run. Because the amplitudes are harmonic this increases the warp's STRENGTH as well as its detail, roughly as the log of the count. Note it breaks before the last one, matching upstream: 10 runs nine passes."
+        ],
+        "scale": [
+          "Scale",
+          "Zoom. Larger values pull the field in."
+        ],
+        "rotation": [
+          "Rotation",
+          "Rotates the whole field, in degrees."
+        ],
+        "colorCount": [
+          "Colours",
+          "How many stops of the ramp are used."
+        ],
+        "color1": [
+          "Colour 1",
+          "First stop."
+        ],
+        "color2": [
+          "Colour 2",
+          "Second stop."
+        ],
+        "color3": [
+          "Colour 3",
+          "Third stop."
+        ],
+        "color4": [
+          "Colour 4",
+          "Fourth stop."
+        ],
+        "evolution": [
+          "Evolution",
+          "Drives everything that moves, in degrees. Keyframe it, or drive it with a Frame behaviour - the rate is yours rather than tied to the comp clock."
+        ],
+        "loop": [
+          "Loop",
+          "Makes the field return exactly to its start, so it can be cycled with no visible seam."
+        ],
+        "cycles": [
+          "Cycles",
+          "How many full revolutions of Evolution before it repeats. At 2 the field comes home at Evolution 720, not 360 - so a higher count travels further through the noise and gives more variation before the repeat."
+        ]
+      },
+      "enums": {
+        "shape": {
+          "0": "Checks",
+          "1": "Stripes",
+          "2": "Edge"
+        }
+      },
+      "tabs": {
+        "filter": "Warp"
+      }
+    }
+  },
+  {
+    "type": "layerStrings",
+    "value": {
+      "author": "samMularczyk",
+      "layerType": "water",
+      "niceName": "Water",
+      "layerInfo": "Refraction through a moving water surface.",
+      "language": "en",
+      "attributes": {
+        "size": [
+          "Scale",
+          "Size of the caustic cells. Smaller values give a bigger, slower pattern."
+        ],
+        "caustic": [
+          "Caustic",
+          "How far the caustic field pushes the picture. This is the fine, fast refraction."
+        ],
+        "waves": [
+          "Swell",
+          "A slow, large-scale wave that both displaces the picture and warps the caustic field's own coordinates, so the cells ride the swell instead of sitting still under it."
+        ],
+        "layering": [
+          "Layering",
+          "Adds a second, finer set of caustic octaves at a different time rate. Doubles the cost of the field, so leave it at zero when the extra depth is not needed."
+        ],
+        "highlights": [
+          "Glint",
+          "Additive sparkle where the caustic peaks, keyed off the same field sample rather than a second one."
+        ],
+        "highlightColor": [
+          "Glint Colour",
+          "Colour of that sparkle."
+        ],
+        "edges": [
+          "Edges",
+          "What a tap finds outside the layer. Transparent is the honest answer - there is no picture out there - but refraction opens wedges of nothing at the border, and Clamp or Mirror fill them."
+        ],
+        "edgeTrim": [
+          "Edge Trim",
+          "Fold against a rect inset by this much. A layer's outermost pixels are antialiased, and reflecting those doubles them into a hard seam."
+        ],
+        "evolution": [
+          "Evolution",
+          "Drives everything that moves, in degrees. Keyframe it, or drive it with a Frame behaviour - the rate is yours rather than tied to the comp clock."
+        ],
+        "loop": [
+          "Loop",
+          "Makes the field return exactly to its start, so it can be cycled with no visible seam."
+        ],
+        "cycles": [
+          "Cycles",
+          "How many full revolutions of Evolution before it repeats. At 2 the field comes home at Evolution 720, not 360 - so a higher count travels further through the noise and gives more variation before the repeat."
+        ],
+        "amount": [
+          "Amount",
+          "Mix between the original layer and the result."
+        ]
+      },
+      "enums": {
+        "edges": {
+          "0": "Transparent",
+          "1": "Clamp",
+          "2": "Mirror"
+        }
+      },
+      "tabs": {
+        "filter": "Water",
+        "surface": "Surface",
+        "output": "Output"
       }
     }
   }

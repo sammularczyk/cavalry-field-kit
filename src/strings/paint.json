@@ -4,7 +4,7 @@
     "author": "samMularczyk",
     "layerType": "paint",
     "niceName": "Paint",
-    "layerInfo": "Re-renders the layer as paint, three ways. Brush smears along the image's own structure; Oil displaces every pixel the same distance along a field's steepest slope, which is what reads as brushwork; Watercolour flattens into washes then transports pigment along them.",
+    "layerInfo": "Repaint the image with brush, oil or watercolour marks.",
     "language": "en",
     "attributes": {
       "style": [

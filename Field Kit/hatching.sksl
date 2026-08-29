@@ -16,7 +16,7 @@
 //
 // Uniform order matches the attribute order in definitions.json.
 
-uniform float  pattern;      // enum 0..6, see above
+uniform float  pattern;      // enum 0..8, see above
 
 uniform float  size;         // line period / cell size, in pixels
 uniform float  lineWidth;    // mark width in pixels
@@ -192,6 +192,51 @@ half4 main(float2 fragCoord) {
         if (lum < threshold2) { ink = max(ink, hatchLine(p.x - p.y, s, w)); }
         if (lum < threshold3) { ink = max(ink, hatchLine(p.x + p.y - offset, s, w)); }
         if (lum < threshold4) { ink = max(ink, hatchLine(p.x - p.y - offset, s, w)); }
+    } else if (pat >= 7) {
+        // ---- Dots / Holes -------------------------------------------------
+        // ONE LUMINANCE PER CELL, sampled at the cell's centre - not per pixel.
+        // This is the whole difference between a halftone and dots laid over a
+        // picture. Sampling per pixel lets tone vary WITHIN a cell, so the
+        // boundary between light and dark regions is a smooth curve with marks
+        // scattered over it. Sampling once per cell quantises that boundary to
+        // the grid, so regions are built out of whole cells with hard,
+        // axis-aligned edges - which is what makes it read as a printed screen
+        // rather than as an overlay. Cross Stitch above samples the same way.
+        float ss = max(s, 0.5);
+        float c2 = cos(radians(angle)), s2 = sin(radians(angle));
+        float2 cell = float2(c2 * p.x - s2 * p.y, s2 * p.x + c2 * p.y) / ss;
+
+        float2 cellC = floor(cell) + 0.5;
+        float2 pc = float2(c2 * cellC.x + s2 * cellC.y, -s2 * cellC.x + c2 * cellC.y) * ss;
+        half4 csrc = image.eval(pc + rectCentre);
+        half3 linC = csrc.a > 0.0 ? csrc.rgb / csrc.a : half3(0.0);
+        float lum = dot(float3(linC), float3(0.299, 0.587, 0.114));
+
+        // Both modes work on the plain, axis-aligned cell - the 45-degree AM
+        // lattice belongs to Print's screen, not here.
+        float2 q = fract(cell) - 0.5;
+        float dist = length(q) * 2.0;
+        float aa = 1.0 / ss + max(softness, 0.0);
+        float baseR = clamp(w / ss * 2.0, 0.05, 2.0);
+
+        if (pat == 7) {
+            // Dots: one round mark per cell, growing as the cell darkens.
+            float radius = clamp(1.0 - lum, 0.0, 1.0) * baseR;
+            ink = 1.0 - smoothstep(radius - aa, radius + aa, dist);
+        } else {
+            // Holes SWAPS POLARITY at mid grey, and that flip is the point:
+            //
+            //   lighter than mid : the cell fills with ink and a disc is
+            //                      punched out - square marks with round holes
+            //   darker than mid  : the ink IS the disc - round marks
+            //
+            // Combined with per-cell tone, that is what produces blocks of
+            // solid cells against a field of small marks, with a hard cellular
+            // border between them. No continuous mapping of coverage reaches it.
+            float radius = mix(0.75 * baseR, 0.0, clamp(lum, 0.0, 1.0));
+            float disc = 1.0 - smoothstep(radius - aa, radius + aa, dist);
+            ink = lum >= 0.5 ? (1.0 - disc) : disc;
+        }
     } else {
         // ---- Lines / Concentric / Spiral / Squares ------------------------
         half3 linH = src.a > 0.0 ? src.rgb / src.a : half3(0.0);

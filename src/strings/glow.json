@@ -1,125 +1,125 @@
 {
- "type": "layerStrings",
- "value": {
-  "author": "samMularczyk",
-  "layerType": "glow",
-  "niceName": "Ultra Glow",
-  "layerInfo": "Bloom and anamorphic streak from the same highlights, and both can run at once - which is what a lens flare is. Built as chained separable blurs, so it never rings or ghosts at any size. The streak is built first and the bloom ladder runs over it, so the streak blooms too.",
-  "language": "en",
-  "attributes": {
-   "srcBlack": [
-    "Threshold",
-    "Only light above this emits. This is the black point of the grade that isolates the highlights."
-   ],
-   "srcWhite": [
-    "White Point",
-    "Level that counts as fully lit. Below 1 pushes more of the picture into the glow."
-   ],
-   "response": [
-    "Response",
-    "Curve of the highlight grade. Higher keeps the glow tight around genuinely bright areas."
-   ],
-   "streakAmount": [
-    "Streak",
-    "Strength of the directional smear. Zero leaves a pure bloom."
-   ],
-   "streakIntensity": [
-    "Streak Intensity",
-    "Brightness of the streak on top of the global Intensity, so the flare can be pushed or pulled against the bloom rather than both moving together."
-   ],
-   "reach": [
-    "Length",
-    "Total streak length in pixels. The layer bounds expand to match."
-   ],
-   "angle": [
-    "Angle",
-    "Streak axis in degrees. Zero is the classic horizontal anamorphic bar."
-   ],
-   "samples": [
-    "Samples",
-    "How densely each pass samples along the streak. This sets quality only - the streak is the same length at any setting - and 4 is the minimum at which the passes still tile without gaps."
-   ],
-   "streakFalloff": [
-    "Streak Falloff",
-    "How quickly the streak fades along its length. The profile is the envelope of a diffraction spike - it falls off as one over distance squared, so the streak keeps a faint tail right across the frame the way a real one does, rather than stopping abruptly."
-   ],
-   "blur": [
-    "Streak Softness",
-    "How far the streak is softened ACROSS its width, as a true gaussian in its own pass. Earlier versions borrowed the streak's own samples for this, which could only ever produce copies or noise rather than a blur."
-   ],
-   "bidirectional": [
-    "Both Directions",
-    "Smear both ways for a symmetric bar. Off gives a comet trail."
-   ],
-   "chromatic": [
-    "Chromatic",
-    "Splits the streak into seven spectral bands, so it fringes warm one way and cool the other."
-   ],
-   "dispersion": [
-    "Dispersion",
-    "How far the colour bands separate, in pixels. Negative swaps which end is warm."
-   ],
-   "bloomAmount": [
-    "Bloom",
-    "Strength of the isotropic glow. Zero leaves a pure streak."
-   ],
-   "haloAmount": [
-    "Halo",
-    "A coloured ring standing at a fixed distance from each highlight - the halo you see around a streetlight at night. Not a falloff like Bloom: diffraction off the radial fibres in the eye's lens throws light out to one particular radius, and because the angle scales with wavelength the ring is chromatic on its own, red outside and blue in."
-   ],
-   "haloRadius": [
-    "Halo Radius",
-    "How far out the ring sits, in pixels. Red lands about 13% further than green and blue about 18% closer, which is what colours it."
-   ],
-   "haloSoftness": [
-    "Halo Softness",
-    "Width of the ring. Thin gives a sharp chromatic band; wide gives a soft halo whose red and blue edges blend through each other."
-   ],
-   "size": [
-    "Size",
-    "Widest radius in the bloom ladder, in pixels."
-   ],
-   "falloff": [
-    "Bloom Falloff",
-    "Scales the whole ladder. Above one pulls the bloom in tighter."
-   ],
-   "steps": [
-    "Steps",
-    "How many rungs of the bloom ladder to run. Each rung is twice the width of the last, so more steps means a wider, softer veil for more cost; fewer means a tighter glow that renders faster. This used to divide the result without changing how many rungs ran, so low values simply overexposed."
-   ],
-   "persistence": [
-    "Persistence",
-    "Gains the wide end of the ladder, for a longer, softer tail."
-   ],
-   "intensity": [
-    "Intensity",
-    "Glow brightness. A wide glow spreads a highlight's energy far, so expect to push this up."
-   ],
-   "saturation": [
-    "Glow Saturation",
-    "Colour of the veil, separate from the picture and from the halo. Scattered light is close to achromatic - the standard glare models treat the veiling term as having no colour at all, and only the halo as wavelength-dependent - so a bright red lamp throws a whitish veil. Above 1 for when the colour is the point."
-   ],
-   "tint": [
-    "Tint",
-    "Colour multiplier on the glow."
-   ],
-   "blend": [
-    "Blend",
-    "How the glow combines with the layer. Effect Only shows the glow alone."
-   ],
-   "amount": [
-    "Amount",
-    "Mix between the original layer and the result."
-   ]
-  },
-  "enums": {
-   "blend": {
-    "0": "Add",
-    "1": "Screen",
-    "2": "Max",
-    "3": "Effect Only"
-   }
-  },
-  "tabs": {}
- }
+  "type": "layerStrings",
+  "value": {
+    "author": "samMularczyk",
+    "layerType": "glow",
+    "niceName": "Ultra Glow",
+    "layerInfo": "Bloom and anamorphic streaks from the image's own highlights.",
+    "language": "en",
+    "attributes": {
+      "srcBlack": [
+        "Threshold",
+        "Only light above this emits. This is the black point of the grade that isolates the highlights."
+      ],
+      "srcWhite": [
+        "White Point",
+        "Level that counts as fully lit. Below 1 pushes more of the picture into the glow."
+      ],
+      "response": [
+        "Response",
+        "Curve of the highlight grade. Higher keeps the glow tight around genuinely bright areas."
+      ],
+      "streakAmount": [
+        "Streak",
+        "Strength of the directional smear. Zero leaves a pure bloom."
+      ],
+      "streakIntensity": [
+        "Streak Intensity",
+        "Brightness of the streak on top of the global Intensity, so the flare can be pushed or pulled against the bloom rather than both moving together."
+      ],
+      "reach": [
+        "Length",
+        "Total streak length in pixels. The layer bounds expand to match."
+      ],
+      "angle": [
+        "Angle",
+        "Streak axis in degrees. Zero is the classic horizontal anamorphic bar."
+      ],
+      "samples": [
+        "Samples",
+        "How densely each pass samples along the streak. This sets quality only - the streak is the same length at any setting - and 4 is the minimum at which the passes still tile without gaps."
+      ],
+      "streakFalloff": [
+        "Streak Falloff",
+        "How quickly the streak fades along its length. The profile is the envelope of a diffraction spike - it falls off as one over distance squared, so the streak keeps a faint tail right across the frame the way a real one does, rather than stopping abruptly."
+      ],
+      "blur": [
+        "Streak Softness",
+        "How far the streak is softened ACROSS its width, as a true gaussian in its own pass. Earlier versions borrowed the streak's own samples for this, which could only ever produce copies or noise rather than a blur."
+      ],
+      "bidirectional": [
+        "Both Directions",
+        "Smear both ways for a symmetric bar. Off gives a comet trail."
+      ],
+      "chromatic": [
+        "Chromatic",
+        "Splits the streak into seven spectral bands, so it fringes warm one way and cool the other."
+      ],
+      "dispersion": [
+        "Dispersion",
+        "How far the colour bands separate, in pixels. Negative swaps which end is warm."
+      ],
+      "bloomAmount": [
+        "Bloom",
+        "Strength of the isotropic glow. Zero leaves a pure streak."
+      ],
+      "haloAmount": [
+        "Halo",
+        "A coloured ring standing at a fixed distance from each highlight - the halo you see around a streetlight at night. Not a falloff like Bloom: diffraction off the radial fibres in the eye's lens throws light out to one particular radius, and because the angle scales with wavelength the ring is chromatic on its own, red outside and blue in."
+      ],
+      "haloRadius": [
+        "Halo Radius",
+        "How far out the ring sits, in pixels. Red lands about 13% further than green and blue about 18% closer, which is what colours it."
+      ],
+      "haloSoftness": [
+        "Halo Softness",
+        "Width of the ring. Thin gives a sharp chromatic band; wide gives a soft halo whose red and blue edges blend through each other."
+      ],
+      "size": [
+        "Size",
+        "Widest radius in the bloom ladder, in pixels."
+      ],
+      "falloff": [
+        "Bloom Falloff",
+        "Scales the whole ladder. Above one pulls the bloom in tighter."
+      ],
+      "steps": [
+        "Steps",
+        "How many rungs of the bloom ladder to run. Each rung is twice the width of the last, so more steps means a wider, softer veil for more cost; fewer means a tighter glow that renders faster. This used to divide the result without changing how many rungs ran, so low values simply overexposed."
+      ],
+      "persistence": [
+        "Persistence",
+        "Gains the wide end of the ladder, for a longer, softer tail."
+      ],
+      "intensity": [
+        "Intensity",
+        "Glow brightness. A wide glow spreads a highlight's energy far, so expect to push this up."
+      ],
+      "saturation": [
+        "Glow Saturation",
+        "Colour of the veil, separate from the picture and from the halo. Scattered light is close to achromatic - the standard glare models treat the veiling term as having no colour at all, and only the halo as wavelength-dependent - so a bright red lamp throws a whitish veil. Above 1 for when the colour is the point."
+      ],
+      "tint": [
+        "Tint",
+        "Colour multiplier on the glow."
+      ],
+      "blend": [
+        "Blend",
+        "How the glow combines with the layer. Effect Only shows the glow alone."
+      ],
+      "amount": [
+        "Amount",
+        "Mix between the original layer and the result."
+      ]
+    },
+    "enums": {
+      "blend": {
+        "0": "Add",
+        "1": "Screen",
+        "2": "Max",
+        "3": "Effect Only"
+      }
+    },
+    "tabs": {}
+  }
 }

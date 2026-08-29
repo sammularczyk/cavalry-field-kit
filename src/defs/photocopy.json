@@ -43,6 +43,13 @@
         "bandingScale",
         "paperAmount",
         "paperScale",
+        "paperFolds",
+        "paperFoldCount",
+        "paperCrumples",
+        "paperCrumpleSize",
+        "paperFibre",
+        "paperRelief_",
+        "paperSeed",
         "inkColor",
         "paperColor",
         "amount"
@@ -156,6 +163,57 @@
       "step": 0.01,
       "dimming": "paperAmount <= 0"
     },
+    "paperFolds": {
+      "type": "double",
+      "default": 0.0,
+      "min": 0.0,
+      "max": 1.0,
+      "step": 0.01
+    },
+    "paperFoldCount": {
+      "type": "double",
+      "default": 5.0,
+      "min": 1.0,
+      "max": 15.0,
+      "step": 1.0,
+      "dimming": "paperFolds <= 0"
+    },
+    "paperCrumples": {
+      "type": "double",
+      "default": 0.0,
+      "min": 0.0,
+      "max": 1.0,
+      "step": 0.01
+    },
+    "paperCrumpleSize": {
+      "type": "double",
+      "default": 0.35,
+      "min": 0.01,
+      "max": 1.0,
+      "step": 0.01,
+      "dimming": "paperCrumples <= 0"
+    },
+    "paperFibre": {
+      "type": "double",
+      "default": 0.0,
+      "min": 0.0,
+      "max": 1.0,
+      "step": 0.01
+    },
+    "paperRelief_": {
+      "type": "double",
+      "default": 0.3,
+      "min": 0.0,
+      "max": 1.0,
+      "step": 0.01
+    },
+    "paperSeed": {
+      "type": "double",
+      "default": 3.0,
+      "min": 0.0,
+      "max": 1000.0,
+      "step": 0.1
+    },
     "inkColor": {
       "type": "color",
       "default": {
@@ -200,6 +258,13 @@
       "bandingScale",
       "paperAmount",
       "paperScale",
+      "paperFolds",
+      "paperFoldCount",
+      "paperCrumples",
+      "paperCrumpleSize",
+      "paperFibre",
+      "paperRelief_",
+      "paperSeed",
       "inkColor",
       "paperColor",
       "amount"
@@ -236,6 +301,14 @@
         "attributeOrder": [
           "paperAmount",
           "paperScale",
+          "---Relief",
+          "paperFolds",
+          "paperFoldCount",
+          "paperCrumples",
+          "paperCrumpleSize",
+          "paperFibre",
+          "paperRelief_",
+          "paperSeed",
           "inkColor",
           "paperColor"
         ]

@@ -8,12 +8,20 @@
 | Display Simulation | Cathode-Retro · REALISTIC SUB-PIXEL OLD CRT | DeadlyRedCube · ENDESGA |
 | Film Emulation | flim · cinegrain | bean_mhm · mr-berndt |
 | Ultra Glow | Spectral_Aberration_Pro_V2 | Marten Blumen |
-| Godray | pixi.js filters | Mathew Groves & Chad Engler |
+| Godray | pixi.js filters · Paper Shaders (god-rays) | Mathew Groves & Chad Engler · Lost Coast Labs |
 | Lens Distortion | HAWK anamorphic profiles · Spectral_Aberration_Pro_V2 | Slava Sexton · Marten Blumen |
 | Lens Blur | Barrel Blur Chroma · post: bokeh blur, hexagon 5pass | hornet |
 | Lens Flare | flaresim_nuke lens prescriptions | Eamonn Nugent & Steve Watts Kennedy |
 | Light Leak | LightLeaksUnity | Daniel Zeller |
-| Print | Screen Print example, Cavalry plug-in SDK | Scene Group |
+| Photocopy | Paper Shaders (paper-texture) | Lost Coast Labs |
+| Print | Screen Print example, Cavalry plug-in SDK · Paper Shaders (paper-texture) | Scene Group · Lost Coast Labs |
+| Linear Refraction | Paper Shaders (fluted-glass) | Lost Coast Labs |
+| Liquid Metal | Paper Shaders (liquid-metal · gem-smoke · heatmap) | Lost Coast Labs |
+| Mesh Gradient | Paper Shaders (mesh-gradient · static-mesh-gradient) | Lost Coast Labs |
+| Paper Texture | Paper Shaders (paper-texture) | Lost Coast Labs |
+| Smoke Ring | Paper Shaders (smoke-ring) | Lost Coast Labs |
+| Warp | Paper Shaders (warp) | Lost Coast Labs |
+| Water | Paper Shaders (water) | Lost Coast Labs |
 | VHS | ntsc-rs · godot-shader-crt-vhs | ntsc-rs · Marcel Jovic |
 
 ## Inspiration
@@ -277,6 +285,23 @@ VHS's signal model follows ntsc-rs, which is Apache-2.0 (excluding its GUI
 crate, from which nothing is taken). Apache-2.0 requires a statement of
 changes: the implementation here is a reimplementation in SkSL, not a copy.
 The full licence is at https://www.apache.org/licenses/LICENSE-2.0.
+
+### Paper Shaders — Lost Coast Labs, Apache-2.0
+
+Several filters and shaders are derived from paper-design/shaders
+(https://github.com/paper-design/shaders), copyright Lost Coast Labs, Inc.,
+licensed under Apache-2.0. Apache-2.0 permits inclusion in an AGPL-3.0 work,
+and the combined work here ships under AGPL-3.0.
+
+Apache-2.0 requires a statement of changes. Every derived `.sksl` file carries
+a header naming its upstream file and what was changed; the substantive
+departures are that the CPU-side Poisson solve is replaced with a blur ladder,
+GLSL derivative functions are replaced with an analytic pixel size (SkSL has
+none), dynamic array indexing is unrolled, and the noise functions are Field
+Kit's own rather than the upstream's.
+
+The upstream NOTICE is propagated in this repository's `NOTICE` file. The full
+licence is at https://www.apache.org/licenses/LICENSE-2.0.
 
 ### Spectral_Aberration_Pro_V2 — Marten Blumen, BSD-3-Clause
 

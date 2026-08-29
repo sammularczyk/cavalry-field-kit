@@ -39,8 +39,13 @@ uniform float  levels;             // 0 = continuous tone
 uniform float  levelBias;
 uniform float  bandDither;
 uniform float  screenType;         // enum: 0 Flat, 1 Grain, 2 Dots, 3 Lines, 4 Stipple, 5 Bayer, 6 Voronoi
+uniform float  dotShape;
+uniform float  screenStrength;           // enum: 0 Round, 1 Elliptical, 2 Square, 3 Diamond
+uniform float  inkGrain;           // depth of the ink-transfer speckle
+uniform float  inkGrainScale;
 uniform float  frequency;
 uniform float  dotGain;
+uniform float  toneFloor;
 uniform float  yuleNielsen;   // optical dot gain: light scattering in the paper
 uniform float4 ink1Color;
 uniform float  ink1Angle;
@@ -56,10 +61,17 @@ uniform float  ink4Angle;
 uniform float  ink4Coverage;
 uniform float  inkOpacity;
 uniform float  registrationError;
+uniform float  edgeBreakup;        // how far the ink boundary wanders, in pixels
+uniform float  edgeBreakupScale;
+uniform float  keyline;            // width in pixels of paper left open at art edges
+uniform float  keylineThreshold;
 uniform float  inkLoss;
+uniform float  inkLossScale;
 uniform float  mottle;
 uniform float  ghosting;
 uniform float  seed;
+uniform float  boil;
+uniform float  time;
 uniform float4 paperColor;
 uniform float  outputMode;         // 0 Paper, 1 Print on Source, 2 Ink Only, 3-6 Plate proofs
 
@@ -69,12 +81,45 @@ uniform float2 resolution;
 uniform float2 rectCentre;
 
 uniform shader childShader;        // the print so far
+
+// STOP-MOTION BOIL. Every random thing in the press - grain, ink loss, mottle,
+// edge breakup, which way each plate drifts - is keyed off the seed. Advancing
+// it in HOLDS rather than continuously is what makes it read as re-printed by
+// hand each time rather than as animated noise: completely different on each
+// new impression, perfectly still in between.
+//
+// Boil is the hold length in frames, so 2 gives the classic on-twos chatter.
+// Zero holds a single impression forever.
+float boiledSeed(float baseSeed, float t, float hold) {
+    if (hold < 0.5) { return baseSeed; }
+    return baseSeed + floor(t / hold) * 17.13;
+}
 uniform shader original;           // the unfiltered input image - MUST be last
 
-const float LOG_EPS = 0.02;        // clamps logs away from zero for pure black/white inks
+// TONE FLOOR - how dark the separation is allowed to READ a channel.
+//
+// This looks like a numerical guard and is really the most consequential
+// control in the solve. A pure zero channel - and flat vector artwork is full
+// of them - has an unbounded logarithm, so the solve reads it as needing
+// infinite ink and spends all of its density chasing a black no ink can reach.
+// Every colour that shares that zero then saturates at a full plate and prints
+// IDENTICALLY: two greens in the artwork collapse into one, and a whole shape
+// disappears.
+//
+// Raising the floor says "nothing is darker than this", so the solve stops
+// chasing the unreachable, uses less ink overall, and distinct tones stay
+// distinct. It costs absolute depth - blacks lighten - which is the trade to
+// make when keeping tones apart matters more than hitting them exactly.
+//
+// Measured on this artwork's two greens: below 0.20 both saturate and crush
+// together; at 0.25 they separate.
+float3 logv(float3 c) {
+    return log(max(c, float3(max(toneFloor, 0.001))));
+}
+
 
 float hash2(float2 p) {
-    p = fract(p * float2(123.34, 456.21) + seed * 0.123);
+    p = fract(p * float2(123.34, 456.21) + boiledSeed(seed, time, boil) * 0.123);
     p += dot(p, p + 45.32);
     return fract(p.x * p.y);
 }
@@ -127,24 +172,36 @@ float3x3 inverse3(float3x3 m) {
                     float3(r0.z, r1.z, r2.z) * invDet);
 }
 
-float3 logv(float3 c) {
-    return log(max(c, float3(LOG_EPS)));
-}
-
 // Non-negative least-squares fit of `target` onto up to four ink
 // log-transmittance vectors. L1..L3 are zeroed by the caller for inks beyond
 // `n`, which is what lets one 3x3 solve serve 1, 2 or 3 active inks: an
 // all-zero column contributes nothing to AtA off the small diagonal
 // regulariser, so its density settles at zero instead of the matrix going
 // singular.
+// Weighted inner product for the separation solve.
+//
+// Plain least squares in log-RGB weights all three channels equally, and that
+// is what made a green print teal. Solving a green target against Riso Green
+// leaves a small residual in RED - the print is not quite dark enough there -
+// and the solver "fixes" it by adding blue, which costs far more in GREEN than
+// it gains in red. Mathematically optimal, visually wrong: the dominant channel
+// gets sacrificed to shave error off the one the eye cares least about.
+//
+// Weighting by luminance makes the objective care about the channels in
+// proportion to how much they actually contribute, so green alone wins. On the
+// measured case it lifted G from 0.60 to 0.69 against a target of 0.77, and
+// dropped the spurious blue plate entirely.
+const float3 LUMW = float3(0.299, 0.587, 0.114);
+float wdot(float3 a, float3 b) { return dot(a * LUMW, b); }
+
 float4 solveDensities(float3 target, float3 L0, float3 L1, float3 L2, float3 L3, int n) {
-    const float reg = 1e-3;
+    const float reg = 3e-4;   // wdot is ~3x smaller than dot, so scale to match
     float3x3 AtA = float3x3(
-        float3(dot(L0, L0) + reg, dot(L0, L1),       dot(L0, L2)),
-        float3(dot(L1, L0),       dot(L1, L1) + reg, dot(L1, L2)),
-        float3(dot(L2, L0),       dot(L2, L1),       dot(L2, L2) + reg)
+        float3(wdot(L0, L0) + reg, wdot(L0, L1),       wdot(L0, L2)),
+        float3(wdot(L1, L0),       wdot(L1, L1) + reg, wdot(L1, L2)),
+        float3(wdot(L2, L0),       wdot(L2, L1),       wdot(L2, L2) + reg)
     );
-    float3 Atb = float3(dot(L0, target), dot(L1, target), dot(L2, target));
+    float3 Atb = float3(wdot(L0, target), wdot(L1, target), wdot(L2, target));
     float3 x = inverse3(AtA) * Atb;
 
     float d0 = max(x.x, 0.0);
@@ -156,15 +213,15 @@ float4 solveDensities(float3 target, float3 L0, float3 L1, float3 L2, float3 L3,
         // A fourth ink has no unique exact solution against three colour
         // channels - refine all four together by projected gradient descent,
         // seeded from the three-ink solve above.
-        float trace = dot(L0, L0) + dot(L1, L1) + dot(L2, L2) + dot(L3, L3);
+        float trace = wdot(L0, L0) + wdot(L1, L1) + wdot(L2, L2) + wdot(L3, L3);
         float lr = 1.0 / (2.0 * max(trace, 1e-4));
         for (int i = 0; i < 12; i++) {
             float3 Ad = d0 * L0 + d1 * L1 + d2 * L2 + d3 * L3;
             float3 r = Ad - target;
-            d0 = max(0.0, d0 - lr * 2.0 * dot(r, L0));
-            d1 = max(0.0, d1 - lr * 2.0 * dot(r, L1));
-            d2 = max(0.0, d2 - lr * 2.0 * dot(r, L2));
-            d3 = max(0.0, d3 - lr * 2.0 * dot(r, L3));
+            d0 = max(0.0, d0 - lr * 2.0 * wdot(r, L0));
+            d1 = max(0.0, d1 - lr * 2.0 * wdot(r, L1));
+            d2 = max(0.0, d2 - lr * 2.0 * wdot(r, L2));
+            d3 = max(0.0, d3 - lr * 2.0 * wdot(r, L3));
         }
     }
     return float4(d0, d1, d2, d3);
@@ -174,6 +231,12 @@ float4 solveDensities(float3 target, float3 L0, float3 L1, float3 L2, float3 L3,
 // three fixed bands (shadows/mid/highlights) to n evenly spaced bands. Only
 // the outer two bands are open-ended, same as the original.
 float bandResponse(float l, int plate, int n) {
+    // ONE ink is not a band, it is a tone ramp. With n == 1 both guards below
+    // are skipped - `plate > 0` is false and `plate < n - 1` is false - so this
+    // returned 1.0 for EVERY pixel: a solid plate at full coverage regardless
+    // of the image. That is what made Newsprint print as a black rectangle.
+    if (n <= 1) { return clamp(1.0 - l, 0.0, 1.0); }
+
     float width = 1.0 / max(float(n), 1.0);
     float lo = float(plate) * width;
     float hi = float(plate + 1) * width;
@@ -189,19 +252,73 @@ float bandResponse(float l, int plate, int n) {
 // the print-so-far. This is what keeps source noise from scattering plate
 // edges pixel to pixel. Taps outside the layer are dropped rather than
 // read as paper, which is what used to leave a pale border.
+// White keyline: paper deliberately left open along every boundary in the
+// artwork, so shapes are separated by a fine white gap instead of butting up
+// against one another.
+//
+// This is NOT what registration error does, and reaching for that instead is
+// the obvious mistake. Misregistration drifts a whole plate one way, so a
+// boundary opens a gap on one side and OVERLAPS on the other - the overlap
+// being a third, darker colour. A keyline pulls EVERY ink back from EVERY
+// edge, so the gap is even all the way round and always shows paper.
+//
+// It keys off the boundaries of the ARTWORK rather than of each ink, which is
+// what lets two shapes that share an ink still be separated - a stem crossing
+// another stem in the same green gets its line, where a per-plate choke would
+// leave that join invisible.
+//
+// The four taps read the source directly rather than the flattened wash, which
+// would cost twenty-five taps apiece. That is the right trade for flat art -
+// hard edges, near-zero gradient elsewhere - and Threshold is there for when a
+// photographic source would otherwise fire the keyline across every texture.
+float keylineOpen(float2 coord) {
+    float k = max(keyline, 0.0);
+    if (k <= 0.0) { return 0.0; }
+
+    half4 xa = original.eval(coord - float2(k, 0.0));
+    half4 xb = original.eval(coord + float2(k, 0.0));
+    half4 ya = original.eval(coord - float2(0.0, k));
+    half4 yb = original.eval(coord + float2(0.0, k));
+
+    // Compare UNPREMULTIPLIED colour, and drop any pair where a tap fell
+    // outside the layer. Without that guard the outer border is the biggest
+    // colour change in the frame - every colour against nothing - and the whole
+    // layer gets ringed in white. A tap outside the layer is absent, not black.
+    float3 cxa = float3(xa.rgb) / max(float(xa.a), 1e-6);
+    float3 cxb = float3(xb.rgb) / max(float(xb.a), 1e-6);
+    float3 cya = float3(ya.rgb) / max(float(ya.a), 1e-6);
+    float3 cyb = float3(yb.rgb) / max(float(yb.a), 1e-6);
+
+    float okX = step(0.5, float(xa.a)) * step(0.5, float(xb.a));
+    float okY = step(0.5, float(ya.a)) * step(0.5, float(yb.a));
+
+    float g = length(cxb - cxa) * okX + length(cyb - cya) * okY;
+    float t = max(keylineThreshold, 0.001);
+    return smoothstep(t, t * 2.0, g);
+}
+
 float3 flattenedColor(float2 p) {
     half4 refc = original.eval(p);
     float3 ref = refc.a > 0.0 ? float3(refc.rgb / refc.a) : paperColor.rgb;
     if (flatten <= 0.0) { return ref; }
 
-    float refY = dot(ref, float3(0.299, 0.587, 0.114));
     float r = max(flatten, 0.0);
     const float thr = 0.12;
 
     float3 sum = float3(0.0);
     float den = 0.0;
+    float3 lo = ref, hi = ref;
+    float  loY = 2.0, hiY = -1.0;
+
     for (int y = -2; y <= 2; y++) {
         for (int x = -2; x <= 2; x++) {
+            // SKIP THE CENTRE TAP. Its offset is zero, so it IS the reference:
+            // distance zero, weight one, always. On flat artwork every other
+            // tap either matches exactly or is a different shape and gets
+            // excluded - so the result was the reference, at every radius.
+            // Flatten did nothing at all, silently, on exactly the artwork it
+            // was being asked about.
+            if (x == 0 && y == 0) { continue; }
             float2 o = float2(float(x), float(y)) * (r * 0.5);
             half4 c = original.eval(p + o);
             // Taps outside the layer contribute NOTHING. Reading them as paper
@@ -211,15 +328,38 @@ float3 flattenedColor(float2 p) {
             // a lighter shade of printed.
             if (c.a <= 0.001) { continue; }
             float3 lin = float3(c.rgb / c.a);
-            float d = abs(dot(lin, float3(0.299, 0.587, 0.114)) - refY);
+            // FULL COLOUR DISTANCE, not luminance distance.
+            //
+            // Two colours can have near-identical luminance and be nothing
+            // alike - the light and dark greens in a piece of flat artwork
+            // usually are. Testing luminance alone merged them, so raising
+            // Flatten far enough to snap antialiased edges to one side also
+            // dissolved whole shapes into their background: the hills vanished
+            // while their outlines stayed, which reads as the shape being
+            // "missing" rather than as a flatten artefact.
+            float ly = dot(lin, float3(0.299, 0.587, 0.114));
+            if (ly < loY) { loY = ly; lo = lin; }
+            if (ly > hiY) { hiY = ly; hi = lin; }
+
+            float d = length(lin - ref);
             float w = max(1.0 - d / thr, 0.0);
             w = w * w;
             sum += lin * w;
             den += w;
         }
     }
-    // Every tap fell outside: keep this pixel's own colour.
-    return den > 0.0001 ? sum / den : ref;
+    // No neighbour resembles this pixel. On flat artwork that means one thing:
+    // it is an ANTIALIASED EDGE pixel - a blend of the two shapes either side,
+    // identical to neither. Left alone it separates to an ink mix matching
+    // nothing and prints as a hairline along every boundary.
+    //
+    // So snap it to whichever side it is nearer. That is the job Flatten should
+    // be doing on this kind of artwork, and the centre-tap bug meant it never
+    // got the chance.
+    if (den <= 0.0001) {
+        return distance(ref, lo) < distance(ref, hi) ? lo : hi;
+    }
+    return sum / den;
 }
 
 float plateCoverage(float2 p, int plate, int n, float covScale) {
@@ -228,18 +368,56 @@ float plateCoverage(float2 p, int plate, int n, float covScale) {
     if (sep == 0) {
         float3 src = flattenedColor(p);
         float3 target = logv(src) - logv(paperColor.rgb);
-        float3 L0 = logv(ink1Color.rgb);
-        float3 L1 = n > 1 ? logv(ink2Color.rgb) : float3(0.0);
-        float3 L2 = n > 2 ? logv(ink3Color.rgb) : float3(0.0);
-        float3 L3 = n > 3 ? logv(ink4Color.rgb) : float3(0.0);
+
+        // THE SOLVE MUST INVERT THE MODEL THE RENDERER ACTUALLY USES.
+        //
+        // It used to be handed the raw ink colours, as if a full-density plate
+        // transmitted exactly `ink`. It does not: the render lays ink at
+        // `inkOpacity` coverage (and Riso quietly scales that by a further
+        // 0.85), so what a solid plate really transmits is
+        // mix(1, ink, opacity) - lighter than the ink, by about 0.11 per
+        // channel at the Riso defaults.
+        //
+        // So the solver was aiming at a target it could not hit with the inks
+        // it thought it had, and every colour landed pale. This is the main
+        // reason Ink Density looked washed out, and it is not a gamut limit -
+        // it was simply solving the wrong equation. Feeding it the EFFECTIVE
+        // transmittance makes the densities come out right.
+        float opac = clamp(inkOpacity *
+            (int(process) == 0 ? 0.85 : int(process) == 2 ? 1.1 : 1.0), 0.0, 1.0);
+        float3 L0 = logv(mix(float3(1.0), ink1Color.rgb, opac));
+        float3 L1 = n > 1 ? logv(mix(float3(1.0), ink2Color.rgb, opac)) : float3(0.0);
+        float3 L2 = n > 2 ? logv(mix(float3(1.0), ink3Color.rgb, opac)) : float3(0.0);
+        float3 L3 = n > 3 ? logv(mix(float3(1.0), ink4Color.rgb, opac)) : float3(0.0);
         float4 d = solveDensities(target, L0, L1, L2, L3, n);
         raw = plate == 0 ? d.x : plate == 1 ? d.y : plate == 2 ? d.z : d.w;
     } else if (sep == 1) {
         float l = dot(flattenedColor(p), float3(0.299, 0.587, 0.114));
         raw = bandResponse(l, plate, n);
-    } else {
+    } else if (sep == 2) {
         float3 c = flattenedColor(p);
         raw = plate == 0 ? c.r : plate == 1 ? c.g : plate == 2 ? c.b : dot(c, float3(0.333));
+    } else {
+        // SOURCE COLOUR: one plate, inked with whatever the artwork already is.
+        //
+        // The other three modes SEPARATE - they work out how much of each ink
+        // reproduces the target, then overprint.
+        //
+        // Be precise about when that fails, because it is easy to blame the
+        // wrong thing: a Riso reaches bright saturated colours perfectly well.
+        // It is a SPOT process with a real ink catalogue - Green 00A95C,
+        // Fluorescent Pink FF48B0, Orange FF6C2F - and a drum of that ink lays
+        // the colour down directly. What cannot reach a bright green is BUILDING
+        // it from blue plus yellow: that needs a little of each, and "a little
+        // of each" means paper showing through, which reads as washed out. The
+        // limit is the process build, not the press.
+        //
+        // So the fix is the one a real press uses: ink with the artwork's own
+        // colours. Either name them on the plates, or use this mode, which
+        // samples the ink per pixel so every colour prints exactly. The screen,
+        // grain, mottle and paper all still apply on top. Registration and
+        // overprint have nothing to do here - there is only one plate.
+        raw = plate == 0 ? 1.0 : 0.0;
     }
     float coverage = clamp(raw * covScale, 0.0, 1.0);
     return pow(coverage, 1.0 - dotGain * 0.5);   // dot gain grows or chokes the dots
@@ -279,17 +457,66 @@ half4 main(float2 coord) {
     float  covScale = plate == 0 ? ink1Coverage : plate == 1 ? ink2Coverage : plate == 2 ? ink3Coverage : ink4Coverage;
 
     // Each plate drifts out of register in its own direction.
-    float regAngle = hash2(float2(plateIndex * 13.7, seed)) * 6.28318;
+    float regAngle = hash2(float2(plateIndex * 13.7, boiledSeed(seed, time, boil))) * 6.28318;
     float2 regDir = float2(cos(regAngle), sin(regAngle));
     float2 regOffset = regDir * registrationError;
 
-    float coverage = plateCoverage(coord - regOffset, plate, n, covScale);
+    // Ink edges do not stop on a clean line. Rather than roughening the edge
+    // after the fact, this WARPS THE COORDINATE the coverage is read at: a
+    // smooth low-frequency wobble of a pixel or two. Inside a solid area the
+    // lookup is flat, so displacing it changes nothing at all - only where
+    // coverage is actually changing, which is exactly the boundary, does the
+    // warp show. One noise pair, no extra taps, and the interior is untouched
+    // by construction.
+    //
+    // Offset per plate so each one breaks up independently, the way separate
+    // impressions do.
+    float2 warp = float2(0.0);
+    if (edgeBreakup > 0.0) {
+        float esc = max(edgeBreakupScale, 0.05);
+        float2 ep = coord * 0.12 / esc + boiledSeed(seed, time, boil) * 3.1 + plateIndex * 19.3;
+        warp = (float2(vnoise(ep), vnoise(ep + 41.7)) - 0.5) * (edgeBreakup * 2.0);
+    }
+
+    if (int(separation) == 3) {
+        // Source Colour has ONE plate, so there is nothing to misregister
+        // against - a shift would just move the whole print. Instead the ink
+        // colour is sampled offset from where the coverage is read, so a
+        // boundary picks up the colour from just across it. That is the fringe
+        // misregistration actually produces, and it is the part you can see.
+        //
+        // Sampled through the flatten wash, so an antialiased edge pixel snaps
+        // to one side rather than inking a blend of both - which is what leaves
+        // hairlines along every boundary.
+        inkColor = float4(flattenedColor(coord - regOffset + warp), 1.0);
+    }
+
+    float coverage = plateCoverage(coord - regOffset + warp, plate, n, covScale);
     coverage = quantiseDensity(coverage, floor(coord));
 
     // Patchy transfer, and uneven laydown broken by the paper fibres.
-    float speckle = vnoise(coord * 0.9 + seed * 7.0);
-    coverage *= 1.0 - inkLoss * smoothstep(0.45, 0.95, speckle);
-    coverage *= 1.0 - clamp(mottle * processMottleBias(int(process)), 0.0, 1.0) * 0.3 * vnoise(coord * 1.7 + 11.0);
+    // TWO OCTAVES, and the cell size floored in PIXELS rather than left to the
+    // slider. A single frequency makes every dropout the same size, and
+    // same-size blobs at even spacing read as a pattern rather than as ink
+    // failing to transfer - but octaves only help while they stay ABOVE the
+    // pixel grid. Below about two pixels a lattice is aliased hash with a fixed
+    // visual frequency, so adding octaves there changes nothing at all, which
+    // is exactly how this behaved before.
+    //
+    // So Scale sets the coarse patch in pixels, floored at 6 so the finer
+    // octave still lands around 2.4. Scale 0.05 is fine speckle; 1 is broad
+    // patches tens of pixels across.
+    float lossCell = max(6.0, 45.0 * max(inkLossScale, 0.0));
+    float2 lossP = coord / lossCell + boiledSeed(seed, time, boil) * 7.0;
+    float speckle = vnoise(lossP) * 0.65
+                  + vnoise(lossP * 2.5 + 31.0) * 0.35;
+    coverage *= 1.0 - keylineOpen(coord);
+    coverage *= 1.0 - inkLoss * smoothstep(0.40, 0.82, speckle);
+    // Mottle is BROAD unevenness in how the sheet took ink - patches you see
+    // across a whole area. At coord * 1.7 the lattice was 0.6 of a pixel, so it
+    // was per-pixel hash instead: fine, uniform, and nothing like mottling.
+    coverage *= 1.0 - clamp(mottle * processMottleBias(int(process)), 0.0, 1.0) * 0.3
+              * vnoise(coord * 0.04 + 11.0);
 
     int st = int(screenType);
     float rad = radians(angle);
@@ -305,27 +532,67 @@ half4 main(float2 coord) {
     float aa = 1.4 / freq;
     float d;
 
-    if (st <= 1) {
-        // Flat: no screen at all, the ink prints solid at its quantised
-        // density. Grain adds riso's uneven "grain touch" speckle on top.
+    if (st == 0) {
+        // Flat: no screen at all, the ink prints solid at its quantised density.
         d = coverage;
-        if (st == 1) {
-            float g = vnoise(coord * 1.3 + seed * 5.0);
-            d *= mix(0.82, 1.0, g);
-        }
-    } else if (st == 2) {       // Dots
+    } else if (st == 1) {       // Dots
         float2 cell = float2(c * coord.x - s * coord.y, s * coord.x + c * coord.y) / freq;
-        float sv = 0.5 + 0.5 * cos(cell.x * 6.28318) * cos(cell.y * 6.28318);
+        int ds = int(dotShape);
+        float sv;
+        if (ds == 0) {
+            // Round, unchanged: the cosine product every existing preset was
+            // built against. Its level sets are round enough and it is smooth,
+            // so it antialiases for free.
+            sv = 0.5 + 0.5 * cos(cell.x * 6.28318) * cos(cell.y * 6.28318);
+        } else {
+            // The cosine product is a square lattice of dots sitting at 45
+            // degrees to `cell`. Rotate into that lattice so a dot is one unit
+            // cell, and the shape becomes a choice of distance metric.
+            float2 q = fract(float2(cell.x + cell.y, cell.x - cell.y) + 0.5) - 0.5;
+            // `r` below is a normalised RADIUS - 0 at the dot centre, 1 where
+            // the dot fills its cell. Thresholding coverage against it directly
+            // would be wrong: coverage is a fractional AREA, and area grows as
+            // the square of radius, so a 40% tint would print about 16% and
+            // every shape would be lighter than Round (whose cosine screen is
+            // area-correct at 50% by symmetry). Converting radius to the area
+            // it encloses keeps the four shapes interchangeable at a given
+            // tone, which is the whole point of a dot-shape control.
+            float r;
+            if (ds == 1) {
+                // Elliptical. Elongated 1:1.4 the way a real elliptical dot is,
+                // and area-preserving (one axis scaled by a, the other by 1/a)
+                // so a given coverage still prints the same weight. This is the
+                // shape that avoids the midtone jump: a round dot joins its four
+                // neighbours at once around 70% and the tone steps, an ellipse
+                // joins along its long axis first and then the short, so the
+                // join is spread over two smaller steps instead of one big one.
+                const float A = 1.18321596;   // sqrt(1.4)
+                r = length(float2(q.x / A, q.y * A)) * 2.0;
+            } else if (ds == 2) {
+                r = max(abs(q.x), abs(q.y)) * 2.0;   // Square
+            } else {
+                r = (abs(q.x) + abs(q.y)) * 2.0;     // Diamond
+            }
+            r = clamp(r, 0.0, 1.0);
+            // Area enclosed at radius r, in cell units.
+            //   round / elliptical : a disc of radius r/2 -> pi*r^2/4
+            //   square             : side r                -> r^2
+            //   diamond            : half of the square    -> r^2/2
+            float area = (ds == 2) ? r * r
+                       : (ds == 3) ? r * r * 0.5
+                                   : r * r * 0.78539816;
+            sv = clamp(area, 0.0, 1.0);
+        }
         d = smoothstep(sv - aa, sv + aa, coverage);
-    } else if (st == 3) {       // Lines
+    } else if (st == 2) {       // Lines
         float2 cell = float2(c * coord.x - s * coord.y, s * coord.x + c * coord.y) / freq;
         float sv = 0.5 + 0.5 * cos(cell.y * 6.28318);
         d = smoothstep(sv - aa, sv + aa, coverage);
-    } else if (st == 4) {       // Stipple
+    } else if (st == 3) {       // Stipple
         float2 cell = float2(c * coord.x - s * coord.y, s * coord.x + c * coord.y) / freq;
         float sv = vnoise(cell * 2.7);
         d = smoothstep(sv - aa, sv + aa, coverage);
-    } else if (st == 5) {       // Bayer
+    } else if (st == 4) {       // Bayer
         float2 cell = float2(c * coord.x - s * coord.y, s * coord.x + c * coord.y) / freq;
         float sv = bayer4(floor(cell * 4.0));
         d = smoothstep(sv - aa, sv + aa, coverage);
@@ -345,20 +612,49 @@ half4 main(float2 coord) {
         d = smoothstep(sv - aa, sv + aa, coverage);
     }
 
+    // SCREEN STRENGTH. The screen turns continuous coverage into a hard
+    // pattern - a dot is either there or it is not - and at full strength that
+    // is maximum contrast between the ink and the bare paper beside it, which
+    // is what makes the dark dots read as heavy.
+    //
+    // Easing it back toward the UNSCREENED coverage keeps the pattern's shape
+    // and position while closing the gap between dot and gap. Average density
+    // is untouched, so the tone does not shift - only the contrast of the
+    // pattern does. At 0 the screen disappears into flat tone entirely.
+    d = mix(coverage, d, clamp(screenStrength, 0.0, 1.0));
+
+    // INK GRAIN, applied to every screen type rather than being one of them.
+    // It was a `screenType` value, which was a category error: the screen is
+    // the GEOMETRY the ink is broken into, and grain is the unevenness of the
+    // transfer itself. A dotted riso is still grainy, and making them mutually
+    // exclusive meant Flat - the setting a riso actually wants - could not have
+    // any. They are orthogonal, so they are now separate controls.
+    if (inkGrain > 0.0) {
+        float g = vnoise(coord * 0.25 / max(inkGrainScale, 0.05) + boiledSeed(seed, time, boil) * 5.0);
+        // Weighted by how much ink is being laid: blank paper has none to be
+        // uneven and stays clean, and it eases at a true solid where the drum
+        // has filled in. NOT the film-grain curve - film models developed
+        // silver, whose variance vanishes at BOTH ends; ink transfer has
+        // nothing to develop, so it tracks coverage and stays visible in solids,
+        // which is where a riso shows it most.
+        float w = d * (1.0 - 0.35 * d);
+        d *= 1.0 - clamp(inkGrain, 0.0, 1.0) * w * (1.0 - g);
+    }
+
     // Ghosting: a faint second impression offset against the drift.
     if (ghosting > 0.001) {
         float2 gOff = -regDir * (ghosting * 8.0);
         float2 gCoord = coord + gOff;
         float gCoverage = plateCoverage(gCoord - regOffset, plate, n, covScale) * 0.35 * ghosting;
         float gd;
-        if (st <= 1) {
+        if (st == 0) {
             gd = gCoverage;
         } else {
             float2 gCell = float2(c * gCoord.x - s * gCoord.y, s * gCoord.x + c * gCoord.y) / freq;
-            float gsv = st == 2 ? 0.5 + 0.5 * cos(gCell.x * 6.28318) * cos(gCell.y * 6.28318)
-                      : st == 3 ? 0.5 + 0.5 * cos(gCell.y * 6.28318)
-                      : st == 4 ? vnoise(gCell * 2.7)
-                      : st == 5 ? bayer4(floor(gCell * 4.0))
+            float gsv = st == 1 ? 0.5 + 0.5 * cos(gCell.x * 6.28318) * cos(gCell.y * 6.28318)
+                      : st == 2 ? 0.5 + 0.5 * cos(gCell.y * 6.28318)
+                      : st == 3 ? vnoise(gCell * 2.7)
+                      : st == 4 ? bayer4(floor(gCell * 4.0))
                       : 0.5;
             gd = smoothstep(gsv - aa, gsv + aa, gCoverage);
         }

@@ -4,7 +4,7 @@
     "author": "samMularczyk",
     "layerType": "led",
     "niceName": "LED",
-    "layerInfo": "LED matrix. Each cell becomes one lamp, with control over spacing, roundness, size and gap.",
+    "layerInfo": "Redraw the image as a matrix of LED lamps.",
     "language": "en",
     "attributes": {
       "cellSize": [

@@ -1,181 +1,181 @@
 {
- "type": "layerStrings",
- "value": {
-  "author": "samMularczyk",
-  "layerType": "lensFlare",
-  "niceName": "Lens Flare",
-  "layerInfo": "The ghosts, halo and starburst a bright source makes inside a lens. Ghosts and the starburst are built from a real lens's own surfaces and aperture rather than drawn, and every element is built from the layer's own thresholded highlights, so it always tracks real image content - including a Manual emitter placed off screen, which is where a flare's source usually is.",
-  "language": "en",
-  "attributes": {
-   "placement": [
-    "Placement",
-    "How the emitter position is found. Auto tracks the brightest region in the frame; Manual lets you place it anywhere, including off screen."
-   ],
-   "position": [
-    "Position",
-    "Emitter offset from the layer centre, in pixels. Works fine outside the frame bounds - that is the usual case for a real flare."
-   ],
-   "colourSource": [
-    "Colour Source",
-    "Where the flare's colour comes from. From Image takes it from the highlight the flare sits on; Manual lets you set it outright."
-   ],
-   "brightnessSource": [
-    "Brightness Source",
-    "Where the flare's strength comes from. From Image fades it with the highlight underneath; Manual renders it at full strength wherever you place it."
-   ],
-   "flareColour": [
-    "Flare Colour",
-    "The flare's colour in Manual mode. Brightness still comes from the image, so the flare keeps responding to how blown out the highlight is."
-   ],
-   "threshold": [
-    "Threshold",
-    "Only light above this feeds the flare. This is the black point of the grade that isolates the highlights."
-   ],
-   "gamma": [
-    "Gamma",
-    "Curve of the highlight grade. Higher keeps every element tight around genuinely bright areas."
-   ],
-   "lens": [
-    "Lens",
-    "Which lens's surfaces the ghost pattern is traced from. Fast Prime and Standard Zoom are paraxially traced from real optical-bench prescriptions; Anamorphic is a derived approximation and squeezes every ghost horizontally."
-   ],
-   "ghostIntensity": [
-    "Ghosts",
-    "Strength of the reflection ghosts. Zero removes them entirely."
-   ],
-   "ghostSoft": [
-    "Ghost Softness",
-    "How defocused the ghosts are. A ghost forms at the wrong focal distance, so it is genuinely out of focus - at 0 you get hard-edged polygons, which is the main thing that makes a flare look drawn."
-   ],
-   "ghostCount": [
-    "Count",
-    "How many ghosts to draw, out of a fixed maximum of 8, revealed in order of how bright that reflection path actually is on the chosen lens."
-   ],
-   "ghostSpacing": [
-    "Spacing",
-    "Scales how far each ghost sits from frame centre. Each ghost has its own baked distance and direction from the lens trace, so raising this spreads an already-irregular pattern rather than fixing its rhythm."
-   ],
-   "ghostScale": [
-    "Scale",
-    "Overall ghost size. Each ghost keeps its own baked size relative to the others."
-   ],
-   "ghostChromatic": [
-    "Chromatic",
-    "Strength of each ghost's own dispersion. The direction and amount differ per ghost, baked from how that reflection path shifts with wavelength - not one fringe applied to all of them."
-   ],
-   "ghostCatsEye": [
-    "Cat's Eye",
-    "Optical vignetting on the ghosts. Clips each one toward frame centre from its own position, so ghosts that land off-axis turn into lemons instead of staying round."
-   ],
-   "ghostCatsEyeFalloff": [
-    "Cat's Eye Falloff",
-    "How quickly that clipping grows with a ghost's distance from centre. Higher keeps ghosts near the middle round for longer."
-   ],
-   "blades": [
-    "Blades",
-    "Aperture shape carved into each ghost and the starburst spikes. Zero is round. Matches the Lens filter's own Blades control, so a scene's flare and its bokeh agree on the diaphragm."
-   ],
-   "haloIntensity": [
-    "Halo",
-    "Strength of the ring around the frame centre. Zero removes it entirely."
-   ],
-   "haloRadius": [
-    "Radius",
-    "Distance from the frame centre to the ring, in pixels."
-   ],
-   "haloWidth": [
-    "Width",
-    "How wide the ring is, in pixels."
-   ],
-   "haloChromatic": [
-    "Chromatic",
-    "Per-channel radius offset, in pixels, so the ring fringes."
-   ],
-   "haloBlur": [
-    "Halo Blur",
-    "Softens the halo across the ring. Without it the ring echoes the source's detail sharply, which an internal reflection never does."
-   ],
-   "starIntensity": [
-    "Starburst",
-    "Strength of the diffraction spikes at the emitter. Zero removes it entirely."
-   ],
-   "starLength": [
-    "Length",
-    "How far the spikes reach, in pixels."
-   ],
-   "starRotation": [
-    "Rotation",
-    "Spins the whole starburst, in degrees."
-   ],
-   "starSoftness": [
-    "Starburst Softness",
-    "How crisp the diffraction spikes are. Above 1 the sinc's side ripples fade toward a plain glow; at 0 they are as sharp as the maths allows."
-   ],
-   "starGlow": [
-    "Starburst Glow",
-    "Veiling glow around the core. The sharp centre is real - it is the diffraction pattern's central lobe - but a lens always scatters light around it too, and without that the spikes read as a drawn asterisk."
-   ],
-   "streakIntensity": [
-    "Streak",
-    "Strength of the anamorphic bar through the emitter. Zero removes it entirely."
-   ],
-   "streakLength": [
-    "Length",
-    "How far the streak reaches from the emitter, in pixels."
-   ],
-   "streakAngle": [
-    "Angle",
-    "Streak axis in degrees. Zero is horizontal."
-   ],
-   "streakTint": [
-    "Tint",
-    "Colour of the streak."
-   ],
-   "intensity": [
-    "Intensity",
-    "Flare brightness. A wide flare spreads a highlight's energy far, so expect to push this up."
-   ],
-   "tint": [
-    "Tint",
-    "Colour multiplier on the whole flare."
-   ],
-   "blend": [
-    "Blend",
-    "How the flare combines with the layer. Effect Only shows the flare alone."
-   ],
-   "amount": [
-    "Amount",
-    "Mix between the original layer and the result."
-   ]
-  },
-  "enums": {
-   "placement": {
-    "0": "Auto",
-    "1": "Manual"
-   },
-   "lens": {
-    "0": "Fast Prime",
-    "1": "Standard Zoom",
-    "2": "Anamorphic"
-   },
-   "blend": {
-    "0": "Add",
-    "1": "Screen",
-    "2": "Max",
-    "3": "Effect Only"
-   },
-   "colourSource": {
-    "0": "From Image",
-    "1": "Manual"
-   },
-   "brightnessSource": {
-    "0": "From Image",
-    "1": "Manual"
-   }
-  },
-  "tabs": {
-   "filter": "Flare",
-   "artifacts": "Artifacts"
+  "type": "layerStrings",
+  "value": {
+    "author": "samMularczyk",
+    "layerType": "lensFlare",
+    "niceName": "Lens Flare",
+    "layerInfo": "Ghosts, halo and starburst from the image's highlights.",
+    "language": "en",
+    "attributes": {
+      "placement": [
+        "Placement",
+        "How the emitter position is found. Auto tracks the brightest region in the frame; Manual lets you place it anywhere, including off screen."
+      ],
+      "position": [
+        "Position",
+        "Emitter offset from the layer centre, in pixels. Works fine outside the frame bounds - that is the usual case for a real flare."
+      ],
+      "colourSource": [
+        "Colour Source",
+        "Where the flare's colour comes from. From Image takes it from the highlight the flare sits on; Manual lets you set it outright."
+      ],
+      "brightnessSource": [
+        "Brightness Source",
+        "Where the flare's strength comes from. From Image fades it with the highlight underneath; Manual renders it at full strength wherever you place it."
+      ],
+      "flareColour": [
+        "Flare Colour",
+        "The flare's colour in Manual mode. Brightness still comes from the image, so the flare keeps responding to how blown out the highlight is."
+      ],
+      "threshold": [
+        "Threshold",
+        "Only light above this feeds the flare. This is the black point of the grade that isolates the highlights."
+      ],
+      "gamma": [
+        "Gamma",
+        "Curve of the highlight grade. Higher keeps every element tight around genuinely bright areas."
+      ],
+      "lens": [
+        "Lens",
+        "Which lens's surfaces the ghost pattern is traced from. Fast Prime and Standard Zoom are paraxially traced from real optical-bench prescriptions; Anamorphic is a derived approximation and squeezes every ghost horizontally."
+      ],
+      "ghostIntensity": [
+        "Ghosts",
+        "Strength of the reflection ghosts. Zero removes them entirely."
+      ],
+      "ghostSoft": [
+        "Ghost Softness",
+        "How defocused the ghosts are. A ghost forms at the wrong focal distance, so it is genuinely out of focus - at 0 you get hard-edged polygons, which is the main thing that makes a flare look drawn."
+      ],
+      "ghostCount": [
+        "Count",
+        "How many ghosts to draw, out of a fixed maximum of 8, revealed in order of how bright that reflection path actually is on the chosen lens."
+      ],
+      "ghostSpacing": [
+        "Spacing",
+        "Scales how far each ghost sits from frame centre. Each ghost has its own baked distance and direction from the lens trace, so raising this spreads an already-irregular pattern rather than fixing its rhythm."
+      ],
+      "ghostScale": [
+        "Scale",
+        "Overall ghost size. Each ghost keeps its own baked size relative to the others."
+      ],
+      "ghostChromatic": [
+        "Chromatic",
+        "Strength of each ghost's own dispersion. The direction and amount differ per ghost, baked from how that reflection path shifts with wavelength - not one fringe applied to all of them."
+      ],
+      "ghostCatsEye": [
+        "Cat's Eye",
+        "Optical vignetting on the ghosts. Clips each one toward frame centre from its own position, so ghosts that land off-axis turn into lemons instead of staying round."
+      ],
+      "ghostCatsEyeFalloff": [
+        "Cat's Eye Falloff",
+        "How quickly that clipping grows with a ghost's distance from centre. Higher keeps ghosts near the middle round for longer."
+      ],
+      "blades": [
+        "Blades",
+        "Aperture shape carved into each ghost and the starburst spikes. Zero is round. Matches the Lens filter's own Blades control, so a scene's flare and its bokeh agree on the diaphragm."
+      ],
+      "haloIntensity": [
+        "Halo",
+        "Strength of the ring around the frame centre. Zero removes it entirely."
+      ],
+      "haloRadius": [
+        "Radius",
+        "Distance from the frame centre to the ring, in pixels."
+      ],
+      "haloWidth": [
+        "Width",
+        "How wide the ring is, in pixels."
+      ],
+      "haloChromatic": [
+        "Chromatic",
+        "Per-channel radius offset, in pixels, so the ring fringes."
+      ],
+      "haloBlur": [
+        "Halo Blur",
+        "Softens the halo across the ring. Without it the ring echoes the source's detail sharply, which an internal reflection never does."
+      ],
+      "starIntensity": [
+        "Starburst",
+        "Strength of the diffraction spikes at the emitter. Zero removes it entirely."
+      ],
+      "starLength": [
+        "Length",
+        "How far the spikes reach, in pixels."
+      ],
+      "starRotation": [
+        "Rotation",
+        "Spins the whole starburst, in degrees."
+      ],
+      "starSoftness": [
+        "Starburst Softness",
+        "How crisp the diffraction spikes are. Above 1 the sinc's side ripples fade toward a plain glow; at 0 they are as sharp as the maths allows."
+      ],
+      "starGlow": [
+        "Starburst Glow",
+        "Veiling glow around the core. The sharp centre is real - it is the diffraction pattern's central lobe - but a lens always scatters light around it too, and without that the spikes read as a drawn asterisk."
+      ],
+      "streakIntensity": [
+        "Streak",
+        "Strength of the anamorphic bar through the emitter. Zero removes it entirely."
+      ],
+      "streakLength": [
+        "Length",
+        "How far the streak reaches from the emitter, in pixels."
+      ],
+      "streakAngle": [
+        "Angle",
+        "Streak axis in degrees. Zero is horizontal."
+      ],
+      "streakTint": [
+        "Tint",
+        "Colour of the streak."
+      ],
+      "intensity": [
+        "Intensity",
+        "Flare brightness. A wide flare spreads a highlight's energy far, so expect to push this up."
+      ],
+      "tint": [
+        "Tint",
+        "Colour multiplier on the whole flare."
+      ],
+      "blend": [
+        "Blend",
+        "How the flare combines with the layer. Effect Only shows the flare alone."
+      ],
+      "amount": [
+        "Amount",
+        "Mix between the original layer and the result."
+      ]
+    },
+    "enums": {
+      "placement": {
+        "0": "Auto",
+        "1": "Manual"
+      },
+      "lens": {
+        "0": "Fast Prime",
+        "1": "Standard Zoom",
+        "2": "Anamorphic"
+      },
+      "blend": {
+        "0": "Add",
+        "1": "Screen",
+        "2": "Max",
+        "3": "Effect Only"
+      },
+      "colourSource": {
+        "0": "From Image",
+        "1": "Manual"
+      },
+      "brightnessSource": {
+        "0": "From Image",
+        "1": "Manual"
+      }
+    },
+    "tabs": {
+      "filter": "Flare",
+      "artifacts": "Artifacts"
+    }
   }
- }
 }

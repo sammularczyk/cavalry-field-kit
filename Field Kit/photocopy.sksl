@@ -39,6 +39,13 @@ uniform float  banding;
 uniform float  bandingScale;
 uniform float  paperAmount;
 uniform float  paperScale;
+uniform float  paperFolds;
+uniform float  paperFoldCount;
+uniform float  paperCrumples;
+uniform float  paperCrumpleSize;
+uniform float  paperFibre;
+uniform float  paperRelief_;
+uniform float  paperSeed;
 uniform half4  inkColor;
 uniform half4  paperColor;
 uniform float  amount;
@@ -103,6 +110,103 @@ float2 insetCoord(float2 c) {
     return clamp(c, lo, hi);
 }
 
+
+// ---------------------------------------------------------- Paper relief
+// Shared with `paperTexture.sksl` (the Shader layer), which is the canonical
+// copy, and with photocopy.sksl / printComposite.sksl. There is no include
+// mechanism here, so keep the four in sync by hand if this is edited.
+//
+// Derived from paper-design/shaders `paper-texture.ts` (Apache-2.0, Lost Coast
+// Labs). Changes: SkSL port, procedural hashes in place of their noise
+// texture, three layers rather than five.
+//
+// Each layer is skipped when its own uniform is zero. The branches are
+// uniform-driven, so every fragment takes the same path - which is what keeps
+// this affordable at default settings, where most of it is switched off.
+float2 pbHash22(float2 p) {
+    p = fract(p * float2(0.3183099, 0.3678794)) + 0.1;
+    p += dot(p, p + 19.19);
+    float a = fract(p.x * p.y);
+    float b = fract((p.x + 71.3) * (p.y + 13.7));
+    return float2(a, b);
+}
+float pbHash21(float2 p) { return pbHash22(p).x; }
+float pbVnoise(float2 p) {
+    float2 i = floor(p), f = fract(p);
+    float2 u = f * f * (3.0 - 2.0 * f);
+    return mix(mix(pbHash21(i), pbHash21(i + float2(1.0, 0.0)), u.x),
+               mix(pbHash21(i + float2(0.0, 1.0)), pbHash21(i + float2(1.0, 1.0)), u.x), u.y);
+}
+float2 pbRot(float2 p, float a) {
+    float c = cos(a), s = sin(a);
+    return float2(c * p.x - s * p.y, s * p.x + c * p.y);
+}
+// A weighted average of jittered cell values, not a Voronoi distance. Two
+// frequencies multiplied - one sharp, one soft - is what gives crumpled foil.
+float pbCrumpled(float2 t, float pw) {
+    float2 p = floor(t);
+    float wsum = 0.0, cl = 0.0;
+    for (int y = -1; y < 2; y++) {
+        for (int x = -1; x < 2; x++) {
+            float2 q = p + float2(float(x), float(y));
+            float2 r = (q + pbHash22(q)) - t;
+            float w = pow(smoothstep(0.0, 1.0, 1.0 - abs(r.x)), pw)
+                    * pow(smoothstep(0.0, 1.0, 1.0 - abs(r.y)), pw);
+            cl += (0.5 + 0.5 * sin((q.x + q.y * 5.0) * 8.0)) * w;
+            wsum += w;
+        }
+    }
+    return pow(wsum > 0.0 ? cl / wsum : 0.0, 0.5) * 2.0;
+}
+float pbCrumpleShape(float2 uv) {
+    return pbCrumpled(uv * 0.25, 16.0) * pbCrumpled(uv * 0.5, 2.0);
+}
+// Returns the VECTOR to the nearest crease seed, not a distance - so a crease
+// perturbs the surface outward from its own origin, which is what makes it
+// read as a fold rather than as a contour line.
+float2 pbFolds(float2 uv, float count, float sd) {
+    float2 best = float2(0.0);
+    float bestD = 9.0;
+    for (int i = 0; i < 15; i++) {
+        if (float(i) >= count) { break; }
+        float2 rnd = pbHash22(float2(float(i), float(i) * sd + 3.1));
+        float an = rnd.x * 6.28318530718;
+        float2 pp = float2(cos(an), sin(an)) * rnd.y;
+        float d = distance(uv, pp);
+        if (d < bestD) { bestD = d; best = uv - pp; }
+    }
+    return mix(best, float2(0.0), pow(clamp(bestD, 0.0, 1.0), 0.25));
+}
+// Returns 1 where the sheet faces the light, below 1 where it turns away.
+// `relief` steepens the normal's own Z rather than remapping the result, which
+// keeps the shading physical at both ends.
+float paperRelief(float2 fragCoord, float2 res, float2 rc,
+                  float foldAmt, float foldN, float crumpleAmt, float crumpleSz,
+                  float fibreAmt, float relief, float sd) {
+    if (foldAmt <= 0.0 && crumpleAmt <= 0.0 && fibreAmt <= 0.0) { return 1.0; }
+    float2 uv = (fragCoord - rc) / max(res.y, 1.0);
+    float2 patternUV = uv * 10.0;
+    float2 normal = float2(0.0);
+    if (foldAmt > 0.0) {
+        float2 fUV = pbRot(patternUV * 0.12, 4.0 * sd);
+        float2 w  = pbFolds(fUV, foldN, sd);
+        float2 w2 = pbFolds(pbRot(fUV + 0.007 * cos(sd), 0.01 * sin(sd)), foldN, sd);
+        normal += foldAmt * 4.0 * max(float2(0.0), w + w2);
+    }
+    if (crumpleAmt > 0.0) {
+        float2 cUV = fract(patternUV * 0.02 / max(crumpleSz, 0.01) - sd) * 32.0;
+        normal += crumpleAmt * (pbCrumpleShape(cUV + float2(0.05, 0.0)) - pbCrumpleShape(cUV));
+    }
+    if (fibreAmt > 0.0) {
+        float2 g = patternUV * 6.0;
+        normal += 0.4 * fibreAmt * float2(pbVnoise(g + float2(0.7, 0.0)) - pbVnoise(g - float2(0.7, 0.0)),
+                                          pbVnoise(g + float2(0.0, 0.7)) - pbVnoise(g - float2(0.0, 0.7)));
+    }
+    float z = 9.5 - 9.0 * pow(clamp(relief, 0.0, 1.0), 0.1);
+    float lam = dot(normalize(float3(normal, z)), normalize(float3(1.0, 2.0, 1.0)));
+    return clamp(0.35 + 0.9 * lam, 0.0, 1.6);
+}
+
 half4 main(float2 fragCoord) {
     half4 src  = original.eval(fragCoord);
     half4 tone = original.eval(insetCoord(fragCoord));
@@ -157,6 +261,10 @@ half4 main(float2 fragCoord) {
                 + vnoise(fragCoord * sc * float2(2.7, 0.9)) * 0.35;
         fibre = mix(1.0, 0.78 + 0.44 * g, clamp(paperAmount, 0.0, 1.0));
     }
+    // Folds, crumple and a second fibre term light the sheet the toner sits
+    // on. All default to zero, so an existing photocopy is unchanged.
+    fibre *= paperRelief(fragCoord, resolution, rectCentre, paperFolds, paperFoldCount,
+                         paperCrumples, paperCrumpleSize, paperFibre, paperRelief_, paperSeed);
 
     float3 col = mix(float3(paperColor.rgb) * fibre, float3(inkColor.rgb), ink);
 

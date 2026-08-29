@@ -1,140 +1,140 @@
 {
- "type": "layerStrings",
- "value": {
-  "author": "samMularczyk",
-  "layerType": "vhs",
-  "niceName": "VHS",
-  "layerInfo": "Tape simulation: horizontal wander, tape crease, head-switching noise, RGB bloom smear and an AC hum beat.",
-  "language": "en",
-  "attributes": {
-   "time": [
-    "Time",
-    "Driven by the composition time. Disconnect it to freeze the tape artefacts."
-   ],
-   "speed": [
-    "Speed",
-    "How fast the tape artefacts move. Zero freezes them."
-   ],
-   "noiseDetail": [
-    "Noise Detail",
-    "Octaves of value noise. This is called six times per pixel and dominates the cost, so drop it if playback is slow."
-   ],
-   "format": [
-    "Format",
-    "Biases the noise floor and chroma bandwidth to match a tape format. S-VHS and Hi8 keep a sharper picture with less noise; Video8 sits close to VHS. Every other control keeps its own meaning - this only scales how much noise and chroma bleed they produce."
-   ],
-   "waveAmount": [
-    "Wave",
-    "Slow horizontal tape wander."
-   ],
-   "fineWave": [
-    "Fine Wave",
-    "Fast per-line horizontal jitter."
-   ],
-   "creaseAmount": [
-    "Crease Amount",
-    "Strength of the horizontal crease band that sweeps up the frame."
-   ],
-   "creaseFrequency": [
-    "Crease Frequency",
-    "How many crease bands fit in the frame height."
-   ],
-   "creaseSpeed": [
-    "Crease Speed",
-    "How fast the crease travels. Negative reverses it."
-   ],
-   "creaseThreshold": [
-    "Crease Threshold",
-    "How high the wave must peak before a crease appears. Lower makes creases more frequent and wider."
-   ],
-   "switchingHeight": [
-    "Switching Height",
-    "Height of the head-switching band at the bottom of frame, as a fraction of the layer."
-   ],
-   "switchingShift": [
-    "Switching Shift",
-    "How far the picture is dragged inside that band."
-   ],
-   "jitter": [
-    "Switching Jitter",
-    "Horizontal noise inside the head-switching band."
-   ],
-   "bloomAmount": [
-    "Bloom Spread",
-    "Horizontal step between the seven smear taps."
-   ],
-   "bloomStrength": [
-    "Bloom Strength",
-    "How much each smear tap adds."
-   ],
-   "greenLag": [
-    "Green Lag",
-    "How far the green channel trails the red in the smear."
-   ],
-   "blueLag": [
-    "Blue Lag",
-    "How far the blue channel trails the red in the smear."
-   ],
-   "gain": [
-    "Gain",
-    "Overall exposure after the bloom is added."
-   ],
-   "humAmount": [
-    "Hum Amount",
-    "Strength of the rolling AC brightness beat."
-   ],
-   "humSpeed": [
-    "Hum Speed",
-    "How fast the hum band rolls up the frame."
-   ],
-   "edgeColor": [
-    "Edge Fill",
-    "Colour shown where the tape wave pulls the picture off its own edge. The original used a flat dark grey."
-   ],
-   "dropout": [
-    "Dropout",
-    "Density of short dashes where the tape has shed oxide, scattered at random scanlines and x positions. Zero removes them."
-   ],
-   "dropoutLength": [
-    "Dropout Length",
-    "Length of each dropout dash, in pixels."
-   ],
-   "dropoutPolarity": [
-    "Dropout Polarity",
-    "Colour of the dashes: +1 white, -1 black, 0 a mix of both."
-   ],
-   "tracking": [
-    "Tracking Loss",
-    "Strength of a band of badly degraded picture drifting up the frame, as when tracking is off. Zero removes it."
-   ],
-   "trackingHeight": [
-    "Tracking Band Height",
-    "Height of the tracking-loss band, as a fraction of the frame."
-   ],
-   "trackingSpeed": [
-    "Tracking Drift",
-    "How fast the tracking-loss band drifts up the frame."
-   ],
-   "hiss": [
-    "Hiss",
-    "Fine luma noise over the whole frame, like tape hiss. Independent of Noise Detail."
-   ],
-   "amount": [
-    "Amount",
-    "Mix between the original layer and the tape result."
-   ]
-  },
-  "enums": {
-   "format": {
-    "0": "VHS",
-    "1": "S-VHS",
-    "2": "Hi8",
-    "3": "Video8"
-   }
-  },
-  "tabs": {
-   "filter": "Tape",
-   "picture": "Picture"
+  "type": "layerStrings",
+  "value": {
+    "author": "samMularczyk",
+    "layerType": "vhs",
+    "niceName": "VHS",
+    "layerInfo": "Tape wander, creases, head-switching noise and chroma smear.",
+    "language": "en",
+    "attributes": {
+      "time": [
+        "Time",
+        "Driven by the composition time. Disconnect it to freeze the tape artefacts."
+      ],
+      "speed": [
+        "Speed",
+        "How fast the tape artefacts move. Zero freezes them."
+      ],
+      "noiseDetail": [
+        "Noise Detail",
+        "Octaves of value noise. This is called six times per pixel and dominates the cost, so drop it if playback is slow."
+      ],
+      "format": [
+        "Format",
+        "Biases the noise floor and chroma bandwidth to match a tape format. S-VHS and Hi8 keep a sharper picture with less noise; Video8 sits close to VHS. Every other control keeps its own meaning - this only scales how much noise and chroma bleed they produce."
+      ],
+      "waveAmount": [
+        "Wave",
+        "Slow horizontal tape wander."
+      ],
+      "fineWave": [
+        "Fine Wave",
+        "Fast per-line horizontal jitter."
+      ],
+      "creaseAmount": [
+        "Crease Amount",
+        "Strength of the horizontal crease band that sweeps up the frame."
+      ],
+      "creaseFrequency": [
+        "Crease Frequency",
+        "How many crease bands fit in the frame height."
+      ],
+      "creaseSpeed": [
+        "Crease Speed",
+        "How fast the crease travels. Negative reverses it."
+      ],
+      "creaseThreshold": [
+        "Crease Threshold",
+        "How high the wave must peak before a crease appears. Lower makes creases more frequent and wider."
+      ],
+      "switchingHeight": [
+        "Switching Height",
+        "Height of the head-switching band at the bottom of frame, as a fraction of the layer."
+      ],
+      "switchingShift": [
+        "Switching Shift",
+        "How far the picture is dragged inside that band."
+      ],
+      "jitter": [
+        "Switching Jitter",
+        "Horizontal noise inside the head-switching band."
+      ],
+      "bloomAmount": [
+        "Bloom Spread",
+        "Horizontal step between the seven smear taps."
+      ],
+      "bloomStrength": [
+        "Bloom Strength",
+        "How much each smear tap adds."
+      ],
+      "greenLag": [
+        "Green Lag",
+        "How far the green channel trails the red in the smear."
+      ],
+      "blueLag": [
+        "Blue Lag",
+        "How far the blue channel trails the red in the smear."
+      ],
+      "gain": [
+        "Gain",
+        "Overall exposure after the bloom is added."
+      ],
+      "humAmount": [
+        "Hum Amount",
+        "Strength of the rolling AC brightness beat."
+      ],
+      "humSpeed": [
+        "Hum Speed",
+        "How fast the hum band rolls up the frame."
+      ],
+      "edgeColor": [
+        "Edge Fill",
+        "Colour shown where the tape wave pulls the picture off its own edge. The original used a flat dark grey."
+      ],
+      "dropout": [
+        "Dropout",
+        "Density of short dashes where the tape has shed oxide, scattered at random scanlines and x positions. Zero removes them."
+      ],
+      "dropoutLength": [
+        "Dropout Length",
+        "Length of each dropout dash, in pixels."
+      ],
+      "dropoutPolarity": [
+        "Dropout Polarity",
+        "Colour of the dashes: +1 white, -1 black, 0 a mix of both."
+      ],
+      "tracking": [
+        "Tracking Loss",
+        "Strength of a band of badly degraded picture drifting up the frame, as when tracking is off. Zero removes it."
+      ],
+      "trackingHeight": [
+        "Tracking Band Height",
+        "Height of the tracking-loss band, as a fraction of the frame."
+      ],
+      "trackingSpeed": [
+        "Tracking Drift",
+        "How fast the tracking-loss band drifts up the frame."
+      ],
+      "hiss": [
+        "Hiss",
+        "Fine luma noise over the whole frame, like tape hiss. Independent of Noise Detail."
+      ],
+      "amount": [
+        "Amount",
+        "Mix between the original layer and the tape result."
+      ]
+    },
+    "enums": {
+      "format": {
+        "0": "VHS",
+        "1": "S-VHS",
+        "2": "Hi8",
+        "3": "Video8"
+      }
+    },
+    "tabs": {
+      "filter": "Tape",
+      "picture": "Picture"
+    }
   }
- }
 }

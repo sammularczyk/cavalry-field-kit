@@ -1,212 +1,212 @@
 {
- "type": "layerStrings",
- "value": {
-  "author": "samMularczyk",
-  "layerType": "lensBlur",
-  "niceName": "Lens Blur",
-  "layerInfo": "Defocus and lens scatter, split out of Lens Distortion so a frame can be bent without paying for four blur passes. The blur builds its aperture from rotated 1D segments, so bokeh takes the shape of a real diaphragm; the scatter adds the haze, astigmatism, diffraction rings and spherical aberration a lens throws around a highlight. Either half switches off at zero.",
-  "language": "en",
-  "attributes": {
-   "bokehThreshold": [
-    "Highlight Threshold",
-    "How bright a pixel must be to count as a highlight and be weighted up by Gain. Below this nothing is changed, so raising it narrows the bokeh to the brightest points only."
-   ],
-   "bokehGamma": [
-    "Highlight Gamma",
-    "How hard highlights outweigh everything else in the blur. This is what turns a bright point into a defined disc rather than a soft smear: the picture is raised to this power before blurring and taken back afterwards, so a flat area returns exactly as it was and only the bright points spread. Higher is more defined; around 4 is a good starting point."
-   ],
-   "defocus": [
-    "Blur",
-    "Blur radius in pixels. Zero switches the blur off. A non-uniform Focus From can scale this up to 4x, which the layer padding does not account for - pull Blur back if you see clipping."
-   ],
-   "blades": [
-    "Blades",
-    "Aperture shape. Round is a lens near wide open, where the diaphragm blades retract clear of the light path and the aperture is the barrel itself. The blade counts are a stopped-down lens, where the blades are in the way and the highlight takes their polygon."
-   ],
-   "rotation": [
-    "Rotation",
-    "Turns the whole aperture, in degrees."
-   ],
-   "bokehSqueeze": [
-    "Bokeh Squeeze",
-    "1 is spherical - out-of-focus highlights come out round. Anything else squeezes them into ellipses, the way an anamorphic lens does. This is the strongest single cue that footage came through one."
-   ],
-   "bokehAngle": [
-    "Bokeh Angle",
-    "The axis the squeeze acts along, so the ellipses can tilt rather than sitting square to frame."
-   ],
-   "catsEye": [
-    "Cat's Eye",
-    "Optical vignetting. Clips the aperture toward the frame edge, so highlights out there turn into lemons pointing at the centre."
-   ],
-   "catsEyeFalloff": [
-    "Cat's Eye Falloff",
-    "How quickly the clipping grows away from the centre. Higher keeps the middle of frame round for longer."
-   ],
-   "ringBias": [
-    "Ring Bias",
-    "Where the light sits inside the out-of-focus disc. Positive brightens the rim - ring, or soap-bubble bokeh, from a lens under-corrected for spherical aberration. Negative brightens the centre, the soft creamy rendering portrait lenses are prized for. Zero is a flat disc."
-   ],
-   "cocSource": [
-    "Focus From",
-    "What decides how blurred each pixel is. Uniform blurs everything equally. Focus Region keeps an area of the frame sharp and is by far the cheapest. Map reads the shader in the Map tab - accurate, but every sample re-evaluates that shader, so a heavy graph is slow. Luminance and Alpha use the layer's own matte."
-   ],
-   "mapMode": [
-    "Read Map As",
-    "How the map in this tab is interpreted. Brightness takes it literally - white blurs, black stays sharp - which is what a hand-painted blur map wants. Depth treats it as distance, so the blur is worked out around Focus and rises on BOTH sides of it, leaving a sharp band that Focus slides through. That is what a rendered depth pass wants."
-   ],
-   "focus": [
-    "Focus",
-    "The value in the matte that stays sharp; anything further from it blurs more. Used by Alpha, Luminance and Depth Map - Focus Region places the sharp area in the frame instead."
-   ],
-   "aperture": [
-    "Aperture",
-    "How fast the blur grows away from the focal plane. The falloff is the thin-lens hyperbola, so something a step nearer than focus blurs harder than something the same step further away, as a real lens does."
-   ],
-   "focusShape": [
-    "Focus Shape",
-    "Circle is a focus vignette - sharp inside the size, blurring outward. Line is a sharp band running across the frame, which is the tilt-shift look."
-   ],
-   "focusPoint": [
-    "Focus Point",
-    "Where the sharp region sits, as an offset from the layer centre. Push it off-frame with a Line to get a plain gradient from sharp to blurred."
-   ],
-   "focusSize": [
-    "Focus Size",
-    "Radius of the sharp circle, or half the width of the sharp band."
-   ],
-   "focusAspect": [
-    "Focus Aspect",
-    "Stretches the sharp circle into an ellipse - a wide sharp zone across a landscape, or a tall one down a portrait. 1 is round. Focus Angle turns it."
-   ],
-   "focusSoftness": [
-    "Focus Softness",
-    "How many pixels the blur takes to come on past the focus region. Small values give a hard edge to the blur, which no lens does; large values are the gentle falloff of a real focal plane."
-   ],
-   "focusAngle": [
-    "Focus Angle",
-    "Turns the Line band, or the Focus Aspect ellipse."
-   ],
-   "exposure": [
-    "Highlight Exposure",
-    "Rolls the discs off rather than letting them clip. Gain multiplies before the blur, so pushed hard it flattens highlights to solid white; this is a compressive curve applied after, which lifts them but never reaches 1, so they keep their falloff. Use Gain for how much a disc dominates, this for how it behaves near white."
-   ],
-   "gain": [
-    "Highlight Gain",
-    "How much extra weight highlights carry INTO the blur, so it sets how strongly the discs dominate the background rather than just how bright they are. A plain multiply, so it will clip - Highlight Exposure is there to roll that off."
-   ],
-   "dither": [
-    "Dither",
-    "Jitters tap positions to trade banding along the aperture edges for fine grain."
-   ],
-   "occlusion": [
-    "Occlusion",
-    "Stops a blurred background smearing over a sharp foreground: a point of light only spreads as far as its own circle of confusion, so a sharp pixel cannot reach a distant one. Needs real depth to mean anything, and it is the expensive control - it re-reads the map once per sample, roughly 96 times a pixel. Off unless you can see the bleed."
-   ],
-   "edges": [
-    "Edges",
-    "What the blur does where it reaches outside the layer. Transparent is honest - there is no picture there - but it drags a dark rim inward at large radii. Clamp smears the rim outward, Mirror reflects the picture back."
-   ],
-   "edgeTrim": [
-    "Edge Trim",
-    "Pixels to inset the edge that Clamp and Mirror fold against. A layer's outermost pixels are antialiased, so reflecting them doubles the rim into a seam."
-   ],
-   "kernel": [
-    "Kernel",
-    "The shape light scatters into. Disc is spherical aberration, Line is astigmatism, Rings is diffraction, Halo is haze."
-   ],
-   "size": [
-    "Scatter Size",
-    "Radius of the artefact scatter, in pixels. Zero switches the artefacts off."
-   ],
-   "kernelRotation": [
-    "Rotation",
-    "Axis of the Line kernel."
-   ],
-   "ringFrequency": [
-    "Ring Frequency",
-    "How many diffraction rings fit inside the radius. Only used by the Rings kernel."
-   ],
-   "axialRed": [
-    "Axial Red",
-    "Kernel size multiplier for red. Setting the three channels apart gives axial chromatic aberration."
-   ],
-   "axialGreen": [
-    "Axial Green",
-    "Kernel size multiplier for green."
-   ],
-   "axialBlue": [
-    "Axial Blue",
-    "Kernel size multiplier for blue."
-   ],
-   "scatterThreshold": [
-    "Scatter Threshold",
-    "Only light above this level scatters. Lower it to let midtones haze as well."
-   ],
-   "scatterGain": [
-    "Scatter Gain",
-    "Brightness of the scattered light."
-   ],
-   "scatterBlend": [
-    "Scatter Blend",
-    "How the scatter combines with the layer. Replace shows the scatter alone."
-   ],
-   "samples": [
-    "Samples",
-    "Tap count for the artefact scatter. The blur's own tap count is fixed by its segment passes."
-   ],
-   "amount": [
-    "Amount",
-    "Mixes the whole filter back against the untouched layer."
-   ],
-   "defocusMap": [
-    "Map",
-    "The shader this filter reads for focus. A rendered depth pass through Shape to Shader, an image through Image Shader, or any shader node. Read As decides whether it means blur or distance."
-   ]
-  },
-  "enums": {
-   "blades": {
-    "0": "Round",
-    "4": "4 Blades",
-    "6": "6 Blades",
-    "8": "8 Blades"
-   },
-   "cocSource": {
-    "0": "Uniform",
-    "3": "Focus Region",
-    "4": "Map",
-    "2": "Luminance",
-    "1": "Alpha"
-   },
-   "kernel": [
-    "Disc (Spherical)",
-    "Line (Astigmatism)",
-    "Rings (Diffraction)",
-    "Halo (Haze)"
-   ],
-   "scatterBlend": [
-    "Screen",
-    "Plus",
-    "Replace"
-   ],
-   "edges": {
-    "0": "Transparent",
-    "1": "Clamp",
-    "2": "Mirror"
-   },
-   "focusShape": {
-    "0": "Circle",
-    "1": "Line"
-   },
-   "mapMode": {
-    "0": "Brightness",
-    "1": "Depth"
-   }
-  },
-  "tabs": {
-   "filter": "Blur",
-   "map": "Map",
-   "artefacts": "Artefacts"
+  "type": "layerStrings",
+  "value": {
+    "author": "samMularczyk",
+    "layerType": "lensBlur",
+    "niceName": "Lens Blur",
+    "layerInfo": "Defocus with a real diaphragm shape, plus lens scatter.",
+    "language": "en",
+    "attributes": {
+      "bokehThreshold": [
+        "Highlight Threshold",
+        "How bright a pixel must be to count as a highlight and be weighted up by Gain. Below this nothing is changed, so raising it narrows the bokeh to the brightest points only."
+      ],
+      "bokehGamma": [
+        "Highlight Gamma",
+        "How hard highlights outweigh everything else in the blur. This is what turns a bright point into a defined disc rather than a soft smear: the picture is raised to this power before blurring and taken back afterwards, so a flat area returns exactly as it was and only the bright points spread. Higher is more defined; around 4 is a good starting point."
+      ],
+      "defocus": [
+        "Blur",
+        "Blur radius in pixels. Zero switches the blur off. A non-uniform Focus From can scale this up to 4x, which the layer padding does not account for - pull Blur back if you see clipping."
+      ],
+      "blades": [
+        "Blades",
+        "Aperture shape. Round is a lens near wide open, where the diaphragm blades retract clear of the light path and the aperture is the barrel itself. The blade counts are a stopped-down lens, where the blades are in the way and the highlight takes their polygon."
+      ],
+      "rotation": [
+        "Rotation",
+        "Turns the whole aperture, in degrees."
+      ],
+      "bokehSqueeze": [
+        "Bokeh Squeeze",
+        "1 is spherical - out-of-focus highlights come out round. Anything else squeezes them into ellipses, the way an anamorphic lens does. This is the strongest single cue that footage came through one."
+      ],
+      "bokehAngle": [
+        "Bokeh Angle",
+        "The axis the squeeze acts along, so the ellipses can tilt rather than sitting square to frame."
+      ],
+      "catsEye": [
+        "Cat's Eye",
+        "Optical vignetting. Clips the aperture toward the frame edge, so highlights out there turn into lemons pointing at the centre."
+      ],
+      "catsEyeFalloff": [
+        "Cat's Eye Falloff",
+        "How quickly the clipping grows away from the centre. Higher keeps the middle of frame round for longer."
+      ],
+      "ringBias": [
+        "Ring Bias",
+        "Where the light sits inside the out-of-focus disc. Positive brightens the rim - ring, or soap-bubble bokeh, from a lens under-corrected for spherical aberration. Negative brightens the centre, the soft creamy rendering portrait lenses are prized for. Zero is a flat disc."
+      ],
+      "cocSource": [
+        "Focus From",
+        "What decides how blurred each pixel is. Uniform blurs everything equally. Focus Region keeps an area of the frame sharp and is by far the cheapest. Map reads the shader in the Map tab - accurate, but every sample re-evaluates that shader, so a heavy graph is slow. Luminance and Alpha use the layer's own matte."
+      ],
+      "mapMode": [
+        "Read Map As",
+        "How the map in this tab is interpreted. Brightness takes it literally - white blurs, black stays sharp - which is what a hand-painted blur map wants. Depth treats it as distance, so the blur is worked out around Focus and rises on BOTH sides of it, leaving a sharp band that Focus slides through. That is what a rendered depth pass wants."
+      ],
+      "focus": [
+        "Focus",
+        "The value in the matte that stays sharp; anything further from it blurs more. Used by Alpha, Luminance and Depth Map - Focus Region places the sharp area in the frame instead."
+      ],
+      "aperture": [
+        "Aperture",
+        "How fast the blur grows away from the focal plane. The falloff is the thin-lens hyperbola, so something a step nearer than focus blurs harder than something the same step further away, as a real lens does."
+      ],
+      "focusShape": [
+        "Focus Shape",
+        "Circle is a focus vignette - sharp inside the size, blurring outward. Line is a sharp band running across the frame, which is the tilt-shift look."
+      ],
+      "focusPoint": [
+        "Focus Point",
+        "Where the sharp region sits, as an offset from the layer centre. Push it off-frame with a Line to get a plain gradient from sharp to blurred."
+      ],
+      "focusSize": [
+        "Focus Size",
+        "Radius of the sharp circle, or half the width of the sharp band."
+      ],
+      "focusAspect": [
+        "Focus Aspect",
+        "Stretches the sharp circle into an ellipse - a wide sharp zone across a landscape, or a tall one down a portrait. 1 is round. Focus Angle turns it."
+      ],
+      "focusSoftness": [
+        "Focus Softness",
+        "How many pixels the blur takes to come on past the focus region. Small values give a hard edge to the blur, which no lens does; large values are the gentle falloff of a real focal plane."
+      ],
+      "focusAngle": [
+        "Focus Angle",
+        "Turns the Line band, or the Focus Aspect ellipse."
+      ],
+      "exposure": [
+        "Highlight Exposure",
+        "Rolls the discs off rather than letting them clip. Gain multiplies before the blur, so pushed hard it flattens highlights to solid white; this is a compressive curve applied after, which lifts them but never reaches 1, so they keep their falloff. Use Gain for how much a disc dominates, this for how it behaves near white."
+      ],
+      "gain": [
+        "Highlight Gain",
+        "How much extra weight highlights carry INTO the blur, so it sets how strongly the discs dominate the background rather than just how bright they are. A plain multiply, so it will clip - Highlight Exposure is there to roll that off."
+      ],
+      "dither": [
+        "Dither",
+        "Jitters tap positions to trade banding along the aperture edges for fine grain."
+      ],
+      "occlusion": [
+        "Occlusion",
+        "Stops a blurred background smearing over a sharp foreground: a point of light only spreads as far as its own circle of confusion, so a sharp pixel cannot reach a distant one. Needs real depth to mean anything, and it is the expensive control - it re-reads the map once per sample, roughly 96 times a pixel. Off unless you can see the bleed."
+      ],
+      "edges": [
+        "Edges",
+        "What the blur does where it reaches outside the layer. Transparent is honest - there is no picture there - but it drags a dark rim inward at large radii. Clamp smears the rim outward, Mirror reflects the picture back."
+      ],
+      "edgeTrim": [
+        "Edge Trim",
+        "Pixels to inset the edge that Clamp and Mirror fold against. A layer's outermost pixels are antialiased, so reflecting them doubles the rim into a seam."
+      ],
+      "kernel": [
+        "Kernel",
+        "The shape light scatters into. Disc is spherical aberration, Line is astigmatism, Rings is diffraction, Halo is haze."
+      ],
+      "size": [
+        "Scatter Size",
+        "Radius of the artefact scatter, in pixels. Zero switches the artefacts off."
+      ],
+      "kernelRotation": [
+        "Rotation",
+        "Axis of the Line kernel."
+      ],
+      "ringFrequency": [
+        "Ring Frequency",
+        "How many diffraction rings fit inside the radius. Only used by the Rings kernel."
+      ],
+      "axialRed": [
+        "Axial Red",
+        "Kernel size multiplier for red. Setting the three channels apart gives axial chromatic aberration."
+      ],
+      "axialGreen": [
+        "Axial Green",
+        "Kernel size multiplier for green."
+      ],
+      "axialBlue": [
+        "Axial Blue",
+        "Kernel size multiplier for blue."
+      ],
+      "scatterThreshold": [
+        "Scatter Threshold",
+        "Only light above this level scatters. Lower it to let midtones haze as well."
+      ],
+      "scatterGain": [
+        "Scatter Gain",
+        "Brightness of the scattered light."
+      ],
+      "scatterBlend": [
+        "Scatter Blend",
+        "How the scatter combines with the layer. Replace shows the scatter alone."
+      ],
+      "samples": [
+        "Samples",
+        "Tap count for the artefact scatter. The blur's own tap count is fixed by its segment passes."
+      ],
+      "amount": [
+        "Amount",
+        "Mixes the whole filter back against the untouched layer."
+      ],
+      "defocusMap": [
+        "Map",
+        "The shader this filter reads for focus. A rendered depth pass through Shape to Shader, an image through Image Shader, or any shader node. Read As decides whether it means blur or distance."
+      ]
+    },
+    "enums": {
+      "blades": {
+        "0": "Round",
+        "4": "4 Blades",
+        "6": "6 Blades",
+        "8": "8 Blades"
+      },
+      "cocSource": {
+        "0": "Uniform",
+        "3": "Focus Region",
+        "4": "Map",
+        "2": "Luminance",
+        "1": "Alpha"
+      },
+      "kernel": [
+        "Disc (Spherical)",
+        "Line (Astigmatism)",
+        "Rings (Diffraction)",
+        "Halo (Haze)"
+      ],
+      "scatterBlend": [
+        "Screen",
+        "Plus",
+        "Replace"
+      ],
+      "edges": {
+        "0": "Transparent",
+        "1": "Clamp",
+        "2": "Mirror"
+      },
+      "focusShape": {
+        "0": "Circle",
+        "1": "Line"
+      },
+      "mapMode": {
+        "0": "Brightness",
+        "1": "Depth"
+      }
+    },
+    "tabs": {
+      "filter": "Blur",
+      "map": "Map",
+      "artefacts": "Artefacts"
+    }
   }
- }
 }
