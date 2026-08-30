@@ -1,0 +1,190 @@
+{
+  "author": "samMularczyk",
+  "type": "warp",
+  "superType": "thirdPartyShader",
+  "version": "1.0",
+  "skslFile": "warp.sksl",
+  "attributes": {
+    "shape": {
+      "type": "enum",
+      "default": 0,
+      "enumValues": [
+        0,
+        1,
+        2
+      ]
+    },
+    "shapeScale": {
+      "type": "double",
+      "default": 0.1,
+      "min": 0.0,
+      "max": 1.0,
+      "step": 0.01
+    },
+    "proportion": {
+      "type": "double",
+      "default": 0.45,
+      "min": 0.0,
+      "max": 1.0,
+      "step": 0.01
+    },
+    "softness": {
+      "type": "double",
+      "default": 1.0,
+      "min": 0.0,
+      "max": 1.0,
+      "step": 0.01
+    },
+    "distortion": {
+      "type": "double",
+      "default": 0.25,
+      "min": 0.0,
+      "max": 1.0,
+      "step": 0.01
+    },
+    "swirl": {
+      "type": "double",
+      "default": 0.8,
+      "min": 0.0,
+      "max": 1.0,
+      "step": 0.01
+    },
+    "swirlIterations": {
+      "type": "double",
+      "default": 10.0,
+      "min": 2.0,
+      "max": 20.0,
+      "step": 1.0,
+      "dimming": "swirl <= 0"
+    },
+    "scale": {
+      "type": "double",
+      "default": 1.0,
+      "min": 0.01,
+      "softMax": 4.0,
+      "step": 0.01
+    },
+    "rotation": {
+      "type": "double",
+      "default": 0.0,
+      "step": 0.5
+    },
+    "colorCount": {
+      "type": "double",
+      "default": 4.0,
+      "min": 1.0,
+      "max": 4.0,
+      "step": 1.0
+    },
+    "color1": {
+      "type": "color",
+      "default": {
+        "type": "Color",
+        "r": 18,
+        "g": 18,
+        "b": 18,
+        "a": 255
+      }
+    },
+    "color2": {
+      "type": "color",
+      "default": {
+        "type": "Color",
+        "r": 148,
+        "g": 112,
+        "b": 255,
+        "a": 255
+      }
+    },
+    "color3": {
+      "type": "color",
+      "default": {
+        "type": "Color",
+        "r": 18,
+        "g": 18,
+        "b": 18,
+        "a": 255
+      }
+    },
+    "color4": {
+      "type": "color",
+      "default": {
+        "type": "Color",
+        "r": 136,
+        "g": 56,
+        "b": 255,
+        "a": 255
+      }
+    },
+    "evolution": {
+      "type": "double",
+      "default": 0.0,
+      "step": 1.0
+    },
+    "loop": {
+      "type": "bool",
+      "default": false
+    },
+    "cycles": {
+      "type": "double",
+      "default": 1.0,
+      "min": 1.0,
+      "softMax": 10.0,
+      "step": 1.0,
+      "dimming": "loop == false"
+    }
+  },
+  "triggers": {
+    "out": [
+      "shape",
+      "shapeScale",
+      "proportion",
+      "softness",
+      "distortion",
+      "swirl",
+      "swirlIterations",
+      "scale",
+      "rotation",
+      "colorCount",
+      "color1",
+      "color2",
+      "color3",
+      "color4",
+      "evolution",
+      "loop",
+      "cycles"
+    ]
+  },
+  "UI": {
+    "icon": "warp.png",
+    "tabs": [
+      {
+        "id": "filter",
+        "attributeOrder": [
+          "shape",
+          "shapeScale",
+          "proportion",
+          "softness",
+          "---Distortion",
+          "distortion",
+          "swirl",
+          "swirlIterations",
+          "---Colours",
+          "colorCount",
+          "color1",
+          "color2",
+          "color3",
+          "color4",
+          "---Transform",
+          "scale",
+          "rotation",
+          "---Motion",
+          "evolution",
+          "loop",
+          "cycles",
+          "---Ported from Paper Shaders (Apache-2.0), Lost Coast Labs"
+        ]
+      }
+    ]
+  }
+}

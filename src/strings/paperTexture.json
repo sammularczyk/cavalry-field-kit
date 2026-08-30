@@ -1,0 +1,65 @@
+{
+  "type": "layerStrings",
+  "value": {
+    "author": "samMularczyk",
+    "layerType": "paperTexture",
+    "niceName": "Paper Texture",
+    "layerInfo": "Procedural paper: fibres, folds, crumple and blotches.",
+    "language": "en",
+    "attributes": {
+      "paperContrast": [
+        "Relief",
+        "How deep the surface reads. This steepens the normal's own Z rather than remapping the output, so the shading stays physical at both ends instead of just gaining contrast."
+      ],
+      "roughness": [
+        "Grain",
+        "Fine tooth. Indexed off screen pixels, not the pattern, so it stays a constant size however the layer is scaled - film grain rather than surface texture."
+      ],
+      "fibre": [
+        "Fibre",
+        "Curling strands in the stock. This is the ridge structure of a noise gradient, so it costs sixteen noise evaluations - by far the most expensive layer here. Leave it low unless the strands are the point."
+      ],
+      "fibreSize": [
+        "Fibre Size",
+        "Length scale of the strands."
+      ],
+      "crumples": [
+        "Crumple",
+        "Faceted foil-like buckling. Two cell fields multiplied, one sharp and one soft."
+      ],
+      "crumpleSize": [
+        "Crumple Size",
+        "Size of the facets."
+      ],
+      "folds": [
+        "Folds",
+        "Creases radiating from a few seed points. The field returns the vector to the nearest seed rather than a distance, so each crease perturbs the surface outward from its own origin - which is what makes them read as folds rather than as contour lines."
+      ],
+      "foldCount": [
+        "Fold Count",
+        "How many crease origins."
+      ],
+      "drops": [
+        "Speckle",
+        "Sparse flecks and inclusions in the stock."
+      ],
+      "seed": [
+        "Seed",
+        "Changes the arrangement without changing the character."
+      ],
+      "paperColor": [
+        "Paper",
+        "Colour of the lit surface."
+      ],
+      "shadowColor": [
+        "Shadow",
+        "Colour the surface falls to where it turns away from the light."
+      ]
+    },
+    "enums": {},
+    "tabs": {
+      "filter": "Paper",
+      "surface": "Surface"
+    }
+  }
+}

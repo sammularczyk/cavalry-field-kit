@@ -1,0 +1,437 @@
+{
+  "author": "samMularczyk",
+  "type": "liquidMetal",
+  "superType": "thirdPartyFilter",
+  "version": "1.0",
+  "paddingExpression": "ceil(spread * 1.6 + 8)",
+  "passes": [
+    {
+      "skslFile": "lmField.sksl",
+      "uniforms": [
+        "spread"
+      ]
+    },
+    {
+      "skslFile": "lmBlur.sksl",
+      "uniforms": [
+        "spread"
+      ],
+      "constants": {
+        "dirX": 1.0,
+        "dirY": 0.0,
+        "radiusMul": 0.15,
+        "storeTo": 0.0
+      }
+    },
+    {
+      "skslFile": "lmBlur.sksl",
+      "uniforms": [
+        "spread"
+      ],
+      "constants": {
+        "dirX": 0.0,
+        "dirY": 1.0,
+        "radiusMul": 0.15,
+        "storeTo": 1.0
+      }
+    },
+    {
+      "skslFile": "lmBlur.sksl",
+      "uniforms": [
+        "spread"
+      ],
+      "constants": {
+        "dirX": 1.0,
+        "dirY": 0.0,
+        "radiusMul": 0.45,
+        "storeTo": 0.0
+      }
+    },
+    {
+      "skslFile": "lmBlur.sksl",
+      "uniforms": [
+        "spread"
+      ],
+      "constants": {
+        "dirX": 0.0,
+        "dirY": 1.0,
+        "radiusMul": 0.45,
+        "storeTo": 2.0
+      }
+    },
+    {
+      "skslFile": "lmBlur.sksl",
+      "uniforms": [
+        "spread"
+      ],
+      "constants": {
+        "dirX": 1.0,
+        "dirY": 0.0,
+        "radiusMul": 1.0,
+        "storeTo": 0.0
+      },
+      "downsampleFactor": 0.5
+    },
+    {
+      "skslFile": "lmBlur.sksl",
+      "uniforms": [
+        "spread"
+      ],
+      "constants": {
+        "dirX": 0.0,
+        "dirY": 1.0,
+        "radiusMul": 1.0,
+        "storeTo": 0.0
+      },
+      "downsampleFactor": 0.5
+    },
+    {
+      "skslFile": "lmShade.sksl",
+      "uniforms": [
+        "material",
+        "spread",
+        "contourAmount",
+        "repetition",
+        "softness",
+        "shiftRed",
+        "shiftBlue",
+        "distortion",
+        "metalAngle",
+        "tintColor",
+        "innerDistortion",
+        "outerDistortion",
+        "innerGlow",
+        "outerGlow",
+        "smokeScale",
+        "smokeSpill",
+        "smokeInner",
+        "heat1",
+        "heat2",
+        "heat3",
+        "heat4",
+        "heatCount",
+        "speed",
+        "time",
+        "backColor",
+        "amount"
+      ]
+    }
+  ],
+  "attributes": {
+    "material": {
+      "type": "enum",
+      "default": 0,
+      "enumValues": [
+        0,
+        1,
+        2
+      ]
+    },
+    "spread": {
+      "type": "double",
+      "default": 70.0,
+      "min": 1.0,
+      "softMax": 600.0,
+      "step": 1.0
+    },
+    "contourAmount": {
+      "type": "double",
+      "default": 0.6,
+      "min": 0.0,
+      "max": 1.0,
+      "step": 0.01,
+      "dimming": "material == 1"
+    },
+    "repetition": {
+      "type": "double",
+      "default": 5.0,
+      "min": 0.1,
+      "softMax": 10.0,
+      "step": 0.05,
+      "dimming": "material != 0"
+    },
+    "softness": {
+      "type": "double",
+      "default": 0.06,
+      "min": 0.0,
+      "max": 1.0,
+      "step": 0.01,
+      "dimming": "material != 0"
+    },
+    "shiftRed": {
+      "type": "double",
+      "default": 0.7,
+      "min": -1.0,
+      "max": 1.0,
+      "step": 0.01,
+      "dimming": "material != 0"
+    },
+    "shiftBlue": {
+      "type": "double",
+      "default": 0.7,
+      "min": -1.0,
+      "max": 1.0,
+      "step": 0.01,
+      "dimming": "material != 0"
+    },
+    "distortion": {
+      "type": "double",
+      "default": 0.07,
+      "min": 0.0,
+      "max": 1.0,
+      "step": 0.01,
+      "dimming": "material == 1"
+    },
+    "metalAngle": {
+      "type": "double",
+      "default": 70.0,
+      "step": 0.5
+    },
+    "tintColor": {
+      "type": "color",
+      "default": {
+        "type": "Color",
+        "r": 255,
+        "g": 255,
+        "b": 255,
+        "a": 255
+      },
+      "dimming": "material != 0"
+    },
+    "innerDistortion": {
+      "type": "double",
+      "default": 0.8,
+      "min": 0.0,
+      "max": 1.0,
+      "step": 0.01,
+      "dimming": "material != 1"
+    },
+    "outerDistortion": {
+      "type": "double",
+      "default": 0.6,
+      "min": 0.0,
+      "max": 1.0,
+      "step": 0.01,
+      "dimming": "material != 1"
+    },
+    "innerGlow": {
+      "type": "double",
+      "default": 1.0,
+      "min": 0.0,
+      "max": 1.0,
+      "step": 0.01,
+      "dimming": "material == 0"
+    },
+    "outerGlow": {
+      "type": "double",
+      "default": 0.55,
+      "min": 0.0,
+      "max": 1.0,
+      "step": 0.01,
+      "dimming": "material == 0"
+    },
+    "smokeScale": {
+      "type": "double",
+      "default": 0.8,
+      "min": 0.0,
+      "step": 0.01,
+      "dimming": "material != 1",
+      "softMax": 1.0
+    },
+    "smokeSpill": {
+      "type": "double",
+      "default": 0.15,
+      "min": 0.0,
+      "max": 1.0,
+      "step": 0.01,
+      "dimming": "material != 1"
+    },
+    "smokeInner": {
+      "type": "color",
+      "default": {
+        "type": "Color",
+        "r": 250,
+        "g": 250,
+        "b": 245,
+        "a": 255
+      },
+      "dimming": "material != 1"
+    },
+    "heat1": {
+      "type": "color",
+      "default": {
+        "type": "Color",
+        "r": 51,
+        "g": 51,
+        "b": 51,
+        "a": 255
+      },
+      "dimming": "material == 0"
+    },
+    "heat2": {
+      "type": "color",
+      "default": {
+        "type": "Color",
+        "r": 231,
+        "g": 230,
+        "b": 223,
+        "a": 255
+      },
+      "dimming": "material == 0"
+    },
+    "heat3": {
+      "type": "color",
+      "default": {
+        "type": "Color",
+        "r": 255,
+        "g": 153,
+        "b": 0,
+        "a": 255
+      },
+      "dimming": "material == 0"
+    },
+    "heat4": {
+      "type": "color",
+      "default": {
+        "type": "Color",
+        "r": 255,
+        "g": 255,
+        "b": 255,
+        "a": 255
+      },
+      "dimming": "material == 0"
+    },
+    "heatCount": {
+      "type": "double",
+      "default": 2.0,
+      "min": 1.0,
+      "max": 4.0,
+      "step": 1.0,
+      "dimming": "material == 0"
+    },
+    "speed": {
+      "type": "double",
+      "default": 0.02,
+      "min": 0.0,
+      "softMax": 0.5,
+      "step": 0.005
+    },
+    "time": {
+      "type": "double",
+      "default": 0.0,
+      "step": 1.0,
+      "compConnect": "time"
+    },
+    "backColor": {
+      "type": "color",
+      "default": {
+        "type": "Color",
+        "r": 0,
+        "g": 0,
+        "b": 0,
+        "a": 0
+      }
+    },
+    "amount": {
+      "type": "double",
+      "default": 1.0,
+      "min": 0.0,
+      "max": 1.0,
+      "step": 0.01
+    },
+    "padding": {
+      "default": {
+        "x": 128,
+        "y": 128
+      }
+    }
+  },
+  "triggers": {
+    "out": [
+      "material",
+      "spread",
+      "contourAmount",
+      "repetition",
+      "softness",
+      "shiftRed",
+      "shiftBlue",
+      "distortion",
+      "metalAngle",
+      "tintColor",
+      "innerDistortion",
+      "outerDistortion",
+      "innerGlow",
+      "outerGlow",
+      "smokeScale",
+      "smokeSpill",
+      "smokeInner",
+      "heat1",
+      "heat2",
+      "heat3",
+      "heat4",
+      "heatCount",
+      "speed",
+      "time",
+      "backColor",
+      "amount"
+    ]
+  },
+  "UI": {
+    "icon": "liquidMetal.png",
+    "tabs": [
+      {
+        "id": "filter",
+        "attributeOrder": [
+          "material",
+          "---Output",
+          "amount",
+          "backColor"
+        ]
+      },
+      {
+        "id": "shape",
+        "attributeOrder": [
+          "spread",
+          "metalAngle",
+          "contourAmount",
+          "---Motion",
+          "speed",
+          "time"
+        ]
+      },
+      {
+        "id": "metal",
+        "attributeOrder": [
+          "repetition",
+          "softness",
+          "distortion",
+          "tintColor",
+          "---Dispersion",
+          "shiftRed",
+          "shiftBlue"
+        ]
+      },
+      {
+        "id": "body",
+        "attributeOrder": [
+          "---Glow",
+          "innerGlow",
+          "outerGlow",
+          "---Colours",
+          "heatCount",
+          "heat1",
+          "heat2",
+          "heat3",
+          "heat4",
+          "---Smoke only",
+          "innerDistortion",
+          "outerDistortion",
+          "smokeScale",
+          "smokeSpill",
+          "smokeInner",
+          "---Ported from Paper Shaders (Apache-2.0), Lost Coast Labs"
+        ]
+      }
+    ]
+  }
+}

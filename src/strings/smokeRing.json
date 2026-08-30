@@ -1,0 +1,61 @@
+{
+  "type": "layerStrings",
+  "value": {
+    "author": "samMularczyk",
+    "layerType": "smokeRing",
+    "niceName": "Smoke Ring",
+    "layerInfo": "A soft noisy ring of smoke.",
+    "language": "en",
+    "attributes": {
+      "radius": [
+        "Radius",
+        "Where the ring sits, as a fraction of the short edge."
+      ],
+      "thickness": [
+        "Thickness",
+        "How wide the band is."
+      ],
+      "innerFade": [
+        "Inner Fade",
+        "Eats the ring from the inside, so the middle opens out instead of filling in."
+      ],
+      "detail": [
+        "Detail",
+        "Angular frequency of the wisps - how many of them go round."
+      ],
+      "turbulence": [
+        "Turbulence",
+        "A second, finer polar octave scrolling the other way, so the smoke churns rather than rotating as one piece."
+      ],
+      "color1": [
+        "Colour 1",
+        "Colour where the noise is thin."
+      ],
+      "color2": [
+        "Colour 2",
+        "Colour where it is dense."
+      ],
+      "backColor": [
+        "Background",
+        "Colour behind the ring. Transparent by default."
+      ],
+      "evolution": [
+        "Evolution",
+        "Drives everything that moves, in degrees. Keyframe it, or drive it with a Frame behaviour - the rate is yours rather than tied to the comp clock."
+      ],
+      "loop": [
+        "Loop",
+        "Makes the field return exactly to its start, so it can be cycled with no visible seam."
+      ],
+      "cycles": [
+        "Cycles",
+        "How many full revolutions of Evolution before it repeats. At 2 the field comes home at Evolution 720, not 360 - so a higher count travels further through the noise and gives more variation before the repeat."
+      ]
+    },
+    "enums": {},
+    "tabs": {
+      "filter": "Output",
+      "ring": "Ring"
+    }
+  }
+}

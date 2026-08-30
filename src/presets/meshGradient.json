@@ -1,0 +1,412 @@
+[
+  {
+    "presetType": "layer",
+    "id": "60112233-4455-4667-8899-aabbccddeeff",
+    "author": "samMularczyk",
+    "name": "Sea",
+    "layerType": [
+      "meshGradient"
+    ],
+    "attrs": [
+      {
+        "attrId": "colorCount",
+        "value": 4.0
+      },
+      {
+        "attrId": "color1",
+        "value": "#013B65"
+      },
+      {
+        "attrId": "color2",
+        "value": "#03738C"
+      },
+      {
+        "attrId": "color3",
+        "value": "#A3D3FF"
+      },
+      {
+        "attrId": "color4",
+        "value": "#F2FAEF"
+      },
+      {
+        "attrId": "positions",
+        "value": 0.0
+      },
+      {
+        "attrId": "waveX",
+        "value": 0.53
+      },
+      {
+        "attrId": "waveXShift",
+        "value": 0.0
+      },
+      {
+        "attrId": "waveY",
+        "value": 0.95
+      },
+      {
+        "attrId": "waveYShift",
+        "value": 0.64
+      },
+      {
+        "attrId": "mixing",
+        "value": 0.5
+      },
+      {
+        "attrId": "grainMixer",
+        "value": 0.0
+      },
+      {
+        "attrId": "grainOverlay",
+        "value": 0.0
+      },
+      {
+        "attrId": "rotation",
+        "value": 0.0
+      }
+    ],
+    "resetsTransforms": false,
+    "resetsLayer": true
+  },
+  {
+    "presetType": "layer",
+    "id": "71223344-5566-4778-99aa-bbccddeeff00",
+    "author": "samMularczyk",
+    "name": "1960s",
+    "layerType": [
+      "meshGradient"
+    ],
+    "attrs": [
+      {
+        "attrId": "colorCount",
+        "value": 4.0
+      },
+      {
+        "attrId": "color1",
+        "value": "#000000"
+      },
+      {
+        "attrId": "color2",
+        "value": "#082400"
+      },
+      {
+        "attrId": "color3",
+        "value": "#B1AA91"
+      },
+      {
+        "attrId": "color4",
+        "value": "#8E8C15"
+      },
+      {
+        "attrId": "positions",
+        "value": 42.0
+      },
+      {
+        "attrId": "waveX",
+        "value": 0.45
+      },
+      {
+        "attrId": "waveXShift",
+        "value": 0.0
+      },
+      {
+        "attrId": "waveY",
+        "value": 1.0
+      },
+      {
+        "attrId": "waveYShift",
+        "value": 0.0
+      },
+      {
+        "attrId": "mixing",
+        "value": 0.0
+      },
+      {
+        "attrId": "grainMixer",
+        "value": 0.37
+      },
+      {
+        "attrId": "grainOverlay",
+        "value": 0.78
+      },
+      {
+        "attrId": "rotation",
+        "value": 0.0
+      }
+    ],
+    "resetsTransforms": false,
+    "resetsLayer": true
+  },
+  {
+    "presetType": "layer",
+    "id": "82334455-6677-4889-aabb-ccddeeff0011",
+    "author": "samMularczyk",
+    "name": "Sunset",
+    "layerType": [
+      "meshGradient"
+    ],
+    "attrs": [
+      {
+        "attrId": "colorCount",
+        "value": 4.0
+      },
+      {
+        "attrId": "color1",
+        "value": "#264653"
+      },
+      {
+        "attrId": "color2",
+        "value": "#9C2B2B"
+      },
+      {
+        "attrId": "color3",
+        "value": "#F4A261"
+      },
+      {
+        "attrId": "color4",
+        "value": "#FFFFFF"
+      },
+      {
+        "attrId": "positions",
+        "value": 0.0
+      },
+      {
+        "attrId": "waveX",
+        "value": 0.6
+      },
+      {
+        "attrId": "waveXShift",
+        "value": 0.7
+      },
+      {
+        "attrId": "waveY",
+        "value": 0.7
+      },
+      {
+        "attrId": "waveYShift",
+        "value": 0.7
+      },
+      {
+        "attrId": "mixing",
+        "value": 0.5
+      },
+      {
+        "attrId": "grainMixer",
+        "value": 0.0
+      },
+      {
+        "attrId": "grainOverlay",
+        "value": 0.0
+      },
+      {
+        "attrId": "rotation",
+        "value": 0.0
+      }
+    ],
+    "resetsTransforms": false,
+    "resetsLayer": true
+  },
+  {
+    "presetType": "layer",
+    "id": "93445566-7788-499a-bbcc-ddeeff001122",
+    "author": "samMularczyk",
+    "name": "Ink",
+    "layerType": [
+      "meshGradient"
+    ],
+    "attrs": [
+      {
+        "attrId": "colorCount",
+        "value": 2.0
+      },
+      {
+        "attrId": "color1",
+        "value": "#FFFFFF"
+      },
+      {
+        "attrId": "color2",
+        "value": "#000000"
+      },
+      {
+        "attrId": "positions",
+        "value": 0.0
+      },
+      {
+        "attrId": "waveX",
+        "value": 1.0
+      },
+      {
+        "attrId": "waveXShift",
+        "value": 0.0
+      },
+      {
+        "attrId": "waveY",
+        "value": 1.0
+      },
+      {
+        "attrId": "waveYShift",
+        "value": 0.0
+      },
+      {
+        "attrId": "swirl",
+        "value": 0.2
+      },
+      {
+        "attrId": "mixing",
+        "value": 0.5
+      },
+      {
+        "attrId": "grainMixer",
+        "value": 0.0
+      },
+      {
+        "attrId": "grainOverlay",
+        "value": 0.0
+      },
+      {
+        "attrId": "rotation",
+        "value": 90.0
+      }
+    ],
+    "resetsTransforms": false,
+    "resetsLayer": true
+  },
+  {
+    "presetType": "layer",
+    "id": "a4556677-8899-4aab-ccdd-eeff00112233",
+    "author": "samMularczyk",
+    "name": "Purple",
+    "layerType": [
+      "meshGradient"
+    ],
+    "attrs": [
+      {
+        "attrId": "colorCount",
+        "value": 2.0
+      },
+      {
+        "attrId": "color1",
+        "value": "#AAA7D7"
+      },
+      {
+        "attrId": "color2",
+        "value": "#3C2B8E"
+      },
+      {
+        "attrId": "positions",
+        "value": 0.0
+      },
+      {
+        "attrId": "waveX",
+        "value": 1.0
+      },
+      {
+        "attrId": "waveXShift",
+        "value": 0.0
+      },
+      {
+        "attrId": "waveY",
+        "value": 1.0
+      },
+      {
+        "attrId": "waveYShift",
+        "value": 0.0
+      },
+      {
+        "attrId": "swirl",
+        "value": 1.0
+      },
+      {
+        "attrId": "mixing",
+        "value": 0.5
+      },
+      {
+        "attrId": "grainMixer",
+        "value": 0.0
+      },
+      {
+        "attrId": "grainOverlay",
+        "value": 0.0
+      },
+      {
+        "attrId": "rotation",
+        "value": 0.0
+      }
+    ],
+    "resetsTransforms": false,
+    "resetsLayer": true
+  },
+  {
+    "presetType": "layer",
+    "id": "b5667788-99aa-4bbc-ddee-ff0011223344",
+    "author": "samMularczyk",
+    "name": "Beach",
+    "layerType": [
+      "meshGradient"
+    ],
+    "attrs": [
+      {
+        "attrId": "colorCount",
+        "value": 4.0
+      },
+      {
+        "attrId": "color1",
+        "value": "#BCECF6"
+      },
+      {
+        "attrId": "color2",
+        "value": "#00AAFF"
+      },
+      {
+        "attrId": "color3",
+        "value": "#00F7FF"
+      },
+      {
+        "attrId": "color4",
+        "value": "#FFD447"
+      },
+      {
+        "attrId": "positions",
+        "value": 0.0
+      },
+      {
+        "attrId": "waveX",
+        "value": 0.8
+      },
+      {
+        "attrId": "waveXShift",
+        "value": 0.0
+      },
+      {
+        "attrId": "waveY",
+        "value": 0.8
+      },
+      {
+        "attrId": "waveYShift",
+        "value": 0.0
+      },
+      {
+        "attrId": "swirl",
+        "value": 0.35
+      },
+      {
+        "attrId": "mixing",
+        "value": 0.6
+      },
+      {
+        "attrId": "grainMixer",
+        "value": 0.0
+      },
+      {
+        "attrId": "grainOverlay",
+        "value": 0.0
+      },
+      {
+        "attrId": "rotation",
+        "value": 0.0
+      }
+    ],
+    "resetsTransforms": false,
+    "resetsLayer": true
+  }
+]

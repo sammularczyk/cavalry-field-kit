@@ -1,0 +1,331 @@
+[
+  {
+    "presetType": "layer",
+    "id": "11aa22bb-33cc-44dd-8e5f-6a7b8c9d0e1f",
+    "author": "samMularczyk",
+    "name": "Cauldron Pot",
+    "layerType": [
+      "warp"
+    ],
+    "attrs": [
+      {
+        "attrId": "colorCount",
+        "value": 3.0
+      },
+      {
+        "attrId": "color1",
+        "value": "#A7E58B"
+      },
+      {
+        "attrId": "color2",
+        "value": "#324472"
+      },
+      {
+        "attrId": "color3",
+        "value": "#0A180D"
+      },
+      {
+        "attrId": "scale",
+        "value": 0.9
+      },
+      {
+        "attrId": "rotation",
+        "value": 160.0
+      },
+      {
+        "attrId": "proportion",
+        "value": 0.64
+      },
+      {
+        "attrId": "softness",
+        "value": 1.0
+      },
+      {
+        "attrId": "distortion",
+        "value": 0.2
+      },
+      {
+        "attrId": "swirl",
+        "value": 0.86
+      },
+      {
+        "attrId": "swirlIterations",
+        "value": 7.0
+      },
+      {
+        "attrId": "shapeScale",
+        "value": 0.6
+      },
+      {
+        "attrId": "shape",
+        "value": 2
+      }
+    ],
+    "resetsTransforms": false,
+    "resetsLayer": true
+  },
+  {
+    "presetType": "layer",
+    "id": "22bb33cc-44dd-455e-9f60-7b8c9d0e1f20",
+    "author": "samMularczyk",
+    "name": "Live Ink",
+    "layerType": [
+      "warp"
+    ],
+    "attrs": [
+      {
+        "attrId": "colorCount",
+        "value": 4.0
+      },
+      {
+        "attrId": "color1",
+        "value": "#111314"
+      },
+      {
+        "attrId": "color2",
+        "value": "#9FAEAB"
+      },
+      {
+        "attrId": "color3",
+        "value": "#F3FEE7"
+      },
+      {
+        "attrId": "color4",
+        "value": "#F3FEE7"
+      },
+      {
+        "attrId": "scale",
+        "value": 1.2
+      },
+      {
+        "attrId": "rotation",
+        "value": 44.0
+      },
+      {
+        "attrId": "proportion",
+        "value": 0.05
+      },
+      {
+        "attrId": "softness",
+        "value": 0.0
+      },
+      {
+        "attrId": "distortion",
+        "value": 0.25
+      },
+      {
+        "attrId": "swirl",
+        "value": 0.8
+      },
+      {
+        "attrId": "swirlIterations",
+        "value": 10.0
+      },
+      {
+        "attrId": "shapeScale",
+        "value": 0.28
+      },
+      {
+        "attrId": "shape",
+        "value": 0
+      }
+    ],
+    "resetsTransforms": false,
+    "resetsLayer": true
+  },
+  {
+    "presetType": "layer",
+    "id": "33cc44dd-55ee-466f-a071-8c9d0e1f2031",
+    "author": "samMularczyk",
+    "name": "Kelp",
+    "layerType": [
+      "warp"
+    ],
+    "attrs": [
+      {
+        "attrId": "colorCount",
+        "value": 3.0
+      },
+      {
+        "attrId": "color1",
+        "value": "#DBFF8F"
+      },
+      {
+        "attrId": "color2",
+        "value": "#404F3E"
+      },
+      {
+        "attrId": "color3",
+        "value": "#091316"
+      },
+      {
+        "attrId": "scale",
+        "value": 0.8
+      },
+      {
+        "attrId": "rotation",
+        "value": 50.0
+      },
+      {
+        "attrId": "proportion",
+        "value": 0.67
+      },
+      {
+        "attrId": "softness",
+        "value": 0.0
+      },
+      {
+        "attrId": "distortion",
+        "value": 0.0
+      },
+      {
+        "attrId": "swirl",
+        "value": 0.2
+      },
+      {
+        "attrId": "swirlIterations",
+        "value": 3.0
+      },
+      {
+        "attrId": "shapeScale",
+        "value": 1.0
+      },
+      {
+        "attrId": "shape",
+        "value": 1
+      }
+    ],
+    "resetsTransforms": false,
+    "resetsLayer": true
+  },
+  {
+    "presetType": "layer",
+    "id": "44dd55ee-66ff-4770-b182-9d0e1f203142",
+    "author": "samMularczyk",
+    "name": "Nectar",
+    "layerType": [
+      "warp"
+    ],
+    "attrs": [
+      {
+        "attrId": "colorCount",
+        "value": 3.0
+      },
+      {
+        "attrId": "color1",
+        "value": "#151310"
+      },
+      {
+        "attrId": "color2",
+        "value": "#D3A86B"
+      },
+      {
+        "attrId": "color3",
+        "value": "#F0EDEA"
+      },
+      {
+        "attrId": "scale",
+        "value": 2.0
+      },
+      {
+        "attrId": "rotation",
+        "value": 0.0
+      },
+      {
+        "attrId": "proportion",
+        "value": 0.24
+      },
+      {
+        "attrId": "softness",
+        "value": 1.0
+      },
+      {
+        "attrId": "distortion",
+        "value": 0.21
+      },
+      {
+        "attrId": "swirl",
+        "value": 0.57
+      },
+      {
+        "attrId": "swirlIterations",
+        "value": 10.0
+      },
+      {
+        "attrId": "shapeScale",
+        "value": 0.75
+      },
+      {
+        "attrId": "shape",
+        "value": 2
+      }
+    ],
+    "resetsTransforms": false,
+    "resetsLayer": true
+  },
+  {
+    "presetType": "layer",
+    "id": "55ee66ff-7700-4881-c293-0e1f20314253",
+    "author": "samMularczyk",
+    "name": "Passion",
+    "layerType": [
+      "warp"
+    ],
+    "attrs": [
+      {
+        "attrId": "colorCount",
+        "value": 3.0
+      },
+      {
+        "attrId": "color1",
+        "value": "#3B1515"
+      },
+      {
+        "attrId": "color2",
+        "value": "#954751"
+      },
+      {
+        "attrId": "color3",
+        "value": "#FFC085"
+      },
+      {
+        "attrId": "scale",
+        "value": 2.5
+      },
+      {
+        "attrId": "rotation",
+        "value": 1.35
+      },
+      {
+        "attrId": "proportion",
+        "value": 0.5
+      },
+      {
+        "attrId": "softness",
+        "value": 1.0
+      },
+      {
+        "attrId": "distortion",
+        "value": 0.09
+      },
+      {
+        "attrId": "swirl",
+        "value": 0.9
+      },
+      {
+        "attrId": "swirlIterations",
+        "value": 6.0
+      },
+      {
+        "attrId": "shapeScale",
+        "value": 0.25
+      },
+      {
+        "attrId": "shape",
+        "value": 0
+      }
+    ],
+    "resetsTransforms": false,
+    "resetsLayer": true
+  }
+]

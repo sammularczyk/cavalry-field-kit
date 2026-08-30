@@ -1,0 +1,200 @@
+{
+  "author": "samMularczyk",
+  "type": "linearRefraction",
+  "superType": "thirdPartyFilter",
+  "version": "1.0",
+  "skslFile": "linearRefraction.sksl",
+  "paddingExpression": "ceil(ribWidth * distortion + blur * ribWidth * 3 + 2)",
+  "attributes": {
+    "ribWidth": {
+      "type": "double",
+      "default": 90.0,
+      "min": 1.0,
+      "softMax": 400.0,
+      "step": 0.5
+    },
+    "angle": {
+      "type": "double",
+      "default": 30.0,
+      "step": 0.5
+    },
+    "shape": {
+      "type": "enum",
+      "default": 1,
+      "enumValues": [
+        0,
+        1,
+        2
+      ]
+    },
+    "profile": {
+      "type": "enum",
+      "default": 4,
+      "enumValues": [
+        0,
+        1,
+        2,
+        3,
+        4
+      ]
+    },
+    "distortion": {
+      "type": "double",
+      "default": 1.0,
+      "min": 0.0,
+      "max": 2.0,
+      "step": 0.01
+    },
+    "shift": {
+      "type": "double",
+      "default": -0.36,
+      "min": -1.0,
+      "max": 1.0,
+      "step": 0.01
+    },
+    "blur": {
+      "type": "double",
+      "default": 1.0,
+      "min": 0.0,
+      "max": 1.0,
+      "step": 0.01
+    },
+    "stretch": {
+      "type": "double",
+      "default": 1.0,
+      "min": 0.0,
+      "max": 1.0,
+      "step": 0.01
+    },
+    "highlights": {
+      "type": "double",
+      "default": 0.0,
+      "min": 0.0,
+      "max": 1.0,
+      "step": 0.01
+    },
+    "highlightColor": {
+      "type": "color",
+      "default": {
+        "type": "Color",
+        "r": 255,
+        "g": 255,
+        "b": 255,
+        "a": 255
+      },
+      "dimming": "highlights <= 0"
+    },
+    "shadows": {
+      "type": "double",
+      "default": 0.0,
+      "min": 0.0,
+      "max": 1.0,
+      "step": 0.01
+    },
+    "shadowColor": {
+      "type": "color",
+      "default": {
+        "type": "Color",
+        "r": 0,
+        "g": 0,
+        "b": 0,
+        "a": 255
+      },
+      "dimming": "shadows <= 0"
+    },
+    "edges": {
+      "type": "enum",
+      "default": 0,
+      "enumValues": [
+        0,
+        1,
+        2
+      ]
+    },
+    "edgeTrim": {
+      "type": "double2",
+      "default": {
+        "x": 1.0,
+        "y": 1.0
+      },
+      "children": {
+        "*": {
+          "step": 0.5,
+          "min": 0.0
+        }
+      },
+      "dimming": "edges == 0"
+    },
+    "amount": {
+      "type": "double",
+      "default": 1.0,
+      "min": 0.0,
+      "max": 1.0,
+      "step": 0.01
+    },
+    "padding": {
+      "default": {
+        "x": 64,
+        "y": 64
+      }
+    }
+  },
+  "triggers": {
+    "out": [
+      "ribWidth",
+      "angle",
+      "shape",
+      "profile",
+      "distortion",
+      "shift",
+      "blur",
+      "stretch",
+      "highlights",
+      "highlightColor",
+      "shadows",
+      "shadowColor",
+      "edges",
+      "edgeTrim",
+      "amount"
+    ]
+  },
+  "UI": {
+    "icon": "linearRefraction.png",
+    "tabs": [
+      {
+        "id": "filter",
+        "attributeOrder": [
+          "ribWidth",
+          "angle",
+          "shape",
+          "---Refraction",
+          "profile",
+          "distortion",
+          "shift"
+        ]
+      },
+      {
+        "id": "surface",
+        "attributeOrder": [
+          "blur",
+          "stretch",
+          "---Ribs",
+          "highlights",
+          "highlightColor",
+          "shadows",
+          "shadowColor"
+        ]
+      },
+      {
+        "id": "output",
+        "attributeOrder": [
+          "edges",
+          "edgeTrim",
+          "---A",
+          "amount",
+          "---Ported from Paper Shaders (Apache-2.0), Lost Coast Labs"
+        ]
+      }
+    ]
+  }
+}

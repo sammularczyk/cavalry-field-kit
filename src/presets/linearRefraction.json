@@ -1,0 +1,186 @@
+[
+  {
+    "presetType": "layer",
+    "id": "b1a7c93e-4d52-4a18-9f60-2c7e5a1d8b04",
+    "author": "samMularczyk",
+    "name": "Reeded",
+    "layerType": [
+      "linearRefraction"
+    ],
+    "attrs": [
+      {
+        "attrId": "ribWidth",
+        "value": 40.0
+      },
+      {
+        "attrId": "shape",
+        "value": 0
+      },
+      {
+        "attrId": "profile",
+        "value": 0
+      },
+      {
+        "attrId": "distortion",
+        "value": 0.5
+      },
+      {
+        "attrId": "highlights",
+        "value": 0.1
+      },
+      {
+        "attrId": "shadows",
+        "value": 0.25
+      },
+      {
+        "attrId": "blur",
+        "value": 0.0
+      },
+      {
+        "attrId": "stretch",
+        "value": 0.0
+      }
+    ],
+    "resetsTransforms": false,
+    "resetsLayer": true
+  },
+  {
+    "presetType": "layer",
+    "id": "c2b8da4f-5e63-4b29-a071-3d8f6b2e9c15",
+    "author": "samMularczyk",
+    "name": "Abstract",
+    "layerType": [
+      "linearRefraction"
+    ],
+    "attrs": [
+      {
+        "attrId": "ribWidth",
+        "value": 120.0
+      },
+      {
+        "attrId": "angle",
+        "value": 30.0
+      },
+      {
+        "attrId": "shape",
+        "value": 1
+      },
+      {
+        "attrId": "profile",
+        "value": 4
+      },
+      {
+        "attrId": "distortion",
+        "value": 1.0
+      },
+      {
+        "attrId": "highlights",
+        "value": 0.0
+      },
+      {
+        "attrId": "shadows",
+        "value": 0.0
+      },
+      {
+        "attrId": "blur",
+        "value": 0.6
+      },
+      {
+        "attrId": "stretch",
+        "value": 1.0
+      }
+    ],
+    "resetsTransforms": false,
+    "resetsLayer": true
+  },
+  {
+    "presetType": "layer",
+    "id": "d3c9eb50-6f74-4c3a-b182-4e907c3fad26",
+    "author": "samMularczyk",
+    "name": "Waves",
+    "layerType": [
+      "linearRefraction"
+    ],
+    "attrs": [
+      {
+        "attrId": "ribWidth",
+        "value": 18.0
+      },
+      {
+        "attrId": "shape",
+        "value": 2
+      },
+      {
+        "attrId": "profile",
+        "value": 2
+      },
+      {
+        "attrId": "distortion",
+        "value": 0.5
+      },
+      {
+        "attrId": "highlights",
+        "value": 0.0
+      },
+      {
+        "attrId": "shadows",
+        "value": 0.0
+      },
+      {
+        "attrId": "blur",
+        "value": 0.1
+      },
+      {
+        "attrId": "stretch",
+        "value": 1.0
+      }
+    ],
+    "resetsTransforms": false,
+    "resetsLayer": true
+  },
+  {
+    "presetType": "layer",
+    "id": "e4daf061-7085-4d4b-c293-5fa18d4abe37",
+    "author": "samMularczyk",
+    "name": "Folds",
+    "layerType": [
+      "linearRefraction"
+    ],
+    "attrs": [
+      {
+        "attrId": "ribWidth",
+        "value": 70.0
+      },
+      {
+        "attrId": "shape",
+        "value": 0
+      },
+      {
+        "attrId": "profile",
+        "value": 3
+      },
+      {
+        "attrId": "distortion",
+        "value": 0.75
+      },
+      {
+        "attrId": "highlights",
+        "value": 0.0
+      },
+      {
+        "attrId": "shadows",
+        "value": 0.4
+      },
+      {
+        "attrId": "blur",
+        "value": 0.25
+      },
+      {
+        "attrId": "stretch",
+        "value": 0.0
+      }
+    ],
+    "resetsTransforms": false,
+    "resetsLayer": true
+  }
+]

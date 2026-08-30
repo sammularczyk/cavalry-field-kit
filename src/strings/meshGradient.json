@@ -1,0 +1,88 @@
+{
+  "type": "layerStrings",
+  "value": {
+    "author": "samMularczyk",
+    "layerType": "meshGradient",
+    "niceName": "Mesh Gradient",
+    "layerInfo": "A gradient blended from colour spots, warped by waves.",
+    "language": "en",
+    "attributes": {
+      "colorCount": [
+        "Colours",
+        "How many stops are used. This is also the SPOT COUNT - each colour is one spot in the field."
+      ],
+      "color1": [
+        "Colour 1",
+        "First spot."
+      ],
+      "color2": [
+        "Colour 2",
+        "Second spot."
+      ],
+      "color3": [
+        "Colour 3",
+        "Third spot."
+      ],
+      "color4": [
+        "Colour 4",
+        "Fourth spot."
+      ],
+      "positions": [
+        "Position",
+        "Slides every spot along its own path. A seed, not a count - changing it rearranges the composition without changing how many spots there are."
+      ],
+      "swirl": [
+        "Swirl",
+        "Twists the field about its centre, strongest there and falling away with distance. It breathes slowly rather than holding a fixed angle, so it never settles."
+      ],
+      "mixing": [
+        "Mixing",
+        "Does two things at once, which is why one slider covers the whole range: it sets the distance falloff exponent and how sharply the nearest spot wins. Low gives hard stripes, high a gradual blend."
+      ],
+      "waveX": [
+        "Wave X",
+        "Sine distortion across the field, strongest through the middle and calm at the border."
+      ],
+      "waveXShift": [
+        "Wave X Phase",
+        "Phase offset of that wave."
+      ],
+      "waveY": [
+        "Wave Y",
+        "The same on the other axis."
+      ],
+      "waveYShift": [
+        "Wave Y Phase",
+        "Phase offset of the vertical wave."
+      ],
+      "grainMixer": [
+        "Grain",
+        "Eats into each spot's reach, so the boundaries between colours break up rather than staying clean."
+      ],
+      "grainOverlay": [
+        "Grain Overlay",
+        "Noise laid over the finished gradient."
+      ],
+      "rotation": [
+        "Rotation",
+        "Rotates the whole field, in degrees."
+      ],
+      "evolution": [
+        "Evolution",
+        "Drives everything that moves, in degrees. Keyframe it, or drive it with a Frame behaviour - the rate is yours rather than tied to the comp clock."
+      ],
+      "loop": [
+        "Loop",
+        "Makes the field return exactly to its start, so it can be cycled with no visible seam."
+      ],
+      "cycles": [
+        "Cycles",
+        "How many full revolutions of Evolution before it repeats. At 2 the field comes home at Evolution 720, not 360 - so a higher count travels further through the noise and gives more variation before the repeat."
+      ]
+    },
+    "enums": {},
+    "tabs": {
+      "filter": "Mesh"
+    }
+  }
+}

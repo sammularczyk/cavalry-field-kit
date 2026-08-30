@@ -1,0 +1,160 @@
+{
+  "author": "samMularczyk",
+  "type": "water",
+  "superType": "thirdPartyFilter",
+  "version": "1.0",
+  "skslFile": "water.sksl",
+  "paddingExpression": "ceil(caustic * 24 + waves * 120)",
+  "attributes": {
+    "size": {
+      "type": "double",
+      "default": 1.0,
+      "min": 0.01,
+      "softMax": 7.0,
+      "step": 0.01
+    },
+    "caustic": {
+      "type": "double",
+      "default": 0.1,
+      "min": 0.0,
+      "max": 1.0,
+      "step": 0.01
+    },
+    "waves": {
+      "type": "double",
+      "default": 0.3,
+      "min": 0.0,
+      "max": 1.0,
+      "step": 0.01
+    },
+    "layering": {
+      "type": "double",
+      "default": 0.5,
+      "min": 0.0,
+      "max": 1.0,
+      "step": 0.01
+    },
+    "highlights": {
+      "type": "double",
+      "default": 0.07,
+      "min": 0.0,
+      "max": 1.0,
+      "step": 0.01
+    },
+    "highlightColor": {
+      "type": "color",
+      "default": {
+        "type": "Color",
+        "r": 255,
+        "g": 255,
+        "b": 255,
+        "a": 255
+      },
+      "dimming": "highlights <= 0"
+    },
+    "edges": {
+      "type": "enum",
+      "default": 0,
+      "enumValues": [
+        0,
+        1,
+        2
+      ]
+    },
+    "edgeTrim": {
+      "type": "double2",
+      "default": {
+        "x": 1.0,
+        "y": 1.0
+      },
+      "children": {
+        "*": {
+          "step": 0.5,
+          "min": 0.0
+        }
+      },
+      "dimming": "edges == 0"
+    },
+    "evolution": {
+      "type": "double",
+      "default": 0.0,
+      "step": 1.0
+    },
+    "loop": {
+      "type": "bool",
+      "default": false
+    },
+    "cycles": {
+      "type": "double",
+      "default": 1.0,
+      "min": 1.0,
+      "softMax": 10.0,
+      "step": 1.0,
+      "dimming": "loop == false"
+    },
+    "amount": {
+      "type": "double",
+      "default": 1.0,
+      "min": 0.0,
+      "max": 1.0,
+      "step": 0.01
+    },
+    "padding": {
+      "default": {
+        "x": 48,
+        "y": 48
+      }
+    }
+  },
+  "triggers": {
+    "out": [
+      "size",
+      "caustic",
+      "waves",
+      "layering",
+      "highlights",
+      "highlightColor",
+      "edges",
+      "edgeTrim",
+      "evolution",
+      "loop",
+      "cycles",
+      "amount"
+    ]
+  },
+  "UI": {
+    "icon": "water.png",
+    "tabs": [
+      {
+        "id": "filter",
+        "attributeOrder": [
+          "size",
+          "caustic",
+          "waves",
+          "layering",
+          "---Motion",
+          "evolution",
+          "loop",
+          "cycles"
+        ]
+      },
+      {
+        "id": "surface",
+        "attributeOrder": [
+          "highlights",
+          "highlightColor",
+          "---Edges",
+          "edges",
+          "edgeTrim"
+        ]
+      },
+      {
+        "id": "output",
+        "attributeOrder": [
+          "amount",
+          "---Ported from Paper Shaders (Apache-2.0), Lost Coast Labs"
+        ]
+      }
+    ]
+  }
+}

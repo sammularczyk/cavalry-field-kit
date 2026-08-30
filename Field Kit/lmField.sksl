@@ -1,0 +1,45 @@
+// Liquid Metal - pass 0 of 8: the shape field, seeded from alpha.
+//
+// Derived from paper-design/shaders `liquid-metal.ts` and `gem-smoke.ts`
+// (Apache-2.0, Lost Coast Labs). Changes: their CPU-side Poisson solve is
+// replaced with a blur ladder (see below); SkSL port.
+//
+// WHAT THIS FIELD IS. All three materials in this filter are driven by one
+// scalar: a smooth interior potential over the layer's own alpha, ~0 deep
+// inside a shape and ~1 at its silhouette. Upstream computes it on the CPU by
+// solving the Poisson equation nabla^2 u = -C with u = 0 on the boundary,
+// using 32 iterations of red/black SOR plus 3 Jacobi smoothing passes.
+//
+// We cannot solve a linear system in a fragment shader, and do not need to:
+// with a constant source and a zero boundary the solution is just a smooth
+// dome over the shape, which a heavy normalised blur of the mask reproduces
+// closely. Upstream's own shader then RE-BLURS the channel before using it,
+// which tells you the field is only ever wanted soft - so the approximation
+// error hides where it cannot be seen.
+//
+// One deliberate improvement: upstream normalises by the global maximum, which
+// it can only do because it works on the CPU with the whole image in hand. We
+// have no global maximum, so instead the falloff distance is a control in
+// pixels. That is a better control than theirs - it is resolution-independent,
+// and it means a thick stroke and a thin one on the same layer both read
+// correctly instead of being normalised against each other.
+
+uniform float  spread;        // not used for the mask itself - see below
+uniform shader childShader;   // pass 0 input = the layer being filtered
+
+half4 main(float2 fragCoord) {
+    half4 c = childShader.eval(fragCoord);
+    // The antialiased alpha, not a hard threshold. Upstream thresholds at
+    // alpha != 0 because it rasterises first; keeping the partial coverage
+    // gives a field that is smooth right down to the last pixel of a stroke.
+    float m = clamp(float(c.a), 0.0, 1.0);
+    // `spread` is declared and referenced deliberately. A pass whose `uniforms`
+    // list is EMPTY is treated exactly like one that omits the key: Cavalry
+    // binds every attribute of the filter, and then logs a "Could not bind
+    // uniform" error for each one the shader does not declare - about two dozen
+    // per evaluation here, which grew the log by megabytes a minute and left
+    // the app unresponsive. Listing one real uniform fixes it, and the step()
+    // keeps the compiler from stripping it back out again (it is 1 for every
+    // legal value, so it changes nothing).
+    return half4(half3(half(m * step(-1.0, spread))), 1.0);
+}

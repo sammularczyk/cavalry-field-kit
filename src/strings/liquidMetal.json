@@ -1,0 +1,129 @@
+{
+  "type": "layerStrings",
+  "value": {
+    "author": "samMularczyk",
+    "layerType": "liquidMetal",
+    "niceName": "Liquid Metal",
+    "layerInfo": "Chrome, smoke or heat, shaped by the layer's own alpha.",
+    "language": "en",
+    "attributes": {
+      "material": [
+        "Material",
+        "Which shading head runs over the shape field. The field itself is built the same way for all three."
+      ],
+      "spread": [
+        "Spread",
+        "How far the shape field reaches, in pixels. This is the falloff distance that upstream gets by normalising against the whole image - as a control it is better, because a thick stroke and a thin one on the same layer both read correctly instead of being scaled against each other."
+      ],
+      "contourAmount": [
+        "Contour",
+        "How hard the field bends the material at the silhouette. Low leaves the pattern flat across the shape; high crowds it against the edges, which is what makes the surface look like it wraps the form."
+      ],
+      "repetition": [
+        "Bands",
+        "How many light/dark bands the stripe field repeats. Think of it as how tightly banded the environment being reflected is."
+      ],
+      "softness": [
+        "Softness",
+        "Edge softness of each band. Zero gives hard chrome; higher gives a brushed or satin surface."
+      ],
+      "shiftRed": [
+        "Red Shift",
+        "Phase offset of the red channel against green. Together with Blue Shift this is the entire chromatic aberration - three samples of one field at three offsets, which is why the fringing follows the strokes and not the frame."
+      ],
+      "shiftBlue": [
+        "Blue Shift",
+        "Phase offset of the blue channel. Negative swaps which side of an edge goes warm."
+      ],
+      "distortion": [
+        "Turbulence",
+        "Noise added into the field before it warps the bands, so the reflection ripples rather than sitting still. On Heat this doubles as the dither amount."
+      ],
+      "metalAngle": [
+        "Angle",
+        "Direction of the band ramp, in degrees. Also rotates Smoke's warp and Heat's scrolling band."
+      ],
+      "tintColor": [
+        "Tint",
+        "Colour applied with a colour burn rather than a multiply, so the highlights stay near white while the darks take the colour - which is what separates tinted metal from a merely coloured object. Alpha is the amount."
+      ],
+      "innerDistortion": [
+        "Inner Swirl",
+        "Warp strength inside the shape. This one is multiplied by the field, so it is calm at the rim and strongest through the thick of the form - that contrast is the whole gem impression."
+      ],
+      "outerDistortion": [
+        "Outer Swirl",
+        "Warp strength of the smoke outside the shape, which is not tied to the field."
+      ],
+      "innerGlow": [
+        "Inner Glow",
+        "Brightness of the material inside the shape. On Heat this is the heat of the body; on Smoke it is how strongly the plume shows through the silhouette."
+      ],
+      "outerGlow": [
+        "Outer Glow",
+        "Brightness of the halo outside the shape. Needs Spread to have room - the layer bounds expand to match, so a big halo costs padding."
+      ],
+      "smokeScale": [
+        "Smoke Scale",
+        "Size of the smoke plume. Lower zooms out and, because the warp is damped where it would alias, also calms it."
+      ],
+      "smokeSpill": [
+        "Spill",
+        "How far the plume is allowed from the shape. At zero it is confined to the falloff measured from the layer's own alpha, so the smoke pours off the form; at one it fills the layer's bounds, which is what the reference does because there the shader IS the whole frame. It always fades out before the padded edge either way."
+      ],
+      "smokeInner": [
+        "Fill",
+        "Colour filling the shape behind the smoke."
+      ],
+      "heat1": [
+        "Colour 1",
+        "First stop of the ramp. Low values of the field land here."
+      ],
+      "heat2": [
+        "Colour 2",
+        "Second stop."
+      ],
+      "heat3": [
+        "Colour 3",
+        "Third stop."
+      ],
+      "heat4": [
+        "Colour 4",
+        "Fourth stop."
+      ],
+      "heatCount": [
+        "Colours",
+        "How many stops of the ramp are used."
+      ],
+      "speed": [
+        "Speed",
+        "Rate the pattern moves. Zero freezes it."
+      ],
+      "time": [
+        "Time",
+        "Connected to the composition time."
+      ],
+      "backColor": [
+        "Background",
+        "Colour behind the result. Transparent by default so it composites over whatever is beneath."
+      ],
+      "amount": [
+        "Amount",
+        "Mix between the original layer and the result."
+      ]
+    },
+    "enums": {
+      "material": {
+        "0": "Metal",
+        "1": "Smoke",
+        "2": "Heat"
+      }
+    },
+    "tabs": {
+      "filter": "Output",
+      "shape": "Shape",
+      "metal": "Metal",
+      "body": "Smoke & Heat"
+    }
+  }
+}

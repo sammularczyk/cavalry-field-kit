@@ -1,0 +1,198 @@
+[
+  {
+    "presetType": "layer",
+    "id": "7c1e4a90-2b53-4d16-8f27-9a0c5e3b1d48",
+    "author": "samMularczyk",
+    "name": "Round and Square",
+    "layerType": [
+      "hatching"
+    ],
+    "attrs": [
+      {
+        "attrId": "pattern",
+        "value": 8
+      },
+      {
+        "attrId": "size",
+        "value": 36.0
+      },
+      {
+        "attrId": "lineWidth",
+        "value": 18.0
+      },
+      {
+        "attrId": "softness",
+        "value": 0.02
+      },
+      {
+        "attrId": "angle",
+        "value": 0.0
+      },
+      {
+        "attrId": "inkColor",
+        "value": "#FF8000"
+      },
+      {
+        "attrId": "paperColor",
+        "value": "#141414"
+      },
+      {
+        "attrId": "transparentPaper",
+        "value": false
+      },
+      {
+        "attrId": "amount",
+        "value": 1.0
+      }
+    ],
+    "resetsTransforms": false,
+    "resetsLayer": true
+  },
+  {
+    "presetType": "layer",
+    "id": "8d2f5ba1-3c64-4e27-9038-ab1d6f4c2e59",
+    "author": "samMularczyk",
+    "name": "Halftone",
+    "layerType": [
+      "hatching"
+    ],
+    "attrs": [
+      {
+        "attrId": "pattern",
+        "value": 7
+      },
+      {
+        "attrId": "size",
+        "value": 10.0
+      },
+      {
+        "attrId": "lineWidth",
+        "value": 6.0
+      },
+      {
+        "attrId": "softness",
+        "value": 0.01
+      },
+      {
+        "attrId": "angle",
+        "value": 15.0
+      },
+      {
+        "attrId": "inkColor",
+        "value": "#141414"
+      },
+      {
+        "attrId": "paperColor",
+        "value": "#F2F1E8"
+      },
+      {
+        "attrId": "transparentPaper",
+        "value": false
+      },
+      {
+        "attrId": "amount",
+        "value": 1.0
+      }
+    ],
+    "resetsTransforms": false,
+    "resetsLayer": true
+  },
+  {
+    "presetType": "layer",
+    "id": "9e3061b2-4d75-4f38-a149-bc2e705d3f6a",
+    "author": "samMularczyk",
+    "name": "Gooey Dots",
+    "layerType": [
+      "hatching"
+    ],
+    "attrs": [
+      {
+        "attrId": "pattern",
+        "value": 7
+      },
+      {
+        "attrId": "size",
+        "value": 22.0
+      },
+      {
+        "attrId": "lineWidth",
+        "value": 16.0
+      },
+      {
+        "attrId": "softness",
+        "value": 0.22
+      },
+      {
+        "attrId": "angle",
+        "value": 0.0
+      },
+      {
+        "attrId": "inkColor",
+        "value": "#29FF7B"
+      },
+      {
+        "attrId": "paperColor",
+        "value": "#000000"
+      },
+      {
+        "attrId": "transparentPaper",
+        "value": false
+      },
+      {
+        "attrId": "amount",
+        "value": 1.0
+      }
+    ],
+    "resetsTransforms": false,
+    "resetsLayer": true
+  },
+  {
+    "presetType": "layer",
+    "id": "af4172c3-5e86-4049-b25a-cd3f816e4a7b",
+    "author": "samMularczyk",
+    "name": "Engraving",
+    "layerType": [
+      "hatching"
+    ],
+    "attrs": [
+      {
+        "attrId": "pattern",
+        "value": 1
+      },
+      {
+        "attrId": "size",
+        "value": 9.0
+      },
+      {
+        "attrId": "lineWidth",
+        "value": 5.0
+      },
+      {
+        "attrId": "warpAmount",
+        "value": 0.25
+      },
+      {
+        "attrId": "warpFrequency",
+        "value": 8.0
+      },
+      {
+        "attrId": "layers",
+        "value": 6.0
+      },
+      {
+        "attrId": "inkColor",
+        "value": "#1A1A1A"
+      },
+      {
+        "attrId": "paperColor",
+        "value": "#EFE7D5"
+      },
+      {
+        "attrId": "amount",
+        "value": 1.0
+      }
+    ],
+    "resetsTransforms": false,
+    "resetsLayer": true
+  }
+]

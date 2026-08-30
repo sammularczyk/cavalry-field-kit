@@ -1,0 +1,72 @@
+{
+  "type": "layerStrings",
+  "value": {
+    "author": "samMularczyk",
+    "layerType": "water",
+    "niceName": "Water",
+    "layerInfo": "Refraction through a moving water surface.",
+    "language": "en",
+    "attributes": {
+      "size": [
+        "Scale",
+        "Size of the caustic cells. Smaller values give a bigger, slower pattern."
+      ],
+      "caustic": [
+        "Caustic",
+        "How far the caustic field pushes the picture. This is the fine, fast refraction."
+      ],
+      "waves": [
+        "Swell",
+        "A slow, large-scale wave that both displaces the picture and warps the caustic field's own coordinates, so the cells ride the swell instead of sitting still under it."
+      ],
+      "layering": [
+        "Layering",
+        "Adds a second, finer set of caustic octaves at a different time rate. Doubles the cost of the field, so leave it at zero when the extra depth is not needed."
+      ],
+      "highlights": [
+        "Glint",
+        "Additive sparkle where the caustic peaks, keyed off the same field sample rather than a second one."
+      ],
+      "highlightColor": [
+        "Glint Colour",
+        "Colour of that sparkle."
+      ],
+      "edges": [
+        "Edges",
+        "What a tap finds outside the layer. Transparent is the honest answer - there is no picture out there - but refraction opens wedges of nothing at the border, and Clamp or Mirror fill them."
+      ],
+      "edgeTrim": [
+        "Edge Trim",
+        "Fold against a rect inset by this much. A layer's outermost pixels are antialiased, and reflecting those doubles them into a hard seam."
+      ],
+      "evolution": [
+        "Evolution",
+        "Drives everything that moves, in degrees. Keyframe it, or drive it with a Frame behaviour - the rate is yours rather than tied to the comp clock."
+      ],
+      "loop": [
+        "Loop",
+        "Makes the field return exactly to its start, so it can be cycled with no visible seam."
+      ],
+      "cycles": [
+        "Cycles",
+        "How many full revolutions of Evolution before it repeats. At 2 the field comes home at Evolution 720, not 360 - so a higher count travels further through the noise and gives more variation before the repeat."
+      ],
+      "amount": [
+        "Amount",
+        "Mix between the original layer and the result."
+      ]
+    },
+    "enums": {
+      "edges": {
+        "0": "Transparent",
+        "1": "Clamp",
+        "2": "Mirror"
+      }
+    },
+    "tabs": {
+      "filter": "Water",
+      "surface": "Surface",
+      "output": "Output"
+    }
+  }
+}

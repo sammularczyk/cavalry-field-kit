@@ -1,0 +1,118 @@
+// Smoke Ring - Field Kit  (thirdPartyShader: a generator)
+//
+// Derived from paper-design/shaders `smoke-ring.ts` (Apache-2.0, Lost Coast
+// Labs). Changes: SkSL port, procedural noise, unrolled colour ramp.
+//
+// Noise sampled in POLAR space against a radial ring falloff. Because the
+// angular coordinate is one axis of the noise, the wisps run AROUND the ring
+// instead of across it - which is the whole difference between smoke and fog.
+// The atan seam is handled by cross-fading two angular parameterisations, the
+// same trick Godray's Light Field mode uses.
+
+uniform float  radius;
+uniform float  thickness;
+uniform float  detail;        // angular frequency
+uniform float  turbulence;
+uniform float  innerFade;
+uniform half4  color1;
+uniform half4  color2;
+uniform half4  backColor;
+uniform float  evolution;     // degrees
+uniform float  loop;          // bool
+uniform float  cycles;        // revolutions of Evolution before it repeats
+uniform float2 resolution;
+
+const float TWO_PI = 6.28318530718;
+
+float srHash21(float2 p) {
+    p = fract(p * float2(0.3183099, 0.3678794)) + 0.1;
+    p += dot(p, p + 19.19);
+    return fract(p.x * p.y);
+}
+float srVnoise(float2 p) {
+    float2 i = floor(p), f = fract(p);
+    float2 u = f * f * (3.0 - 2.0 * f);
+    return mix(mix(srHash21(i), srHash21(i + float2(1.0, 0.0)), u.x),
+               mix(srHash21(i + float2(0.0, 1.0)), srHash21(i + float2(1.0, 1.0)), u.x), u.y);
+}
+// Three octaves at lacunarity 2.1 - never a power of two, so the octaves never
+// align and three read as many more.
+float srFbm(float2 p) {
+    float v = 0.0, a = 0.55;
+    for (int i = 0; i < 3; i++) { v += srVnoise(p) * a; p *= 2.1; a *= 0.55; }
+    return v;
+}
+float ringNoise(float dxs, float ang, float r, float freq, float2 drift) {
+    // The drift is added to the noise COORDINATE rather than to `r` by the
+    // caller, so it can move in two dimensions - which is what lets it travel a
+    // closed circle and return, instead of only sliding radially forever.
+    float nL = srFbm(float2(ang * freq, r) + drift);
+    float aR = fract(ang / TWO_PI) * TWO_PI;
+    float nR = srFbm(float2(aR * freq, r) + drift);
+    return mix(nR, nL, smoothstep(-0.15, 0.15, dxs));
+}
+
+// -------------------------------------------------------------- Evolution
+//
+// Everything that moves is driven by Evolution, in DEGREES - the same control
+// After Effects' Turbulent Noise uses, and for the same reason: you keyframe
+// it, so the rate is yours instead of being welded to the comp clock.
+//
+// Two kinds of term need different handling, and only the second is subtle:
+//
+//   - Terms inside sin/cos are periodic already, so they take the angle
+//     straight and come home every 360 degrees.
+//   - Noise SAMPLED at a moving offset never repeats, because the offset walks
+//     away in a straight line forever. When looping it walks a CIRCLE instead,
+//     sized so ONE LAP takes Cycles whole revolutions of Evolution.
+//
+// That is precisely what Cycles buys: a longer path through the noise before
+// it arrives home, so more variation before the repeat. Cycles 2 means the
+// field returns to its start at Evolution 720, not 360.
+float evoAngle(float evolution) { return radians(evolution); }
+
+float2 evoDrift(float evolution, float looping, float cycles, float radius) {
+    float a = radians(evolution);
+    if (looping > 0.5) {
+        // Whole revolutions only - a fractional lap would land mid-circle at
+        // the wrap and jump.
+        float c = max(floor(cycles + 0.5), 1.0);
+        return radius * c * float2(cos(a / c), sin(a / c));
+    }
+    return float2(a) * radius;      // free-running: walks away and never returns
+}
+
+half4 main(float2 coord) {
+    float2 res = max(resolution, float2(1.0));
+    // A thirdPartyShader's `coord` is CENTRED and Y-up - world space, the same
+    // convention as a filter's fragCoord, except there is no rectCentre to
+    // subtract because 0,0 already is the centre. Subtracting res*0.5 (the
+    // habit from 0..1 UV shaders) puts the origin in a corner.
+    float2 uv = coord / res.y;
+    float2 drift = evoDrift(evolution, loop, cycles, 1.0);
+
+    float r = length(uv);
+    float ang = atan(uv.y, uv.x);
+
+    float n = ringNoise(uv.x, ang, r * 4.0, max(detail, 0.1), drift);
+    n += turbulence * (ringNoise(uv.x, ang, r * 9.0, max(detail, 0.1) * 2.0, drift * -1.7) - 0.5);
+
+    // The ring itself: a band at `radius`, softened by `thickness`, eaten from
+    // the inside by innerFade so the middle opens out rather than filling in.
+    float rr = max(radius, 0.001);
+    float th = max(thickness, 0.01);
+    float band = exp(-pow(abs(r - rr) / th, 2.0));
+    band *= smoothstep(0.0, rr * max(innerFade, 0.001), r);
+
+    float d = clamp(band * (0.35 + 1.3 * n), 0.0, 1.0);
+
+    float3 col = mix(float3(color1.rgb), float3(color2.rgb), clamp(n, 0.0, 1.0));
+    float  a   = mix(float(color1.a), float(color2.a), clamp(n, 0.0, 1.0)) * d;
+
+    float bgA = float(backColor.a);
+    float3 outRgb = col * a + float3(backColor.rgb) * bgA * (1.0 - a);
+    float  outA   = a + bgA * (1.0 - a);
+
+    outRgb += 0.0039 * (srHash21(coord * 0.019) - 0.5);
+    return half4(half3(clamp(outRgb, 0.0, 1.0)), half(clamp(outA, 0.0, 1.0)));
+}

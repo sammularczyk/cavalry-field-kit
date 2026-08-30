@@ -1,0 +1,202 @@
+// Paper Texture - Field Kit  (thirdPartyShader: a generator, not a filter)
+//
+// Ported from paper-design/shaders `paper-texture.ts` (Apache-2.0, Lost Coast
+// Labs). Changes: SkSL port; their 128px white-noise TEXTURE is replaced with
+// procedural hashes (they ship it as a base64 PNG, which a Cavalry plugin has
+// no way to bind); the image-displacement half is not here, because a shader
+// layer has no image - connect this to Lens's Displace Map to emboss footage,
+// or use the same layers folded into Print and Photocopy.
+//
+// FIVE LAYERS, ONE NORMAL. Each layer contributes a slope, they are summed
+// into a surface normal, and the whole thing is lit with a single Lambert dot.
+// That is why it reads as a photographed surface rather than as noise: the
+// tone comes from lighting a height field, not from a grey value.
+//
+// EVERY LAYER IS SKIPPED WHEN ITS OWN UNIFORM IS ZERO. The branches are
+// uniform-driven, so all fragments take the same path and there is no
+// divergence - which is what keeps a five-layer model affordable. Fibre is 16
+// noise evaluations and is by far the most expensive; leave it low.
+
+uniform float  paperContrast;   // steepens the surface normal's Z
+uniform float  roughness;       // screen-locked grain
+uniform float  fibre;
+uniform float  fibreSize;
+uniform float  crumples;
+uniform float  crumpleSize;
+uniform float  folds;
+uniform float  foldCount;
+uniform float  drops;
+uniform float  seed;
+uniform half4  paperColor;
+uniform half4  shadowColor;
+uniform float2 resolution;
+
+const float TWO_PI = 6.28318530718;
+
+float ptHash21(float2 p) {
+    p = fract(p * float2(0.3183099, 0.3678794)) + 0.1;
+    p += dot(p, p + 19.19);
+    return fract(p.x * p.y);
+}
+float2 ptHash22(float2 p) {
+    return float2(ptHash21(p), ptHash21(p + 71.3));
+}
+float2 ptRot(float2 p, float a) {
+    float c = cos(a), s = sin(a);
+    return float2(c * p.x - s * p.y, s * p.x + c * p.y);
+}
+float ptVnoise(float2 p) {
+    float2 i = floor(p), f = fract(p);
+    float2 u = f * f * (3.0 - 2.0 * f);          // cubic, not quintic
+    return mix(mix(ptHash21(i), ptHash21(i + float2(1.0, 0.0)), u.x),
+               mix(ptHash21(i + float2(0.0, 1.0)), ptHash21(i + float2(1.0, 1.0)), u.x), u.y);
+}
+
+// Three octaves at lacunarity 2.1 - deliberately NOT 2. Octaves that never
+// align read as far more of them, which is why three is enough here. The
+// `1/exp(|sin|)` term is a fake directional ridge: one sin and one exp buying
+// what a whole second ridged-noise field would otherwise cost.
+float ptRoughness(float2 p) {
+    p *= 0.1;
+    float o = 0.0;
+    for (int i = 0; i < 3; i++) {
+        o += ptVnoise(p);
+        o += 0.2 / exp(2.0 * abs(sin(0.2 * p.x + 0.5 * p.y)));
+        p *= 2.1;
+    }
+    return o / 3.0;
+}
+
+float ptFbm(float2 n) {
+    float total = 0.0, amp = 1.0;
+    for (int i = 0; i < 4; i++) {
+        n = ptRot(n, 0.7);                       // per-octave rotation: strands CURL
+        total += ptVnoise(n) * amp;
+        n *= 2.0; amp *= 0.6;
+    }
+    return total;
+}
+
+// Fibre is the GRADIENT MAGNITUDE of an fbm, not the fbm itself - the ridges of
+// |grad| are what look like strands. Four fbm evaluations, so sixteen noise
+// samples; this is the expensive layer.
+float ptFibre(float2 uv) {
+    float e = 0.001;
+    float n1 = ptFbm(uv + float2(e, 0.0)), n2 = ptFbm(uv - float2(e, 0.0));
+    float n3 = ptFbm(uv + float2(0.0, e)), n4 = ptFbm(uv - float2(0.0, e));
+    return length(float2(n1 - n2, n3 - n4)) / (2.0 * e);
+}
+
+// Not a Voronoi distance: a weighted AVERAGE of jittered cell values with a
+// separable pow(smoothstep) kernel. `pw` sharpens the facet boundaries, and
+// multiplying a sharp copy by a soft one is what gives crumpled foil rather
+// than a cell pattern.
+float ptCrumpled(float2 t, float pw) {
+    float2 p = floor(t);
+    float wsum = 0.0, cl = 0.0;
+    for (int y = -1; y < 2; y++) {
+        for (int x = -1; x < 2; x++) {
+            float2 b = float2(float(x), float(y));
+            float2 q = b + p;
+            float2 c = q + ptHash22(q);
+            float2 r = c - t;
+            float w = pow(smoothstep(0.0, 1.0, 1.0 - abs(r.x)), pw)
+                    * pow(smoothstep(0.0, 1.0, 1.0 - abs(r.y)), pw);
+            cl += (0.5 + 0.5 * sin((q.x + q.y * 5.0) * 8.0)) * w;
+            wsum += w;
+        }
+    }
+    return pow(wsum > 0.0 ? cl / wsum : 0.0, 0.5) * 2.0;
+}
+float ptCrumpleShape(float2 uv) {
+    return ptCrumpled(uv * 0.25, 16.0) * ptCrumpled(uv * 0.5, 2.0);
+}
+
+// Returns the VECTOR to the nearest crease seed, not a distance - so it acts
+// directly as a normal perturbation radiating outward from each crease origin,
+// faded with distance. That is the whole reason creases look like creases here
+// and not like a distance field.
+float2 ptFolds(float2 uv) {
+    float2 best = float2(0.0);
+    float bestD = 9.0;
+    for (int i = 0; i < 15; i++) {
+        if (float(i) >= foldCount) { break; }     // constant bound, uniform break
+        float2 rnd = ptHash22(float2(float(i), float(i) * seed + 3.1));
+        float an = rnd.x * TWO_PI;
+        float2 p = float2(cos(an), sin(an)) * rnd.y;
+        float d = distance(uv, p);
+        if (d < bestD) { bestD = d; best = uv - p; }
+    }
+    return mix(best, float2(0.0), pow(clamp(bestD, 0.0, 1.0), 0.25));
+}
+
+float ptDrops(float2 t) {
+    float2 p = floor(t);
+    float m = 1.0;
+    for (int y = -1; y < 2; y++) {
+        for (int x = -1; x < 2; x++) {
+            float2 q = p + float2(float(x), float(y));
+            float d = distance(t, q + ptHash22(q + seed));
+            m = min(m, m * d);
+        }
+    }
+    return 1.0 - smoothstep(0.05, 0.09, pow(m, 0.5));
+}
+
+half4 main(float2 coord) {
+    float2 res = max(resolution, float2(1.0));
+    // A thirdPartyShader's `coord` is CENTRED and Y-up - world space, the same
+    // convention as a filter's fragCoord, except there is no rectCentre to
+    // subtract because 0,0 already is the centre. Subtracting res*0.5 (the
+    // habit from 0..1 UV shaders) puts the origin in a corner.
+    float2 uv = coord / res.y;      // isotropic, centred
+    float2 patternUV = uv * 10.0;
+
+    float2 normal = float2(0.0);
+
+    // Folds - a nearest-seed vector field. Two samples, slightly rotated and
+    // offset from each other, sum into a double crease.
+    if (folds > 0.0) {
+        float2 fUV = ptRot(patternUV * 0.12, 4.0 * seed);
+        float2 w  = ptFolds(fUV);
+        float2 w2 = ptFolds(ptRot(fUV + 0.007 * cos(seed), 0.01 * sin(seed)));
+        normal += folds * 4.0 * max(float2(0.0), w + w2);
+    }
+
+    // Crumples, converted from height to slope by finite difference.
+    if (crumples > 0.0) {
+        float2 cUV = fract(patternUV * 0.02 / max(crumpleSize, 0.01) - seed) * 32.0;
+        normal += crumples * (ptCrumpleShape(cUV + float2(0.05, 0.0)) - ptCrumpleShape(cUV));
+    }
+
+    if (drops > 0.0) {
+        normal += 3.0 * drops * ptDrops(patternUV * 0.4);
+    }
+
+    // Roughness is indexed off the FRAGMENT coordinate, not the pattern UV, so
+    // it stays a constant size on screen however the layer is scaled. It is
+    // film grain, not surface texture - and that distinction is what stops the
+    // paper looking like a photograph of paper that has been zoomed.
+    if (roughness > 0.0) {
+        float2 rUV = 1.5 * coord;
+        normal += roughness * 1.5 * (ptRoughness(rUV + float2(1.0, 0.0))
+                                   - ptRoughness(rUV - float2(1.0, 0.0)));
+    }
+
+    if (fibre > 0.0) {
+        normal += 0.5 * fibre * (ptFibre(2.0 / max(fibreSize, 0.01) * patternUV) - 1.0);
+    }
+
+    // One Lambert dot against a fixed light. Contrast steepens or flattens the
+    // normal's Z rather than remapping the output - one pow doing the work of a
+    // whole tone curve, and it keeps the shading physical at both ends.
+    float z = 9.5 - 9.0 * pow(clamp(paperContrast, 0.0, 1.0), 0.1);
+    float lam = dot(normalize(float3(normal, z)), normalize(float3(1.0, 2.0, 1.0)));
+
+    float3 lit = mix(float3(shadowColor.rgb), float3(paperColor.rgb),
+                     clamp(lam * 1.4, 0.0, 1.0));
+    lit -= 0.007 * (drops > 0.0 ? ptDrops(patternUV * 0.4) : 0.0);
+
+    float a = clamp(float(paperColor.a), 0.0, 1.0);
+    return half4(half3(clamp(lit, 0.0, 1.0)) * half(a), half(a));
+}

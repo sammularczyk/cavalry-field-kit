@@ -1,0 +1,197 @@
+{
+  "author": "samMularczyk",
+  "type": "meshGradient",
+  "superType": "thirdPartyShader",
+  "version": "1.0",
+  "skslFile": "meshGradient.sksl",
+  "attributes": {
+    "colorCount": {
+      "type": "double",
+      "default": 4.0,
+      "min": 1.0,
+      "max": 4.0,
+      "step": 1.0
+    },
+    "color1": {
+      "type": "color",
+      "default": {
+        "type": "Color",
+        "r": 255,
+        "g": 173,
+        "b": 10,
+        "a": 255
+      }
+    },
+    "color2": {
+      "type": "color",
+      "default": {
+        "type": "Color",
+        "r": 98,
+        "g": 0,
+        "b": 255,
+        "a": 255
+      }
+    },
+    "color3": {
+      "type": "color",
+      "default": {
+        "type": "Color",
+        "r": 226,
+        "g": 163,
+        "b": 255,
+        "a": 255
+      }
+    },
+    "color4": {
+      "type": "color",
+      "default": {
+        "type": "Color",
+        "r": 255,
+        "g": 153,
+        "b": 253,
+        "a": 255
+      }
+    },
+    "positions": {
+      "type": "double",
+      "default": 2.0,
+      "min": 0.0,
+      "max": 100.0,
+      "step": 0.5
+    },
+    "waveX": {
+      "type": "double",
+      "default": 1.0,
+      "min": 0.0,
+      "max": 1.0,
+      "step": 0.01
+    },
+    "waveXShift": {
+      "type": "double",
+      "default": 0.6,
+      "min": 0.0,
+      "max": 1.0,
+      "step": 0.01
+    },
+    "waveY": {
+      "type": "double",
+      "default": 1.0,
+      "min": 0.0,
+      "max": 1.0,
+      "step": 0.01
+    },
+    "waveYShift": {
+      "type": "double",
+      "default": 0.21,
+      "min": 0.0,
+      "max": 1.0,
+      "step": 0.01
+    },
+    "swirl": {
+      "type": "double",
+      "default": 0.0,
+      "min": 0.0,
+      "max": 3.0,
+      "step": 0.01
+    },
+    "mixing": {
+      "type": "double",
+      "default": 0.93,
+      "min": 0.0,
+      "max": 1.0,
+      "step": 0.01
+    },
+    "grainMixer": {
+      "type": "double",
+      "default": 0.0,
+      "min": 0.0,
+      "max": 1.0,
+      "step": 0.01
+    },
+    "grainOverlay": {
+      "type": "double",
+      "default": 0.0,
+      "min": 0.0,
+      "max": 1.0,
+      "step": 0.01
+    },
+    "rotation": {
+      "type": "double",
+      "default": 270.0,
+      "step": 0.5
+    },
+    "evolution": {
+      "type": "double",
+      "default": 0.0,
+      "step": 1.0
+    },
+    "loop": {
+      "type": "bool",
+      "default": false
+    },
+    "cycles": {
+      "type": "double",
+      "default": 1.0,
+      "min": 1.0,
+      "softMax": 10.0,
+      "step": 1.0,
+      "dimming": "loop == false"
+    }
+  },
+  "triggers": {
+    "out": [
+      "colorCount",
+      "color1",
+      "color2",
+      "color3",
+      "color4",
+      "positions",
+      "waveX",
+      "waveXShift",
+      "waveY",
+      "waveYShift",
+      "swirl",
+      "mixing",
+      "grainMixer",
+      "grainOverlay",
+      "rotation",
+      "evolution",
+      "loop",
+      "cycles"
+    ]
+  },
+  "UI": {
+    "icon": "meshGradient.png",
+    "tabs": [
+      {
+        "id": "filter",
+        "attributeOrder": [
+          "colorCount",
+          "color1",
+          "color2",
+          "color3",
+          "color4",
+          "---Layout",
+          "positions",
+          "mixing",
+          "---Wave",
+          "waveX",
+          "waveXShift",
+          "waveY",
+          "waveYShift",
+          "swirl",
+          "---Grain",
+          "grainMixer",
+          "grainOverlay",
+          "---Transform",
+          "rotation",
+          "---Motion",
+          "evolution",
+          "loop",
+          "cycles",
+          "---Ported from Paper Shaders (Apache-2.0), Lost Coast Labs"
+        ]
+      }
+    ]
+  }
+}

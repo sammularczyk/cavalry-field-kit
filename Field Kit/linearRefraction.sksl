@@ -1,0 +1,191 @@
+// Linear Refraction - Field Kit
+//
+// Ported from paper-design/shaders `fluted-glass.ts` (Apache-2.0, Lost Coast
+// Labs). Changes: SkSL port; their normalised 0..1 pattern scale becomes a
+// rib width in PIXELS, which also makes the antialiasing exact; every
+// fwidth() is replaced by that analytic pixel size (SkSL has no derivatives,
+// and the coordinate is affine in screen space so the derivative is a constant
+// we can just compute); the unbounded up-to-101-tap blur is capped and
+// jittered; the frame fade becomes this kit's edge modes.
+//
+// TWO IDEAS CARRY THE WHOLE FILTER.
+//
+// 1. SPLIT FLOOR AND FRACT. Only the fractional position WITHIN a rib is
+//    displaced; the integer rib index is preserved exactly and added back
+//    afterwards. That keeps the refraction local to its own rib - no smearing
+//    across rib boundaries - and avoids the precision loss of distorting a
+//    large coordinate.
+//
+// 2. THE ANTIALIASING WIDTH IS THE PIXEL SIZE, AND THAT IS FREE
+//    SUPERSAMPLING. The rib highlight is drawn two pixels wide in RIB units.
+//    As the ribs get finer than a pixel that width grows past the whole
+//    rib, so the pattern greys out smoothly into flat tone instead of
+//    moireing. Every periodic filter wants this; here it costs one divide.
+
+uniform float  ribWidth;    // period, in pixels
+uniform float  angle;         // degrees
+uniform float  shape;         // enum: 0 Lines, 1 Irregular, 2 Wave, 3 Zigzag, 4 Grid
+uniform float  profile;       // enum: 0 Prism, 1 Lens, 2 Contour, 3 Cascade, 4 Flat
+uniform float  distortion;    // 0..1 strength of the refraction
+uniform float  shift;         // -1..1 bias on the profile
+uniform float  blur;          // frost, across the ribs
+uniform float  stretch;       // pulls the sample toward the rib centre line
+uniform float  highlights;
+uniform half4  highlightColor;
+uniform float  shadows;
+uniform half4  shadowColor;
+uniform float  edges;         // enum: 0 Transparent, 1 Clamp, 2 Mirror
+uniform float2 edgeTrim;
+uniform float  amount;
+
+uniform float2 resolution;
+uniform float2 rectCentre;
+uniform shader image;
+
+const float TWO_PI = 6.28318530718;
+const int   MAX_BLUR_TAPS = 12;
+
+float fgHash21(float2 p) {
+    return fract(sin(dot(p, float2(127.1, 311.7))) * 43758.5453123);
+}
+
+float2 fgRot(float2 p, float a) {
+    float c = cos(a), s = sin(a);
+    return float2(c * p.x - s * p.y, s * p.x + c * p.y);
+}
+
+float2 applyEdges(float2 c) {
+    if (edges < 0.5) { return c; }
+    float2 res = max(resolution, float2(1.0));
+    float2 trim = clamp(max(edgeTrim, float2(0.0)), float2(0.0), res * 0.45);
+    float2 inner = res - trim * 2.0;
+    float2 lo = rectCentre - res * 0.5 + trim;
+    float2 t = (c - lo) / inner;
+    if (edges < 1.5) {
+        t = clamp(t, 0.0, 1.0);
+    } else {
+        float2 m = mod(t, 2.0);
+        t = 1.0 - abs(1.0 - m);
+    }
+    float2 half_px = 0.5 / inner;
+    return lo + clamp(t, half_px, 1.0 - half_px) * inner;
+}
+
+// Antialiased sawtooth: mirrors across the seam within about a pixel, so the
+// fract() discontinuity never lands as a hard one-pixel line.
+float smoothFract(float x, float w) {
+    float f = fract(x);
+    float band = smoothstep(-w, w, abs(f - 0.5) - 0.5);
+    return mix(f, 1.0 - f, band);
+}
+
+half4 main(float2 fragCoord) {
+    half4 src = image.eval(fragCoord);
+    float mix_ = clamp(amount, 0.0, 1.0);
+    if (mix_ <= 0.0) { return src; }
+
+    float period = max(ribWidth, 1.0);
+    float rad = radians(angle);
+
+    // Rotate into the rib frame. One unit of `q.x` is one rib, so a pixel
+    // is exactly 1/period units - the analytic derivative, no fwidth needed.
+    float2 pc = fgRot(fragCoord - rectCentre, -rad);
+    float2 q  = pc / period;
+    float pxW = 1.0 / period;
+
+    // The pattern bends the ribs by adding a per-position offset BEFORE the
+    // fract, which is why a wave stays one continuous rib rather than breaking
+    // into segments.
+    float curve = 0.0;
+    int sh = int(shape);
+    if (sh == 1)      { curve = 0.5 + 0.5 * sin(0.5 * q.x) * sin(1.7 * q.x); }
+    else if (sh == 2) { curve = 4.0 * sin(0.23 * q.y); }
+
+    float xw = q.x + curve;
+    float x  = smoothFract(xw, pxW);
+    float xr = fract(xw) + 0.0001;
+
+    // ---- Refraction profile. All five are cheap polynomials; only Cascade
+    // touches trig, and it reuses its own sine through asin for the shading.
+    int pr = int(profile);
+    float d = 0.0;
+    float shade = pow(clamp(x, 0.0, 1.0), 1.3);
+    float aa = max(0.2 + 0.15 * clamp(pxW * 4.0, 0.0, 1.0), pxW * 2.0);
+    float fade = smoothstep(0.0, aa, xr) * smoothstep(1.0, 1.0 - aa, xr);
+
+    if (pr == 0) {                          // Prism - cubic sawtooth
+        d = -pow(1.5 * x, 3.0) + (0.5 - shift);
+        d = mix(0.5, d, fade);
+    } else if (pr == 1) {                   // Lens - parabola
+        d = 2.0 * x * x - (0.5 + shift);
+        d = mix(0.0, d, fade);
+    } else if (pr == 2) {                   // Contour - flat centre, steep ends
+        d = pow(2.0 * (xr - 0.5), 6.0) - 0.25 - shift;
+        d = mix(0.0, d, fade);
+    } else if (pr == 3) {                   // Cascade - a true arc
+        float sn = sin((xr + 0.25) * TWO_PI);
+        shade = 0.5 + 0.5 * asin(clamp(sn, -1.0, 1.0)) / (0.5 * 3.14159265);
+        d = sn * 0.5 - shift;
+    } else {                                // Flat - near-linear, soft ends
+        d = (-pow(abs(x), 0.2) * x + 0.33 - 3.0 * shift) * 0.33;
+        shade = pow(clamp(x, 0.0, 1.0), 2.5);
+        d *= fade;
+    }
+    d *= clamp(distortion, 0.0, 2.0);
+
+    // ---- Split floor/fract: displace within the rib, keep the rib index.
+    float xi = floor(xw);
+    float2 local = float2((xi + fract(xw) + d) * period, pc.y);
+
+    // Stretch pulls the sample toward the rib's own centre line near its edges,
+    // which is the smeared look on the shoulders of real fluted glass.
+    float st = clamp(stretch, 0.0, 1.0);
+    if (st > 0.0) {
+        float s = 1.0 - smoothstep(0.0, 0.5, xr) * smoothstep(1.0, 0.5, xr);
+        local.y = mix(local.y, 0.0, st * s * s);
+    }
+
+    float2 sampleAt = fgRot(local, rad) + rectCentre;
+
+    // ---- Frost: a capped, jittered blur ACROSS the ribs. The source runs an
+    // uncapped gaussian out to 101 taps, which is the single most expensive
+    // thing in that library. Twelve jittered taps read smoother than dozens of
+    // aligned ones (a fixed ladder is a ladder at any length), so this is both
+    // cheaper and cleaner.
+    half4 c;
+    float sigma = clamp(blur, 0.0, 1.0) * period * 1.5;
+    if (sigma <= 0.5) {
+        c = image.eval(applyEdges(sampleAt));
+    } else {
+        float2 dir = fgRot(float2(0.0, 1.0), rad);
+        float jit = fgHash21(fragCoord * 0.731) - 0.5;
+        float4 acc = float4(0.0);
+        float wsum = 0.0;
+        for (int i = -MAX_BLUR_TAPS; i <= MAX_BLUR_TAPS; i++) {
+            float fi = (float(i) + jit) / float(MAX_BLUR_TAPS);
+            float w  = exp(-fi * fi * 2.5);
+            half4 t = image.eval(applyEdges(sampleAt + dir * (fi * sigma * 2.0)));
+            acc += float4(t) * w;
+            wsum += w;
+        }
+        c = half4(acc / max(wsum, 1e-4));
+    }
+
+    float3 lin = float3(c.rgb) / max(float(c.a), 1e-6);
+
+    // ---- Rib strokes. Width in RIB units, two pixels wide - so when the
+    // ribs go sub-pixel the stroke swallows the rib and the whole pattern
+    // fades to flat tone rather than aliasing. This is the free-supersampling
+    // trick, and it is why this filter survives being zoomed out.
+    float hw = 2.0 * max(pxW, 0.001);
+    float hl = 1.0 - smoothstep(0.0, hw, xr) * smoothstep(1.0, 1.0 - hw, xr);
+    hl = clamp(hl, 0.0, 1.0) * clamp(highlights, 0.0, 1.0) * float(highlightColor.a);
+    lin = mix(lin, float3(highlightColor.rgb), hl);
+
+    float sd = clamp(shade, 0.0, 1.0) * clamp(shadows, 0.0, 1.0) * float(shadowColor.a);
+    lin = mix(lin, float3(shadowColor.rgb), sd * sd);
+
+    float a = float(c.a);
+    half4 glass = half4(half3(clamp(lin, 0.0, 1.0)) * half(a), half(a));
+    return mix(src, glass, half(mix_));
+}

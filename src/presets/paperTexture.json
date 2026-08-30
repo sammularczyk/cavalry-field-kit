@@ -1,0 +1,185 @@
+[
+  {
+    "presetType": "layer",
+    "id": "1a2b3c4d-5e6f-4a70-8b91-c2d3e4f50617",
+    "author": "samMularczyk",
+    "name": "Cartridge",
+    "layerType": [
+      "paperTexture"
+    ],
+    "attrs": [
+      {
+        "attrId": "paperColor",
+        "value": "#9FADBC"
+      },
+      {
+        "attrId": "shadowColor",
+        "value": "#FFFFFF"
+      },
+      {
+        "attrId": "paperContrast",
+        "value": 0.3
+      },
+      {
+        "attrId": "roughness",
+        "value": 0.4
+      },
+      {
+        "attrId": "fibre",
+        "value": 0.3
+      },
+      {
+        "attrId": "fibreSize",
+        "value": 0.2
+      },
+      {
+        "attrId": "crumples",
+        "value": 0.3
+      },
+      {
+        "attrId": "crumpleSize",
+        "value": 0.35
+      },
+      {
+        "attrId": "folds",
+        "value": 0.65
+      },
+      {
+        "attrId": "foldCount",
+        "value": 5.0
+      },
+      {
+        "attrId": "drops",
+        "value": 0.2
+      },
+      {
+        "attrId": "seed",
+        "value": 5.8
+      }
+    ],
+    "resetsTransforms": false,
+    "resetsLayer": true
+  },
+  {
+    "presetType": "layer",
+    "id": "2b3c4d5e-6f70-4b81-9ca2-d3e4f5061728",
+    "author": "samMularczyk",
+    "name": "Cardboard",
+    "layerType": [
+      "paperTexture"
+    ],
+    "attrs": [
+      {
+        "attrId": "paperColor",
+        "value": "#C7B89E"
+      },
+      {
+        "attrId": "shadowColor",
+        "value": "#999180"
+      },
+      {
+        "attrId": "paperContrast",
+        "value": 0.4
+      },
+      {
+        "attrId": "roughness",
+        "value": 0.0
+      },
+      {
+        "attrId": "fibre",
+        "value": 0.35
+      },
+      {
+        "attrId": "fibreSize",
+        "value": 0.14
+      },
+      {
+        "attrId": "crumples",
+        "value": 0.7
+      },
+      {
+        "attrId": "crumpleSize",
+        "value": 0.1
+      },
+      {
+        "attrId": "folds",
+        "value": 0.0
+      },
+      {
+        "attrId": "foldCount",
+        "value": 1.0
+      },
+      {
+        "attrId": "drops",
+        "value": 0.1
+      },
+      {
+        "attrId": "seed",
+        "value": 1.6
+      }
+    ],
+    "resetsTransforms": false,
+    "resetsLayer": true
+  },
+  {
+    "presetType": "layer",
+    "id": "3c4d5e6f-7081-4c92-adb3-e4f506172839",
+    "author": "samMularczyk",
+    "name": "Crumpled",
+    "layerType": [
+      "paperTexture"
+    ],
+    "attrs": [
+      {
+        "attrId": "paperColor",
+        "value": "#FFFFFF"
+      },
+      {
+        "attrId": "shadowColor",
+        "value": "#B9BCC4"
+      },
+      {
+        "attrId": "paperContrast",
+        "value": 0.85
+      },
+      {
+        "attrId": "roughness",
+        "value": 0.0
+      },
+      {
+        "attrId": "fibre",
+        "value": 0.1
+      },
+      {
+        "attrId": "fibreSize",
+        "value": 0.2
+      },
+      {
+        "attrId": "crumples",
+        "value": 1.0
+      },
+      {
+        "attrId": "crumpleSize",
+        "value": 0.3
+      },
+      {
+        "attrId": "folds",
+        "value": 1.0
+      },
+      {
+        "attrId": "foldCount",
+        "value": 15.0
+      },
+      {
+        "attrId": "drops",
+        "value": 0.0
+      },
+      {
+        "attrId": "seed",
+        "value": 2.2
+      }
+    ],
+    "resetsTransforms": false,
+    "resetsLayer": true
+  }
+]

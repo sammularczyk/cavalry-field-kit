@@ -1,0 +1,135 @@
+{
+  "author": "samMularczyk",
+  "type": "smokeRing",
+  "superType": "thirdPartyShader",
+  "version": "1.0",
+  "skslFile": "smokeRing.sksl",
+  "attributes": {
+    "radius": {
+      "type": "double",
+      "default": 0.3,
+      "min": 0.001,
+      "softMax": 1.0,
+      "step": 0.01
+    },
+    "thickness": {
+      "type": "double",
+      "default": 0.12,
+      "min": 0.01,
+      "softMax": 1.0,
+      "step": 0.01
+    },
+    "detail": {
+      "type": "double",
+      "default": 3.0,
+      "min": 0.1,
+      "softMax": 20.0,
+      "step": 0.05
+    },
+    "turbulence": {
+      "type": "double",
+      "default": 0.5,
+      "min": 0.0,
+      "max": 2.0,
+      "step": 0.01
+    },
+    "innerFade": {
+      "type": "double",
+      "default": 0.6,
+      "min": 0.001,
+      "max": 2.0,
+      "step": 0.01
+    },
+    "color1": {
+      "type": "color",
+      "default": {
+        "type": "Color",
+        "r": 255,
+        "g": 255,
+        "b": 255,
+        "a": 255
+      }
+    },
+    "color2": {
+      "type": "color",
+      "default": {
+        "type": "Color",
+        "r": 120,
+        "g": 160,
+        "b": 255,
+        "a": 255
+      }
+    },
+    "backColor": {
+      "type": "color",
+      "default": {
+        "type": "Color",
+        "r": 0,
+        "g": 0,
+        "b": 0,
+        "a": 0
+      }
+    },
+    "evolution": {
+      "type": "double",
+      "default": 0.0,
+      "step": 1.0
+    },
+    "loop": {
+      "type": "bool",
+      "default": false
+    },
+    "cycles": {
+      "type": "double",
+      "default": 1.0,
+      "min": 1.0,
+      "softMax": 10.0,
+      "step": 1.0,
+      "dimming": "loop == false"
+    }
+  },
+  "triggers": {
+    "out": [
+      "radius",
+      "thickness",
+      "detail",
+      "turbulence",
+      "innerFade",
+      "color1",
+      "color2",
+      "backColor",
+      "evolution",
+      "loop",
+      "cycles"
+    ]
+  },
+  "UI": {
+    "icon": "smokeRing.png",
+    "tabs": [
+      {
+        "id": "filter",
+        "attributeOrder": [
+          "color1",
+          "color2",
+          "backColor",
+          "---Motion",
+          "evolution",
+          "loop",
+          "cycles"
+        ]
+      },
+      {
+        "id": "ring",
+        "attributeOrder": [
+          "radius",
+          "thickness",
+          "innerFade",
+          "---Smoke",
+          "detail",
+          "turbulence",
+          "---Ported from Paper Shaders (Apache-2.0), Lost Coast Labs"
+        ]
+      }
+    ]
+  }
+}

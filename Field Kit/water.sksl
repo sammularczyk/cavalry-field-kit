@@ -1,0 +1,203 @@
+// Water - Field Kit
+//
+// Ported from paper-design/shaders `water.ts` (Apache-2.0, Lost Coast Labs).
+// Changes: SkSL port; their Ashima/webgl-noise simplex is replaced with this
+// kit's own value noise (their copy has the upstream MIT header stripped, so
+// carrying it forward would inherit that defect); UV-space offsets are
+// converted to pixels for Cavalry's absolute, Y-up fragCoord; the frame fade
+// is replaced with this kit's Transparent/Clamp/Mirror edge handling.
+//
+// THE CAUSTIC IS NOT AN FBM. It is six iterations of sin/cos with PHASE
+// FEEDBACK: each octave's phase perturbs the next through an accumulator that
+// is itself rotated every step. That self-advection is what makes the cells
+// look like light refracted through a moving surface rather than a sum of sine
+// grids - and it costs no texture reads at all.
+//
+// Two details that look like noise in the source and are not:
+//   - `(mod(j,2) - 1)` is +-1 alternating, so odd and even octaves scroll in
+//     OPPOSITE time directions. The cells drift against each other instead of
+//     streaming one way. Branchless.
+//   - lacunarity is 1.1, not 2. Octaves that close together never align, so
+//     six of them read as far more.
+//
+// The refraction is deliberately NOT the gradient of the caustic field. A
+// scalar is added to both components of the sample coordinate - an
+// anti-diagonal push. Taking a true gradient would cost two more evaluations
+// (24 more sin/cos) and, because the field is high-frequency and isotropic,
+// look much the same. Measure before "fixing" this.
+
+uniform float  size;          // pattern scale
+uniform float  caustic;       // refraction from the caustic field
+uniform float  waves;         // slow large-scale swell
+uniform float  layering;      // second caustic octave set
+uniform float  highlights;    // additive glint off the surface
+uniform half4  highlightColor;
+uniform float  edges;         // enum: 0 Transparent, 1 Clamp, 2 Mirror
+uniform float2 edgeTrim;
+uniform float  evolution;     // degrees
+uniform float  loop;          // bool
+uniform float  cycles;        // revolutions of Evolution before it repeats
+uniform float  amount;
+
+uniform float2 resolution;
+uniform float2 rectCentre;
+uniform shader image;         // single-pass input, binds last
+
+const float TWO_PI = 6.28318530718;
+
+float wHash21(float2 p) {
+    return fract(sin(dot(p, float2(127.1, 311.7))) * 43758.5453123);
+}
+
+float wVnoise(float2 p) {
+    float2 i = floor(p);
+    float2 f = fract(p);
+    float2 u = f * f * (3.0 - 2.0 * f);
+    return mix(mix(wHash21(i), wHash21(i + float2(1.0, 0.0)), u.x),
+               mix(wHash21(i + float2(0.0, 1.0)), wHash21(i + float2(1.0, 1.0)), u.x), u.y);
+}
+
+// Two octaves standing in for the one simplex octave the source used. The
+// swell only needs to be smooth and slow, so gradient noise buys nothing here.
+float wSwell(float2 p) {
+    return wVnoise(p) * 0.65 + wVnoise(p * 2.17 + 5.3) * 0.35;
+}
+
+float2 wRot(float2 p, float a) {
+    float c = cos(a), s = sin(a);
+    return float2(c * p.x - s * p.y, s * p.x + c * p.y);
+}
+
+float causticField(float2 uv, float t, float scale) {
+    float2 n = float2(0.1);
+    float2 N = float2(0.1);
+    for (int j = 0; j < 6; j++) {
+        uv = wRot(uv, 0.5);
+        n  = wRot(n, 0.5);                       // the FEEDBACK term rotates too
+        float2 q = uv * scale + float(j) + n
+                 + (0.5 + 0.5 * float(j)) * (mod(float(j), 2.0) - 1.0) * t;
+        n += sin(q);                             // this octave warps the next
+        N += cos(q) / scale;
+        scale *= 1.1;
+    }
+    return (N.x + N.y + 1.0);
+}
+
+// Transparent / Clamp / Mirror, same pair of controls every gather in this kit
+// uses. A tap outside the layer is absent, not black, so Clamp and Mirror fill
+// the wedge the refraction opens up at the border.
+float2 applyEdges(float2 c) {
+    if (edges < 0.5) { return c; }
+    float2 res = max(resolution, float2(1.0));
+    float2 trim = clamp(max(edgeTrim, float2(0.0)), float2(0.0), res * 0.45);
+    float2 inner = res - trim * 2.0;
+    float2 lo = rectCentre - res * 0.5 + trim;
+    float2 t = (c - lo) / inner;
+    if (edges < 1.5) {
+        t = clamp(t, 0.0, 1.0);
+    } else {
+        float2 m = mod(t, 2.0);
+        t = 1.0 - abs(1.0 - m);
+    }
+    float2 half_px = 0.5 / inner;
+    return lo + clamp(t, half_px, 1.0 - half_px) * inner;
+}
+
+
+// -------------------------------------------------------------- Evolution
+//
+// Everything that moves is driven by Evolution, in DEGREES - the same control
+// After Effects' Turbulent Noise uses, and for the same reason: you keyframe
+// it, so the rate is yours instead of being welded to the comp clock.
+//
+// Two kinds of term need different handling, and only the second is subtle:
+//
+//   - Terms inside sin/cos are periodic already, so they take the angle
+//     straight and come home every 360 degrees.
+//   - Noise SAMPLED at a moving offset never repeats, because the offset walks
+//     away in a straight line forever. When looping it walks a CIRCLE instead,
+//     sized so ONE LAP takes Cycles whole revolutions of Evolution.
+//
+// That is precisely what Cycles buys: a longer path through the noise before
+// it arrives home, so more variation before the repeat. Cycles 2 means the
+// field returns to its start at Evolution 720, not 360.
+float evoAngle(float evolution) { return radians(evolution); }
+
+float2 evoDrift(float evolution, float looping, float cycles, float radius) {
+    float a = radians(evolution);
+    if (looping > 0.5) {
+        // Whole revolutions only - a fractional lap would land mid-circle at
+        // the wrap and jump.
+        float c = max(floor(cycles + 0.5), 1.0);
+        return radius * c * float2(cos(a / c), sin(a / c));
+    }
+    return float2(a) * radius;      // free-running: walks away and never returns
+}
+
+half4 main(float2 fragCoord) {
+    half4 src = image.eval(fragCoord);
+    float mix_ = clamp(amount, 0.0, 1.0);
+    if (mix_ <= 0.0) { return src; }
+
+    float2 res = max(resolution, float2(1.0));
+    float2 uv  = (fragCoord - rectCentre) / res.y;      // isotropic, centred
+    float2 patternUV = uv / (0.01 + 0.09 * max(size, 0.01));
+
+    // The caustic's own octave coefficients are 0.5, 1, 1.5 ... 3, so the times
+    // handed to it must be even multiples of the loop phase for every octave to
+    // land on a whole turn - 2x and 4x give integer sets (1..6 and 2..12) that
+    // still drift against each other, which is what keeps the counter-motion.
+    float t = evoAngle(evolution);
+    float2 swellOff = evoDrift(evolution, loop, cycles, 2.0);
+    float tA = 2.0 * t;
+    // 1.5 gives the two octave sets their counter-drift, but 1.5 x the caustic's
+    // own half-integer coefficients is not a whole turn, so when looping this
+    // becomes 4 - still a different rate, and now an integer one.
+    float tB = loop > 0.5 ? 4.0 * t : 1.5 * t;
+
+    // ONE sample of each field, reused for everything downstream - the
+    // distortion, the tint, the glint and the alpha. The source does the same,
+    // and it is most of why this filter is cheap.
+    float swell = wSwell(0.03 * patternUV + swellOff) * 2.0 - 1.0;
+
+    float cf = causticField(patternUV + waves * float2(1.0, -1.0) * swell, tA, 1.5);
+    if (layering > 0.0) {
+        cf += layering * causticField(patternUV + 2.0 * waves * float2(1.0, -1.0) * swell,
+                                      tB, 2.0);
+    }
+    cf = cf * cf;                                        // squared, not pow()
+
+    // Displacement in PIXELS. The source works in 0..1 UVs where 0.02 and 0.1
+    // are its two magnitudes; scaling by the short edge keeps the same look at
+    // any resolution.
+    float causticPush = 0.02 * res.y * caustic * cf;
+    float wavePush    = 0.10 * res.y * waves * swell;
+
+    float2 sampleAt = fragCoord;
+    sampleAt += float2(wavePush, -wavePush);             // anti-diagonal
+    sampleAt += float2(causticPush);                     // scalar into BOTH axes
+
+    half4 c = image.eval(applyEdges(sampleAt));
+
+    float3 lin = float3(c.rgb) / max(float(c.a), 1e-6);
+
+    // Glint off the surface, keyed off the SAME caustic sample and modulated a
+    // second time by the swell so it moves with the water rather than sitting
+    // on top of it.
+    // Gated by the sampled alpha. The source lifts opacity with the glint
+    // unconditionally, because there it is a full-frame surface composited
+    // over a background colour. Here the water IS the layer, so ungated glint
+    // paints caustics into the empty padding around it. Apply this to a solid
+    // if a full-frame pool is what is wanted.
+    float surface = float(c.a);
+    float hl = 0.025 * highlights * max(cf, -0.2) * float(highlightColor.a) * surface;
+    lin = mix(lin, float3(highlightColor.rgb),
+              clamp(0.05 * highlights * max(cf, -0.2) * float(highlightColor.a) * surface, 0.0, 1.0));
+    lin += hl * (0.5 + 0.5 * swell);
+
+    float a = clamp(float(c.a) + hl, 0.0, 1.0);
+    float3 outRgb = clamp(lin, 0.0, 1.0);
+
+    half4 wet = half4(half3(outRgb) * half(a), half(a));
+    return mix(src, wet, half(mix_));
+}

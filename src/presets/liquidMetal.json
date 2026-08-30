@@ -1,0 +1,356 @@
+[
+  {
+    "presetType": "layer",
+    "id": "a5e1c7b2-3f46-4d90-8b71-6c2e9d05af18",
+    "author": "samMularczyk",
+    "name": "Chrome",
+    "layerType": [
+      "liquidMetal"
+    ],
+    "attrs": [
+      {
+        "attrId": "material",
+        "value": 0
+      },
+      {
+        "attrId": "spread",
+        "value": 70.0
+      },
+      {
+        "attrId": "repetition",
+        "value": 5.0
+      },
+      {
+        "attrId": "softness",
+        "value": 0.06
+      },
+      {
+        "attrId": "shiftRed",
+        "value": 0.3
+      },
+      {
+        "attrId": "shiftBlue",
+        "value": 0.3
+      },
+      {
+        "attrId": "contourAmount",
+        "value": 0.6
+      },
+      {
+        "attrId": "distortion",
+        "value": 0.05
+      },
+      {
+        "attrId": "metalAngle",
+        "value": 70.0
+      },
+      {
+        "attrId": "tintColor",
+        "value": "#FFFFFF"
+      }
+    ],
+    "resetsTransforms": false,
+    "resetsLayer": true
+  },
+  {
+    "presetType": "layer",
+    "id": "b6f2d8c3-4057-4ea1-9c82-7d3fae16b029",
+    "author": "samMularczyk",
+    "name": "Iridescent",
+    "layerType": [
+      "liquidMetal"
+    ],
+    "attrs": [
+      {
+        "attrId": "material",
+        "value": 0
+      },
+      {
+        "attrId": "spread",
+        "value": 60.0
+      },
+      {
+        "attrId": "repetition",
+        "value": 6.0
+      },
+      {
+        "attrId": "softness",
+        "value": 0.05
+      },
+      {
+        "attrId": "shiftRed",
+        "value": 1.0
+      },
+      {
+        "attrId": "shiftBlue",
+        "value": 1.0
+      },
+      {
+        "attrId": "contourAmount",
+        "value": 0.7
+      },
+      {
+        "attrId": "distortion",
+        "value": 0.12
+      },
+      {
+        "attrId": "metalAngle",
+        "value": 70.0
+      },
+      {
+        "attrId": "tintColor",
+        "value": "#FFFFFF"
+      }
+    ],
+    "resetsTransforms": false,
+    "resetsLayer": true
+  },
+  {
+    "presetType": "layer",
+    "id": "c7a3e9d4-5168-4fb2-ad93-8e4bf2270c3a",
+    "author": "samMularczyk",
+    "name": "Noir",
+    "layerType": [
+      "liquidMetal"
+    ],
+    "attrs": [
+      {
+        "attrId": "material",
+        "value": 0
+      },
+      {
+        "attrId": "spread",
+        "value": 80.0
+      },
+      {
+        "attrId": "repetition",
+        "value": 3.0
+      },
+      {
+        "attrId": "softness",
+        "value": 0.45
+      },
+      {
+        "attrId": "shiftRed",
+        "value": 0.0
+      },
+      {
+        "attrId": "shiftBlue",
+        "value": 0.0
+      },
+      {
+        "attrId": "contourAmount",
+        "value": 0.0
+      },
+      {
+        "attrId": "distortion",
+        "value": 0.0
+      },
+      {
+        "attrId": "metalAngle",
+        "value": 90.0
+      },
+      {
+        "attrId": "tintColor",
+        "value": "#606060"
+      }
+    ],
+    "resetsTransforms": false,
+    "resetsLayer": true
+  },
+  {
+    "presetType": "layer",
+    "id": "d8b4fae5-6279-40c3-be04-9f5c03381d4b",
+    "author": "samMularczyk",
+    "name": "Smoke",
+    "layerType": [
+      "liquidMetal"
+    ],
+    "attrs": [
+      {
+        "attrId": "material",
+        "value": 1
+      },
+      {
+        "attrId": "spread",
+        "value": 90.0
+      },
+      {
+        "attrId": "innerDistortion",
+        "value": 0.8
+      },
+      {
+        "attrId": "outerDistortion",
+        "value": 0.6
+      },
+      {
+        "attrId": "innerGlow",
+        "value": 1.0
+      },
+      {
+        "attrId": "outerGlow",
+        "value": 0.55
+      },
+      {
+        "attrId": "smokeScale",
+        "value": 0.8
+      },
+      {
+        "attrId": "smokeInner",
+        "value": "#FAFAF5"
+      },
+      {
+        "attrId": "heatCount",
+        "value": 2.0
+      },
+      {
+        "attrId": "heat1",
+        "value": "#333333"
+      },
+      {
+        "attrId": "heat2",
+        "value": "#E7E6DF"
+      },
+      {
+        "attrId": "backColor",
+        "value": "#F0EFEA"
+      },
+      {
+        "attrId": "smokeSpill",
+        "value": 0.25
+      }
+    ],
+    "resetsTransforms": false,
+    "resetsLayer": true
+  },
+  {
+    "presetType": "layer",
+    "id": "e9c50bf6-738a-41d4-cf15-a06d14492e5c",
+    "author": "samMularczyk",
+    "name": "Fire",
+    "layerType": [
+      "liquidMetal"
+    ],
+    "attrs": [
+      {
+        "attrId": "material",
+        "value": 1
+      },
+      {
+        "attrId": "spread",
+        "value": 90.0
+      },
+      {
+        "attrId": "innerDistortion",
+        "value": 0.6
+      },
+      {
+        "attrId": "outerDistortion",
+        "value": 0.8
+      },
+      {
+        "attrId": "innerGlow",
+        "value": 0.65
+      },
+      {
+        "attrId": "outerGlow",
+        "value": 1.0
+      },
+      {
+        "attrId": "smokeScale",
+        "value": 0.8
+      },
+      {
+        "attrId": "smokeInner",
+        "value": "#000000"
+      },
+      {
+        "attrId": "heatCount",
+        "value": 3.0
+      },
+      {
+        "attrId": "heat1",
+        "value": "#FE5B16"
+      },
+      {
+        "attrId": "heat2",
+        "value": "#F7FF61"
+      },
+      {
+        "attrId": "heat3",
+        "value": "#FFFFFF"
+      },
+      {
+        "attrId": "backColor",
+        "value": "#000000"
+      },
+      {
+        "attrId": "smokeSpill",
+        "value": 0.6
+      }
+    ],
+    "resetsTransforms": false,
+    "resetsLayer": true
+  },
+  {
+    "presetType": "layer",
+    "id": "fad61c07-849b-42e5-d026-b17e2550af6d",
+    "author": "samMularczyk",
+    "name": "Heatmap",
+    "layerType": [
+      "liquidMetal"
+    ],
+    "attrs": [
+      {
+        "attrId": "material",
+        "value": 2
+      },
+      {
+        "attrId": "spread",
+        "value": 120.0
+      },
+      {
+        "attrId": "innerGlow",
+        "value": 0.5
+      },
+      {
+        "attrId": "outerGlow",
+        "value": 0.5
+      },
+      {
+        "attrId": "contourAmount",
+        "value": 0.5
+      },
+      {
+        "attrId": "distortion",
+        "value": 0.0
+      },
+      {
+        "attrId": "heatCount",
+        "value": 4.0
+      },
+      {
+        "attrId": "heat1",
+        "value": "#11206A"
+      },
+      {
+        "attrId": "heat2",
+        "value": "#2F63E7"
+      },
+      {
+        "attrId": "heat3",
+        "value": "#FF991E"
+      },
+      {
+        "attrId": "heat4",
+        "value": "#FFE679"
+      },
+      {
+        "attrId": "backColor",
+        "value": "#000000"
+      }
+    ],
+    "resetsTransforms": false,
+    "resetsLayer": true
+  }
+]

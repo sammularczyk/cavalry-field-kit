@@ -1,0 +1,357 @@
+// Liquid Metal - pass 7 of 8: the three shading heads.
+//
+// Derived from paper-design/shaders `liquid-metal.ts`, `gem-smoke.ts` and
+// `heatmap.ts` (Apache-2.0, Lost Coast Labs). Changes: SkSL port; the shape
+// field comes from this kit's blur ladder rather than their CPU Poisson solve;
+// their dFdx-based aliasing guard becomes an analytic pixel size; their
+// dynamically-indexed colour arrays are unrolled (SkSL forbids dynamic array
+// indexing); the content-specific terms tuned to one particular logo are
+// dropped; the noise is this kit's own.
+//
+// METAL IS NOT CHROME SHADING. There is no normal, no environment map, no
+// Fresnel and no lighting model anywhere in it. It is a BANDED STRIPE FIELD -
+// a repeating light/dark/gradient ladder - whose phase is warped by the shape
+// field, sampled three times at three different phase offsets, one per colour
+// channel. Those three offsets ARE the iridescence.
+//
+// The useful way to read it: `direction` is a stand-in for a surface normal
+// angle, and fract(direction) samples a one-dimensional environment strip. So
+// it IS a matcap, with a horizon-banded studio environment - which is exactly
+// what a real chrome render shows. That is why the controls behave the way
+// they do, and why the fringing follows the strokes rather than the frame.
+
+uniform float  material;      // enum: 0 Metal, 1 Smoke, 2 Heat
+uniform float  spread;
+uniform float  contourAmount;
+uniform float  repetition;
+uniform float  softness;
+uniform float  shiftRed;
+uniform float  shiftBlue;
+uniform float  distortion;
+uniform float  metalAngle;
+uniform half4  tintColor;
+uniform float  innerDistortion;
+uniform float  outerDistortion;
+uniform float  innerGlow;
+uniform float  outerGlow;
+uniform float  smokeScale;
+uniform float  smokeSpill;
+uniform half4  smokeInner;
+uniform half4  heat1;
+uniform half4  heat2;
+uniform half4  heat3;
+uniform half4  heat4;
+uniform float  heatCount;
+uniform float  speed;
+uniform float  time;
+uniform half4  backColor;
+uniform float  amount;
+
+uniform float2 resolution;
+uniform float2 rectCentre;
+uniform shader childShader;   // R = halo, G = interior, B = contour
+uniform shader original;      // the untouched layer
+
+const float PI     = 3.14159265;
+const float TWO_PI = 6.28318530718;
+
+float lmHash21(float2 p) {
+    return fract(sin(dot(p, float2(127.1, 311.7))) * 43758.5453123);
+}
+
+float lmVnoise(float2 p) {
+    float2 i = floor(p), f = fract(p);
+    float2 u = f * f * (3.0 - 2.0 * f);
+    return mix(mix(lmHash21(i), lmHash21(i + float2(1.0, 0.0)), u.x),
+               mix(lmHash21(i + float2(0.0, 1.0)), lmHash21(i + float2(1.0, 1.0)), u.x), u.y);
+}
+
+float2 lmRot(float2 p, float a) {
+    float c = cos(a), s = sin(a);
+    return float2(c * p.x - s * p.y, s * p.x + c * p.y);
+}
+
+// The band profile: a five-step light/dark ladder followed by a gradient tail.
+// `bump` widens or narrows the middle steps, which is what makes the banding
+// compress where the surface reads as curved. The tint is applied with a
+// COLOUR BURN, not a multiply - burn keeps the highlights near white while
+// crushing the darks toward the tint, which is what stops a tinted metal from
+// just looking like a coloured object.
+float bandProfile(float c1, float c2, float stripe, float3 w, float blur, float bump, float tint, float tintAmt) {
+    float ch = mix(c2, c1, smoothstep(0.0, 2.0 * blur, stripe));
+    float border = w[0];
+    ch = mix(ch, c2, smoothstep(border, border + 2.0 * blur, stripe));
+    float b2 = smoothstep(0.2, 0.8, bump);
+    border = w[0] + 0.4 * (1.0 - b2) * w[1];
+    ch = mix(ch, c1, smoothstep(border, border + 2.0 * blur, stripe));
+    border = w[0] + 0.5 * (1.0 - b2) * w[1];
+    ch = mix(ch, c2, smoothstep(border, border + 2.0 * blur, stripe));
+    border = w[0] + w[1];
+    ch = mix(ch, c1, smoothstep(border, border + 2.0 * blur, stripe));
+    float gt = (stripe - w[0] - w[1]) / max(w[2], 1e-4);
+    float grad = mix(c1, c2, smoothstep(0.0, 1.0, gt));
+    ch = mix(ch, grad, smoothstep(border, border + 0.5 * blur, stripe));
+    ch = mix(ch, 1.0 - min(1.0, (1.0 - ch) / max(tint, 1e-4)), tintAmt);
+    return ch;
+}
+
+// Up to four colours, unrolled. SkSL cannot index an array with a loop
+// variable ("index expression must be constant"), which is what the upstream
+// ramp does, so the chain is written out.
+float4 heatRamp(float h, float n) {
+    float m = clamp(h, 0.0, 1.0) * max(n, 1.0);
+    float4 c = heat1 * clamp(m, 0.0, 1.0);
+    c = mix(c, heat2, clamp(m - 1.0, 0.0, 1.0));
+    if (n > 2.5) { c = mix(c, heat3, clamp(m - 2.0, 0.0, 1.0)); }
+    if (n > 3.5) { c = mix(c, heat4, clamp(m - 3.0, 0.0, 1.0)); }
+    return c;
+}
+
+// A hot band travelling across the shape.
+//
+// Upstream carves the interior with a "shadow" of about ten circles, several
+// hand-placed against one particular logo - the source literally comments them
+// "apple top circle", "apple bottom circle", "leaf". Those are not portable,
+// but what they ACHIEVE is: the interior sits mostly dark and one bright region
+// sweeps through it. Without that, Heat fills every shape with a flat slab of
+// the hottest colour, which is not what the model looks like at all.
+//
+// A travelling band is the general form. Three phase-offset copies of a large
+// blob was the first attempt and it was wrong for a reason worth recording:
+// three wide shapes a third of a period apart have a union that barely changes
+// as they move, so the result was static. A single band with a real gap moves
+// visibly.
+float travellingHeat(float y, float tt) {
+    float phase = fract(y * 0.35 - tt);
+    return smoothstep(0.0, 0.22, phase) * (1.0 - smoothstep(0.22, 0.62, phase));
+}
+
+half4 main(float2 fragCoord) {
+    half4 srcP = original.eval(fragCoord);
+    float mixAmt = clamp(amount, 0.0, 1.0);
+
+    float2 res = max(resolution, float2(1.0));
+    float2 uv  = (fragCoord - rectCentre) / res.y;      // isotropic, centred, 0 at middle
+    float t = time * speed;
+
+    half4 f = childShader.eval(fragCoord);
+    float halo     = clamp(float(f.r), 0.0, 1.0);
+    float interior = clamp(float(f.g), 0.0, 1.0);
+    float contour  = clamp(float(f.b), 0.0, 1.0);
+
+    // ~0 deep inside the shape, ~1 at the silhouette and beyond.
+    float edge      = clamp(1.0 - contour, 0.0, 1.0);
+    // 1 in the thick core, 0 at the rim and outside. Upstream's field is
+    // inverted relative to this one (theirs is a blur of 1-alpha, ours a blur
+    // of alpha), so its `1 - x` must NOT be carried over literally - doing that
+    // put Smoke's swirl outside the shape, where there is nothing to swirl,
+    // and left the core still. The whole gem impression is the other way round.
+    float roundness = clamp(interior, 0.0, 1.0);
+
+    float opacity = clamp(float(srcP.a), 0.0, 1.0);
+    float3 outRgb = float3(0.0);
+    float  outA   = 0.0;
+
+    int mat = int(material);
+
+    if (mat == 0) {
+        // ------------------------------------------------------------ METAL
+        float e = pow(edge, 1.6) * clamp(contourAmount, 0.0, 1.0);
+
+        float ang = radians(metalAngle);
+        float2 g = lmRot(uv, ang);
+
+        // `bump` is "how much does this point read as the fat middle of the
+        // form" - it scales the phase ramp, sets the band widths, and inversely
+        // drives the dispersion. Upstream computes it as a radial dome about
+        // the frame centre, which it can get away with because THEIR canvas IS
+        // the logo: centred, and filling the frame. A Cavalry filter runs on a
+        // layer of any shape, anywhere, so a frame-centred dome is just wrong -
+        // on a full-frame layer it is the only structure present, and shows up
+        // as concentric rings sitting in the middle of the picture.
+        //
+        // The interior rung of the field IS this quantity, measured from the
+        // layer's own alpha: ~1 deep inside a thick form, falling to 0 at the
+        // silhouette. So the bands crowd and the colour fringes where the form
+        // is thin or near an edge, which is where they should be.
+        float bump = clamp(pow(interior, 0.7), 0.0, 1.0);
+
+        float direction = g.x;
+
+        float noise = lmVnoise(uv * 3.0 - t) * 2.0 - 1.0;
+        e += (1.0 - e) * clamp(distortion, 0.0, 1.0) * noise;
+
+        // The shape field bends the stripe phase. This is the whole trick: the
+        // bands crowd and swerve where the field changes fastest, which is at
+        // the silhouette - so the metal appears to wrap the form.
+        direction -= 2.0 * noise * (smoothstep(0.0, 1.0, e) * (1.0 - smoothstep(0.0, 1.0, e)));
+        direction *= mix(1.0, 1.0 - e, 1.0);
+        direction -= 1.7 * e;
+        direction *= (0.1 + (1.1 - e) * bump);
+        direction *= (0.4 + 0.6 * (1.0 - smoothstep(0.5, 1.0, e)));
+
+        float cycleWidth = max(repetition, 0.1);
+        direction *= cycleWidth;
+        direction -= t;
+
+        float thin1 = 0.12 / cycleWidth * (1.0 - 0.4 * bump);
+        float thin2 = 0.07 / cycleWidth * (1.0 + 0.4 * bump);
+        float3 w = float3(thin1, thin2 - 0.02 * smoothstep(0.0, 1.0, e + bump),
+                          max(1.0 - thin1 - thin2, 0.05));
+
+        // Antialiasing width, analytic. `direction` is affine in screen space
+        // apart from the field terms, so one pixel is about this much phase -
+        // no derivative instruction needed, and it is more accurate than the
+        // GPU's 2x2-quad estimate would have been.
+        float pxPhase = cycleWidth / res.y;
+        float blur = max(softness * 0.08, 0.0) + pxPhase * 2.0;
+
+        float dispersion = clamp(1.0 - bump, 0.0, 1.0);
+        float dRed  = dispersion * (shiftRed  / 20.0);
+        float dBlue = dispersion * 1.3 * (shiftBlue / 20.0);
+
+        float c1 = 0.98, c2 = 0.1;
+        float tintA = float(tintColor.a);
+        float r = bandProfile(c1, c2, fract(direction + dRed),  w, blur, bump, float(tintColor.r), tintA);
+        float gg = bandProfile(c1, c2, fract(direction),        w, blur, bump, float(tintColor.g), tintA);
+        float b = bandProfile(c1, c2, fract(direction - dBlue), w, blur, bump, float(tintColor.b), tintA);
+
+        outRgb = float3(r, gg, b);
+        outA = opacity;
+
+    } else if (mat == 1) {
+        // ------------------------------------------------------------ SMOKE
+        // No fbm, no noise texture, no refraction - four terms of a cosine
+        // domain warp with 1/i decay, then a gaussian blob in the warped
+        // space. Eight cos calls and two exps for the whole material.
+        // x2 because `uv` here is +-0.5 across the short edge while upstream's
+        // object UV is +-1; without it the gaussian blob is half the size it
+        // should be and the smoke never reaches the frame.
+        // Scale was mix(4, 1, clamp(smokeScale, 0, 1)) - which meant anything
+        // above 1 was clamped away and the slider simply stopped doing
+        // anything. This form keeps 0 -> 4 and 1 -> 1 identical but carries on
+        // shrinking the multiplier past that, so the plume can keep growing
+        // with no ceiling.
+        float sZoom = 4.0 / (1.0 + 3.0 * max(smokeScale, 0.0));
+        float2 sUV = lmRot(uv * 2.0, radians(metalAngle)) * sZoom;
+        float2 innerUV = sUV, outerUV = sUV;
+
+        float iD = clamp(innerDistortion, 0.0, 1.0);
+        float oD = clamp(outerDistortion, 0.0, 1.0);
+        innerUV.y += iD * (1.0 - smoothstep(0.0, 1.0, length(0.4 * innerUV))) - 0.4 * iD;
+        outerUV.y += oD * (1.0 - smoothstep(0.0, 1.0, length(0.4 * outerUV))) - 0.4 * oD;
+
+        // The gem reading comes from exactly this line: the warp is calm at the
+        // rim, where roundness is 0, and violent in the thick of the shape.
+        float innerSwirl = iD * roundness;
+        float outerSwirl = oD;
+
+        // Analytic replacement for their dFdx-based damping. The base UV is
+        // affine in device space, so the stretch is a constant we can compute:
+        // it fades the warp where the field would otherwise alias.
+        float stretch = sZoom / res.y;
+        float dampen = 1.0 / (1.0 + stretch * 8.0);
+        innerSwirl *= dampen;
+        outerSwirl *= dampen;
+
+        for (int i = 1; i < 5; i++) {
+            float fi = float(i);
+            innerUV.x += innerSwirl / fi * cos(t + fi * 2.9 * innerUV.y);
+            innerUV.y += innerSwirl / fi * cos(t + fi * 1.5 * innerUV.x);
+            outerUV.x += outerSwirl / fi * cos(t + fi * 2.9 * outerUV.y);
+            outerUV.y += outerSwirl / fi * cos(t + fi * 1.5 * outerUV.x);
+        }
+        float innerShape = exp(-1.5 * dot(innerUV, innerUV));
+        float outerShape = exp(-1.5 * dot(outerUV, outerUV));
+
+        innerShape *= (0.01 + 0.99 * clamp(innerGlow, 0.0, 1.0)) * opacity;
+        // WHERE THE OUTER SMOKE IS ALLOWED TO GO.
+        //
+        // Upstream gates this on (1 - alpha) alone, because there the shader IS
+        // the whole canvas and smoke filling the frame is the intended look.
+        // Applied to a LAYER that is not the whole frame, the same expression
+        // puts smoke in every empty pixel of the padded bounds - so it reads as
+        // detached from the shape rather than pouring off it.
+        //
+        // Spill picks between the two: 0 confines the plume to the halo rung's
+        // reach, which is measured from the layer's own alpha, so the smoke
+        // hugs the form; 1 is upstream's frame-filling behaviour.
+        float hug = clamp(halo * 3.0, 0.0, 1.0);
+        float reach = mix(hug, 1.0, clamp(smokeSpill, 0.0, 1.0));
+
+        // And regardless of Spill, fade out before the padded edge. The smoke
+        // is a gaussian centred on the layer RECT, so on a wide layer or a
+        // small Spread it can still be well above zero where the bounds stop -
+        // and a plume that is simply cut off square is worse than no plume.
+        float2 rel = abs((fragCoord - rectCentre) / max(res * 0.5, float2(1.0)));
+        float bounds = 1.0 - smoothstep(0.72, 1.0, max(rel.x, rel.y));
+
+        outerShape *= pow(clamp(outerGlow, 0.0, 1.0), 2.0) * (1.0 - opacity)
+                    * reach * bounds;
+
+        float4 grad = heatRamp(innerShape + outerShape, heatCount);
+        float smokeMask = clamp(float(grad.a), 0.0, 1.0);
+
+        float3 col = float3(grad.rgb) * smokeMask;
+        float a = smokeMask;
+        float innerA = float(smokeInner.a) * opacity;
+        col += float3(smokeInner.rgb) * innerA * (1.0 - a);
+        a   += innerA * (1.0 - a);
+        outRgb = col;
+        outA = a;
+
+    } else {
+        // ------------------------------------------------------------- HEAT
+        // Three blurs of the same alpha at three radii: the contour hugs the
+        // silhouette, the interior fills the body, the halo reaches outside.
+        // Upstream's animated wave is ten circles hand-placed against one
+        // particular logo - literally commented "apple top circle" - so it is
+        // not ported. A scrolling band along the pattern axis is the general
+        // form of the same idea.
+        float2 aUV = lmRot(uv * 2.0, radians(metalAngle));
+
+        float hot = travellingHeat(aUV.y, t);
+
+        // The outer halo keeps a plain scrolling band - out there the shadow
+        // has nothing to carve, and a band is what makes the glow breathe.
+        float band = mod(aUV.y * 0.5 + 0.5 - t, 1.0);
+        float wave = 0.5 + smoothstep(0.3, 0.65, band) * (1.0 - smoothstep(0.65, 1.0, band));
+
+        // The interior term saturates on its own - upstream relies on its
+        // travelling shadow to carve variation back into it, and that shadow is
+        // ten circles hand-placed against one specific logo. The scrolling band
+        // is the general form of the same idea, so it drives the inside as well
+        // as the outside; without it the shape fills with one flat colour.
+        float inner = (0.8 + 0.8 * (1.0 - interior)) * clamp(innerGlow, 0.0, 1.0) * 2.0;
+        // Carve it. This is what stops the shape reading as one flat slab of
+        // the hottest colour and lets the contour below actually show.
+        inner *= mix(0.12, 1.0, clamp(hot, 0.0, 1.0));
+        // The contour: a band hugging the INSIDE of the silhouette, from the
+        // narrow rung. It is the bright rim in the reference, and it only reads
+        // once the interior has been carved back.
+        inner += clamp(contourAmount, 0.0, 1.0) * 2.0 * (1.0 - contour) * opacity;
+        inner = min(inner, 1.0) * opacity;
+
+        float outer = 0.9 * pow(clamp(halo, 0.0, 1.0), 0.8);
+        outer *= wave * mix(0.0, 5.0, pow(clamp(outerGlow, 0.0, 1.0), 2.0)) * (1.0 - opacity);
+
+        float h = clamp(inner + outer, 0.0, 1.0);
+        // Dither. A smooth ramp across a large canvas bands badly in 8 bits,
+        // and half a level of hash noise is cheaper than any extra precision.
+        h += (0.004 + 0.35 * clamp(distortion, 0.0, 1.0)) * (lmHash21(fragCoord) - 0.5);
+
+        float4 grad = heatRamp(h, heatCount);
+        outRgb = float3(grad.rgb) * clamp(float(grad.a), 0.0, 1.0);
+        outA   = clamp(float(grad.a), 0.0, 1.0);
+    }
+
+    // Background sits behind everything, premultiplied front-to-back.
+    float bgA = float(backColor.a);
+    outRgb = outRgb * (mat == 0 ? outA : 1.0);
+    if (mat == 0) { outA = opacity; }
+    outRgb += float3(backColor.rgb) * bgA * (1.0 - outA);
+    outA   += bgA * (1.0 - outA);
+
+    half4 result = half4(half3(clamp(outRgb, 0.0, 1.0)), half(clamp(outA, 0.0, 1.0)));
+    return mix(srcP, result, half(mixAmt));
+}

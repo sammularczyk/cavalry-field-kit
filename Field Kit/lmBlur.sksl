@@ -1,0 +1,66 @@
+// Liquid Metal - blur rung. One file serves all six blur passes; `dirX`/`dirY`
+// pick the axis, `radiusMul` the rung, and `storeTo` says which channel this
+// rung's finished result is parked in.
+//
+// THE CHANNEL BUDGET IS THE DESIGN. A pass sees only its predecessor and the
+// untouched original, so three different blur radii have to survive to the
+// shading pass inside one RGBA. They do it by relay: R is always the rung
+// currently being widened, and when a rung finishes its vertical half it is
+// copied down into G or B and left alone while R goes on getting wider.
+//
+//   passes 1-2  radius x0.15  -> parked in B   (contour: hugs the silhouette)
+//   passes 3-4  radius x0.45  -> parked in G   (interior: the body of the shape)
+//   passes 5-6  radius x1.00  -> stays in R    (halo: reaches well outside)
+//
+// Each rung blurs the PREVIOUS rung's result rather than the original mask, so
+// the widths compound - the same ladder `glowBloom.sksl` uses, and the reason
+// a wide field costs a few short blurs instead of one enormous one.
+
+uniform float spread;         // falloff distance, in pixels
+uniform float dirX;           // pass constant
+uniform float dirY;           // pass constant
+uniform float radiusMul;      // pass constant
+uniform float storeTo;        // pass constant: 0 none, 1 -> B, 2 -> G
+uniform shader childShader;
+uniform shader original;
+
+const int TAPS = 10;
+
+float lmHash21(float2 p) {
+    return fract(sin(dot(p, float2(127.1, 311.7))) * 43758.5453123);
+}
+
+half4 main(float2 fragCoord) {
+    float radius = max(spread, 0.0) * radiusMul;
+    half4 here = childShader.eval(fragCoord);
+    if (radius < 0.5) { 
+        float3 o = float3(here.rgb);
+        if (storeTo > 1.5)      { o.g = o.r; }
+        else if (storeTo > 0.5) { o.b = o.r; }
+        return half4(half3(o), 1.0);
+    }
+
+    float2 dir = float2(dirX, dirY);
+    // Sub-tap jitter. A fixed ladder of taps is a visible ladder at any length;
+    // jitter turns the residual steps into fine noise, and this field is then
+    // blurred again by the next rung anyway.
+    float jit = lmHash21(fragCoord * 0.7317) - 0.5;
+
+    float sum = 0.0, den = 0.0;
+    for (int i = -TAPS; i <= TAPS; i++) {
+        float f = (float(i) + jit) / float(TAPS);
+        float w = exp(-f * f * 2.5);
+        // No coverage weighting here, deliberately. This is a field over the
+        // layer's own alpha, so "outside the layer" is genuinely zero rather
+        // than absent - the field HAS to fall off into the padding or the halo
+        // materials have nothing to reach into.
+        sum += float(childShader.eval(fragCoord + dir * (f * radius)).r) * w;
+        den += w;
+    }
+    float v = sum / max(den, 1e-4);
+
+    float3 o = float3(v, float(here.g), float(here.b));
+    if (storeTo > 1.5)      { o.g = v; }
+    else if (storeTo > 0.5) { o.b = v; }
+    return half4(half3(clamp(o, 0.0, 1.0)), 1.0);
+}

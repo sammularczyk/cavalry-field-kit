@@ -1,0 +1,96 @@
+{
+  "type": "layerStrings",
+  "value": {
+    "author": "samMularczyk",
+    "layerType": "linearRefraction",
+    "niceName": "Linear Refraction",
+    "layerInfo": "Refraction through parallel ribs, as reeded or fluted glass.",
+    "language": "en",
+    "attributes": {
+      "ribWidth": [
+        "Rib Width",
+        "Period of the ribs, in pixels."
+      ],
+      "angle": [
+        "Angle",
+        "Direction of the ribs, in degrees."
+      ],
+      "shape": [
+        "Grid",
+        "How the ribs run. The bend is added to the coordinate BEFORE it is wrapped, so a wave stays one continuous rib rather than breaking into steps."
+      ],
+      "profile": [
+        "Profile",
+        "Cross-section of each rib, which is what sets the character of the refraction. Prism is a cubic sawtooth - hard, faceted. Lens is a parabola. Contour has a flat centre and steep shoulders. Cascade is a true arc. Flat is nearly linear with soft ends."
+      ],
+      "distortion": [
+        "Refraction",
+        "How far each rib bends the picture behind it."
+      ],
+      "shift": [
+        "Shift",
+        "Biases the whole profile one way, so the ribs refract off-centre."
+      ],
+      "blur": [
+        "Frost",
+        "Softens across the ribs, for etched rather than polished glass. Twelve jittered taps - a fixed ladder of taps stays a visible ladder however long it gets, so the jitter matters more than the count."
+      ],
+      "stretch": [
+        "Stretch",
+        "Pulls the sample toward each rib's centre line near its shoulders, smearing the picture there."
+      ],
+      "highlights": [
+        "Rib Highlight",
+        "A thin stroke along each rib boundary. It is also the antialiasing: the stroke is two pixels wide, so when the ribs go sub-pixel it swallows them and the pattern greys out cleanly."
+      ],
+      "highlightColor": [
+        "Highlight Colour",
+        "Colour of that stroke."
+      ],
+      "shadows": [
+        "Shading",
+        "Darkening across each rib, from the profile's own curve."
+      ],
+      "shadowColor": [
+        "Shading Colour",
+        "Colour of that darkening."
+      ],
+      "edges": [
+        "Edges",
+        "What a tap finds outside the layer. Transparent is the honest answer; Clamp and Mirror fill the wedge the refraction opens at the border."
+      ],
+      "edgeTrim": [
+        "Edge Trim",
+        "Fold against a rect inset by this much, so the antialiased outer pixels are not reflected into a seam."
+      ],
+      "amount": [
+        "Amount",
+        "Mix between the original layer and the result."
+      ]
+    },
+    "enums": {
+      "shape": {
+        "0": "Lines",
+        "1": "Irregular",
+        "2": "Wave"
+      },
+      "profile": {
+        "0": "Prism",
+        "1": "Lens",
+        "2": "Contour",
+        "3": "Cascade",
+        "4": "Flat"
+      },
+      "edges": {
+        "0": "Transparent",
+        "1": "Clamp",
+        "2": "Mirror"
+      }
+    },
+    "tabs": {
+      "filter": "Glass",
+      "surface": "Surface",
+      "output": "Output"
+    }
+  }
+}
