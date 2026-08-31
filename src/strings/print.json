@@ -3,7 +3,7 @@
   "value": {
     "author": "samMularczyk",
     "layerType": "print",
-    "niceName": "Print",
+    "niceName": "Screen Print",
     "layerInfo": "Separate into spot inks, screen them, and overprint on paper.",
     "language": "en",
     "attributes": {
@@ -218,6 +218,10 @@
       "amount": [
         "Amount",
         "Mix between the original layer and the printed result."
+      ],
+      "padding": [
+        "Padding",
+        "Extra pixels of room around the layer for the effect to spread into. Cavalry 2.8 sizes this automatically; on 2.7.2 raise it by hand if the result clips at the layer bounds."
       ]
     },
     "enums": {

@@ -2714,12 +2714,7 @@
             "---Shape",
             "spread",
             "speed",
-            "time"
-          ]
-        },
-        {
-          "id": "rays",
-          "attributeOrder": [
+            "time",
             "---Volumetric",
             "density",
             "gain",
@@ -2731,12 +2726,8 @@
             "rayIntensity",
             "spotty",
             "coreSize",
-            "coreGlow"
-          ]
-        },
-        {
-          "id": "output",
-          "attributeOrder": [
+            "coreGlow",
+            "---Output",
             "rayColor",
             "rayColor2",
             "---A",
@@ -3018,6 +3009,13 @@
         "softMax": 20,
         "step": 0.1
       },
+      "shapePower": {
+        "type": "double",
+        "default": 2,
+        "min": 1,
+        "softMax": 12,
+        "step": 0.25
+      },
       "sizeFromBrightness": {
         "type": "double",
         "default": 0,
@@ -3054,6 +3052,7 @@
         "dotSize",
         "roundness",
         "softness",
+        "shapePower",
         "sizeFromBrightness",
         "perChannel",
         "bgColor",
@@ -3069,6 +3068,7 @@
         "dotSize",
         "roundness",
         "softness",
+        "shapePower",
         "---Brightness",
         "sizeFromBrightness",
         "perChannel",
@@ -4977,7 +4977,8 @@
           0,
           1,
           2
-        ]
+        ],
+        "dimming": "evolution == 0"
       },
       "profile": {
         "type": "enum",
@@ -5010,6 +5011,25 @@
         "min": 0,
         "max": 1,
         "step": 0.01
+      },
+      "evolution": {
+        "type": "double",
+        "default": 0,
+        "step": 1,
+        "dimming": "shape != 1 && shape != 2"
+      },
+      "loop": {
+        "type": "bool",
+        "default": false,
+        "dimming": "shape != 1 && shape != 2"
+      },
+      "cycles": {
+        "type": "double",
+        "default": 1,
+        "min": 1,
+        "softMax": 10,
+        "step": 1,
+        "dimming": "loop == false"
       },
       "stretch": {
         "type": "double",
@@ -5099,6 +5119,9 @@
         "profile",
         "distortion",
         "shift",
+        "evolution",
+        "loop",
+        "cycles",
         "blur",
         "stretch",
         "highlights",
@@ -5119,6 +5142,9 @@
             "ribWidth",
             "angle",
             "shape",
+            "evolution",
+            "loop",
+            "cycles",
             "---Refraction",
             "profile",
             "distortion",
@@ -5499,37 +5525,21 @@
           "id": "filter",
           "attributeOrder": [
             "material",
-            "---Output",
-            "amount",
-            "backColor"
-          ]
-        },
-        {
-          "id": "shape",
-          "attributeOrder": [
+            "---Motion",
+            "speed",
+            "time",
+            "---Shape",
             "spread",
             "metalAngle",
             "contourAmount",
-            "---Motion",
-            "speed",
-            "time"
-          ]
-        },
-        {
-          "id": "metal",
-          "attributeOrder": [
+            "---Metal",
             "repetition",
             "softness",
             "distortion",
             "tintColor",
             "---Dispersion",
             "shiftRed",
-            "shiftBlue"
-          ]
-        },
-        {
-          "id": "body",
-          "attributeOrder": [
+            "shiftBlue",
             "---Glow",
             "innerGlow",
             "outerGlow",
@@ -5545,6 +5555,9 @@
             "smokeScale",
             "smokeSpill",
             "smokeInner",
+            "---Output",
+            "amount",
+            "backColor",
             "---Ported from Paper Shaders (Apache-2.0), Lost Coast Labs"
           ]
         }
@@ -6975,7 +6988,7 @@
     "attributes": {
       "process": {
         "type": "enum",
-        "default": 0,
+        "default": 1,
         "enumValues": [
           0,
           1,
@@ -6994,7 +7007,7 @@
       },
       "inkCount": {
         "type": "int",
-        "default": 2,
+        "default": 3,
         "min": 1,
         "max": 4,
         "step": 1,
@@ -7002,7 +7015,7 @@
       },
       "flatten": {
         "type": "double",
-        "default": 1.5,
+        "default": 0,
         "min": 0,
         "softMax": 8,
         "step": 0.1
@@ -7032,7 +7045,7 @@
       },
       "screenType": {
         "type": "enum",
-        "default": 0,
+        "default": 1,
         "enumValues": [
           0,
           1,
@@ -7063,7 +7076,7 @@
       },
       "inkGrain": {
         "type": "double",
-        "default": 0.35,
+        "default": 0.6,
         "min": 0,
         "max": 1,
         "step": 0.01
@@ -7093,7 +7106,7 @@
       },
       "toneFloor": {
         "type": "double",
-        "default": 0.02,
+        "default": 0.28,
         "min": 0.001,
         "max": 0.5,
         "step": 0.005,
@@ -7111,9 +7124,9 @@
         "type": "color",
         "default": {
           "type": "Color",
-          "r": 0,
-          "g": 90,
-          "b": 181,
+          "r": 27,
+          "g": 127,
+          "b": 90,
           "a": 255
         },
         "dimming": "separation == 3"
@@ -7138,9 +7151,9 @@
         "type": "color",
         "default": {
           "type": "Color",
-          "r": 255,
-          "g": 214,
-          "b": 0,
+          "r": 232,
+          "g": 84,
+          "b": 124,
           "a": 255
         },
         "dimming": "inkCount <= 1 || separation == 3"
@@ -7165,9 +7178,9 @@
         "type": "color",
         "default": {
           "type": "Color",
-          "r": 226,
-          "g": 61,
-          "b": 130,
+          "r": 242,
+          "g": 194,
+          "b": 48,
           "a": 255
         },
         "dimming": "inkCount <= 2 || separation == 3"
@@ -7217,7 +7230,7 @@
       },
       "inkOpacity": {
         "type": "double",
-        "default": 0.85,
+        "default": 0.9,
         "min": 0,
         "max": 1,
         "step": 0.01
@@ -7276,7 +7289,7 @@
       },
       "mottle": {
         "type": "double",
-        "default": 0.2,
+        "default": 0.1,
         "min": 0,
         "max": 1,
         "step": 0.01
@@ -8332,22 +8345,14 @@
             "---Motion",
             "evolution",
             "loop",
-            "cycles"
-          ]
-        },
-        {
-          "id": "surface",
-          "attributeOrder": [
+            "cycles",
+            "---Surface",
             "highlights",
             "highlightColor",
             "---Edges",
             "edges",
-            "edgeTrim"
-          ]
-        },
-        {
-          "id": "output",
-          "attributeOrder": [
+            "edgeTrim",
+            "---Output",
             "amount",
             "---Ported from Paper Shaders (Apache-2.0), Lost Coast Labs"
           ]

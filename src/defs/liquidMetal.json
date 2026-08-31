@@ -383,37 +383,21 @@
         "id": "filter",
         "attributeOrder": [
           "material",
-          "---Output",
-          "amount",
-          "backColor"
-        ]
-      },
-      {
-        "id": "shape",
-        "attributeOrder": [
+          "---Motion",
+          "speed",
+          "time",
+          "---Shape",
           "spread",
           "metalAngle",
           "contourAmount",
-          "---Motion",
-          "speed",
-          "time"
-        ]
-      },
-      {
-        "id": "metal",
-        "attributeOrder": [
+          "---Metal",
           "repetition",
           "softness",
           "distortion",
           "tintColor",
           "---Dispersion",
           "shiftRed",
-          "shiftBlue"
-        ]
-      },
-      {
-        "id": "body",
-        "attributeOrder": [
+          "shiftBlue",
           "---Glow",
           "innerGlow",
           "outerGlow",
@@ -429,6 +413,9 @@
           "smokeScale",
           "smokeSpill",
           "smokeInner",
+          "---Output",
+          "amount",
+          "backColor",
           "---Ported from Paper Shaders (Apache-2.0), Lost Coast Labs"
         ]
       }

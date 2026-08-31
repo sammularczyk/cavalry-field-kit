@@ -40,7 +40,7 @@ uniform float  levelBias;
 uniform float  bandDither;
 uniform float  screenType;         // enum: 0 Flat, 1 Grain, 2 Dots, 3 Lines, 4 Stipple, 5 Bayer, 6 Voronoi
 uniform float  dotShape;
-uniform float  screenStrength;           // enum: 0 Round, 1 Elliptical, 2 Square, 3 Diamond
+uniform float  screenStrength;           // 0..1 blend of the screened pattern back toward flat coverage
 uniform float  inkGrain;           // depth of the ink-transfer speckle
 uniform float  inkGrainScale;
 uniform float  frequency;

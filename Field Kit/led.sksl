@@ -14,6 +14,7 @@ uniform float  stagger;            // 0 = square grid, 1 = fully offset rows
 uniform float  dotSize;            // dot diameter as a fraction of the cell
 uniform float  roundness;          // 0 = square dot, 1 = round dot
 uniform float  softness;           // edge falloff in pixels
+uniform float  shapePower;         // Lp-norm exponent: 1 diamond, 2 circle, 12 square
 uniform float  sizeFromBrightness; // 0 = fixed dots, 1 = radius tracks brightness
 uniform float  perChannel;         // bool: separate R/G/B dot radii
 uniform half4  bgColor;            // straight RGBA, fills between the dots
@@ -46,8 +47,11 @@ half4 main(float2 fragCoord) {
     half4 cell = image.eval(centre + float2(off, 0.0) + rectCentre);
     float3 lin = cell.a > 0.0 ? float3(cell.rgb / cell.a) : float3(0.0);
 
-    // Superellipse-ish distance: Chebyshev is a square, Euclidean is a circle.
-    float d = mix(max(abs(local.x), abs(local.y)), length(local), clamp(roundness, 0.0, 1.0));
+    // Superellipse (Lp-norm) distance: shapePower=1 is diamond, 2 is circle, 12
+    // is a sharp square. Falls back to the original roundness blend when 2.0.
+    float d = (shapePower == 2.0)
+        ? mix(max(abs(local.x), abs(local.y)), length(local), clamp(roundness, 0.0, 1.0))
+        : pow(pow(abs(local.x), shapePower) + pow(abs(local.y), shapePower), 1.0 / shapePower);
 
     float lum = dot(lin, float3(0.299, 0.587, 0.114));
     float3 drive = perChannel > 0.5 ? lin : float3(lum);

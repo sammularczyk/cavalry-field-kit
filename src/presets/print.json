@@ -1,87 +1,6 @@
 [
   {
     "presetType": "layer",
-    "id": "5ddd387f-d738-4c21-8e91-975f17583d47",
-    "author": "samMularczyk",
-    "name": "Riso",
-    "layerType": [
-      "print"
-    ],
-    "attrs": [
-      {
-        "attrId": "process",
-        "value": 0
-      },
-      {
-        "attrId": "separation",
-        "value": 0
-      },
-      {
-        "attrId": "inkCount",
-        "value": 2
-      },
-      {
-        "attrId": "ink1Color",
-        "value": "#0078BF"
-      },
-      {
-        "attrId": "ink2Color",
-        "value": "#FFE800"
-      },
-      {
-        "attrId": "screenType",
-        "value": 0
-      },
-      {
-        "attrId": "levels",
-        "value": 3
-      },
-      {
-        "attrId": "levelBias",
-        "value": 1.2
-      },
-      {
-        "attrId": "flatten",
-        "value": 2.0
-      },
-      {
-        "attrId": "mottle",
-        "value": 0.4
-      },
-      {
-        "attrId": "registrationError",
-        "value": 2.0
-      },
-      {
-        "attrId": "inkLoss",
-        "value": 0.2
-      },
-      {
-        "attrId": "inkOpacity",
-        "value": 0.8
-      },
-      {
-        "attrId": "trueColour",
-        "value": 0.0
-      },
-      {
-        "attrId": "inkGrain",
-        "value": 0.6
-      },
-      {
-        "attrId": "toneFloor",
-        "value": 0.28
-      },
-      {
-        "attrId": "inkLossScale",
-        "value": 0.05
-      }
-    ],
-    "resetsTransforms": false,
-    "resetsLayer": true
-  },
-  {
-    "presetType": "layer",
     "id": "3503ef46-bb73-490d-8344-38a31aaa3e01",
     "author": "samMularczyk",
     "name": "Screen Print",
@@ -152,6 +71,87 @@
       {
         "attrId": "ink3Color",
         "value": "#F2C230"
+      },
+      {
+        "attrId": "toneFloor",
+        "value": 0.28
+      },
+      {
+        "attrId": "inkLossScale",
+        "value": 0.05
+      }
+    ],
+    "resetsTransforms": false,
+    "resetsLayer": true
+  },
+  {
+    "presetType": "layer",
+    "id": "5ddd387f-d738-4c21-8e91-975f17583d47",
+    "author": "samMularczyk",
+    "name": "Riso",
+    "layerType": [
+      "print"
+    ],
+    "attrs": [
+      {
+        "attrId": "process",
+        "value": 0
+      },
+      {
+        "attrId": "separation",
+        "value": 0
+      },
+      {
+        "attrId": "inkCount",
+        "value": 2
+      },
+      {
+        "attrId": "ink1Color",
+        "value": "#0078BF"
+      },
+      {
+        "attrId": "ink2Color",
+        "value": "#FFE800"
+      },
+      {
+        "attrId": "screenType",
+        "value": 0
+      },
+      {
+        "attrId": "levels",
+        "value": 3
+      },
+      {
+        "attrId": "levelBias",
+        "value": 1.2
+      },
+      {
+        "attrId": "flatten",
+        "value": 2.0
+      },
+      {
+        "attrId": "mottle",
+        "value": 0.4
+      },
+      {
+        "attrId": "registrationError",
+        "value": 2.0
+      },
+      {
+        "attrId": "inkLoss",
+        "value": 0.2
+      },
+      {
+        "attrId": "inkOpacity",
+        "value": 0.8
+      },
+      {
+        "attrId": "trueColour",
+        "value": 0.0
+      },
+      {
+        "attrId": "inkGrain",
+        "value": 0.6
       },
       {
         "attrId": "toneFloor",

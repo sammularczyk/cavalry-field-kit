@@ -25,7 +25,8 @@
         0,
         1,
         2
-      ]
+      ],
+      "dimming": "evolution == 0"
     },
     "profile": {
       "type": "enum",
@@ -58,6 +59,25 @@
       "min": 0.0,
       "max": 1.0,
       "step": 0.01
+    },
+    "evolution": {
+      "type": "double",
+      "default": 0.0,
+      "step": 1.0,
+      "dimming": "shape != 1 && shape != 2"
+    },
+    "loop": {
+      "type": "bool",
+      "default": false,
+      "dimming": "shape != 1 && shape != 2"
+    },
+    "cycles": {
+      "type": "double",
+      "default": 1.0,
+      "min": 1.0,
+      "softMax": 10.0,
+      "step": 1.0,
+      "dimming": "loop == false"
     },
     "stretch": {
       "type": "double",
@@ -147,6 +167,9 @@
       "profile",
       "distortion",
       "shift",
+      "evolution",
+      "loop",
+      "cycles",
       "blur",
       "stretch",
       "highlights",
@@ -167,6 +190,9 @@
           "ribWidth",
           "angle",
           "shape",
+          "evolution",
+          "loop",
+          "cycles",
           "---Refraction",
           "profile",
           "distortion",

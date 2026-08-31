@@ -27,6 +27,10 @@
         "Softness",
         "Edge falloff in pixels. Raise it for a glowing lamp, drop it for a hard pixel."
       ],
+      "shapePower": [
+        "Shape Power",
+        "Lamp shape: 1 = diamond, 2 = circle, higher = sharper square corners."
+      ],
       "sizeFromBrightness": [
         "Size From Brightness",
         "Drives lamp radius from image brightness, so dark areas get small lamps. This is the behaviour of the original lightbulb shader."

@@ -6,6 +6,9 @@
     "niceName": "Liquid Metal",
     "layerInfo": "Chrome, smoke or heat, shaped by the layer's own alpha.",
     "language": "en",
+    "tabs": {
+      "filter": "Liquid Metal"
+    },
     "attributes": {
       "material": [
         "Material",
@@ -110,6 +113,10 @@
       "amount": [
         "Amount",
         "Mix between the original layer and the result."
+      ],
+      "padding": [
+        "Padding",
+        "Extra pixels of room around the layer for the effect to spread into. Cavalry 2.8 sizes this automatically; on 2.7.2 raise it by hand if the result clips at the layer bounds."
       ]
     },
     "enums": {
@@ -118,12 +125,6 @@
         "1": "Smoke",
         "2": "Heat"
       }
-    },
-    "tabs": {
-      "filter": "Output",
-      "shape": "Shape",
-      "metal": "Metal",
-      "body": "Smoke & Heat"
     }
   }
 }

@@ -29,6 +29,9 @@ uniform float  profile;       // enum: 0 Prism, 1 Lens, 2 Contour, 3 Cascade, 4 
 uniform float  distortion;    // 0..1 strength of the refraction
 uniform float  shift;         // -1..1 bias on the profile
 uniform float  blur;          // frost, across the ribs
+uniform float  evolution;   // degrees: phase offset that animates the pattern
+uniform float  loop;        // bool: snap the phase rates so the pattern repeats
+uniform float  cycles;      // revolutions of Evolution before it repeats
 uniform float  stretch;       // pulls the sample toward the rib centre line
 uniform float  highlights;
 uniform half4  highlightColor;
@@ -73,6 +76,17 @@ float2 applyEdges(float2 c) {
 
 // Antialiased sawtooth: mirrors across the seam within about a pixel, so the
 // fract() discontinuity never lands as a hard one-pixel line.
+// LOOPING. Evolution is a plain angle, so a term whose rate is a WHOLE number
+// of turns per revolution returns to where it started after 360 degrees. The
+// Irregular shape runs a second sine at 1.7x, which never does - so when
+// looping, snap that rate to the nearest whole number of turns per Cycles
+// revolutions. Slight change of character, only while Loop is on.
+float evoRate(float k) {
+    if (loop < 0.5) { return k; }
+    float c = max(floor(cycles + 0.5), 1.0);
+    return max(floor(k * c + 0.5), 1.0) / c;
+}
+
 float smoothFract(float x, float w) {
     float f = fract(x);
     float band = smoothstep(-w, w, abs(f - 0.5) - 0.5);
@@ -97,9 +111,10 @@ half4 main(float2 fragCoord) {
     // fract, which is why a wave stays one continuous rib rather than breaking
     // into segments.
     float curve = 0.0;
+    float eRad = radians(evolution);
     int sh = int(shape);
-    if (sh == 1)      { curve = 0.5 + 0.5 * sin(0.5 * q.x) * sin(1.7 * q.x); }
-    else if (sh == 2) { curve = 4.0 * sin(0.23 * q.y); }
+    if (sh == 1)      { curve = 0.5 + 0.5 * sin(0.5 * q.x + eRad) * sin(1.7 * q.x + eRad * evoRate(1.7)); }
+    else if (sh == 2) { curve = 4.0 * sin(0.23 * q.y + eRad); }
 
     float xw = q.x + curve;
     float x  = smoothFract(xw, pxW);

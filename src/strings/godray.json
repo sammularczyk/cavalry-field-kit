@@ -95,9 +95,7 @@
       }
     },
     "tabs": {
-      "filter": "Rays",
-      "rays": "Model",
-      "output": "Output"
+      "filter": "Rays"
     }
   }
 }

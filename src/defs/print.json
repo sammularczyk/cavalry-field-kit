@@ -247,7 +247,7 @@
   "attributes": {
     "process": {
       "type": "enum",
-      "default": 0,
+      "default": 1,
       "enumValues": [
         0,
         1,
@@ -266,7 +266,7 @@
     },
     "inkCount": {
       "type": "int",
-      "default": 2,
+      "default": 3,
       "min": 1,
       "max": 4,
       "step": 1,
@@ -274,7 +274,7 @@
     },
     "flatten": {
       "type": "double",
-      "default": 1.5,
+      "default": 0.0,
       "min": 0.0,
       "softMax": 8.0,
       "step": 0.1
@@ -304,7 +304,7 @@
     },
     "screenType": {
       "type": "enum",
-      "default": 0,
+      "default": 1,
       "enumValues": [
         0,
         1,
@@ -335,7 +335,7 @@
     },
     "inkGrain": {
       "type": "double",
-      "default": 0.35,
+      "default": 0.6,
       "min": 0.0,
       "max": 1.0,
       "step": 0.01
@@ -365,7 +365,7 @@
     },
     "toneFloor": {
       "type": "double",
-      "default": 0.02,
+      "default": 0.28,
       "min": 0.001,
       "max": 0.5,
       "step": 0.005,
@@ -383,9 +383,9 @@
       "type": "color",
       "default": {
         "type": "Color",
-        "r": 0,
-        "g": 90,
-        "b": 181,
+        "r": 27,
+        "g": 127,
+        "b": 90,
         "a": 255
       },
       "dimming": "separation == 3"
@@ -410,9 +410,9 @@
       "type": "color",
       "default": {
         "type": "Color",
-        "r": 255,
-        "g": 214,
-        "b": 0,
+        "r": 232,
+        "g": 84,
+        "b": 124,
         "a": 255
       },
       "dimming": "inkCount <= 1 || separation == 3"
@@ -437,9 +437,9 @@
       "type": "color",
       "default": {
         "type": "Color",
-        "r": 226,
-        "g": 61,
-        "b": 130,
+        "r": 242,
+        "g": 194,
+        "b": 48,
         "a": 255
       },
       "dimming": "inkCount <= 2 || separation == 3"
@@ -489,7 +489,7 @@
     },
     "inkOpacity": {
       "type": "double",
-      "default": 0.85,
+      "default": 0.9,
       "min": 0.0,
       "max": 1.0,
       "step": 0.01
@@ -548,7 +548,7 @@
     },
     "mottle": {
       "type": "double",
-      "default": 0.2,
+      "default": 0.1,
       "min": 0.0,
       "max": 1.0,
       "step": 0.01

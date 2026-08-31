@@ -135,22 +135,14 @@
           "---Motion",
           "evolution",
           "loop",
-          "cycles"
-        ]
-      },
-      {
-        "id": "surface",
-        "attributeOrder": [
+          "cycles",
+          "---Surface",
           "highlights",
           "highlightColor",
           "---Edges",
           "edges",
-          "edgeTrim"
-        ]
-      },
-      {
-        "id": "output",
-        "attributeOrder": [
+          "edgeTrim",
+          "---Output",
           "amount",
           "---Ported from Paper Shaders (Apache-2.0), Lost Coast Labs"
         ]

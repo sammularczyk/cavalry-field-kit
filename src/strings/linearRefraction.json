@@ -19,6 +19,18 @@
         "Grid",
         "How the ribs run. The bend is added to the coordinate BEFORE it is wrapped, so a wave stays one continuous rib rather than breaking into steps."
       ],
+      "evolution": [
+        "Evolution",
+        "Phase offset in degrees. Drives the animation of the Irregular and Wave grids."
+      ],
+      "loop": [
+        "Loop",
+        "Snaps the pattern's phase rates so it returns exactly to its start and can be cycled with no seam. Slightly changes the character of Irregular while on."
+      ],
+      "cycles": [
+        "Cycles",
+        "How many full revolutions of Evolution before it repeats. At 2 the field comes home at Evolution 720, not 360 - so a higher count travels further through the noise and gives more variation before the repeat."
+      ],
       "profile": [
         "Profile",
         "Cross-section of each rib, which is what sets the character of the refraction. Prism is a cubic sawtooth - hard, faceted. Lens is a parabola. Contour has a flat centre and steep shoulders. Cascade is a true arc. Flat is nearly linear with soft ends."
@@ -66,6 +78,10 @@
       "amount": [
         "Amount",
         "Mix between the original layer and the result."
+      ],
+      "padding": [
+        "Padding",
+        "Extra pixels of room around the layer for the effect to spread into. Cavalry 2.8 sizes this automatically; on 2.7.2 raise it by hand if the result clips at the layer bounds."
       ]
     },
     "enums": {

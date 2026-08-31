@@ -204,12 +204,7 @@
           "---Shape",
           "spread",
           "speed",
-          "time"
-        ]
-      },
-      {
-        "id": "rays",
-        "attributeOrder": [
+          "time",
           "---Volumetric",
           "density",
           "gain",
@@ -221,12 +216,8 @@
           "rayIntensity",
           "spotty",
           "coreSize",
-          "coreGlow"
-        ]
-      },
-      {
-        "id": "output",
-        "attributeOrder": [
+          "coreGlow",
+          "---Output",
           "rayColor",
           "rayColor2",
           "---A",

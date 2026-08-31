@@ -331,6 +331,14 @@ for (const file of defs) {
   if (orphaned.length) {
     fail(type, `not in any tab/attributeOrder, so INVISIBLE in the UI: ${orphaned.join(", ")}`);
   }
+  // The engine owns a base tab with the id "filter" and merges its own
+  // inherited controls (padding, allowViewportClipping) into it. A def whose
+  // tabs do not include that id does not suppress it - the engine adds its own
+  // "Filter" tab alongside, which reads as a stray empty-looking tab.
+  if (tabs && !tabs.some(t => t.id === "filter")) {
+    fail(type, `no tab with id "filter", so the engine adds its own alongside these: ${tabs.map(t => t.id).join(", ")}`);
+  }
+
   const dupes = shown.filter((a, i) => shown.indexOf(a) !== i);
   if (dupes.length) fail(type, `listed more than once in the UI: ${[...new Set(dupes)].join(", ")}`);
 

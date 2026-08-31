@@ -162,6 +162,10 @@
       "defocusMap": [
         "Map",
         "The shader this filter reads for focus. A rendered depth pass through Shape to Shader, an image through Image Shader, or any shader node. Read As decides whether it means blur or distance."
+      ],
+      "padding": [
+        "Padding",
+        "Extra pixels of room around the layer for the effect to spread into. Cavalry 2.8 sizes this automatically; on 2.7.2 raise it by hand if the result clips at the layer bounds."
       ]
     },
     "enums": {
